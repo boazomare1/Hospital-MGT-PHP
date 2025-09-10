@@ -1,6 +1,22 @@
-/* Debtors Report Modern CSS - Based on vat.php styling */
+/* Debtors Report Modern CSS - Based on VAT styling */
+:root {
+    --medstar-primary: #1e40af;
+    --medstar-primary-light: #3b82f6;
+    --medstar-secondary: #64748b;
+    --medstar-accent: #f59e0b;
+    --background-primary: #ffffff;
+    --background-secondary: #f8fafc;
+    --background-accent: #f1f5f9;
+    --text-primary: #1f2937;
+    --text-secondary: #64748b;
+    --border-color: #e2e8f0;
+    --border-radius: 8px;
+    --border-radius-small: 4px;
+    --shadow-light: 0 1px 3px rgba(0, 0, 0, 0.1);
+    --shadow-medium: 0 4px 6px rgba(0, 0, 0, 0.1);
+    --transition: all 0.3s ease;
+}
 
-/* Reset and Base Styles */
 * {
     margin: 0;
     padding: 0;
@@ -9,43 +25,40 @@
 
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    min-height: 100vh;
-    color: #333;
+    background: var(--background-secondary);
+    color: var(--text-primary);
     line-height: 1.6;
 }
 
 /* Hospital Header */
 .hospital-header {
-    background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+    background: linear-gradient(135deg, var(--medstar-primary), var(--medstar-primary-light));
     color: white;
-    padding: 1.5rem 2rem;
     text-align: center;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    padding: 2rem 1rem;
+    box-shadow: var(--shadow-medium);
 }
 
 .hospital-title {
     font-size: 2.5rem;
     font-weight: 700;
     margin-bottom: 0.5rem;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
 }
 
 .hospital-subtitle {
     font-size: 1.1rem;
     opacity: 0.9;
-    font-weight: 300;
 }
 
 /* User Information Bar */
 .user-info-bar {
-    background: rgba(255,255,255,0.95);
+    background: var(--background-primary);
     padding: 1rem 2rem;
+    border-bottom: 1px solid var(--border-color);
     display: flex;
     justify-content: space-between;
     align-items: center;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    backdrop-filter: blur(10px);
+    box-shadow: var(--shadow-light);
 }
 
 .user-welcome {
@@ -56,12 +69,12 @@ body {
 
 .welcome-text {
     font-weight: 600;
-    color: #2c3e50;
+    color: var(--text-primary);
 }
 
 .location-info {
     font-size: 0.9rem;
-    color: #7f8c8d;
+    color: var(--text-secondary);
 }
 
 .user-actions {
@@ -71,58 +84,166 @@ body {
 
 /* Navigation Breadcrumb */
 .nav-breadcrumb {
-    background: rgba(255,255,255,0.9);
-    padding: 0.75rem 2rem;
-    border-bottom: 1px solid #e0e0e0;
+    background: var(--background-primary);
+    padding: 1rem 2rem;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
 }
 
 .nav-breadcrumb a {
-    color: #3498db;
+    color: var(--medstar-primary);
     text-decoration: none;
-    font-weight: 500;
+    transition: var(--transition);
 }
 
 .nav-breadcrumb a:hover {
-    color: #2980b9;
-    text-decoration: underline;
+    color: var(--medstar-primary-light);
 }
 
 .nav-breadcrumb span {
-    color: #7f8c8d;
-    margin: 0 0.5rem;
+    color: var(--text-secondary);
+}
+
+/* Floating Menu Toggle */
+.floating-menu-toggle {
+    position: fixed;
+    top: 1rem;
+    left: 1rem;
+    z-index: 1000;
+    background: var(--medstar-primary);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 3rem;
+    height: 3rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: var(--shadow-medium);
+    transition: var(--transition);
+}
+
+.floating-menu-toggle:hover {
+    background: var(--medstar-primary-light);
+    transform: scale(1.1);
+}
+
+/* Main Container with Sidebar */
+.main-container-with-sidebar {
+    display: flex;
+    min-height: calc(100vh - 200px);
+    transition: var(--transition);
+}
+
+/* Left Sidebar */
+.left-sidebar {
+    width: 280px;
+    background: var(--background-primary);
+    border-right: 1px solid var(--border-color);
+    transition: var(--transition);
+    box-shadow: var(--shadow-light);
+}
+
+.sidebar-header {
+    background: var(--medstar-primary);
+    color: white;
+    padding: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.sidebar-header h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+.sidebar-toggle {
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+    font-size: 1.25rem;
+    padding: 0.5rem;
+    border-radius: var(--border-radius-small);
+    transition: var(--transition);
+}
+
+.sidebar-toggle:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.sidebar-nav {
+    padding: 1rem 0;
+}
+
+.nav-list {
+    list-style: none;
+}
+
+.nav-item {
+    margin-bottom: 0.25rem;
+}
+
+.nav-link {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1.5rem;
+    color: var(--text-primary);
+    text-decoration: none;
+    transition: var(--transition);
+    border-left: 3px solid transparent;
+}
+
+.nav-link:hover {
+    background: var(--background-accent);
+    color: var(--medstar-primary);
+    border-left-color: var(--medstar-primary);
+}
+
+.nav-link.active {
+    background: var(--medstar-primary);
+    color: white;
+    border-left-color: var(--medstar-accent);
+}
+
+.nav-link i {
+    width: 1.25rem;
+    text-align: center;
 }
 
 /* Main Content */
 .main-content {
+    flex: 1;
     padding: 2rem;
-    max-width: 1400px;
-    margin: 0 auto;
+    background: var(--background-secondary);
 }
 
 /* Page Header */
 .page-header {
+    background: var(--background-primary);
+    padding: 2rem;
+    border-radius: var(--border-radius);
+    margin-bottom: 2rem;
+    box-shadow: var(--shadow-light);
     display: flex;
     justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 2rem;
-    padding-bottom: 1.5rem;
-    border-bottom: 2px solid #e9ecef;
-    background: rgba(255,255,255,0.95);
-    padding: 2rem;
-    border-radius: 12px;
-    box-shadow: 0 5px 20px rgba(0,0,0,0.08);
-    backdrop-filter: blur(10px);
+    align-items: center;
 }
 
 .page-header-content h2 {
     font-size: 2rem;
-    color: #2c3e50;
+    color: var(--text-primary);
     margin-bottom: 0.5rem;
-    font-weight: 700;
 }
 
 .page-header-content p {
-    color: #7f8c8d;
+    color: var(--text-secondary);
     font-size: 1.1rem;
 }
 
@@ -131,64 +252,415 @@ body {
     gap: 1rem;
 }
 
+/* Add Form Section */
+.add-form-section {
+    background: var(--background-primary);
+    padding: 2rem;
+    border-radius: var(--border-radius);
+    margin-bottom: 2rem;
+    box-shadow: var(--shadow-light);
+}
+
+.add-form-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.add-form-icon {
+    font-size: 2rem;
+    color: var(--medstar-primary);
+}
+
+.add-form-title {
+    font-size: 1.5rem;
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+.add-form {
+    max-width: 600px;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.form-input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 2px solid var(--border-color);
+    border-radius: var(--border-radius);
+    font-size: 1rem;
+    transition: var(--transition);
+    background: var(--background-primary);
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: var(--medstar-primary);
+    box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.1);
+}
+
+.form-input::placeholder {
+    color: var(--text-secondary);
+}
+
+/* VAT ID Badge */
+.vat-id-badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    background: var(--medstar-primary);
+    color: white;
+    border: 1px solid var(--medstar-primary-light);
+}
+
+/* Flag Badge */
+.flag-badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.flag-sales {
+    background: #dcfce7;
+    color: #166534;
+    border: 1px solid #bbf7d0;
+}
+
+.flag-purchase {
+    background: #fef3c7;
+    color: #92400e;
+    border: 1px solid #fde68a;
+}
+
 /* Buttons */
 .btn {
-    padding: 0.75rem 1.5rem;
-    border: none;
-    border-radius: 8px;
-    font-weight: 600;
-    text-decoration: none;
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: var(--border-radius);
+    font-size: 1rem;
+    font-weight: 600;
+    text-decoration: none;
     cursor: pointer;
-    transition: all 0.3s ease;
-    font-size: 0.95rem;
+    transition: var(--transition);
+    text-align: center;
 }
 
 .btn-primary {
-    background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+    background: var(--medstar-primary);
     color: white;
 }
 
 .btn-primary:hover {
-    background: linear-gradient(135deg, #2980b9 0%, #1f618d 100%);
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
+    background: var(--medstar-primary-light);
+    transform: translateY(-1px);
 }
 
 .btn-secondary {
-    background: linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%);
+    background: var(--medstar-secondary);
     color: white;
 }
 
 .btn-secondary:hover {
-    background: linear-gradient(135deg, #7f8c8d 0%, #6c7b7d 100%);
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(149, 165, 166, 0.3);
+    background: #475569;
+    transform: translateY(-1px);
 }
 
 .btn-outline {
     background: transparent;
-    color: #3498db;
-    border: 2px solid #3498db;
+    color: var(--medstar-primary);
+    border: 2px solid var(--medstar-primary);
 }
 
 .btn-outline:hover {
-    background: #3498db;
+    background: var(--medstar-primary);
     color: white;
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
+    transform: translateY(-1px);
 }
 
-/* Filter Form Section */
-.filter-form-section {
-    background: white;
-    border-radius: 12px;
+.submit-btn {
+    background: var(--medstar-primary);
+    color: white;
+    padding: 1rem 2rem;
+    font-size: 1.1rem;
+    border: none;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    transition: var(--transition);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 600;
+}
+
+.submit-btn:hover {
+    background: var(--medstar-primary-light);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-medium);
+}
+
+/* Data Table Section */
+.data-table-section {
+    background: var(--background-primary);
     padding: 2rem;
+    border-radius: var(--border-radius);
     margin-bottom: 2rem;
-    box-shadow: 0 5px 20px rgba(0,0,0,0.08);
-    border: 1px solid #e9ecef;
+    box-shadow: var(--shadow-light);
+}
+
+.data-table-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.data-table-icon {
+    font-size: 2rem;
+    color: var(--medstar-primary);
+}
+
+.data-table-title {
+    font-size: 1.5rem;
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 1rem;
+}
+
+.data-table th {
+    background: var(--background-accent);
+    padding: 1rem;
+    text-align: left;
+    font-weight: 600;
+    color: var(--text-primary);
+    border-bottom: 2px solid var(--border-color);
+}
+
+.data-table td {
+    padding: 1rem;
+    border-bottom: 1px solid var(--border-color);
+    vertical-align: middle;
+}
+
+.data-table tbody tr:hover {
+    background: var(--background-accent);
+}
+
+/* Action Buttons */
+.action-buttons {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.action-btn {
+    padding: 0.5rem;
+    border: none;
+    border-radius: var(--border-radius-small);
+    cursor: pointer;
+    transition: var(--transition);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+}
+
+.action-btn.edit {
+    background: var(--medstar-primary);
+    color: white;
+}
+
+.action-btn.edit:hover {
+    background: var(--medstar-primary-light);
+    transform: scale(1.1);
+}
+
+.action-btn.delete {
+    background: #dc2626;
+    color: white;
+}
+
+.action-btn.delete:hover {
+    background: #b91c1c;
+    transform: scale(1.1);
+}
+
+.action-btn.activate {
+    background: var(--medstar-accent);
+    color: white;
+    padding: 0.5rem 1rem;
+    width: auto;
+    height: auto;
+}
+
+.action-btn.activate:hover {
+    background: #d97706;
+    transform: scale(1.05);
+}
+
+/* Deleted Items Section */
+.deleted-items-section {
+    background: var(--background-primary);
+    padding: 2rem;
+    border-radius: var(--border-radius);
+    margin-bottom: 2rem;
+    box-shadow: var(--shadow-light);
+}
+
+.deleted-items-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.deleted-items-icon {
+    font-size: 2rem;
+    color: var(--medstar-secondary);
+}
+
+.deleted-items-title {
+    font-size: 1.5rem;
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+/* Alert Messages */
+.alert {
+    padding: 1rem 1.5rem;
+    border-radius: var(--border-radius);
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.alert-success {
+    background: #dcfce7;
+    color: #166534;
+    border: 1px solid #bbf7d0;
+}
+
+.alert-error {
+    background: #fef2f2;
+    color: #dc2626;
+    border: 1px solid #fecaca;
+}
+
+.alert-info {
+    background: #dbeafe;
+    color: #1e40af;
+    border: 1px solid #bfdbfe;
+}
+
+.alert-icon {
+    font-size: 1.25rem;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .left-sidebar {
+        transform: translateX(-100%);
+    }
+    
+    .main-container-with-sidebar.sidebar-collapsed .left-sidebar {
+        transform: translateX(0);
+    }
+    
+    .main-content {
+        margin-left: 0;
+    }
+}
+
+@media (max-width: 768px) {
+    .hospital-header {
+        padding: 1rem;
+    }
+    
+    .hospital-title {
+        font-size: 2rem;
+    }
+    
+    .user-info-bar {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+    }
+    
+    .main-content {
+        padding: 1rem;
+    }
+    
+    .page-header {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+    }
+    
+    .page-header-actions {
+        justify-content: center;
+    }
+    
+    .data-table {
+        font-size: 0.875rem;
+    }
+    
+    .data-table th,
+    .data-table td {
+        padding: 0.75rem 0.5rem;
+    }
+    
+    .action-buttons {
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+    
+    .action-btn {
+        width: 2rem;
+        height: 2rem;
+        font-size: 0.875rem;
+    }
+    
+    .vat-id-badge,
+    .flag-badge {
+        font-size: 0.75rem;
+        padding: 0.125rem 0.5rem;
+    }
+}
+
+/* Debtors Report Specific Styles */
+.filter-form-section {
+    background: var(--background-primary);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-light);
+    margin-bottom: 2rem;
+    padding: 2rem;
+    border: 1px solid var(--border-color);
 }
 
 .filter-form-header {
@@ -197,21 +669,20 @@ body {
     gap: 1rem;
     margin-bottom: 2rem;
     padding-bottom: 1rem;
-    border-bottom: 2px solid #f8f9fa;
+    border-bottom: 2px solid var(--background-accent);
 }
 
 .filter-form-icon {
-    font-size: 1.5rem;
-    color: #3498db;
+    font-size: 2rem;
+    color: var(--medstar-primary);
 }
 
 .filter-form-title {
     font-size: 1.5rem;
-    color: #2c3e50;
+    color: var(--text-primary);
     font-weight: 600;
 }
 
-/* Form Styles */
 .filter-form {
     display: flex;
     flex-direction: column;
@@ -232,391 +703,114 @@ body {
 
 .form-label {
     font-weight: 600;
-    color: #2c3e50;
-    font-size: 0.95rem;
+    color: var(--text-primary);
+    font-size: 0.9rem;
 }
 
 .form-input {
     padding: 0.75rem 1rem;
-    border: 2px solid #e9ecef;
-    border-radius: 8px;
+    border: 2px solid var(--border-color);
+    border-radius: var(--border-radius);
     font-size: 1rem;
-    transition: all 0.3s ease;
-    background: white;
+    transition: var(--transition);
+    background: var(--background-primary);
 }
 
 .form-input:focus {
     outline: none;
-    border-color: #3498db;
-    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+    border-color: var(--medstar-primary);
+    box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.1);
 }
 
-/* Submit Button */
-.submit-btn {
-    background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
-    color: white;
+.date-input-group {
+    position: relative;
+}
+
+.date-picker-btn {
+    position: absolute;
+    right: 0.5rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
     border: none;
-    border-radius: 8px;
-    padding: 0.875rem 2rem;
-    font-weight: 600;
-    font-size: 1rem;
+    color: var(--medstar-primary);
     cursor: pointer;
-    transition: all 0.3s ease;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    align-self: flex-start;
+    font-size: 1.2rem;
 }
 
-.submit-btn:hover {
-    background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(46, 204, 113, 0.3);
+.form-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+    margin-top: 1rem;
 }
 
-/* Results Section */
 .results-section {
-    background: white;
-    border-radius: 12px;
+    background: var(--background-primary);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-light);
+    margin-bottom: 2rem;
     padding: 2rem;
-    box-shadow: 0 5px 20px rgba(0,0,0,0.08);
-    border: 1px solid #e9ecef;
-    overflow-x: auto;
+    border: 1px solid var(--border-color);
 }
 
-/* Data Table */
+.table-container {
+    overflow-x: auto;
+    margin-top: 1rem;
+}
+
 .data-table {
     width: 100%;
-    border-collapse: collapse;
-    margin-top: 1rem;
-    background: white;
-    border-radius: 8px;
+    background: var(--background-primary);
+    border-radius: var(--border-radius);
     overflow: hidden;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    box-shadow: var(--shadow-light);
 }
 
 .data-table th {
-    background: linear-gradient(135deg, #34495e 0%, #2c3e50 100%);
+    background: linear-gradient(135deg, var(--medstar-primary), var(--medstar-primary-light));
     color: white;
+    font-weight: 600;
     padding: 1rem;
     text-align: left;
-    font-weight: 600;
-    font-size: 0.9rem;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+    border-bottom: 2px solid var(--border-color);
 }
 
 .data-table td {
-    padding: 0.875rem 1rem;
-    border-bottom: 1px solid #f1f2f6;
-    font-size: 0.9rem;
+    padding: 1rem;
+    border-bottom: 1px solid var(--border-color);
+    vertical-align: middle;
 }
 
-.data-table tr:hover {
-    background: rgba(52, 152, 219, 0.05);
+.data-table tbody tr:hover {
+    background: var(--background-accent);
 }
 
 .data-table tr:last-child td {
     border-bottom: none;
 }
 
-/* Debt Analysis Cards */
-.debt-analysis-cards {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 1.5rem;
-    margin-bottom: 2rem;
-}
-
-.debt-analysis-card {
-    background: white;
-    border-radius: 12px;
-    padding: 2rem;
-    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
-    border-left: 4px solid #3498db;
-    transition: all 0.3s ease;
-    position: relative;
-    overflow: hidden;
-}
-
-.debt-analysis-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    right: 0;
-    width: 100px;
-    height: 100px;
-    background: linear-gradient(135deg, rgba(52, 152, 219, 0.1) 0%, rgba(41, 128, 185, 0.1) 100%);
-    border-radius: 50%;
-    transform: translate(30px, -30px);
-}
-
-.debt-analysis-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 15px 35px rgba(0,0,0,0.15);
-}
-
-.debt-analysis-card:nth-child(1) { border-left-color: #e74c3c; }
-.debt-analysis-card:nth-child(2) { border-left-color: #f39c12; }
-.debt-analysis-card:nth-child(3) { border-left-color: #27ae60; }
-.debt-analysis-card:nth-child(4) { border-left-color: #9b59b6; }
-
-.debt-analysis-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1rem;
-}
-
-.debt-analysis-title {
-    font-size: 0.9rem;
-    color: #7f8c8d;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.debt-analysis-icon {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.2rem;
-    color: white;
-    background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
-}
-
-.debt-analysis-value {
-    font-size: 2.5rem;
-    font-weight: 700;
-    color: #2c3e50;
-    margin-bottom: 0.5rem;
-    line-height: 1;
-}
-
-.debt-analysis-subtitle {
-    font-size: 0.85rem;
-    color: #95a5a6;
-    font-weight: 500;
-}
-
-/* Debt Status Indicators */
-.debt-status-indicators {
-    display: flex;
-    gap: 1rem;
-    margin-bottom: 1rem;
-}
-
-.debt-status-indicator {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.5rem 1rem;
-    border-radius: 20px;
-    font-size: 0.9rem;
+.total-row {
+    background: var(--background-accent);
     font-weight: 600;
 }
 
-.debt-status-indicator.overdue {
-    background: rgba(231, 76, 60, 0.1);
-    color: #e74c3c;
+.financial-positive {
+    color: #059669;
+    font-weight: 600;
 }
 
-.debt-status-indicator.due-soon {
-    background: rgba(241, 196, 15, 0.1);
-    color: #f39c12;
+.financial-negative {
+    color: #dc2626;
+    font-weight: 600;
 }
 
-.debt-status-indicator.current {
-    background: rgba(46, 204, 113, 0.1);
-    color: #27ae60;
+.financial-neutral {
+    color: var(--text-secondary);
+    font-weight: 600;
 }
 
-/* Alert Container */
-#alertContainer {
-    margin-bottom: 1.5rem;
-}
-
-.alert {
-    padding: 1rem 1.5rem;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    margin-bottom: 1rem;
-    font-weight: 500;
-}
-
-.alert-success {
-    background: #d4edda;
-    color: #155724;
-    border: 1px solid #c3e6cb;
-}
-
-.alert-error {
-    background: #f8d7da;
-    color: #721c24;
-    border: 1px solid #f5c6cb;
-}
-
-.alert-info {
-    background: #d1ecf1;
-    color: #0c5460;
-    border: 1px solid #bee5eb;
-}
-
-.alert-icon {
-    font-size: 1.2rem;
-}
-
-/* Responsive Design */
-@media (max-width: 768px) {
-    .main-content {
-        padding: 1rem;
-    }
-    
-    .page-header {
-        flex-direction: column;
-        gap: 1rem;
-        align-items: flex-start;
-        padding: 1rem;
-    }
-    
-    .form-row {
-        grid-template-columns: 1fr;
-    }
-    
-    .user-info-bar {
-        flex-direction: column;
-        gap: 1rem;
-        text-align: center;
-    }
-    
-    .hospital-title {
-        font-size: 2rem;
-    }
-    
-    .debt-analysis-cards {
-        grid-template-columns: 1fr;
-    }
-    
-    .debt-status-indicators {
-        flex-direction: column;
-        gap: 0.5rem;
-    }
-}
-
-@media (max-width: 480px) {
-    .hospital-header {
-        padding: 1rem;
-    }
-    
-    .hospital-title {
-        font-size: 1.5rem;
-    }
-    
-    .main-content {
-        padding: 0.75rem;
-    }
-    
-    .filter-form-section {
-        padding: 1rem;
-    }
-    
-    .data-table {
-        font-size: 0.8rem;
-    }
-    
-    .data-table th,
-    .data-table td {
-        padding: 0.5rem;
-    }
-    
-    .debt-analysis-value {
-        font-size: 2rem;
-    }
-}
-
-/* Animation Classes */
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.fade-in {
-    animation: fadeIn 0.5s ease-out;
-}
-
-/* Loading States */
-.loading {
-    opacity: 0.6;
-    pointer-events: none;
-}
-
-.loading::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 20px;
-    height: 20px;
-    margin: -10px 0 0 -10px;
-    border: 2px solid #f3f3f3;
-    border-top: 2px solid #3498db;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
-/* Print Styles */
-@media print {
-    .hospital-header,
-    .user-info-bar,
-    .nav-breadcrumb,
-    .page-header-actions,
-    .filter-form-section {
-        display: none;
-    }
-    
-    .main-content {
-        padding: 0;
-        max-width: none;
-    }
-    
-    .debt-analysis-card,
-    .results-section {
-        box-shadow: none;
-        border: 1px solid #ccc;
-        background: white;
-    }
-    
-    .debt-analysis-cards {
-        grid-template-columns: repeat(2, 1fr);
-    }
-}
-
-/* High Contrast Mode */
-@media (prefers-contrast: high) {
-    .debt-analysis-card,
-    .filter-form-section,
-    .results-section {
-        border: 2px solid #000;
-    }
-    
-    .btn {
-        border: 2px solid currentColor;
-    }
+.text-right {
+    text-align: right;
 }
 

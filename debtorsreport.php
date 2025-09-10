@@ -117,7 +117,7 @@ if (isset($_REQUEST["frmflag2"])) { $frmflag2 = $_REQUEST["frmflag2"]; } else { 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     
     <!-- Modern CSS -->
-    <link rel="stylesheet" href="css/vat-modern.css?v=<?php echo time(); ?>">
+    <link rel="stylesheet" href="css/debtorsreport-modern.css?v=<?php echo time(); ?>">
     
     <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -127,100 +127,18 @@ if (isset($_REQUEST["frmflag2"])) { $frmflag2 = $_REQUEST["frmflag2"]; } else { 
     <script type="text/javascript" src="js/adddate2.js"></script>
     <script src="js/datetimepicker_css.js"></script>
 
-<style type="text/css">
-.bodytext31:hover { font-size:14px; }
-
-<!--
-
-body {
-
-	margin-left: 0px;
-
-	margin-top: 0px;
-
-	background-color: #ecf0f5;
-
-}
-
-.bodytext3 {	FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3B3B3C; FONT-FAMILY: Tahoma
-
-}
-
--->
-
-</style>
 
 
 
-<script type="text/javascript" src="js/adddate.js"></script>
-
-<script type="text/javascript" src="js/adddate2.js"></script>
-
-<script src="js/datetimepicker_css.js"></script>
 
 
 
-<!--<script type="text/javascript" src="js/autocomplete_customer2.js"></script>
-
-<script type="text/javascript" src="js/autosuggestcustomer.js"></script>-->
-
-<script type="text/javascript">
-
-window.onload = function () 
-
-{
-
-	var oTextbox = new AutoSuggestControl(document.getElementById("searchsuppliername"), new StateSuggestions());        
-
-}
-
-</script>
-
-<link rel="stylesheet" type="text/css" href="css/autosuggest.css" />        
-
-<style type="text/css">
-
-<!--
-
-.bodytext3 {FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3b3b3c; FONT-FAMILY: Tahoma; text-decoration:none
-
-}
-
-.bodytext31 {FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3b3b3c; FONT-FAMILY: Tahoma; text-decoration:none
-
-}
-
-.bodytext311 {FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3b3b3c; FONT-FAMILY: Tahoma; text-decoration:none
-
-}
-
--->
-
-.bal
-
-{
-
-border-style:none;
-
-background:none;
-
-text-align:right;
-
-}
-
-.bali
-
-{
-
-text-align:right;
-
-}
-
-</style>
 
 
 
-</head>
+
+
+
 
 
 
@@ -255,8 +173,162 @@ text-align:right;
         <span>Debtors Report</span>
     </nav>
 
-    <!-- Main Content -->
-    <main class="main-content">
+    <!-- Floating Menu Toggle -->
+    <div id="menuToggle" class="floating-menu-toggle">
+        <i class="fas fa-bars"></i>
+    </div>
+
+    <!-- Main Container with Sidebar -->
+    <div class="main-container-with-sidebar">
+        <!-- Left Sidebar -->
+        <aside id="leftSidebar" class="left-sidebar">
+            <div class="sidebar-header">
+                <h3>Quick Navigation</h3>
+                <button id="sidebarToggle" class="sidebar-toggle">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <ul class="nav-list">
+                    <li class="nav-item">
+                        <a href="mainmenu1.php" class="nav-link">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="labitem1master.php" class="nav-link">
+                            <i class="fas fa-flask"></i>
+                            <span>Lab Items</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="openingstockentry_master.php" class="nav-link">
+                            <i class="fas fa-boxes"></i>
+                            <span>Opening Stock</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="addward.php" class="nav-link">
+                            <i class="fas fa-bed"></i>
+                            <span>Wards</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="accountreceivableentrylist.php" class="nav-link">
+                            <i class="fas fa-receipt"></i>
+                            <span>Account Receivable</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="corporateoutstanding.php" class="nav-link">
+                            <i class="fas fa-building"></i>
+                            <span>Corporate Outstanding</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="accountstatement.php" class="nav-link">
+                            <i class="fas fa-file-invoice-dollar"></i>
+                            <span>Account Statement</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="addaccountsmain.php" class="nav-link">
+                            <i class="fas fa-chart-line"></i>
+                            <span>Accounts Main</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="addaccountssub.php" class="nav-link">
+                            <i class="fas fa-chart-pie"></i>
+                            <span>Accounts Sub Type</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="fixedasset_acquisition_report.php" class="nav-link">
+                            <i class="fas fa-building"></i>
+                            <span>Fixed Asset Acquisition</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="activeinpatientlist.php" class="nav-link">
+                            <i class="fas fa-bed"></i>
+                            <span>Active Inpatient List</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="activeusersreport.php" class="nav-link">
+                            <i class="fas fa-users"></i>
+                            <span>Active Users Report</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="chartofaccounts_upload.php" class="nav-link">
+                            <i class="fas fa-upload"></i>
+                            <span>Chart of Accounts Upload</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="chartaccountsmaindataimport.php" class="nav-link">
+                            <i class="fas fa-database"></i>
+                            <span>Chart of Accounts Main Import</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="chartaccountssubdataimport.php" class="nav-link">
+                            <i class="fas fa-database"></i>
+                            <span>Chart of Accounts Sub Import</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="addbloodgroup.php" class="nav-link">
+                            <i class="fas fa-tint"></i>
+                            <span>Blood Group Master</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="addfoodallergy1.php" class="nav-link">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <span>Food Allergy Master</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="addgenericname.php" class="nav-link">
+                            <i class="fas fa-pills"></i>
+                            <span>Generic Name Master</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="addpromotion.php" class="nav-link">
+                            <i class="fas fa-percentage"></i>
+                            <span>Promotion Master</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="addsalutation1.php" class="nav-link">
+                            <i class="fas fa-user-tie"></i>
+                            <span>Salutation Master</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="vat.php" class="nav-link">
+                            <i class="fas fa-receipt"></i>
+                            <span>VAT Master</span>
+                        </a>
+                    </li>
+                    <li class="nav-item active">
+                        <a href="debtorsreport.php" class="nav-link">
+                            <i class="fas fa-chart-bar"></i>
+                            <span>Debtors Report</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
         <!-- Alert Container -->
         <div id="alertContainer">
             <?php include ("includes/alertmessages1.php"); ?>
@@ -278,177 +350,95 @@ text-align:right;
             </div>
         </div>
 
-  <tr>
-
-    <td colspan="10" bgcolor="#ecf0f5"><?php include ("includes/title1.php"); ?></td>
-
-  </tr>
-
-  <tr>
-
-    <td colspan="10" bgcolor="#ecf0f5"><?php include ("includes/menu1.php"); ?></td>
-
-  </tr>
-
-  <tr>
-
-    <td colspan="10">&nbsp;</td>
-
-  </tr>
-
-  <tr>
-
-    <td width="1%">&nbsp;</td>
-
-    <td width="2%" valign="top"><?php //include ("includes/menu4.php"); ?>
-
-      &nbsp;</td>
-
-    <td width="97%" valign="top"><table width="116%" border="0" cellspacing="0" cellpadding="0">
-
-      <tr>
-
-        <td width="860">
-
-		
-
-		
-
-              <form name="cbform1" method="post" action="debtorsreport.php">
-
-		<table width="634" border="0" align="left" cellpadding="4" cellspacing="0" bordercolor="#666666" id="AutoNumber3" style="border-collapse: collapse">
-
-          <tbody>
-
-            <tr bgcolor="#011E6A">
-
-              <td colspan="4" bgcolor="#ecf0f5" class="bodytext3"><strong>Debtors Report</strong></td>
-
-             </tr>
-
-             <tr>
-
-              <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">Location</td>
-
-              <td width="82%" colspan="3" align="left" valign="top"  bgcolor="#FFFFFF">
-
-              <select name="locationcode" id="$locationcode">
-			  <option value="All">All</option>
-
-                <?php
-
-                  $query20 = "select * FROM master_location";
-
-                  $exec20 = mysqli_query($GLOBALS["___mysqli_ston"], $query20) or die ("Error in Query20". mysqli_error($GLOBALS["___mysqli_ston"]));
-
-                  while ($res20 = mysqli_fetch_array($exec20)){
-				?>
-                    <option value="<?php echo $res20['locationcode'];?>" <?php if($locationcode1==$res20['locationcode']){ echo  'selected'; } ?>><?php echo $res20['locationname'];?> </option>;
-				<?php
-                  }
-
-                ?>
-
-                </select></td>
-
-           </tr>
-
-           	
-
-	         <tr>
-
-                      <td class="bodytext31" valign="center"  align="left" 
-
-                bgcolor="#FFFFFF"> Date From </td>
-
-                      <td width="30%" align="left" valign="center"  bgcolor="#FFFFFF" class="bodytext31"><input name="ADate1" id="ADate1" value="<?php echo $paymentreceiveddatefrom; ?>"  size="10"  readonly="readonly" onKeyDown="return disableEnterKey()" />
-
-                          <img src="images2/cal.gif" onClick="javascript:NewCssCal('ADate1')" style="cursor:pointer"/> </td>
-
-                      <td width="16%" align="left" valign="center"  bgcolor="#FFFFFF" class="bodytext31"> Date To </td>
-
-                      <td width="33%" align="left" valign="center"  bgcolor="#FFFFFF"><span class="bodytext31">
-
-                        <input name="ADate2" id="ADate2" value="<?php echo $paymentreceiveddateto; ?>"  size="10"  readonly="readonly" onKeyDown="return disableEnterKey()" />
-
-                        <img src="images2/cal.gif" onClick="javascript:NewCssCal('ADate2')" style="cursor:pointer"/> </span></td>
-
-                  </tr>	
-
-                  <tr>
-
-	              <td align="left" valign="top"  bgcolor="#FFFFFF"></td>
-
-	              <td colspan="3" align="left" valign="top"  bgcolor="#FFFFFF">
-
-				            <input type="hidden" name="cbfrmflag1" value="cbfrmflag1">
-
-	                  <input type="submit" value="Search" name="Submit" />
-
-	                  <input name="resetbutton" type="reset" id="resetbutton"  value="Reset" /></td>
-
-            	</tr>
-
-          </tbody>
-
-        </table>
-
-		</form>		</td>
-
-      </tr>
-
-      <tr>
-
-        <td>&nbsp;</td>
-
-      </tr>
-
-       <tr>
-
-        <?php
-
-        if(isset($_POST['Submit'])){
-
-        ?>
-
-        <td><table id="AutoNumber3" style="BORDER-COLLAPSE: collapse" 
-
-            bordercolor="#666666" cellspacing="0" cellpadding="4" width="800" 
-
-            align="left" border="0">
-
-          <tbody>
-
-        <tr>
-
-          <td class="bodytext31" valign="center"  align="left" colspan="2"> 
-
-           <!-- <a target="_blank" href="print_admissionregister.php?cbfrmflag1=cbfrmflag1&&ADate1=<?php echo $ADate1; ?>&&ADate2=<?php echo $ADate2; ?>&&wardcode=<?php echo $wardcode; ?>"><img src="images/pdfdownload.jpg" width="30" height="30"></a> -->
-
-           <a href="print_debtorsreportxls.php?ADate1=<?php echo $ADate1; ?>&&ADate2=<?php echo $ADate2; ?>&&locationcode1=<?php echo $locationcode1; ?>"><img src="images/excel-xls-icon.png" width="30" height="30"></a>
-
-          </td>
-
-        </tr>
-
-          <tr>
-
-          <td width="5%" align="left" valign="center"  
-
-            bgcolor="#ecf0f5" class="bodytext31"><div align="left"><strong>SNO.</strong></div></td>
-
-            <td width="30%" align="left" valign="center"  
-
-            bgcolor="#ecf0f5" class="bodytext31"><div align="left"><strong>ACCOUNTNAME</strong></div></td>
-
-            <td width="15%" align="left" valign="center"  
-
-            bgcolor="#ecf0f5" class="bodytext31"><div align="left"><strong>MIS TYPE</strong></div></td>
-
-          <td width="15%" align="left" valign="center"  bgcolor="#ecf0f5" class="bodytext31"><div align="right"><strong>OP REVENUE</strong></div></td>
-          <td width="15%" align="left" valign="center"  bgcolor="#ecf0f5" class="bodytext31"><div align="right"><strong>IP REVENUE</strong></div></td>
-          <td width="15%" align="left" valign="center"  bgcolor="#ecf0f5" class="bodytext31"><div align="right"><strong>Doc. Share</strong></div></td>
-        </tr>
+        <!-- Filter Form Section -->
+        <div class="filter-form-section">
+            <div class="filter-form-header">
+                <i class="fas fa-filter filter-form-icon"></i>
+                <h3 class="filter-form-title">Report Filters</h3>
+            </div>
+            
+            <form name="cbform1" method="post" action="debtorsreport.php" class="filter-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="locationcode" class="form-label">Location</label>
+                        <select name="locationcode" id="locationcode" class="form-input">
+                            <option value="All">All Locations</option>
+                            <?php
+                            $query20 = "select * FROM master_location";
+                            $exec20 = mysqli_query($GLOBALS["___mysqli_ston"], $query20) or die ("Error in Query20". mysqli_error($GLOBALS["___mysqli_ston"]));
+                            while ($res20 = mysqli_fetch_array($exec20)){
+                            ?>
+                                <option value="<?php echo $res20['locationcode'];?>" <?php if($locationcode1==$res20['locationcode']){ echo  'selected'; } ?>><?php echo $res20['locationname'];?></option>
+                            <?php
+                            }
+                            ?>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="ADate1" class="form-label">Date From</label>
+                        <div class="date-input-group">
+                            <input name="ADate1" id="ADate1" value="<?php echo $paymentreceiveddatefrom; ?>" class="form-input" readonly="readonly" onKeyDown="return disableEnterKey()" />
+                            <button type="button" class="date-picker-btn" onClick="javascript:NewCssCal('ADate1')">
+                                <i class="fas fa-calendar-alt"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="ADate2" class="form-label">Date To</label>
+                        <div class="date-input-group">
+                            <input name="ADate2" id="ADate2" value="<?php echo $paymentreceiveddateto; ?>" class="form-input" readonly="readonly" onKeyDown="return disableEnterKey()" />
+                            <button type="button" class="date-picker-btn" onClick="javascript:NewCssCal('ADate2')">
+                                <i class="fas fa-calendar-alt"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <input type="hidden" name="cbfrmflag1" value="cbfrmflag1">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-search"></i> Generate Report
+                    </button>
+                    <button type="reset" class="btn btn-secondary">
+                        <i class="fas fa-undo"></i> Reset
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Results Section -->
+        <?php if(isset($_POST['Submit'])): ?>
+        <div class="results-section">
+            <div class="results-header">
+                <div class="results-title">
+                    <i class="fas fa-chart-line results-icon"></i>
+                    <h3>Debtors Report Results</h3>
+                </div>
+                <div class="results-actions">
+                    <a href="print_debtorsreportxls.php?ADate1=<?php echo $ADate1; ?>&ADate2=<?php echo $ADate2; ?>&locationcode1=<?php echo $locationcode1; ?>" 
+                       class="btn btn-success" title="Export to Excel">
+                        <i class="fas fa-file-excel"></i> Export Excel
+                    </a>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Account Name</th>
+                            <th>MIS Type</th>
+                            <th class="text-right">OP Revenue</th>
+                            <th class="text-right">IP Revenue</th>
+                            <th class="text-right">Doc. Share</th>
+                        </tr>
+                    </thead>
+                    <tbody>
 
           
 
@@ -623,48 +613,143 @@ text-align:right;
 
               ?>
 
-               <tr <?php echo $colorcode; ?>>
-
-                  <td class="bodytext31" valign="center"  align="center"><?php echo $snocount; ?></td>
-
-                  <td class="bodytext31" valign="center"  align="left"><?php echo $accountname; ?></td>
-
-                  <td class="bodytext31" valign="center"  align="left"><?php echo $mistype; ?></td>
-
-                  <td class="bodytext31" valign="center"  align="right"><?php echo number_format($oprevenue,2); ?></td>
-                  <td class="bodytext31" valign="center"  align="right"><?php echo number_format($revenue,2); ?></td>
-                  <td class="bodytext31" valign="center"  align="right"><?php echo number_format($account_doc_share,2); ?></td>
-
-              </tr>
+                        <tr>
+                            <td><?php echo $snocount; ?></td>
+                            <td><?php echo htmlspecialchars($accountname); ?></td>
+                            <td><?php echo htmlspecialchars($mistype); ?></td>
+                            <td class="text-right financial-positive"><?php echo number_format($oprevenue,2); ?></td>
+                            <td class="text-right financial-positive"><?php echo number_format($revenue,2); ?></td>
+                            <td class="text-right financial-positive"><?php echo number_format($account_doc_share,2); ?></td>
+                        </tr>
 
             <?php } ?>
 
-          <tr>
-
-
-            <td class="bodytext31" valign="center" align="right" bgcolor="#ecf0f5" colspan="3"><strong>TOTAL REVENUE</strong></td>
-            <td class="bodytext31" valign="center" align="right" bgcolor="#ecf0f5"><strong><?php echo number_format($optotalrevenue,2); ?></strong></td>
-            <td class="bodytext31" valign="center" align="right" bgcolor="#ecf0f5"><strong><?php echo number_format($totalrevenue,2); ?></strong></td>
-            <td class="bodytext31" valign="center" align="right" bgcolor="#ecf0f5"><strong><?php echo number_format($total_doc_share_amount,2); ?></strong></td>
-          </tbody>
-
-        </table></td>
-
-      <?php } ?>
-
-      </tr>
-
-	  
-
-    </table>
-
-</table>
+                        <tr class="total-row">
+                            <td colspan="3"><strong>TOTAL REVENUE</strong></td>
+                            <td class="text-right"><strong><?php echo number_format($optotalrevenue,2); ?></strong></td>
+                            <td class="text-right"><strong><?php echo number_format($totalrevenue,2); ?></strong></td>
+                            <td class="text-right"><strong><?php echo number_format($total_doc_share_amount,2); ?></strong></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <?php endif; ?>
 
             </div>
         </main>
+    </div>
 
     <!-- Modern JavaScript -->
-    <script src="js/debtorsreport-modern.js?v=<?php echo time(); ?>"></script>
+    <script>
+        // Modern JavaScript functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            // Sidebar functionality
+            const menuToggle = document.getElementById('menuToggle');
+            const sidebar = document.getElementById('leftSidebar');
+            const sidebarToggle = document.getElementById('sidebarToggle');
+            const mainContainer = document.querySelector('.main-container-with-sidebar');
+
+            // Toggle sidebar visibility
+            if (menuToggle) {
+                menuToggle.addEventListener('click', function() {
+                    mainContainer.classList.toggle('sidebar-collapsed');
+                });
+            }
+
+            // Toggle sidebar collapse
+            if (sidebarToggle) {
+                sidebarToggle.addEventListener('click', function() {
+                    mainContainer.classList.toggle('sidebar-collapsed');
+                });
+            }
+
+            // Close sidebar when clicking backdrop
+            document.addEventListener('click', function(e) {
+                if (window.innerWidth <= 1024) {
+                    if (!sidebar.contains(e.target) && !menuToggle.contains(e.target)) {
+                        mainContainer.classList.remove('sidebar-collapsed');
+                    }
+                }
+            });
+
+            // Form validation
+            const form = document.querySelector('.filter-form');
+            if (form) {
+                form.addEventListener('submit', function(e) {
+                    const dateFrom = document.getElementById('ADate1').value;
+                    const dateTo = document.getElementById('ADate2').value;
+                    
+                    if (!dateFrom || !dateTo) {
+                        e.preventDefault();
+                        alert('Please select both date from and date to.');
+                        return false;
+                    }
+                    
+                    if (new Date(dateFrom) > new Date(dateTo)) {
+                        e.preventDefault();
+                        alert('Date from cannot be greater than date to.');
+                        return false;
+                    }
+                });
+            }
+            
+            // Add loading state to form submission
+            const submitBtn = document.querySelector('button[type="submit"]');
+            if (submitBtn) {
+                submitBtn.addEventListener('click', function() {
+                    this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating Report...';
+                    this.disabled = true;
+                });
+            }
+            
+            // Auto-refresh functionality
+            function refreshPage() {
+                window.location.reload();
+            }
+            
+            // Export functionality
+            function exportToExcel() {
+                const form = document.querySelector('.filter-form');
+                if (form) {
+                    // Create a temporary form for export
+                    const exportForm = document.createElement('form');
+                    exportForm.method = 'GET';
+                    exportForm.action = 'print_debtorsreportxls.php';
+                    
+                    const dateFrom = document.getElementById('ADate1').value;
+                    const dateTo = document.getElementById('ADate2').value;
+                    const location = document.getElementById('locationcode').value;
+                    
+                    if (dateFrom && dateTo) {
+                        const inputs = [
+                            {name: 'ADate1', value: dateFrom},
+                            {name: 'ADate2', value: dateTo},
+                            {name: 'locationcode1', value: location}
+                        ];
+                        
+                        inputs.forEach(input => {
+                            const inputElement = document.createElement('input');
+                            inputElement.type = 'hidden';
+                            inputElement.name = input.name;
+                            inputElement.value = input.value;
+                            exportForm.appendChild(inputElement);
+                        });
+                        
+                        document.body.appendChild(exportForm);
+                        exportForm.submit();
+                        document.body.removeChild(exportForm);
+                    } else {
+                        alert('Please select date range before exporting.');
+                    }
+                }
+            }
+            
+            // Make functions globally available
+            window.refreshPage = refreshPage;
+            window.exportToExcel = exportToExcel;
+        });
+    </script>
 </body>
 </html>
 

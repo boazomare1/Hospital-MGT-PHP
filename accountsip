@@ -1,0 +1,267 @@
+<?php
+session_start();
+include ("includes/loginverify.php");
+include ("db/db_connect.php");
+
+$docno = $_SESSION['docno'];
+$username = $_SESSION['username'];
+$transactiondatefrom = date('Y-m-d');
+$transactiondateto = date('Y-m-d');
+$ADate1=$_REQUEST['ADate1'];
+$ADate2=$_REQUEST['ADate2'];
+$location=$_REQUEST['locationcode'];
+$typetransfer=$_REQUEST['typetransfer'];
+if($location!='')
+{
+	$locationcode=$location;
+	}
+$data = '';
+$status = '';
+$searchsupplier = '';
+$totalrate = 0;
+
+header('Content-Type: application/vnd.ms-excel');
+header('Content-Disposition: attachment;filename="stocktransferreport.xls"');
+header('Cache-Control: max-age=80');
+
+?>
+<style type="text/css">
+<!--
+body {
+	margin-left: 0px;
+	margin-top: 0px;
+	//background-color: #FFFFFF;
+}
+.bodytext3 {	FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3B3B3C; FONT-FAMILY: Tahoma
+}
+-->
+</style>
+<style type="text/css">
+<!--
+.bodytext3 {FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3b3b3c; FONT-FAMILY: Tahoma; text-decoration:none
+}
+.bodytext31 {FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3b3b3c; FONT-FAMILY: Tahoma; text-decoration:none
+}
+-->
+</style>
+</head>
+
+<body>
+	<table id="AutoNumber3" style="BORDER-COLLAPSE: collapse" 
+            bordercolor="#666666" cellspacing="0" cellpadding="4" width="1151" 
+            align="left" border="1">
+            <tbody>
+			<tr>
+                <td colspan="9" bgcolor="#FFFFFF" class="bodytext31"><strong>Stock Transfer Report</strong></td>
+			</tr>	
+              <tr>
+                <td  bgcolor="#FFFFFF" class="bodytext31">&nbsp;</td>
+                 <?php 
+				$query1 = "select * from master_location where locationcode='$location'";
+						$exec1 = mysql_query($query1) or die ("Error in Query1".mysql_error());
+						$res1 = mysql_fetch_array($exec1);
+						$locationname = $res1["locationname"];
+						 
+						 				 ?>
+                <td class="bodytext31" bgcolor="#FFFFFF" colspan="2" align="center"><strong>Location : </strong><?php echo $locationname;  ?></td>
+               
+                <!--<td width="12%" bgcolor="#FFFFFF" class="bodytext31"></td>-->
+                <td class="bodytext31" bgcolor="#FFFFFF"><strong>Type :</strong><?php if($typetransfer!=''){  echo $typetransfer;  } else{ echo '';}  ?></td>
+                <td  bgcolor="#FFFFFF" class="bodytext31" align="right"><strong>Date&nbsp;&nbsp;&nbsp; </strong> From : </td>
+                <td  bgcolor="#FFFFFF" class="bodytext31" align="left"><?php echo $ADate1;  ?></td>
+                <td  bgcolor="#FFFFFF" class="bodytext31">To : <?php echo $ADate2;  ?></td>
+                <td  bgcolor="#FFFFFF" class="bodytext31">&nbsp;</td>
+                <!--<td width="8%" bgcolor="#FFFFFF" class="bodytext31">&nbsp;</td>
+                <td width="8%" bgcolor="#FFFFFF" class="bodytext31">&nbsp;</td>-->
+                <td width="12%" bgcolor="#FFFFFF" class="bodytext31">&nbsp;</td>
+                </tr>
+              <tr>
+                <td class="bodytext31" valign="center"  align="left" 
+                bgcolor="#ffffff">&nbsp;</td>
+                <td width="7%" align="left" valign="center"  
+                bgcolor="#ffffff" class="bodytext31"><!--<input onClick="javascript:excelexport1();" type="button" value="Export To Excel" name="Submit2" class="button" style="border: 1px solid #001E6A" />--></td>
+                <td align="left" valign="center"  
+                bgcolor="#ffffff" class="bodytext31">&nbsp;</td>
+                <td  align="left" valign="center"  
+                bgcolor="#ffffff" class="bodytext31">&nbsp;</td>
+                <!--<td align="left" valign="center"  
+                bgcolor="#ffffff" class="bodytext31">&nbsp;</td>-->
+                <td align="left" valign="center"  
+                bgcolor="#ffffff" class="bodytext31">&nbsp;</td>
+                <td align="left" valign="center"  
+                bgcolor="#ffffff" class="bodytext31">&nbsp;</td>
+                <!--<td align="left" valign="center"  
+                bgcolor="#ffffff" class="bodytext31">&nbsp;</td>
+                <td align="left" valign="center"  
+                bgcolor="#ffffff" class="bodytext31">&nbsp;</td>-->
+                <td align="left" valign="center"  
+                bgcolor="#ffffff" class="bodytext31">&nbsp;</td>
+                <td align="left" valign="center"  
+                bgcolor="#ffffff" class="bodytext31">&nbsp;</td>
+                <td align="left" valign="center"  
+                bgcolor="#ffffff" class="bodytext31">&nbsp;</td>
+              </tr>
+              <tr>
+                <td class="bodytext31" valign="center"  align="left" 
+                bgcolor="#ffffff" width="3%"><strong>No.</strong></td>
+                <td class="bodytext31" valign="center"  align="left" 
+                bgcolor="#ffffff"><div align="left"><strong>Date</strong></div></td>
+                <td width="8%" align="left" valign="center"  
+                bgcolor="#ffffff" class="bodytext31"><div align="left"><strong> Doc No </strong></div></td>
+                <!--<td class="bodytext31" valign="center"  align="left" 
+                bgcolor="#ffffff"><div align="left"><strong>Location</strong></div></td>-->
+                <td class="bodytext31" valign="center"  align="left" 
+                bgcolor="#ffffff" width="15%"><div align="left"><strong> From Store </strong></div></td>
+                <td class="bodytext31" valign="center"  align="center" 
+                bgcolor="#ffffff" width="19%"><div align="center"><strong>To Store</strong></div></td>
+                
+                <td class="bodytext31" width="12%" valign="center"  align="left" 
+                bgcolor="#ffffff"><div align="left"><strong>Itemname</strong></div></td>
+                <!--<td class="bodytext31" valign="center"  align="left" 
+                bgcolor="#ffffff"><div align="left"><strong>Batch </strong></div></td>
+                <td class="bodytext31" valign="center"  align="left" 
+                bgcolor="#ffffff"><div align="left"><strong>Exp.Dt </strong></div></td>
+                <td class="bodytext31" valign="center"  align="left" 
+                bgcolor="#ffffff"><div align="left"><strong>Avl.Qty </strong></div></td>-->
+                <td class="bodytext31" valign="center" width="12%"  align="left" 
+                bgcolor="#ffffff"><div align="right"><strong>Trn.Qty </strong></div></td>
+                <td class="bodytext31" valign="center" width="12%"  align="left" 
+                bgcolor="#ffffff"><div align="right"><strong>Cost</strong></div></td>
+				<td class="bodytext31" valign="center" width="12%"  align="left" 
+                bgcolor="#ffffff"><div align="right"><strong>Total Cost</strong></div></td>
+              </tr>
+			  <?php
+			  $colorloopcount = '';
+			  $loopcount = '';
+			  $totalcost = 0;
+			   //echo  $query2 = "SELECT ts.transaction_quantity AS transaction_quantity,mst.locationname AS locationname,ts.recorddate AS recorddate,ts.itemname AS itemname,ts.batchnumber AS batch,ts.batch_quantity AS batch_quantity,ts.rate AS rate,mst.typetransfer AS typetransfer,mst.docno AS docno,mst.fromstore AS fromstore,mst.tostore AS tostore,pd.expirydate AS expirydate FROM master_stock_transfer AS mst JOIN transaction_stock AS ts ON ts.entrydocno = mst.docno  JOIN purchase_details AS pd ON ts.fifo_code = pd.fifo_code  WHERE ts.transactionfunction = '1' and ts.fifo_code = mst.fifo_code   and mst.locationcode = '".$location."' and mst.typetransfer = '".$typetransfer."' and ts.recorddate BETWEEN '".$ADate1."' and '".$ADate2."' ORDER BY ts.auto_number DESC limit 10";
+			  if($typetransfer == 'Transfer') {
+			  $query2 = "select fifo_code, typetransfer, docno, fromstore, tostore, locationname, entrydate, batch, itemname, itemcode, transferquantity, rate from master_stock_transfer where typetransfer = '$typetransfer' and entrydate BETWEEN '".$ADate1."' and '".$ADate2."' and locationcode = '$location' order by auto_number DESC";
+			  }
+			  else if($typetransfer == 'Consumable') {
+			  $typetransfer1 = 'Consumable';
+			  $query2 = "select fifo_code, typetransfer, docno, fromstore, tostore, locationname, entrydate, batch, itemname, itemcode, transferquantity, rate from master_stock_transfer where typetransfer = '$typetransfer1' and entrydate BETWEEN '".$ADate1."' and '".$ADate2."' and locationcode = '$location' and tolocationcode = '' order by auto_number DESC";
+			  }
+			  else if($typetransfer == 'Branch Transfer') {
+			  $typetransfer1 = '';
+			  $query2 = "select fifo_code, typetransfer, docno, fromstore, tostore, locationname, entrydate, batch, itemname, itemcode, transferquantity, rate from master_stock_transfer where typetransfer = '$typetransfer1' and entrydate BETWEEN '".$ADate1."' and '".$ADate2."' and locationcode = '$location' order by auto_number DESC";
+			  }
+			  $exec2 = mysql_query($query2) or die ("Error in Query2".mysql_error());
+			  while ($res2 = mysql_fetch_array($exec2))
+			  {
+				  $loopcount=$loopcount+1;
+			  $typetransfer23 = $res2['typetransfer'];
+			  $docno = $res2['docno'];
+			   $fromstore = $res2['fromstore'];
+			  $tostore = $res2['tostore'];			  
+			  $locationname = $res2['locationname'];
+			  $entrydate = $res2['entrydate'];
+			  $itemname = $res2['itemname'];
+			  $itemcode = $res2['itemcode'];
+			  $batch = $res2['batch'];
+			  $transaction_quantity = $res2['transferquantity'];
+			  $rate = $res2['rate'];
+			  $expirydate = '';
+			  $cost = $rate * $transaction_quantity;
+			  $totalrate=$totalrate+$rate;
+			  $totalcost = $totalcost + $cost;
+			  $query11 = "select store  from master_store where storecode='$fromstore'";
+						$exec11 = mysql_query($query11) or die ("Error in Query1".mysql_error());
+						$res11 = mysql_fetch_array($exec11);
+						$fromstore = $res11["store"];
+					
+			  if($typetransfer != 'Consumable')
+			  {			
+			    $query12 = "select store from master_store where storecode='$tostore'";
+				$exec12 = mysql_query($query12) or die ("Error in Query1".mysql_error());
+				$res12 = mysql_fetch_array($exec12);
+				$tostore = $res12["store"];
+			  }
+			  else
+			  {
+			  	$query121 = "select accountname from master_accountname where id='$tostore'";
+				$exec121 = mysql_query($query121) or die ("Error in Query1".mysql_error());
+				$res121 = mysql_fetch_array($exec121);
+				$tostore = $res121["accountname"];
+			  }	
+			  
+			  $colorloopcount = $colorloopcount + 1;
+			  $showcolor = ($colorloopcount & 1); 
+			  $colorcode = '';
+			  if ($showcolor == 0)
+			  {
+			  	//$colorcode = 'bgcolor="#66CCFF"';
+			  }
+			  else
+			  {
+			  	$colorcode = 'bgcolor="#FFF"';
+			  }
+			  ?>
+              <tr <?php echo $colorcode; ?>>
+                <td class="bodytext31" valign="center"  align="left"><?php echo $loopcount; ?></td>
+                <td class="bodytext31" valign="center"  align="left">
+				  <div align="left"><?php echo $entrydate; ?></div></td>
+                <td class="bodytext31" valign="center"  align="left">
+                <div class="bodytext31">
+                  <div align="left"><?php echo $docno;?></div>
+                </div></td>
+                <!--<td class="bodytext31" valign="center"  align="left"><div align="left">
+				<?php echo $locationname; ?></div></td>-->
+                <td class="bodytext31" valign="center"  align="left">
+				<div class="bodytext31">
+				  <div align="left"><?php echo $fromstore; ?></div>
+				</div></td>
+                <td class="bodytext31" valign="center"  align="center">
+				  <div align="center"><?php echo $tostore; ?></div></td>
+                
+                <td class="bodytext31" valign="center"  align="left">
+				  <div align="left"><?php echo $itemname; ?></div></td>
+                <!--<td class="bodytext31" valign="center"  align="left">
+				  <div align="left"><?php //echo $batch; ?></div></td>
+                <td class="bodytext31" valign="center"  align="left">
+				  <div align="left"><?php //echo $expirydate; ?></div></td>
+                <td class="bodytext31" valign="center"  align="left">
+				  <div align="left"><?php// echo $batch_quantity; ?></div></td>-->
+                  <td class="bodytext31" valign="center"  align="right">
+				  <div align="right"><?php echo $transaction_quantity; ?></div></td>
+                <td class="bodytext31" valign="center"  align="right">
+				<div align="right"><?php echo $rate; ?></div></td>
+				<td class="bodytext31" valign="center"  align="right">
+				<div align="right"><?php echo number_format($cost,2); ?></div></td>
+              </tr>
+			  <?php
+			  }
+			  //}
+			  ?>
+              <tr>
+                <td class="bodytext31" valign="center"  align="left" 
+                bgcolor="#FFFFFF">&nbsp;</td>
+                <td class="bodytext31" valign="center"  align="left" 
+                bgcolor="#FFFFFF">&nbsp;</td>
+                <!--<td class="bodytext31" valign="center"  align="left" 
+                bgcolor="#FFFFFF">&nbsp;</td>-->
+                <td class="bodytext31" valign="center"  align="left" 
+                bgcolor="#FFFFFF">&nbsp;</td>
+                <td class="bodytext31" valign="center"  align="left" 
+                bgcolor="#FFFFFF">&nbsp;</td>
+                <td class="bodytext31" valign="center"  align="left" 
+                bgcolor="#FFFFFF">&nbsp;</td>
+                <td class="bodytext31" valign="center"  align="left" 
+                bgcolor="#FFFFFF">&nbsp;</td>
+                <td class="bodytext31" valign="center"  align="right" 
+                bgcolor="#FFFFFF"><strong>Total :</strong></td>
+                <td class="bodytext31" valign="center"  align="right" 
+                bgcolor="#FFFFFF"><strong><?php echo number_format($totalrate,2,'.',','); ?></strong></td>
+				<td class="bodytext31" valign="center"  align="right" 
+                bgcolor="#FFFFFF"><strong><?php echo number_format($totalcost,2,'.',','); ?></strong></td>
+                <!--<td class="bodytext31" valign="center"  align="left" 
+                bgcolor="#FFFFFF">&nbsp;</td>
+                <td class="bodytext31" valign="center"  align="left" 
+                bgcolor="#FFFFFF">&nbsp;</td>-->
+                </tr>
+             
+            </tbody>
+        </table>
+</body>
+</html>
+

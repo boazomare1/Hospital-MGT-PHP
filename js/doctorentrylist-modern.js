@@ -1,0 +1,455 @@
+// Doctor Entry List Modern JavaScript - Following VAT.php Structure
+let allDoctorEntries = [];
+let filteredDoctorEntries = [];
+let currentPage = 1;
+const itemsPerPage = 10;
+
+// DOM Elements
+let searchForm, searchInput, paginationContainer;
+
+// Initialize the page
+document.addEventListener('DOMContentLoaded', function() {
+    initializeElements();
+    setupEventListeners();
+    setupSidebarToggle();
+    initializePagination();
+    setupAutoComplete();
+});
+
+function initializeElements() {
+    searchForm = document.getElementById('cbform1');
+    searchInput = document.getElementById('searchsuppliername');
+    paginationContainer = document.getElementById('paginationContainer');
+}
+
+function setupEventListeners() {
+    if (searchForm) {
+        searchForm.addEventListener('submit', handleSearchSubmit);
+    }
+    
+    if (searchInput) {
+        searchInput.addEventListener('input', debounce(performLiveSearch, 300));
+    }
+}
+
+function setupSidebarToggle() {
+    const menuToggle = document.getElementById('menuToggle');
+    const sidebarToggle = document.getElementById('sidebarToggle');
+    const mainContainer = document.querySelector('.main-container-with-sidebar');
+    
+    if (menuToggle) {
+        menuToggle.addEventListener('click', () => {
+            mainContainer.classList.toggle('sidebar-collapsed');
+        });
+    }
+    
+    if (sidebarToggle) {
+        sidebarToggle.addEventListener('click', () => {
+            mainContainer.classList.toggle('sidebar-collapsed');
+        });
+    }
+}
+
+function initializePagination() {
+    // Initialize pagination if needed
+    console.log('Doctor Entry List page initialized');
+}
+
+function setupAutoComplete() {
+    // Setup autocomplete for doctor search
+    if (window.AutoSuggestControl && window.StateSuggestions) {
+        const oTextbox = new AutoSuggestControl(document.getElementById("searchsuppliername"), new StateSuggestions());
+    }
+}
+
+function handleSearchSubmit(event) {
+    // Validate search form before submission
+    if (!validateSearchForm()) {
+        event.preventDefault();
+        return false;
+    }
+    
+    // Show loading state
+    showLoadingState('search');
+    
+    // Form will submit normally
+    return true;
+}
+
+function validateSearchForm() {
+    const errors = [];
+    
+    // Check if at least one search criteria is entered
+    const doctorName = document.getElementById('searchsuppliername');
+    const docNo = document.getElementById('docno');
+    const dateFrom = document.getElementById('ADate1');
+    const dateTo = document.getElementById('ADate2');
+    
+    if ((!doctorName || !doctorName.value.trim()) && 
+        (!docNo || !docNo.value.trim()) && 
+        (!dateFrom || !dateFrom.value.trim()) && 
+        (!dateTo || !dateTo.value.trim())) {
+        errors.push('Please enter at least one search criteria');
+    }
+    
+    // Check date range validity
+    if (dateFrom && dateFrom.value && dateTo && dateTo.value) {
+        const fromDate = new Date(dateFrom.value);
+        const toDate = new Date(dateTo.value);
+        
+        if (fromDate > toDate) {
+            errors.push('Date From cannot be later than Date To');
+        }
+    }
+    
+    if (errors.length > 0) {
+        errors.forEach(error => showAlert(error, 'error'));
+        return false;
+    }
+    
+    return true;
+}
+
+function showLoadingState(type) {
+    const submitBtn = document.querySelector('.submit-btn');
+    if (submitBtn && type === 'search') {
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Searching...';
+        submitBtn.disabled = true;
+    }
+}
+
+function hideLoadingState() {
+    const submitBtn = document.querySelector('.submit-btn');
+    if (submitBtn) {
+        submitBtn.innerHTML = '<i class="fas fa-search"></i> Search';
+        submitBtn.disabled = false;
+    }
+}
+
+function showAlert(message, type = 'info') {
+    const alertContainer = document.getElementById('alertContainer');
+    if (!alertContainer) return;
+    
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type}`;
+    alertDiv.innerHTML = `
+        <i class="fas fa-${type === 'success' ? 'check-circle' : (type === 'error' ? 'exclamation-triangle' : 'info-circle')} alert-icon"></i>
+        <span>${message}</span>
+    `;
+    
+    alertContainer.appendChild(alertDiv);
+    
+    // Auto-remove after 5 seconds
+    setTimeout(() => {
+        if (alertDiv.parentElement) {
+            alertDiv.remove();
+        }
+    }, 5000);
+}
+
+function performLiveSearch(searchTerm) {
+    if (searchTerm.length < 2) {
+        clearSearch();
+        return;
+    }
+    
+    console.log('Searching for:', searchTerm);
+    
+    // Get all table rows
+    const tableBody = document.getElementById('doctorEntryTableBody');
+    if (!tableBody) return;
+    
+    const rows = tableBody.querySelectorAll('tr');
+    
+    rows.forEach(row => {
+        const text = row.textContent.toLowerCase();
+        if (text.includes(searchTerm.toLowerCase())) {
+            row.style.display = '';
+        } else {
+            row.style.display = 'none';
+        }
+    });
+}
+
+function clearSearch() {
+    if (searchInput) {
+        searchInput.value = '';
+    }
+    
+    // Show all rows
+    const tableBody = document.getElementById('doctorEntryTableBody');
+    if (tableBody) {
+        const rows = tableBody.querySelectorAll('tr');
+        rows.forEach(row => {
+            row.style.display = '';
+        });
+    }
+}
+
+// Doctor entry functions
+function funcDeleteVoucher(docNo, sno, mode) {
+    if (confirm("Are you sure to delete this Payment Voucher?")) {
+        // Show loading state
+        const deleteBtn = document.querySelector(`#idTR${sno} .action-btn.delete`);
+        if (deleteBtn) {
+            deleteBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            deleteBtn.disabled = true;
+        }
+        
+        // Here you would typically make an AJAX call to delete the voucher
+        // For now, we'll simulate the deletion
+        setTimeout(() => {
+            // Remove the row from the table
+            const row = document.querySelector(`#idTR${sno}`);
+            if (row) {
+                row.style.opacity = '0.5';
+                row.style.background = '#f8d7da';
+                
+                // Show success message
+                showAlert(`Payment voucher ${docNo} has been deleted successfully`, 'success');
+                
+                // Remove row after animation
+                setTimeout(() => {
+                    row.remove();
+                    updateRowNumbers();
+                }, 1000);
+            }
+        }, 1000);
+    }
+}
+
+function viewEntry(docNo) {
+    // Here you would typically navigate to a detail view or show a modal
+    showAlert(`Viewing details for document: ${docNo}`, 'info');
+    
+    // For demo purposes, you could open a new window or show a modal
+    // window.open(`doctorentrydetail.php?docno=${docNo}`, '_blank');
+}
+
+function updateRowNumbers() {
+    const rows = document.querySelectorAll('#doctorEntryTableBody tr');
+    rows.forEach((row, index) => {
+        const firstCell = row.querySelector('td:first-child');
+        if (firstCell) {
+            firstCell.textContent = index + 1;
+        }
+    });
+}
+
+// Utility functions
+function refreshPage() {
+    window.location.reload();
+}
+
+function resetSearchForm() {
+    if (searchForm) {
+        searchForm.reset();
+        
+        // Reset date fields to default values
+        const dateFromInput = document.getElementById('ADate1');
+        const dateToInput = document.getElementById('ADate2');
+        
+        if (dateFromInput) {
+            dateFromInput.value = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+        }
+        if (dateToInput) {
+            dateToInput.value = new Date().toISOString().split('T')[0];
+        }
+        
+        showAlert('Search form has been reset', 'info');
+    }
+}
+
+function exportToExcel() {
+    // Get the current search results table
+    const table = document.querySelector('.data-table');
+    if (!table) {
+        showAlert('No data to export', 'error');
+        return;
+    }
+    
+    // Create a temporary link to download the table as CSV
+    const csvContent = tableToCSV(table);
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    
+    if (link.download !== undefined) {
+        const url = URL.createObjectURL(blob);
+        link.setAttribute('href', url);
+        link.setAttribute('download', 'doctor_entries.csv');
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        showAlert('Data exported successfully to CSV', 'success');
+    } else {
+        showAlert('Export not supported in this browser', 'error');
+    }
+}
+
+function tableToCSV(table) {
+    const rows = table.querySelectorAll('tr');
+    let csv = [];
+    
+    rows.forEach(row => {
+        const rowData = [];
+        const cells = row.querySelectorAll('th, td');
+        
+        cells.forEach(cell => {
+            // Get text content, removing any HTML tags
+            let text = cell.textContent || cell.innerText || '';
+            // Clean up the text
+            text = text.replace(/\s+/g, ' ').trim();
+            // Escape quotes and wrap in quotes if contains comma
+            if (text.includes(',') || text.includes('"') || text.includes('\n')) {
+                text = '"' + text.replace(/"/g, '""') + '"';
+            }
+            rowData.push(text);
+        });
+        
+        csv.push(rowData.join(','));
+    });
+    
+    return csv.join('\n');
+}
+
+// Debounce function for search
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction() {
+        const later = function() {
+            clearTimeout(timeout);
+            func.apply(this, arguments);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+
+// Handle responsive design
+function handleResize() {
+    const mainContainer = document.querySelector('.main-container-with-sidebar');
+    if (window.innerWidth <= 768) {
+        mainContainer.classList.add('mobile-view');
+    } else {
+        mainContainer.classList.remove('mobile-view');
+    }
+}
+
+// Add resize event listener
+window.addEventListener('resize', handleResize);
+
+// Add loading states for better UX
+function addLoadingStates() {
+    const buttons = document.querySelectorAll('button[type="submit"], .btn');
+    buttons.forEach(button => {
+        button.addEventListener('click', function() {
+            if (!this.disabled && this.type === 'submit') {
+                this.classList.add('loading');
+                this.disabled = true;
+                
+                // Re-enable after a delay (for demo purposes)
+                setTimeout(() => {
+                    this.classList.remove('loading');
+                    this.disabled = false;
+                }, 2000);
+            }
+        });
+    });
+}
+
+// Initialize loading states
+document.addEventListener('DOMContentLoaded', function() {
+    addLoadingStates();
+});
+
+// Add accessibility improvements
+function improveAccessibility() {
+    // Add ARIA labels to form elements
+    const inputs = document.querySelectorAll('input, select, textarea');
+    inputs.forEach(input => {
+        if (!input.getAttribute('aria-label') && !input.getAttribute('id')) {
+            const label = input.previousElementSibling;
+            if (label && label.tagName === 'LABEL') {
+                input.setAttribute('aria-label', label.textContent);
+            }
+        }
+    });
+    
+    // Add keyboard navigation to tables
+    const tables = document.querySelectorAll('table');
+    tables.forEach(table => {
+        table.setAttribute('role', 'grid');
+        table.setAttribute('aria-label', 'Doctor entries data table');
+    });
+    
+    // Add keyboard navigation to action buttons
+    const actionButtons = document.querySelectorAll('.action-btn');
+    actionButtons.forEach(button => {
+        button.setAttribute('tabindex', '0');
+        button.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                this.click();
+            }
+        });
+    });
+}
+
+// Initialize accessibility improvements
+document.addEventListener('DOMContentLoaded', function() {
+    improveAccessibility();
+});
+
+// Add performance optimizations
+function optimizePerformance() {
+    // Lazy load images if any
+    const images = document.querySelectorAll('img[data-src]');
+    const imageObserver = new IntersectionObserver((entries, observer) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const img = entry.target;
+                img.src = img.dataset.src;
+                img.classList.remove('lazy');
+                imageObserver.unobserve(img);
+            }
+        });
+    });
+    
+    images.forEach(img => imageObserver.observe(img));
+}
+
+// Initialize performance optimizations
+document.addEventListener('DOMContentLoaded', function() {
+    optimizePerformance();
+});
+
+// Add error boundary for better error handling
+window.addEventListener('error', function(e) {
+    console.error('JavaScript error:', e.error);
+    showAlert('An error occurred. Please refresh the page.', 'error');
+});
+
+// Add unhandled promise rejection handler
+window.addEventListener('unhandledrejection', function(e) {
+    console.error('Unhandled promise rejection:', e.reason);
+    showAlert('An error occurred. Please refresh the page.', 'error');
+});
+
+// Export functions to global scope for use in HTML
+window.refreshPage = refreshPage;
+window.resetSearchForm = resetSearchForm;
+window.exportToExcel = exportToExcel;
+window.funcDeleteVoucher = funcDeleteVoucher;
+window.viewEntry = viewEntry;
+
+
+
+
+
+
+
+
+
+

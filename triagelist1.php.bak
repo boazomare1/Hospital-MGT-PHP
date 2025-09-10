@@ -1,0 +1,1746 @@
+<?php
+
+session_start();
+
+include ("includes/loginverify.php");
+
+
+include ("db/db_connect.php");
+
+$username = $_SESSION['username'];
+//echo 'menu'.$menu_id;
+include ("includes/check_user_access.php");
+
+$docno = $_SESSION['docno'];
+
+
+
+ $locationcode=isset($_REQUEST['location'])?$_REQUEST['location']:'';
+
+ $location=isset($_REQUEST['location'])?$_REQUEST['location']:'';
+
+
+
+$ipaddress = $_SERVER['REMOTE_ADDR'];
+
+$updatedatetime = date('Y-m-d H:i:s');
+
+$username = $_SESSION['username'];
+
+$companyanum = $_SESSION['companyanum'];
+
+$companyname = $_SESSION['companyname'];
+
+$transactiondatefrom = date('Y-m-d');
+
+$transactiondateto = date('Y-m-d');
+
+$numml = 0;
+
+			$colorloopcount = '';
+
+			$sno = '';
+
+			if (isset($_REQUEST["cbfrmflag1"])) { $cbfrmflag1 = $_REQUEST["cbfrmflag1"]; } else { $cbfrmflag1 = ""; }
+
+			
+
+			$query1111 = "select * from master_employee where username = '$username'";
+
+				$exec1111 = mysqli_query($GLOBALS["___mysqli_ston"], $query1111) or die ("Error in Query1111".mysqli_error($GLOBALS["___mysqli_ston"]));
+
+			 while ($res1111 = mysqli_fetch_array($exec1111))
+
+			 {
+
+			   $locationnumber = $res1111["location"];
+
+			   $query1112 = "select * from master_location where auto_number = '$locationnumber' and status<>'deleted'";
+
+				$exec1112 = mysqli_query($GLOBALS["___mysqli_ston"], $query1112) or die ("Error in Query1112".mysqli_error($GLOBALS["___mysqli_ston"]));
+
+			 while ($res1112 = mysqli_fetch_array($exec1112))
+
+			 {
+
+			   $locationname = $res1112["locationname"];    
+
+				 $locationcode = $res1112["locationcode"];
+
+			 }
+
+			 }
+
+if (isset($_REQUEST["department"])) { $department = $_REQUEST["department"]; } else { $department = ""; }
+
+if(isset($_POST['patient'])){$searchpatient = $_POST['patient'];}else{$searchpatient="";}
+
+if(isset($_POST['patientcode'])){$searchpatientcode=$_POST['patientcode'];}else{$searchpatientcode="";}
+
+if(isset($_POST['visitcode'])){$searchvisitcode = $_POST['visitcode'];}else{$searchvisitcode="";}
+
+if(isset($_POST['ADate1'])){ $fromdate = $_POST['ADate1'];}else{$fromdate=$transactiondatefrom;}
+
+if(isset($_POST['ADate2'])){$todate = $_POST['ADate2'];}else{$todate=$transactiondateto;}
+
+$query112 = "select * from master_department where auto_number = '$department'";
+
+$exec112 = mysqli_query($GLOBALS["___mysqli_ston"], $query112) or die ("Error in Query112".mysqli_error($GLOBALS["___mysqli_ston"]));
+
+$res112 = mysqli_fetch_array($exec112);
+
+$res112department = $res112['department'];
+
+
+
+if (isset($_REQUEST["frmflag2"])) { $frmflag2 = $_REQUEST["frmflag2"]; } else { $frmflag2 = ""; }
+
+if ($frmflag2 == 'frmflag2')
+
+{
+
+foreach($_POST['visit'] as $key => $value)
+
+{
+
+ $visit = $_POST['visit'][$key];
+
+ $status = $_POST['status'][$key];
+
+
+
+		
+
+		$querytr1="update master_visitentry set triagestatus='$status' where visitcode='$visit'";
+
+		$exectr1=mysqli_query($GLOBALS["___mysqli_ston"], $querytr1) or die(mysqli_error($GLOBALS["___mysqli_ston"]));
+
+		$querytr="update master_billing set triagestatus='$status' where visitcode='$visit'";
+
+		$exectr=mysqli_query($GLOBALS["___mysqli_ston"], $querytr) or die(mysqli_error($GLOBALS["___mysqli_ston"]));
+
+		
+
+		}
+
+
+
+}
+
+?>
+
+<style type="text/css">
+
+<!--
+
+body {
+
+	margin-left: 0px;
+
+	margin-top: 0px;
+
+	background-color: #ecf0f5;
+
+}
+
+.bodytext3 {	FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3B3B3C; FONT-FAMILY: Tahoma
+
+}
+
+.number
+
+{
+
+padding-left:800px;
+
+text-align:right;
+
+font-weight:bold;
+
+}
+
+-->
+
+</style>
+
+<link href="css/datepickerstyle.css" rel="stylesheet" type="text/css" />
+
+<script type="text/javascript" src="js/adddate.js"></script>
+
+<script type="text/javascript" src="js/adddate2.js"></script>
+
+<script language="javascript">
+
+
+
+function cbcustomername1()
+
+{
+
+	document.cbform1.submit();
+
+}
+
+
+
+</script>
+
+<script type="text/javascript" src="js/autocomplete_customer1.js"></script>
+
+<script type="text/javascript" src="js/autosuggest3.js"></script>
+
+<script type="text/javascript">
+
+/*
+
+window.onload = function () 
+
+{
+
+	var oTextbox = new AutoSuggestControl(document.getElementById("searchcustomername"), new StateSuggestions());        
+
+}
+
+*/
+
+
+
+function ajaxlocationfunction(val)
+
+{ 
+
+if (window.XMLHttpRequest)
+
+					  {// code for IE7+, Firefox, Chrome, Opera, Safari
+
+					  xmlhttp=new XMLHttpRequest();
+
+					  }
+
+					else
+
+					  {// code for IE6, IE5
+
+					  xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+
+					  }
+
+					xmlhttp.onreadystatechange=function()
+
+					  {
+
+					  if (xmlhttp.readyState==4 && xmlhttp.status==200)
+
+						{
+
+						document.getElementById("ajaxlocation").innerHTML=xmlhttp.responseText;
+
+						}
+
+					  }
+
+					xmlhttp.open("GET","ajax/ajaxgetlocationname.php?loccode="+val,true);
+
+					xmlhttp.send();
+
+}
+
+					
+
+//ajax to get location which is selected ends here
+
+
+
+
+
+function disableEnterKey(varPassed)
+
+{
+
+	//alert ("Back Key Press");
+
+	if (event.keyCode==8) 
+
+	{
+
+		event.keyCode=0; 
+
+		return event.keyCode 
+
+		return false;
+
+	}
+
+	
+
+	var key;
+
+	if(window.event)
+
+	{
+
+		key = window.event.keyCode;     //IE
+
+	}
+
+	else
+
+	{
+
+		key = e.which;     //firefox
+
+	}
+
+
+
+	if(key == 13) // if enter key press
+
+	{
+
+		//alert ("Enter Key Press2");
+
+		return false;
+
+	}
+
+	else
+
+	{
+
+		return true;
+
+	}
+
+}
+
+
+
+
+
+
+
+
+
+</script>
+
+<script src="js/datetimepicker_css.js"></script>
+
+<link rel="stylesheet" type="text/css" href="css/autosuggest.css" />        
+
+<style type="text/css">
+
+<!--
+
+.bodytext31 {FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3b3b3c; FONT-FAMILY: Tahoma
+
+}
+
+-->
+
+</style>
+
+</head>
+
+
+
+<body>
+
+<?php 
+
+
+
+$querynw1 = "select * from master_billing where patientfullname like '%$searchpatient%' and patientcode like '%$searchpatientcode%' and visitcode like '%$searchvisitcode%' and paymentstatus = 'completed' and triagestatus='pending' order by auto_number desc";// and (billingdatetime between '$triagedatefrom' and '$triagedateto')";//
+
+			$execnw1 = mysqli_query($GLOBALS["___mysqli_ston"], $querynw1) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
+
+			$resnw1=mysqli_num_rows($execnw1);
+
+			$query1 = "select * from master_visitentry where  patientfullname like '%$searchpatient%' and patientcode like '%$searchpatientcode%' and visitcode like '%$searchvisitcode%' and planfixedamount='0.00' and planpercentage='0.00' and triagestatus='pending' order by auto_number desc";// and (billingdatetime between '$triagedatefrom' and '$triagedateto')";//
+
+			$exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
+
+		$resnw2=mysqli_num_rows($exec1);
+
+		$resnw3=$resnw1+$resnw2;
+
+		
+
+		function calculate_age($birthday)
+
+{
+
+    $today = new DateTime();
+
+    $diff = $today->diff(new DateTime($birthday));
+
+
+
+    if ($diff->y)
+
+    {
+
+        return $diff->y . ' Years';
+
+    }
+
+    elseif ($diff->m)
+
+    {
+
+        return $diff->m . ' Months';
+
+    }
+
+    else
+
+    {
+
+        return $diff->d . ' Days';
+
+    }
+
+}
+
+			?>
+
+
+
+<table width="103%" border="0" cellspacing="0" cellpadding="2">
+
+  <tr>
+
+    <td colspan="9" bgcolor="#ecf0f5"><?php include ("includes/alertmessages1.php"); ?></td>
+
+  </tr>
+
+  <tr>
+
+    <td colspan="9" bgcolor="#ecf0f5"><?php include ("includes/title1.php"); ?></td>
+
+  </tr>
+
+  <tr>
+
+    <td colspan="9" bgcolor="#ecf0f5"><?php include ("includes/menu1.php"); ?></td>
+
+  </tr>
+
+  <tr>
+
+    <td colspan="9">&nbsp;</td>
+
+  </tr>
+
+   <tr>
+
+    <td width="1%">&nbsp;</td>
+
+    <td width="99%" valign="top"><table width="105%" border="0" cellspacing="0" cellpadding="0">
+
+	      
+
+		  <tr>
+
+        <td width="860">
+
+              <form name="cbform1" method="post" action="triagelist1.php">
+
+                <table width="600" height="250" border="0" align="left" cellpadding="4" cellspacing="0" bordercolor="#666666" id="AutoNumber3" style="border-collapse: collapse">
+
+                  <tbody>
+
+                   <tr bgcolor="#011E6A">
+
+              <td colspan="3" bgcolor="#CCCCCC" class="bodytext3"><strong> Search Patient to Triage </strong></td>
+
+              <td colspan="2" align="right" bgcolor="#CCCCCC" class="bodytext3" id="ajaxlocation"><strong> Location </strong>
+
+             
+
+            
+
+                  <?php
+
+						
+
+							if ($location!='')
+
+						{
+
+						$query12 = "select locationname from master_location where locationcode='$location' order by locationname";
+
+						$exec12 = mysqli_query($GLOBALS["___mysqli_ston"], $query12) or die ("Error in Query12".mysqli_error($GLOBALS["___mysqli_ston"]));
+
+						$res12 = mysqli_fetch_array($exec12);
+
+						
+
+						echo $res1location = $res12["locationname"];
+
+						//echo $location;
+
+						}
+
+						else
+
+						{
+
+						$query1 = "select locationname from login_locationdetails where username='$username' and docno='$docno' group by locationname order by locationname";
+
+						$exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
+
+						$res1 = mysqli_fetch_array($exec1);
+
+						
+
+						echo $res1location = $res1["locationname"];
+
+						//$res1locationanum = $res1["locationcode"];
+
+						}
+
+						?>
+
+						
+
+						
+
+                  
+
+                  </td>
+
+     
+
+              </tr>
+
+             <tr>
+
+              <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">Location</td>
+
+              <td  bgcolor="#FFFFFF" class="bodytext3"  colspan="3" ><select name="location" id="location" onChange="ajaxlocationfunction(this.value);" style="border: 1px solid #001E6A;">
+
+                  <?php
+
+						
+
+						$query = "select * from login_locationdetails where username='$username' and docno='$docno' group by locationname order by locationname";
+
+						$exec = mysqli_query($GLOBALS["___mysqli_ston"], $query) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
+
+						while ($res = mysqli_fetch_array($exec))
+
+						{
+
+						$locationname = $res["locationname"];
+
+						$locationcode1 = $res["locationcode"];
+
+						?>
+
+						<option value="<?php echo $locationcode1; ?>" <?php if($location!=''){if($location == $locationcode1){echo "selected";}}?>><?php echo $locationname; ?></option>
+
+						<?php
+
+						}
+
+						?>
+
+                  </select></td>
+
+                   
+
+                  <input type="hidden" name="locationnamenew" value="<?php echo $locationname; ?>">
+
+                <input type="hidden" name="locationcodenew" value="<?php echo $res1locationanum; ?>">
+
+             
+
+              </tr>
+
+         
+
+                  
+
+                    <tr>
+
+					  <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">Patient Name</td>
+
+					  <td width="82%" colspan="3" align="left" valign="top"  bgcolor="#FFFFFF"><span class="bodytext3">
+
+						<input name="patient" type="text" id="patient" value="" size="50" autocomplete="off">
+
+					  </span></td>
+
+					  </tr>
+
+						<tr>
+
+					  <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">Registration No</td>
+
+					  <td width="82%" colspan="3" align="left" valign="top"  bgcolor="#FFFFFF"><span class="bodytext3">
+
+						<input name="patientcode" type="text" id="patient" value="" size="50" autocomplete="off">
+
+					  </span></td>
+
+					  </tr>
+
+					   <tr>
+
+					  <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">Visit No </td>
+
+					  <td width="82%" colspan="3" align="left" valign="top"  bgcolor="#FFFFFF"><span class="bodytext3">
+
+						<input name="visitcode" type="text" id="visitcode" value="" size="50" autocomplete="off">
+
+					  </span></td>
+
+             		 </tr>
+
+					 
+
+					  <tr>
+
+          <td width="100" align="left" valign="center"  
+
+                bgcolor="#ffffff" class="bodytext31"><strong> Date From </strong></td>
+
+          <td width="137" align="left" valign="center"  bgcolor="#ffffff" class="bodytext31"><input name="ADate1" id="ADate1" value="<?php echo $transactiondatefrom; ?>"  size="10"  readonly="readonly" onKeyDown="return disableEnterKey()" />
+
+			<img src="images2/cal.gif" onClick="javascript:NewCssCal('ADate1')" style="cursor:pointer"/>			</td>
+
+          <td width="68" align="left" valign="center"  bgcolor="#FFFFFF" class="style1"><span class="bodytext31"><strong> Date To </strong></span></td>
+
+          <td width="263" align="left" valign="center"  bgcolor="#ffffff"><span class="bodytext31">
+
+            <input name="ADate2" id="ADate2" value="<?php echo $transactiondateto; ?>"  size="10"  readonly="readonly" onKeyDown="return disableEnterKey()" />
+
+			<img src="images2/cal.gif" onClick="javascript:NewCssCal('ADate2')" style="cursor:pointer"/>
+
+		  </span></td>
+
+          </tr>
+					
+
+			 <!--<td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">Search Department</td>
+
+				  <td colspan="3" align="left" valign="top"  bgcolor="#FFFFFF"><strong>
+
+				    <select name="department" id="department">
+
+                      <option value="">Select Department</option>
+
+                      <?php
+
+				     $query51 = "select * from master_department where recordstatus <> 'deleted' ";
+
+				     $exec51 = mysqli_query($GLOBALS["___mysqli_ston"], $query51) or die ("Error in Query51".mysqli_error($GLOBALS["___mysqli_ston"]));
+
+				     while ($res51 = mysqli_fetch_array($exec51))
+
+				       {
+
+				       $res51anum = $res51["auto_number"];
+
+				       $res51department = $res51["department"];
+
+				       ?>
+
+					  
+
+                      <option value="<?php echo $res51anum; ?>" ><?php echo $res51department; ?></option>
+
+                      <?php
+
+				     }
+
+				  ?>
+
+                    </select>
+
+				  </strong></td>
+
+			</tr>-->
+
+			
+
+			<tr>
+                      <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">&nbsp;</td>
+                      <td colspan="3" align="left" valign="top"  bgcolor="#FFFFFF">
+					  <input type="hidden" name="cbfrmflag1" value="cbfrmflag1">
+                          <input  type="submit" value="Search" name="Submit" />
+                          <input name="resetbutton" type="reset" id="resetbutton"  value="Reset" /></td>
+                    </tr>
+
+                  </tbody>
+                </table>
+                <table >
+                	<tr >
+                		<td>&nbsp;&nbsp;&nbsp;</td> 
+                		<td ><iframe id="publishedlistiframe" src="consultationwatinglist.php" width="670" height="250" frameborder="1">                  </iframe>                  
+              </td>
+                	</tr>
+                </table>
+
+              </form>	
+              	</td>
+
+              
+
+      </tr>
+
+	  
+
+  <tr>
+
+    <td colspan="9">&nbsp;</td>
+
+  </tr>
+
+  <form name="form1" id="form1" method="post" action="triagelist1.php">	
+
+  <tr>
+
+    
+
+    <td width="99%" valign="top"><table width="116%" border="0" cellspacing="0" cellpadding="0">
+
+      <tr>
+
+        <td><table id="AutoNumber3" style="BORDER-COLLAPSE: collapse" 
+
+            bordercolor="#666666" cellspacing="0" cellpadding="4" width="1238" 
+
+            align="left" border="0">
+
+          <tbody>
+
+            <tr>
+
+              <td width="3%" bgcolor="#cccccc" class="bodytext31">&nbsp;</td>
+
+              <td colspan="10" bgcolor="#cccccc" class="bodytext31"><script language="javascript">
+
+				function printbillreport1()
+
+				{
+
+					window.open("print_collectionpendingreport1hospital.php?<?php echo $urlpath; ?>","Window1",'width=900,height=950,toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=1,resizable=1,left=25,top=25');
+
+					//window.open("message_popup.php?anum="+anum,"Window1",'toolbar=0,scrollbars=0,location=0,statusbar=0,menubar=0,resizable=1,width=200,height=400,left=312,top=84');
+
+				}
+
+				function printbillreport2()
+
+				{
+
+					window.location = "dbexcelfiles/CollectionPendingByPatientHospital.xls"
+
+				}
+
+				</script>
+
+                <!--<input onClick="javascript:printbillreport1()" name="resetbutton2" type="submit" id="resetbutton2"  style="border: 1px solid #001E6A" value="Print Report" />-->
+
+                <div align="left"><strong>Triage</strong><label class="number">&nbsp;</label></div></td>
+
+                <?php 
+
+				if(isset($_REQUEST['location']))
+
+				{
+
+				$loc = $_REQUEST['location'];
+
+				}
+
+				 ?>
+
+              </tr>
+
+            <tr>
+
+              <td class="bodytext31" valign="center"  align="left" 
+
+                bgcolor="#ffffff"><div align="left"><strong>No.</strong></div></td>
+
+				 <td width="7%"  align="left" valign="center" 
+
+                bgcolor="#ffffff" class="bodytext31"><div align="left"><strong>OP Date </strong></div></td>
+
+				<td width="7%"  align="left" valign="center" 
+
+                bgcolor="#ffffff" class="bodytext31"><div align="left"><strong>Patient code </strong></div></td>
+
+					<td width="8%"  align="left" valign="center" 
+
+                bgcolor="#ffffff" class="bodytext31"><div align="left"><strong>Visit code </strong></div></td>
+
+              <td width="16%"  align="left" valign="center" 
+
+                bgcolor="#ffffff" class="bodytext31"><div align="left"><strong> Patient Name </strong></div></td>
+
+              <td width="7%"  align="left" valign="center" 
+
+                bgcolor="#ffffff" class="bodytext31"><div align="left"><strong> Age </strong></div></td>
+
+				 <td width="6%"  align="left" valign="center" 
+
+                bgcolor="#ffffff" class="bodytext31"><div align="left"><strong> Gender </strong></div></td>
+
+			<td width="15%"  align="left" valign="center" 
+
+                bgcolor="#ffffff" class="bodytext31"><div align="left"><strong> Consultant </strong></div></td>
+
+              <td width="10%"  align="left" valign="center" 
+
+                bgcolor="#ffffff" class="bodytext31"><div align="left"><strong>Department </strong></div></td>
+
+             <td width="8%"  align="left" valign="center" 
+
+                bgcolor="#ffffff" class="bodytext31"><div align="left"><strong>Account Name</strong></div></td>
+
+			
+
+              <!--<td width="7%"  align="left" valign="center" 
+
+                bgcolor="#ffffff" class="bodytext31"><strong>Status</strong></td>
+
+              -->
+
+              <td width="8%"  align="center" valign="center" 
+
+                bgcolor="#ffffff" class="bodytext31"><div align="center"><strong>Action</strong></div></td>
+
+              </tr>
+
+			<?php
+
+			
+
+
+
+			$triagedatefrom = date('Y-m-d', strtotime('-2 day'));
+
+			$triagedateto = date('Y-m-d');
+
+			 $query1 = "select * from master_billing where patientfullname like '%$searchpatient%' and patientcode like '%$searchpatientcode%' and visitcode like '%$searchvisitcode%' and paymentstatus = 'completed' and triagestatus<>'completed' and consultationdate between '$fromdate' and '$todate' and locationcode='$locationcode' order by auto_number asc";
+
+			$exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
+
+			while ($res1 = mysqli_fetch_array($exec1))
+
+			{
+
+			$patientcode = $res1['patientcode'];
+
+			$visitcode = $res1['visitcode'];
+
+			$patientfirstname = $res1['patientfirstname'];
+
+			$patientmiddlename=$res1['patientmiddlename'];
+
+			$patientlastname = $res1['patientlastname'];
+
+			$consultingdoctorname = $res1['consultingdoctor'];
+
+							  
+
+          // $query123 = "select * from master_visitentry where patientfullname like '%$searchpatient%' and locationcode='$locationcode' and patientcode like '%$searchpatientcode%' and visitcode like '%$searchvisitcode%' and locationcode='$locationcode' and  paymentstatus = '' and consultationdate between '$fromdate' and '$todate'  order by auto_number desc";
+
+			//$exec123 = mysql_query($query123) or die ("Error in Query1".mysql_error());
+
+			//while ($res123 = mysql_fetch_array($exec123))
+
+			//{
+
+				$accountname=$res1['accountname'];
+
+			
+
+			//}
+
+		
+
+			$query321 = "select departmentname,triagestatus from master_visitentry where patientcode = '$patientcode' and visitcode='$visitcode' and locationcode='$locationcode'";
+
+			$exec321 = mysqli_query($GLOBALS["___mysqli_ston"], $query321) or die(mysqli_error($GLOBALS["___mysqli_ston"]));
+
+			$res321 = mysqli_fetch_array($exec321);
+
+			 $department1111 = $res321['departmentname'];
+
+			$status = $res321['triagestatus'];
+
+			//$consultingdoctor = $res321['consultingdoctor'];
+
+			if($status == '')
+
+			{
+
+			$status = 'pending';
+
+			}
+
+			
+
+			
+
+			$query1pay = "select gender from master_visitentry where overallpayment='completed' and patientcode like '%$patientcode%' and visitcode like '%$visitcode%' and billtype <> 'PAY NOW' and locationcode='$locationcode' order by auto_number desc";
+
+			$exec1pay = mysqli_query($GLOBALS["___mysqli_ston"], $query1pay) or die ("Error in Query1pay".mysqli_error($GLOBALS["___mysqli_ston"]));
+
+			$nums1pay = mysqli_num_rows($exec1pay);
+
+			$res1pay = mysqli_fetch_array($exec1pay);
+			
+
+			if($nums1pay == 0)
+
+			{
+
+			//$query32 = "select * from master_visitentry where patientcode = '$patientcode' and locationcode='$locationcode'";
+
+			//$exec32 = mysql_query($query32) or die(mysql_error());
+
+			//$res32 = mysql_fetch_array($exec32);
+
+			
+
+			//$gender = $res32['gender'];
+			$gender = $res1pay['gender'];
+
+			
+
+			$query751 = "select dateofbirth from master_customer where customercode = '$patientcode' and locationcode='$locationcode'";
+
+			$exec751 = mysqli_query($GLOBALS["___mysqli_ston"], $query751) or die(mysqli_error($GLOBALS["___mysqli_ston"]));
+
+			$res751 = mysqli_fetch_array($exec751);
+
+			$dob = $res751['dateofbirth'];
+
+			
+
+			$age = calculate_age($dob);
+
+			
+
+			//$query2 = "select * from master_doctor where auto_number = '$consultingdoctoranum'";
+
+			//$exec2 = mysql_query($query2) or die ("Error in Query2".mysql_error());
+
+			//$res2 = mysql_fetch_array($exec2);
+
+			//$consultingdoctorname  = $res2['doctorname'];
+
+			
+
+			$consultationdate = $res1['consultationdate'];
+
+			$consultationtime = $res1['consultationtime']; 
+
+			$consultationfees = $res1['consultationfees'];
+
+			$accountname=$res1['accountname'];	
+
+			
+
+			$query65="select visitcode from master_triage where patientcode = '$patientcode' and visitcode = '$visitcode' and triagestatus = 'completed' and closesvisits = ''";
+
+			$exec65=mysqli_query($GLOBALS["___mysqli_ston"], $query65) or die(mysqli_error($GLOBALS["___mysqli_ston"]));
+
+			$num65=mysqli_num_rows($exec65);
+
+			
+
+			if($num65 == 0)
+
+			{
+
+			
+
+			$query5 = "select department from master_employeedepartment where department = '$department1111' and username='$username'";
+
+			$exec5 = mysqli_query($GLOBALS["___mysqli_ston"], $query5) or die ("Error in Query2".mysqli_error($GLOBALS["___mysqli_ston"]));
+
+			$num5 = mysqli_num_rows($exec5);
+
+			
+
+			
+
+			if($num5 > 0)
+
+			{
+
+
+
+			$colorloopcount = $colorloopcount + 1;
+
+			$showcolor = ($colorloopcount & 1);   
+
+			
+
+			
+
+			if ($showcolor == 0)
+
+			{
+
+				//echo "if";
+
+				$colorcode = 'bgcolor="#CBDBFA"';
+
+			}
+
+			else
+
+			{
+
+				//echo "else";
+
+				$colorcode = 'bgcolor="#ecf0f5"';
+
+			}
+
+			?>
+
+            <tr <?php echo $colorcode; ?>>
+
+              <td class="bodytext31" valign="center"  align="left"><div align="left"><?php echo $sno = $sno + 1; ?></div></td>
+
+			   <td class="bodytext31" valign="center"  align="left">
+
+			    <div align="left"><?php echo $consultationdate; ?></div></td>
+
+				 <td class="bodytext31" valign="center"  align="left">
+
+			    <div align="left"><?php echo $patientcode; ?></div></td>
+
+				<td class="bodytext31" valign="center"  align="left">
+
+			    <div align="left"><?php echo $visitcode; ?>
+
+				<input type="hidden" name="visit[]" id="visit" value="<?php echo $visitcode; ?>"></div></td>
+
+              <td class="bodytext31" valign="center"  align="left">
+
+			  <div class="bodytext31"><?php echo $patientfirstname.' '.$patientmiddlename.' '.$patientlastname; ?></div></td>
+
+              <td class="bodytext31" valign="center"  align="left">
+
+			    <div align="left"><?php echo $age;?></div></td>
+
+				 <td class="bodytext31" valign="center"  align="left">
+
+			    <div align="left"><?php echo strtoupper($gender);?></div></td>
+
+
+				<td class="bodytext31" valign="center"  align="left">
+
+			    <div align="left"><?php echo $consultingdoctorname;?></div></td>
+
+
+
+             <td class="bodytext31" valign="center"  align="left">
+
+			    <div align="left"><?php echo $department1111;?></div></td>
+
+             <td class="bodytext31" valign="center"  align="left">
+
+			    <div align="left"><?php echo $accountname;?></div></td>
+
+             
+
+              
+
+              <td class="bodytext31" valign="center"  align="left">
+
+			   <?php if(strcmp(trim($department1111),"MCH  CONSULTATION")==0)
+
+			  {?>
+
+			    <div align="left"><a href="addtriage2.php?patientcode=<?php echo $patientcode; ?>&&visitcode=<?php echo $visitcode; ?>&&menuid=<?php echo $menu_id; ?>"><strong>Triage</strong></a>&nbsp;&nbsp;
+
+				<?php /*?><a href="mchtriagebilling.php?patientcode=<?php echo $patientcode; ?>&&visitcode=<?php echo $visitcode; ?>"><strong>Billing</strong></a><?php */?></div>
+
+				<?php } else{?>
+
+				<div align="left"><a href="addtriage2.php?patientcode=<?php echo $patientcode; ?>&&visitcode=<?php echo $visitcode; ?>&&menuid=<?php echo $menu_id; ?>"><strong>Triage</strong></a>&nbsp;&nbsp;
+
+				<a href="triagebilling.php?patientcode=<?php echo $patientcode; ?>&&visitcode=<?php echo $visitcode; ?>&&menuid=<?php echo $menu_id; ?>"><strong>    Billing</strong></a></div>
+
+				<?php }?>
+
+				</td>
+
+              </tr>
+
+			<?php
+
+			}
+
+			}    
+
+			}
+
+			}
+
+			?>
+
+			<?php
+
+			//echo $locationcode;
+
+			
+
+			$query1 = "select * from master_visitentry where overallpayment <> 'completed'  and billtype <> 'PAY NOW' and 
+
+			consultationfees <> '0' and patientfullname like '%$searchpatient%' and patientcode like '%$searchpatientcode%' and visitcode like '%$searchvisitcode%' and planfixedamount='0.00' and planpercentage='0.00' and triagestatus<>'completed' and consultationdate between '$fromdate' and '$todate' and locationcode='$locationcode' order by auto_number asc";
+
+			
+
+			$exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
+
+			while ($res1 = mysqli_fetch_array($exec1))
+
+			{
+
+			 $patientcode = $res1['patientcode'];
+
+			 $visitcode = $res1['visitcode'];
+
+			 $patientfirstname = $res1['patientfirstname'];
+
+			$patientmiddlename=$res1['patientmiddlename'];
+
+			$patientlastname = $res1['patientlastname'];
+
+			$consultingdoctorname = $res1['consultingdoctor'];
+
+			$res1department = $res1['departmentname'];
+
+			
+
+			$gender = $res1['gender'];
+
+			$status = $res1['triagestatus'];
+
+			if($status == '')
+
+			{
+
+			$status = 'pending';
+
+			}
+
+			if($status == 'pending')
+
+			{
+
+			$status = 'pending';
+
+			}
+
+			
+
+			$query751 = "select dateofbirth from master_customer where customercode = '$patientcode' and locationcode='$locationcode'";
+
+			$exec751 = mysqli_query($GLOBALS["___mysqli_ston"], $query751) or die(mysqli_error($GLOBALS["___mysqli_ston"]));
+
+			$res751 = mysqli_fetch_array($exec751);
+
+			$dob = $res751['dateofbirth'];
+
+			
+
+			$age = calculate_age($dob);
+
+			
+
+			/*$query111 = "select * from master_department where auto_number='$res1department' and recordstatus=''";
+
+			$exec111 = mysql_query($query111) or die(mysql_error());
+
+			$res111 = mysql_fetch_array($exec111);
+
+			$res111department = $res111['department'];*/
+
+			
+
+			$query32="select doctorname from master_doctor where auto_number='$consultingdoctorname' and locationcode='$locationcode'";
+
+			$exec32=mysqli_query($GLOBALS["___mysqli_ston"], $query32) or die(mysqli_error($GLOBALS["___mysqli_ston"]));
+
+			$res32=mysqli_fetch_array($exec32);
+
+			$doctorname=$res32['doctorname'];
+
+			 $doctorname;
+
+			//$query2 = "select * from master_doctor where auto_number = '$consultingdoctoranum'";
+
+			//$exec2 = mysql_query($query2) or die ("Error in Query2".mysql_error());
+
+			//$res2 = mysql_fetch_array($exec2);
+
+			//$consultingdoctorname  = $res2['doctorname'];
+
+			
+
+			$consultationdate = $res1['consultationdate'];
+
+			$consultationtime = $res1['consultationtime']; 
+
+			$consultationfees = $res1['consultationfees'];
+
+			 $accountname=$res1['accountname'];	
+
+			$query33="select accountname from master_accountname where auto_number='$accountname'";
+
+			$exec33=mysqli_query($GLOBALS["___mysqli_ston"], $query33) or die(mysqli_error($GLOBALS["___mysqli_ston"]));
+
+			$res33=mysqli_fetch_array($exec33);
+
+			 $res1accountfullname =$res33['accountname']; 
+
+			$query65="select visitcode from master_triage where patientcode = '$patientcode' and visitcode = '$visitcode' and triagestatus = 'completed' and closesvisits = '' and locationcode='$locationcode'";
+
+			$exec65=mysqli_query($GLOBALS["___mysqli_ston"], $query65) or die(mysqli_error($GLOBALS["___mysqli_ston"]));
+
+			 $num65=mysqli_num_rows($exec65);
+
+			
+
+			if($num65 == 0)
+
+			{
+
+			
+
+			$query5 = "select department from master_employeedepartment where department = '$res1department' and username='$username' ";
+
+			$exec5 = mysqli_query($GLOBALS["___mysqli_ston"], $query5) or die ("Error in Query2".mysqli_error($GLOBALS["___mysqli_ston"]));
+
+			$num5 = mysqli_num_rows($exec5);
+
+			
+
+			
+
+			if($num5 > 0)
+
+			{
+
+
+
+		
+
+			$colorloopcount = $colorloopcount + 1;
+
+			$showcolor = ($colorloopcount & 1); 
+
+			
+
+			
+
+			if ($showcolor == 0)
+
+			{
+
+				//echo "if";
+
+				$colorcode = 'bgcolor="#CBDBFA"';
+
+			}
+
+			else
+
+			{
+
+				//echo "else";
+
+				$colorcode = 'bgcolor="#ecf0f5"';
+
+			}
+
+			?>
+
+            <tr <?php echo $colorcode; ?>>
+
+              <td class="bodytext31" valign="center"  align="left"><div align="left"><?php echo $sno = $sno + 1; ?></div></td>
+
+			   <td class="bodytext31" valign="center"  align="left">
+
+			    <div align="left"><?php echo $consultationdate; ?></div></td>
+
+				 <td class="bodytext31" valign="center"  align="left">
+
+			    <div align="left"><?php echo $patientcode; ?></div></td>
+
+				<td class="bodytext31" valign="center"  align="left">
+
+			    <div align="left"><?php echo $visitcode; ?>
+
+				<input type="hidden" name="visit[]" id="visit" value="<?php echo $visitcode; ?>"></div></td>
+
+              <td class="bodytext31" valign="center"  align="left">
+
+			  <div class="bodytext31"><?php echo $patientfirstname.' '.$patientmiddlename.' '.$patientlastname; ?></div></td>
+
+              <td class="bodytext31" valign="center"  align="left">
+
+			    <div align="left"><?php echo $age;?></div></td>
+
+				 <td class="bodytext31" valign="center"  align="left">
+
+			    <div align="left"><?php echo strtoupper($gender);?></div></td>
+
+			<td class="bodytext31" valign="center"  align="left">
+
+			    <div align="left"><?php echo $consultingdoctorname;?></div></td>
+
+             <td class="bodytext31" valign="center"  align="left">
+
+			    <div align="left"><?php echo $res1department;?></div></td>
+
+              <td class="bodytext31" valign="center"  align="left">
+
+			    <div align="left"><?php echo $res1accountfullname;?></div></td>
+
+            
+
+              
+
+              <td class="bodytext31" valign="center"  align="left">
+
+			  <?php 
+
+			   if(strcmp(trim($res1department),"MCH  CONSULTATION")==0)
+
+			  {?>
+
+			    <div align="left"><a href="addtriage2.php?patientcode=<?php echo $patientcode; ?>&&visitcode=<?php echo $visitcode; ?>&&menuid=<?php echo $menu_id; ?>"><strong>Triage</strong></a>&nbsp;&nbsp;
+
+				<a href="mchtriagebilling.php?patientcode=<?php echo $patientcode; ?>&&visitcode=<?php echo $visitcode; ?>&&menuid=<?php echo $menu_id; ?>"><strong> Billing</strong></a></div>
+
+				<?php } else{?>
+
+				<div align="left"><a href="addtriage2.php?patientcode=<?php echo $patientcode; ?>&&visitcode=<?php echo $visitcode; ?>&&menuid=<?php echo $menu_id; ?>"><strong>Triage</strong></a>&nbsp;&nbsp;
+
+				<a href="triagebilling.php?patientcode=<?php echo $patientcode; ?>&&visitcode=<?php echo $visitcode; ?>&&menuid=<?php echo $menu_id; ?>"><strong> Billing</strong></a></div>
+
+				<?php }?>
+
+				</td>
+
+              </tr>
+
+			<?php
+
+			}
+
+			}    
+
+			}
+
+			?>
+
+			<?php
+
+			
+
+			$query1 = "select * from master_visitentry where patientfullname like '%$searchpatient%' and complaint <> '0' and patientcode like '%$searchpatientcode%' and visitcode like '%$searchvisitcode%' and (consultationfees='0' or consultationfees='0.00') and triagestatus <> 'completed' and consultationdate between '$fromdate' and '$todate' and locationcode='$locationcode' order by auto_number asc";
+
+			
+
+			$exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
+
+			while ($res1 = mysqli_fetch_array($exec1))
+
+			{
+
+			$patientcode = $res1['patientcode'];
+
+			$visitcode = $res1['visitcode'];
+
+			 $patientfirstname = $res1['patientfirstname'];
+
+			$patientmiddlename=$res1['patientmiddlename'];
+
+			$patientlastname = $res1['patientlastname'];
+
+			$consultingdoctorname = $res1['consultingdoctor'];
+
+			$res1department = $res1['departmentname'];
+
+			$res1accountfullname = $res1['accountfullname'];
+
+			
+
+			$gender = $res1['gender'];
+
+			$status = $res1['triagestatus'];
+
+			if($status == '')
+
+			{
+
+			$status = 'pending';
+
+			}
+
+			if($status == 'pending')
+
+			{
+
+			$status = 'pending';
+
+			}
+
+			
+
+			$query751 = "select dateofbirth from master_customer where customercode = '$patientcode' and locationcode='$locationcode'";
+
+			$exec751 = mysqli_query($GLOBALS["___mysqli_ston"], $query751) or die(mysqli_error($GLOBALS["___mysqli_ston"]));
+
+			$res751 = mysqli_fetch_array($exec751);
+
+			$dob = $res751['dateofbirth'];
+
+			
+
+			$age = calculate_age($dob);
+
+
+
+			
+
+			/*$query111 = "select * from master_department where auto_number='$res1department' and recordstatus=''";
+
+			$exec111 = mysql_query($query111) or die(mysql_error());
+
+			$res111 = mysql_fetch_array($exec111);
+
+			$res111department = $res111['department'];*/
+
+			
+
+			$query32="select doctorname from master_doctor where auto_number='$consultingdoctorname' and locationcode='$locationcode'";
+
+			$exec32=mysqli_query($GLOBALS["___mysqli_ston"], $query32) or die(mysqli_error($GLOBALS["___mysqli_ston"]));
+
+			$res32=mysqli_fetch_array($exec32);
+
+			$doctorname=$res32['doctorname'];
+
+			
+
+			//$query2 = "select * from master_doctor where auto_number = '$consultingdoctoranum'";
+
+			//$exec2 = mysql_query($query2) or die ("Error in Query2".mysql_error());
+
+			//$res2 = mysql_fetch_array($exec2);
+
+			//$consultingdoctorname  = $res2['doctorname'];
+
+			
+
+			$consultationdate = $res1['consultationdate'];
+
+			$consultationtime = $res1['consultationtime']; 
+
+			$consultationfees = $res1['consultationfees'];
+
+			$accountname=$res1['accountname'];	
+
+			$query33="select accountname from master_accountname where auto_number='$accountname' and locationcode='$locationcode'";
+
+			$exec33=mysqli_query($GLOBALS["___mysqli_ston"], $query33) or die(mysqli_error($GLOBALS["___mysqli_ston"]));
+
+			$res33=mysqli_fetch_array($exec33);
+
+			$accname=$res33['accountname'];
+
+			$query65="select visitcode from master_triage where patientcode = '$patientcode' and visitcode = '$visitcode' and triagestatus = 'completed' and closesvisits = '' and locationcode='$locationcode1'";
+
+			$exec65=mysqli_query($GLOBALS["___mysqli_ston"], $query65) or die(mysqli_error($GLOBALS["___mysqli_ston"]));
+
+			$num65=mysqli_num_rows($exec65);
+
+			
+
+			if($num65 == 0)
+
+			{
+
+			
+
+		//	$query5 = "select * from master_employeedepartment AS me LEFT JOIN master_employeelocation AS ml ON me.employeecode = ml.employeecode  where me.department = '$res1department' and me.username='$username' and ml.locationcode = '".$locationcode."' ";
+
+			$query5 = "select employeecode from master_employeedepartment  where department = '$res1department' and username='$username'";
+
+			
+
+			$exec5 = mysqli_query($GLOBALS["___mysqli_ston"], $query5) or die ("Error in Query2".mysqli_error($GLOBALS["___mysqli_ston"]));
+
+			$num5 = mysqli_num_rows($exec5);
+
+			while($employeedep=mysqli_fetch_array($exec5))
+
+			{
+
+				$employeecodedep=$employeedep['employeecode'];
+
+				
+
+			
+
+			$queryml = "select auto_number from  master_employeelocation   where employeecode = '".$employeecodedep."' and locationcode = '".$locationcode."' ";
+
+			$execml = mysqli_query($GLOBALS["___mysqli_ston"], $queryml) or die ("Error in Queryml".mysqli_error($GLOBALS["___mysqli_ston"]));
+
+			$numml = mysqli_num_rows($execml);
+
+			}
+
+			
+
+			if($numml > 0)
+
+			{
+
+
+
+		
+
+			$colorloopcount = $colorloopcount + 1;
+
+			$showcolor = ($colorloopcount & 1); 
+
+			
+
+			
+
+			if ($showcolor == 0)
+
+			{
+
+				//echo "if";
+
+				$colorcode = 'bgcolor="#CBDBFA"';
+
+			}
+
+			else
+
+			{
+
+				//echo "else";
+
+				$colorcode = 'bgcolor="#ecf0f5"';
+
+			}
+
+			?>
+
+            <tr <?php echo $colorcode; ?>>
+
+              <td class="bodytext31" valign="center"  align="left"><div align="left"><?php echo $sno = $sno + 1; ?></div></td>
+
+			   <td class="bodytext31" valign="center"  align="left">
+
+			    <div align="left"><?php echo $consultationdate; ?></div></td>
+
+				 <td class="bodytext31" valign="center"  align="left">
+
+			    <div align="left"><?php echo $patientcode; ?></div></td>
+
+				<td class="bodytext31" valign="center"  align="left">
+
+			    <div align="left"><?php echo $visitcode; ?>
+
+				<input type="hidden" name="visit[]" id="visit" value="<?php echo $visitcode; ?>"></div></td>
+
+              <td class="bodytext31" valign="center"  align="left">
+
+			  <div class="bodytext31"><?php echo $patientfirstname.' '.$patientmiddlename.' '.$patientlastname; ?></div></td>
+
+              <td class="bodytext31" valign="center"  align="left">
+
+			    <div align="left"><?php echo $age;?></div></td>
+
+				 <td class="bodytext31" valign="center"  align="left">
+
+			    <div align="left"><?php echo strtoupper($gender);?></div></td>
+
+
+			<td class="bodytext31" valign="center"  align="left">
+
+			    <div align="left"><?php echo $consultingdoctorname;?></div></td>
+
+
+             <td class="bodytext31" valign="center"  align="left">
+
+			    <div align="left"><?php echo $res1department;?></div></td>
+
+             <td class="bodytext31" valign="center"  align="left">
+
+			    <div align="left"><?php echo $res1department;?></div></td>
+
+             
+
+              <td class="bodytext31" valign="center"  align="left" hidden="true"><strong>
+
+			  <select name="status[]" id="status">
+
+			  <?php
+
+			  if($status != '')
+
+			  {
+
+			  ?>
+
+			  <option value="<?php echo $status; ?>"><?php echo $status; ?></option>
+
+			  <?php
+
+			  }
+
+			  ?>
+
+			  <option value="pending">pending</option>
+
+			  <option value="Inprogress">Inprogress</option>
+
+			  <option value="Not Available">Not Available</option>
+
+			  </select>
+
+			  </strong></td>
+
+              <td class="bodytext31" valign="center"  align="left">
+
+			  <?php 
+
+			   if(strcmp(trim($res1department),"MCH  CONSULTATION")==0)
+
+			  {?>
+
+			    <div align="left"><a href="addtriage2.php?patientcode=<?php echo $patientcode; ?>&&visitcode=<?php echo $visitcode; ?>&&menuid=<?php echo $menu_id; ?>"><strong>Triage</strong></a>&nbsp;&nbsp;
+
+				<a href="mchtriagebilling.php?patientcode=<?php echo $patientcode; ?>&&visitcode=<?php echo $visitcode; ?>&&menuid=<?php echo $menu_id; ?>"></a></div>
+
+				<?php } else{?>
+
+				<div align="left"><a href="addtriage2.php?patientcode=<?php echo $patientcode; ?>&&visitcode=<?php echo $visitcode; ?>&&menuid=<?php echo $menu_id; ?>"><strong>Triage</strong></a>&nbsp;&nbsp;
+
+				<a href="triagebilling.php?patientcode=<?php echo $patientcode; ?>&&visitcode=<?php echo $visitcode; ?>&&menuid=<?php echo $menu_id; ?>"><strong>Billing</strong></a></div>
+
+				<?php }?>
+
+				</td>
+
+              </tr>
+
+			<?php
+
+			}
+
+			}    
+
+			}
+
+			?>
+
+            <tr>
+
+              <td class="bodytext31" valign="center"  align="left" 
+
+                bgcolor="#ecf0f5">&nbsp;</td>
+
+				 <td class="bodytext31" valign="center"  align="left" 
+
+                bgcolor="#cccccc">&nbsp;</td>
+
+              <td class="bodytext31" valign="center"  align="left" 
+
+                bgcolor="#ecf0f5">&nbsp;</td>
+
+				 <td class="bodytext31" valign="center"  align="left" 
+
+                bgcolor="#cccccc">&nbsp;</td>
+
+              <td class="bodytext31" valign="center"  align="left" 
+
+                bgcolor="#cccccc">&nbsp;</td>
+
+				<td class="bodytext31" valign="center"  align="left" 
+
+                bgcolor="#cccccc">&nbsp;</td>
+
+              <td class="bodytext31" valign="center"  align="left" 
+
+                bgcolor="#cccccc">&nbsp;</td>
+
+              <td class="bodytext31" valign="center"  align="left" 
+
+                bgcolor="#cccccc">&nbsp;</td>
+
+              <td class="bodytext31" valign="center"  align="left" 
+
+                bgcolor="#cccccc">&nbsp;</td>
+
+              <td class="bodytext31" valign="center"  align="left" 
+
+                bgcolor="#cccccc">&nbsp;</td>
+
+              </tr>
+
+          </tbody>
+
+        </table></td>
+
+      </tr>
+
+    </table>
+
+	</td>
+
+	</tr>
+
+	<tr>
+
+	   <td class="bodytext31" valign="center"  align="left">&nbsp;</td>
+
+	  </tr>
+
+	  <tr>
+
+	 
+
+	  <td width="241"  align="center" valign="center" class="bodytext31">
+
+	   <input type="hidden" name="frmflag2" value="frmflag2" />
+
+	  
+
+	    <!--<input type="submit" name="submit" value="Submit">--></td>
+
+	  </tr>
+
+	  </form>
+
+  </table>
+
+<?php include ("includes/footer1.php"); ?>
+
+</body>
+
+</html>
+
+
+

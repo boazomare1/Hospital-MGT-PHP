@@ -1,0 +1,730 @@
+/* Modern CSS for OP Revenue Report Details */
+
+/* CSS Variables for Design System */
+:root {
+    /* Colors */
+    --primary-color: #2563eb;
+    --primary-hover: #1d4ed8;
+    --secondary-color: #64748b;
+    --success-color: #059669;
+    --warning-color: #d97706;
+    --error-color: #dc2626;
+    --info-color: #0891b2;
+
+    /* Background Colors */
+    --bg-primary: #ffffff;
+    --bg-secondary: #f8fafc;
+    --bg-tertiary: #f1f5f9;
+    --row-bg: #ffffff;
+    --row-alt-bg: #f8fafc;
+    --hover-bg: #f1f5f9;
+
+    /* Text Colors */
+    --text-primary: #1e293b;
+    --text-secondary: #64748b;
+    --text-muted: #94a3b8;
+    --text-inverse: #ffffff;
+
+    /* Border Colors */
+    --border-color: #e2e8f0;
+    --border-focus: #2563eb;
+
+    /* Shadow */
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+
+    /* Spacing */
+    --spacing-xs: 0.25rem;
+    --spacing-sm: 0.5rem;
+    --spacing-md: 1rem;
+    --spacing-lg: 1.5rem;
+    --spacing-xl: 2rem;
+    --spacing-2xl: 3rem;
+
+    /* Border Radius */
+    --radius-sm: 0.25rem;
+    --radius-md: 0.375rem;
+    --radius-lg: 0.5rem;
+    --radius-xl: 0.75rem;
+
+    /* Transitions */
+    --transition-fast: 0.15s ease-in-out;
+    --transition-normal: 0.3s ease-in-out;
+    --transition-slow: 0.5s ease-in-out;
+
+    /* Financial Colors */
+    --revenue-positive: #059669;
+    --revenue-negative: #dc2626;
+    --revenue-neutral: #64748b;
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --bg-primary: #0f172a;
+        --bg-secondary: #1e293b;
+        --bg-tertiary: #334155;
+        --row-bg: #1e293b;
+        --row-alt-bg: #334155;
+        --hover-bg: #475569;
+        --text-primary: #f1f5f9;
+        --text-secondary: #cbd5e1;
+        --text-muted: #94a3b8;
+        --border-color: #475569;
+    }
+}
+
+/* High Contrast Mode */
+@media (prefers-contrast: high) {
+    :root {
+        --border-color: #000000;
+        --text-primary: #000000;
+        --text-secondary: #333333;
+    }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* Base Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--text-primary);
+    background-color: var(--bg-secondary);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Typography */
+h1, h2, h3, h4, h5, h6 {
+    font-weight: 600;
+    line-height: 1.25;
+    margin-bottom: var(--spacing-md);
+    color: var(--text-primary);
+}
+
+h1 { font-size: 2rem; }
+h2 { font-size: 1.75rem; }
+h3 { font-size: 1.5rem; }
+h4 { font-size: 1.25rem; }
+h5 { font-size: 1.125rem; }
+h6 { font-size: 1rem; }
+
+/* Legacy Table Override */
+table {
+    border-collapse: collapse;
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+/* Revenue Report Container */
+.revenue-report-container {
+    background-color: var(--bg-primary);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-xl);
+    margin: var(--spacing-xl);
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--border-color);
+    overflow: hidden;
+}
+
+/* Report Header */
+.report-header {
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
+    color: var(--text-inverse);
+    padding: var(--spacing-lg);
+    margin: calc(-1 * var(--spacing-xl)) calc(-1 * var(--spacing-xl)) var(--spacing-xl) calc(-1 * var(--spacing-xl));
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.report-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="white" opacity="0.1"/><circle cx="75" cy="75" r="1" fill="white" opacity="0.1"/><circle cx="50" cy="10" r="0.5" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+    opacity: 0.3;
+}
+
+.report-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 0;
+    position: relative;
+    z-index: 1;
+}
+
+.report-subtitle {
+    margin: var(--spacing-xs) 0 0 0;
+    opacity: 0.9;
+    position: relative;
+    z-index: 1;
+    font-size: 1rem;
+}
+
+/* Revenue Table */
+.revenue-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+    background-color: var(--bg-primary);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+}
+
+.revenue-table thead {
+    background-color: var(--bg-tertiary);
+    border-bottom: 2px solid var(--border-color);
+}
+
+.revenue-table th {
+    padding: var(--spacing-md);
+    text-align: left;
+    font-weight: 600;
+    color: var(--text-primary);
+    white-space: nowrap;
+    border-bottom: 1px solid var(--border-color);
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.revenue-table td {
+    padding: var(--spacing-md);
+    border-bottom: 1px solid var(--border-color);
+    vertical-align: middle;
+}
+
+.revenue-table tbody tr {
+    background-color: var(--row-bg);
+    transition: background-color var(--transition-fast);
+}
+
+.revenue-table tbody tr:nth-child(even) {
+    background-color: var(--row-alt-bg);
+}
+
+.revenue-table tbody tr:hover {
+    background-color: var(--hover-bg);
+}
+
+/* Specific Row Styles */
+.revenue-table tr[bgcolor="#ecf0f5"] {
+    background-color: var(--row-bg) !important;
+}
+
+.revenue-table tr[bgcolor="#CBDBFA"] {
+    background-color: var(--row-alt-bg) !important;
+}
+
+.revenue-table tr[bgcolor="#ecf0f5"]:hover,
+.revenue-table tr[bgcolor="#CBDBFA"]:hover {
+    background-color: var(--hover-bg) !important;
+}
+
+/* Cell Content Styling */
+.revenue-table .bodytext31 {
+    font-family: inherit;
+    font-size: inherit;
+    color: inherit;
+    background: none;
+    border: none;
+    padding: 0;
+    margin: 0;
+}
+
+/* Row Number Column */
+.revenue-table td:first-child {
+    font-weight: 600;
+    color: var(--primary-color);
+    text-align: center;
+    width: 60px;
+}
+
+/* Service Name Column */
+.revenue-table td:nth-child(2) {
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+/* Amount Column */
+.revenue-table td:nth-child(3) {
+    text-align: right;
+    font-weight: 600;
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+}
+
+/* Amount Styling */
+.amount-positive {
+    color: var(--revenue-positive);
+}
+
+.amount-negative {
+    color: var(--revenue-negative);
+}
+
+.amount-neutral {
+    color: var(--revenue-neutral);
+}
+
+/* Net Revenue Row */
+.revenue-table tr:last-child {
+    background-color: var(--bg-tertiary) !important;
+    border-top: 2px solid var(--border-color);
+}
+
+.revenue-table tr:last-child td {
+    font-weight: 700;
+    font-size: 1rem;
+    color: var(--text-primary);
+}
+
+.revenue-table tr:last-child td:first-child {
+    text-align: right;
+    color: var(--text-primary);
+}
+
+/* Service Links */
+.service-link {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color var(--transition-fast);
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+}
+
+.service-link:hover {
+    color: var(--primary-hover);
+    text-decoration: underline;
+}
+
+.service-link::before {
+    content: '🔗';
+    font-size: 0.75rem;
+}
+
+/* Report Type Indicators */
+.report-type-cash {
+    background: linear-gradient(135deg, var(--success-color), #047857);
+}
+
+.report-type-refunds {
+    background: linear-gradient(135deg, var(--warning-color), #b45309);
+}
+
+/* Summary Cards */
+.summary-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: var(--spacing-lg);
+    margin-bottom: var(--spacing-xl);
+}
+
+.summary-card {
+    background: linear-gradient(135deg, var(--bg-tertiary), var(--bg-secondary));
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-lg);
+    text-align: center;
+    transition: all var(--transition-fast);
+}
+
+.summary-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}
+
+.summary-card .card-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    margin-bottom: var(--spacing-sm);
+}
+
+.summary-card .card-label {
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.summary-card .card-change {
+    margin-top: var(--spacing-sm);
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.summary-card .card-change.positive {
+    color: var(--success-color);
+}
+
+.summary-card .card-change.negative {
+    color: var(--error-color);
+}
+
+/* Action Buttons */
+.action-buttons {
+    display: flex;
+    gap: var(--spacing-md);
+    justify-content: center;
+    margin-top: var(--spacing-xl);
+    flex-wrap: wrap;
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-md) var(--spacing-lg);
+    border: none;
+    border-radius: var(--radius-md);
+    font-size: 0.875rem;
+    font-weight: 500;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    white-space: nowrap;
+    justify-content: center;
+    min-height: 44px;
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    color: var(--text-inverse);
+}
+
+.btn-primary:hover {
+    background-color: var(--primary-hover);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+}
+
+.btn-secondary {
+    background-color: var(--bg-tertiary);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+}
+
+.btn-secondary:hover {
+    background-color: var(--border-color);
+}
+
+.btn-success {
+    background-color: var(--success-color);
+    color: var(--text-inverse);
+}
+
+.btn-success:hover {
+    background-color: #047857;
+}
+
+.btn-warning {
+    background-color: var(--warning-color);
+    color: var(--text-inverse);
+}
+
+.btn-warning:hover {
+    background-color: #b45309;
+}
+
+.btn:focus-visible {
+    outline: 2px solid var(--border-focus);
+    outline-offset: 2px;
+}
+
+.btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none !important;
+}
+
+/* Export Button */
+.export-btn {
+    background-color: var(--success-color);
+    color: var(--text-inverse);
+    border: none;
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.export-btn:hover {
+    background-color: #047857;
+    transform: translateY(-1px);
+}
+
+.export-btn img {
+    width: 20px;
+    height: 20px;
+    filter: brightness(0) invert(1);
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .revenue-report-container {
+        margin: var(--spacing-md);
+        padding: var(--spacing-lg);
+    }
+
+    .report-header {
+        margin: calc(-1 * var(--spacing-lg)) calc(-1 * var(--spacing-lg)) var(--spacing-lg) calc(-1 * var(--spacing-lg));
+        padding: var(--spacing-md);
+    }
+
+    .report-title {
+        font-size: 1.25rem;
+    }
+
+    .summary-cards {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: var(--spacing-md);
+    }
+}
+
+@media (max-width: 768px) {
+    .revenue-report-container {
+        margin: var(--spacing-sm);
+        padding: var(--spacing-md);
+    }
+
+    .report-header {
+        margin: calc(-1 * var(--spacing-md)) calc(-1 * var(--spacing-md)) var(--spacing-md) calc(-1 * var(--spacing-md));
+        padding: var(--spacing-sm);
+    }
+
+    .report-title {
+        font-size: 1.125rem;
+    }
+
+    .report-subtitle {
+        font-size: 0.875rem;
+    }
+
+    .revenue-table {
+        font-size: 0.75rem;
+    }
+
+    .revenue-table th,
+    .revenue-table td {
+        padding: var(--spacing-sm);
+    }
+
+    .summary-cards {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-md);
+    }
+
+    .action-buttons {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .btn {
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .revenue-report-container {
+        margin: var(--spacing-xs);
+        padding: var(--spacing-sm);
+    }
+
+    .report-header {
+        margin: calc(-1 * var(--spacing-sm)) calc(-1 * var(--spacing-sm)) var(--spacing-sm) calc(-1 * var(--spacing-sm));
+        padding: var(--spacing-xs);
+    }
+
+    .report-title {
+        font-size: 1rem;
+    }
+
+    .revenue-table {
+        font-size: 0.625rem;
+    }
+
+    .revenue-table th,
+    .revenue-table td {
+        padding: var(--spacing-xs);
+    }
+}
+
+/* Print Styles */
+@media print {
+    .revenue-report-container {
+        margin: 0;
+        padding: 0;
+        box-shadow: none;
+        border: 1px solid #000;
+    }
+
+    .report-header {
+        background: #000 !important;
+        color: #fff !important;
+        margin: 0;
+        padding: var(--spacing-md);
+    }
+
+    .revenue-table {
+        border: 1px solid #000;
+    }
+
+    .revenue-table th,
+    .revenue-table td {
+        border: 1px solid #000;
+    }
+
+    .action-buttons {
+        display: none;
+    }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg-tertiary);
+    border-radius: var(--radius-sm);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: var(--radius-sm);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--text-muted);
+}
+
+/* Focus Visible States */
+*:focus-visible {
+    outline: 2px solid var(--border-focus);
+    outline-offset: 2px;
+}
+
+/* Animations */
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+/* Loading States */
+.loading {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    margin: -10px 0 0 -10px;
+    border: 2px solid var(--border-color);
+    border-top-color: var(--primary-color);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Legacy Compatibility */
+.bodytext31 {
+    font-family: inherit !important;
+    font-size: inherit !important;
+    color: inherit !important;
+    background: none !important;
+    border: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+/* Table Layout Fixes */
+table[width="1900"] {
+    width: 100% !important;
+    max-width: 100% !important;
+}
+
+table[width="116%"] {
+    width: 100% !important;
+    max-width: 100% !important;
+}
+
+table[width="400"] {
+    width: 100% !important;
+    max-width: 100% !important;
+}
+
+/* Cell Width Fixes */
+td[width="1%"] {
+    width: auto !important;
+}
+
+td[width="99%"] {
+    width: auto !important;
+}
+
+td[width="860"] {
+    width: auto !important;
+}
+
+td[width="10%"] {
+    width: auto !important;
+}
+
+
+
+

@@ -1,0 +1,334 @@
+<?php
+ 
+session_start();  
+
+include ("db/db_connect.php");
+
+
+$username = $_SESSION['username'];
+
+$docno = $_SESSION['docno'];
+
+$query = "select * from login_locationdetails where username='$username' and docno='$docno' order by locationname";
+
+$exec = mysqli_query($GLOBALS["___mysqli_ston"], $query) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
+
+$res = mysqli_fetch_array($exec);
+
+$locationname  = $res["locationname"];
+
+$locationcode = $res["locationcode"];
+
+$res12locationanum = $res["auto_number"]; 
+
+if (isset($_REQUEST["location"])) { $location = $_REQUEST["location"]; } else { $location = ""; }
+
+if (isset($_REQUEST["byear"])) { $byear = $_REQUEST["byear"]; } else { $byear = ""; }
+
+if (isset($_REQUEST["producttype"])) { $producttype = $_REQUEST["producttype"]; } else { $producttype = ""; }
+if (isset($_REQUEST["categoryid"])) { $categoryid = $_REQUEST["categoryid"]; } else { $categoryid = ""; }
+if (isset($_REQUEST["category"])) { $category = $_REQUEST["category"]; } else { $category = ""; }
+
+
+
+$locationcode = $location;
+
+$storecode = "";
+
+
+
+if (isset($_REQUEST["frmflag34"])) { $frmflag34 = $_REQUEST["frmflag34"]; } else { $frmflag34 = ""; }
+
+?>
+
+<?php
+
+if($frmflag34 == 'frmflag34')
+
+{
+
+	
+
+	$snocount=0;
+
+	require_once 'phpexcel/Classes/PHPExcel.php';
+
+ 	$objPHPExcel = new PHPExcel();
+
+	$objPHPExcel->getProperties()->setCreator("Med360")
+
+							 ->setLastModifiedBy("Med360")
+
+							 ->setTitle("Cost Center")
+
+							 ->setSubject("Cost Center")
+
+							 ->setDescription("Cost Center")
+
+							 ->setKeywords("Cost Center")
+
+							 ->setCategory("CostCenter");
+
+	
+
+	
+
+	 
+	$query1 = "select * from master_costcenter where recordstatus <> 'deleted' order by name";
+
+	$exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
+    
+    $sheet_incr = 0;
+	while ($res1 = mysqli_fetch_array($exec1))
+
+	{
+		$rowCount = 1;
+		// Create a new worksheet, after the default sheet
+		$objPHPExcel->createSheet();
+		//$objPHPExcel->setActiveSheetIndex(1);
+		//$objPHPExcel->setActiveSheetIndex($sheet_incr);
+
+		$costcenter_name = $res1["name"];
+		$master_cost_center_id = $res1["auto_number"];
+
+		
+
+			$objPHPExcel->setActiveSheetIndex($sheet_incr)->setCellValue('A'.$rowCount, "Location Code");
+
+			$objPHPExcel->setActiveSheetIndex($sheet_incr)->getColumnDimension('A')->setAutoSize(true);
+
+	$objPHPExcel->setActiveSheetIndex($sheet_incr)->setCellValue('B'.$rowCount, "Ledger Code");
+	$objPHPExcel->setActiveSheetIndex($sheet_incr)->getColumnDimension('B')->setAutoSize(true);
+
+	$objPHPExcel->setActiveSheetIndex($sheet_incr)->setCellValue('C'.$rowCount, "Ledger Name");
+
+	$objPHPExcel->setActiveSheetIndex($sheet_incr)->getColumnDimension('C')->setAutoSize(true);
+
+	$objPHPExcel->setActiveSheetIndex($sheet_incr)->setCellValue('D'.$rowCount, "Cost Center");
+
+	$objPHPExcel->setActiveSheetIndex($sheet_incr)->getColumnDimension('D')->setAutoSize(true);
+
+
+	$objPHPExcel->setActiveSheetIndex($sheet_incr)->setCellValue('E'.$rowCount, "CC Code");
+
+	$objPHPExcel->setActiveSheetIndex($sheet_incr)->setCellValue('F'.$rowCount, "jan_$byear");
+
+	$objPHPExcel->setActiveSheetIndex($sheet_incr)->setCellValue('G'.$rowCount, "feb_$byear");
+
+	$objPHPExcel->setActiveSheetIndex($sheet_incr)->setCellValue('H'.$rowCount, "mar_$byear");
+
+	$objPHPExcel->setActiveSheetIndex($sheet_incr)->setCellValue('I'.$rowCount, "apr_$byear");
+
+	$objPHPExcel->setActiveSheetIndex($sheet_incr)->setCellValue('J'.$rowCount, "may_$byear");
+
+	$objPHPExcel->setActiveSheetIndex($sheet_incr)->setCellValue('K'.$rowCount, "june_$byear");
+	$objPHPExcel->setActiveSheetIndex($sheet_incr)->setCellValue('L'.$rowCount, "july_$byear");
+	$objPHPExcel->setActiveSheetIndex($sheet_incr)->setCellValue('M'.$rowCount, "aug_$byear");
+	$objPHPExcel->setActiveSheetIndex($sheet_incr)->setCellValue('N'.$rowCount, "sep_$byear");
+	$objPHPExcel->setActiveSheetIndex($sheet_incr)->setCellValue('O'.$rowCount, "oct_$byear");
+	$objPHPExcel->setActiveSheetIndex($sheet_incr)->setCellValue('P'.$rowCount, "nov_$byear");
+	
+	$objPHPExcel->setActiveSheetIndex($sheet_incr)->setCellValue('Q'.$rowCount, "dec_$byear");
+
+
+
+	$rowCount++;
+
+
+		 $query01 = "select id,accountname,accountsmain,cost_center from master_accountname where accountsmain IN  ('4','6') and recordstatus <> 'deleted' order by accountsmain desc,auto_number  ";
+
+		
+		$run01=mysqli_query($GLOBALS["___mysqli_ston"], $query01);
+
+		while($exec01=mysqli_fetch_array($run01))
+
+		{
+
+			$ledgerid=$exec01['id'];
+
+			$ledgername=$exec01['accountname'];
+
+			$accountsmain = $exec01['accountsmain'];
+
+			
+			$cost_center_id = "";
+			$cost_center_name ="";
+
+			$cost_center_id = $exec01['cost_center']; 
+
+			$costcenteridsdb = array();
+
+			if($cost_center_id !="")
+			{
+				if($accountsmain ==4)
+				{
+					$costcenteridsdb = array($cost_center_id);
+					
+				}
+				$costcenteridsdb= explode(',',$cost_center_id);
+			}
+			
+			
+			$load_ledger = 0;
+			if($cost_center_id !="")
+			{
+				if(in_array($master_cost_center_id,$costcenteridsdb))
+				{
+					$load_ledger = 1;
+				}
+			}
+
+			if($load_ledger)
+			{
+
+
+				$sno=0;
+
+				$snocount = $snocount + 1;
+
+				
+
+				$objPHPExcel->setActiveSheetIndex($sheet_incr)->setCellValue('A'.$rowCount, $locationcode);
+
+				$objPHPExcel->setActiveSheetIndex($sheet_incr)->setCellValue('B'.$rowCount, $ledgerid);
+
+				$objPHPExcel->setActiveSheetIndex($sheet_incr)->setCellValue('C'.$rowCount, $ledgername);
+
+				$objPHPExcel->setActiveSheetIndex($sheet_incr)->setCellValue('D'.$rowCount, $costcenter_name);
+
+				$objPHPExcel->setActiveSheetIndex($sheet_incr)->setCellValue('E'.$rowCount, $master_cost_center_id);
+
+				
+
+				$rowCount++; 
+		    }
+
+		}
+		
+		$objPHPExcel->setActiveSheetIndex($sheet_incr)->setTitle($costcenter_name);
+
+		
+		$sheet_incr++;
+
+	}
+
+
+
+	//$objPHPExcel->setActiveSheetIndex(0)->setCellValue('R'.$rowCount, "budgetyear");
+
+	
+
+
+
+	
+	
+
+	// }
+
+	
+
+	
+ 	//$objSheet = $objPHPExcel->getActiveSheet();
+
+	
+
+	//PROTECT THE CELL RANGE
+
+	//$objSheet->protectCells('A1:I'.$rowCount, 'MasterData');
+
+	
+
+	// UNPROTECT THE CELL RANGE
+
+	/*$objSheet->getColumnDimension('R')->setVisible(true);
+
+	$objSheet->getStyle('R1:R'.$rowCount)
+
+      ->getProtection()
+
+      ->setHidden(PHPExcel_Style_Protection::PROTECTION_PROTECTED);
+
+	
+
+	$objSheet->getStyle('R1:R'.$rowCount)
+
+	  ->getFont()->getColor( )->setRGB('FFFFFF');
+*/
+
+
+	/*$objSheet->getStyle('A1:I'.$rowCount)
+
+	  ->getBorders()->getAllBorders()->setBorderStyle(PHPExcel_Style_Border::BORDER_THICK);*/
+
+	/*$objSheet->getStyle('A1:J'.$rowCount)->applyFromArray(
+
+    	array(
+
+        	'borders' => array(
+
+        	    'allborders' => array(
+
+        	        'style' => PHPExcel_Style_Border::BORDER_THIN,
+
+        	        'color' => array('rgb' => '000000')
+
+        	    )
+
+        	)
+
+    	)
+
+	);*/
+
+
+
+	/*$objSheet->getStyle('J2:J'.$rowCount)->getProtection()
+
+		->setLocked(PHPExcel_Style_Protection::PROTECTION_UNPROTECTED);*/
+
+	
+
+	// PROTECT THE WORKSHEET SHEET
+
+	/*$objSheet->getProtection()->setSheet(true)
+
+							->setPassword('MasterData')
+
+							//->setSelectLockedCells(true)
+
+							->setFormatCells(true)
+
+							->setFormatRows(true)
+
+							->setInsertColumns(true)
+
+							->setInsertRows(true)
+
+							->setDeleteColumns(true)
+
+							->setDeleteRows(true);*/
+
+	$filename = "BudgetCostCenter$byear";
+    $downloadpath ='budgetcc/'.$filename.'.xls';
+	$objWriter = PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel5');
+    $objWriter->save($downloadpath);
+
+    
+	header('Content-Description: File Transfer');
+	header('Content-Type: application/vnd.ms-excel');
+	header('Content-Disposition: attachment; filename='.basename($downloadpath));
+	header('Content-Transfer-Encoding: binary');
+	header('Expires: 0');
+	header('Cache-Control: must-revalidate');
+	header('Pragma: public');
+	header('Content-Length: ' . filesize($downloadpath));
+	ob_clean();
+	flush();
+	readfile($downloadpath);
+	unlink($downloadpath);
+	exit;
+}
+
+
+?>
+

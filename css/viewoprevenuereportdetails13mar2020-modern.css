@@ -1,0 +1,150 @@
+/* Modern CSS for OP Revenue Report Details - March 13, 2020 */
+
+/* Import base styles from main version */
+@import url('viewoprevenuereportdetails-modern.css');
+
+/* Specific overrides for March 13, 2020 version */
+.report-header {
+    background: linear-gradient(135deg, #059669, #047857); /* Green theme for historical data */
+}
+
+.report-header::before {
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="white" opacity="0.1"/><circle cx="75" cy="75" r="1" fill="white" opacity="0.1"/><circle cx="50" cy="10" r="0.5" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+    opacity: 0.4;
+}
+
+.report-title::after {
+    content: ' - March 13, 2020';
+    font-size: 0.8em;
+    opacity: 0.8;
+    margin-left: var(--spacing-sm);
+}
+
+/* Historical data indicator */
+.historical-indicator {
+    background: linear-gradient(135deg, var(--warning-color), #b45309);
+    color: var(--text-inverse);
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: var(--radius-sm);
+    font-size: 0.75rem;
+    font-weight: 500;
+    display: inline-block;
+    margin-left: var(--spacing-sm);
+}
+
+/* Archive styling */
+.archive-badge {
+    position: absolute;
+    top: var(--spacing-sm);
+    right: var(--spacing-sm);
+    background: var(--warning-color);
+    color: var(--text-inverse);
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: var(--radius-sm);
+    font-size: 0.75rem;
+    font-weight: 500;
+    z-index: 2;
+}
+
+/* Enhanced date display */
+.date-display {
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-sm) var(--spacing-md);
+    margin-bottom: var(--spacing-lg);
+    text-align: center;
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+
+.date-display::before {
+    content: '📅 ';
+    margin-right: var(--spacing-xs);
+}
+
+/* Historical comparison */
+.historical-comparison {
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-lg);
+    margin-top: var(--spacing-xl);
+}
+
+.historical-comparison h4 {
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-md);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.historical-comparison h4::before {
+    content: '📊 ';
+}
+
+.comparison-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--spacing-md);
+}
+
+.comparison-item {
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-md);
+    text-align: center;
+}
+
+.comparison-item .item-value {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--primary-color);
+    margin-bottom: var(--spacing-xs);
+}
+
+.comparison-item .item-label {
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+}
+
+.comparison-item .item-change {
+    margin-top: var(--spacing-xs);
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.comparison-item .item-change.positive {
+    color: var(--success-color);
+}
+
+.comparison-item .item-change.negative {
+    color: var(--error-color);
+}
+
+/* Responsive adjustments for historical version */
+@media (max-width: 768px) {
+    .report-title::after {
+        content: ' - Mar 13, 2020';
+        font-size: 0.7em;
+    }
+    
+    .archive-badge {
+        position: relative;
+        top: auto;
+        right: auto;
+        display: block;
+        text-align: center;
+        margin: var(--spacing-sm) 0;
+    }
+    
+    .comparison-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+
+
+

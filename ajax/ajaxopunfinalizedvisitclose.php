@@ -1,0 +1,20 @@
+ <?php 
+include ("../db/db_connect.php");
+$json = array('status'=>0,'msg'=>"Update Failed");
+$autono    = 	$_POST['autono'];
+$tablename    = 	$_POST['tablename'];
+
+
+$select_qry = "SELECT  * FROM $tablename WHERE auto_number ='$autono' ";
+$result =  mysqli_query($GLOBALS["___mysqli_ston"], $select_qry);
+$num_rows = mysqli_num_rows($result);
+if($num_rows > 0)
+{
+
+		$item_update_qry = "UPDATE `$tablename` SET `recordstatus` = 'closed' WHERE auto_number = '$autono'  ";
+		$exec4 = mysqli_query($GLOBALS["___mysqli_ston"], $item_update_qry) or die ("Error in Update Query".mysqli_error($GLOBALS["___mysqli_ston"]));
+		$json = array('status'=>1,'msg'=>"Visit Closed Successfully");
+
+}
+echo json_encode($json);
+?>

@@ -1,0 +1,4584 @@
+<?php 
+
+session_start();
+
+include ("includes/loginverify.php"); //to prevent indefinite loop, loginverify is disabled.
+//echo $menu_id;
+include ("includes/check_user_access.php");
+
+if (!isset($_SESSION["username"])) header ("location:index.php");
+
+include ("db/db_connect.php");
+
+$myBase = 'http://' . $_SERVER['HTTP_HOST'] . dirname($_SERVER['PHP_SELF']);
+
+$errmsg = "";
+
+$bgcolorcode = "";
+
+$pagename = "";
+
+$consultationfees1 = '';
+
+$availablelimit = '';
+
+$mrdno = '';
+
+$companyanum = $_SESSION['companyanum'];
+
+$companyname = $_SESSION['companyname'];
+
+$locationname='';
+
+$username = $_SESSION['username'];
+
+$docno = $_SESSION['docno'];
+
+$smartap = '0';
+
+$photoavailable = '';
+
+$subtypeanum = '';
+
+$is_mcc = '';
+
+$memberno = '';
+
+$registrationfees = '';
+
+$currentdate = date('Y-m-d H:i:s');
+
+$overallplandue = 0;
+
+
+						$query1 = "select locationcode from login_locationdetails where username='$username' and docno='$docno' group by locationname order by locationname";
+
+						$exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
+
+						$res1 = mysqli_fetch_array($exec1);
+
+						
+
+						 $this_location = $res1["locationcode"];
+
+if (isset($_REQUEST["errorcode"])) { $errorcode = $_REQUEST["errorcode"]; } else { $errorcode = ""; }
+
+
+if (isset($_REQUEST["oppatientcode"])) { $oppatientcode = $_REQUEST["oppatientcode"]; } else { $oppatientcode = ""; }
+
+$location =isset( $_REQUEST['location'])?$_REQUEST['location']:'';	
+
+$locationcode1 =isset( $_REQUEST['locationcodenew'])?$_REQUEST['locationcodenew']:'';
+
+//This include updatation takes too long to load for hunge items database.
+
+//include ("autocompletebuild_customer1.php");
+
+
+
+if (isset($_REQUEST["apnum"])) { $apnum = $_REQUEST["apnum"]; } else { $apnum = ""; }
+
+
+
+if (isset($_REQUEST["frmflag1"])) { $frmflag1 = $_REQUEST["frmflag1"]; } else { $frmflag1 = ""; }
+
+if ($frmflag1 == 'frmflag1')
+
+{
+
+// this is for resubmit process, suppose if dupicate visit happened. added by k Kenique on 25 may 2019
+visitcreate:
+$ipaddress = $_SERVER["REMOTE_ADDR"];
+
+$patientcode=$_REQUEST["patientcode"];
+
+$apnum=$_REQUEST["apnum"];
+
+$locationname1 = $_REQUEST['locationnamenew'];	
+
+$locationcode1 = $_REQUEST['locationcodenew'];
+
+$location = $_REQUEST['location'];
+
+	$type=$_REQUEST['type'];
+
+
+	$patientfirstname = $_REQUEST["patientfirstname"];
+
+	$patientfirstname = strtoupper($patientfirstname);
+
+	$patientmiddlename = $_REQUEST['patientmiddlename'];
+
+	$patientmiddlename = strtoupper($patientmiddlename);
+
+	$patientlastname = $_REQUEST["patientlastname"];
+
+	$patientlastname = strtoupper($patientlastname);
+
+	$patientfullname=$patientfirstname.' '.$patientmiddlename.' '.$patientlastname;
+
+	$consultingdoctor = $_REQUEST["consultingdoctor"];
+
+	$consultingdoctorcode = $_REQUEST["consultingdoctorcode"];
+
+	
+
+	$department = $_REQUEST["department"];
+
+	
+
+	$query43 = "select skiptriage,department  from master_department where auto_number='$department'";
+
+	$exec43 = mysqli_query($GLOBALS["___mysqli_ston"], $query43) or die(mysqli_error($GLOBALS["___mysqli_ston"]));
+
+	$res43 = mysqli_fetch_array($exec43);
+
+	$departmentname = $res43['department'];
+
+	
+
+	$skiptriage = $res43['skiptriage'];
+
+	$triagestatus= ($skiptriage=='1')?'completed':'pending'; 
+
+	
+
+		$billnumbercode=$_REQUEST['billnumbercode'];
+
+	
+
+	$paymenttype = $_REQUEST["paymenttype"];
+
+	
+
+	$query121 = "select paymenttype from master_paymenttype where auto_number = '$paymenttype'";
+
+	$exec121 = mysqli_query($GLOBALS["___mysqli_ston"], $query121) or die (mysqli_error($GLOBALS["___mysqli_ston"]));
+
+	$res121 = mysqli_fetch_array($exec121);
+
+	$paymenttypetriage = $res121['paymenttype'];
+
+	
+
+	$subtype = $_REQUEST["subtype"];
+
+	
+
+	$query131 = "select subtype from master_subtype where auto_number = '$subtype'";
+
+	$exec131 = mysqli_query($GLOBALS["___mysqli_ston"], $query131) or die ("Error in Query131".mysqli_error($GLOBALS["___mysqli_ston"]));
+
+	$res131 = mysqli_fetch_array($exec131);
+
+	$subtypetriage = $res131['subtype'];
+
+	
+
+	$billtype = $_REQUEST["billtype"];
+
+   $scheme_id = $_REQUEST["scheme_id"];
+   $accountname = $_REQUEST["accountname"];
+
+	/* $query87="select * from master_accountname where auto_number='$accountname'";
+
+	$exec87=mysqli_query($GLOBALS["___mysqli_ston"], $query87);
+
+	$res87=mysqli_fetch_array($exec87); */
+
+	$accname=$_REQUEST['accountnamename'];
+
+	$accountnametriage=$_REQUEST['accountnamename'];
+
+	$accountexpirydate = $_REQUEST["accountexpirydate"];
+
+	$planname = $_REQUEST["planname"];
+
+	$query87p="select smartap from master_planname where auto_number='$planname'";
+
+	$exec87p=mysqli_query($GLOBALS["___mysqli_ston"], $query87p);
+
+	$res87p=mysqli_fetch_array($exec87p);
+
+	$smartap=$res87p['smartap'];
+
+
+	$planstatus = $_REQUEST["planstatus"];
+
+	$planexpirydate = $_REQUEST["planexpirydate"];
+
+ 	$consultationdate = $_REQUEST["consultationdate"];
+
+	$consultationtime  = $_REQUEST["consultationtime"];
+
+	$consultationtype = $_REQUEST["consultationtype"];
+
+	$consultationfees  = $_REQUEST["consultationfees"];
+
+	$referredby = isset($_REQUEST["referredby"])?$_REQUEST['referredby']:'';
+
+	$consultationremarks = isset($_REQUEST["consultationremarks"])?$_REQUEST['consultationremarks']:'';
+
+	$complaint = isset($_REQUEST["complaint"])?$_REQUEST['complaint']:'';
+
+ 	$registrationdate = $_REQUEST["registrationdate"];
+
+	$visittype = $_REQUEST["visittype"];
+
+	$visitlimit = $_REQUEST["visitlimit"];
+
+	$overalllimit = $_REQUEST["overalllimit"];
+
+	$availablelimit = $_REQUEST["availablelimit"]; 
+
+		$visitcount = $_REQUEST["visitcount"];
+
+	$planfixedamount = $_REQUEST["planfixedamount"];
+
+	$planpercentageamount = $_REQUEST["planpercentageamount"];
+
+	$updatedatetime = date('Y-m-d H:i:s');
+
+	$age = $_REQUEST['age'];
+
+	$gender = $_REQUEST['gender'];
+
+	$revisit = $_REQUEST['revisit'];
+
+	$triag = isset($_POST["triag"])? 1 : 0;
+
+	
+
+	$patientspent=$_REQUEST['patientspent'];
+
+	$smartbenefitno = $_REQUEST["smartbenefitno"];
+
+	$admitid = $_REQUEST["admitid"];
+
+	$hospitalfees = $_REQUEST['hospitalfees'];
+
+	$doctorfees = $_REQUEST['doctorfees'];
+
+	$memberno = $_REQUEST['memberno'];
+
+	$slade_authentication_token = addslashes($_REQUEST['slade_authentication_token']);
+	$payer_code = $_REQUEST['payer_code'];
+	$savannah_authid = $_REQUEST['savannah_authid'];
+	$savannah_authflag = $_REQUEST['savannah_authflag'];
+	$savannahvalid_from = $_REQUEST['savannahvalid_from'];
+	$savannahvalid_to = $_REQUEST['savannahvalid_to'];
+
+	$plandue = $_REQUEST['plandue'];
+
+	$registrationfees = $_REQUEST['registrationfees'];
+
+	
+
+	$consultationtypetriage = $_SESSION['username'];
+
+
+
+	if(isset($_POST['mccno']) && $_POST['mccno']!='' && $_POST['subtype_mcc']==1)
+
+		$mcc = $_POST['mccno'] ;
+
+	else
+
+        $mcc ='';
+
+	
+
+	    $query77 = "update appointmentschedule_entry set visitstatus='yes' where auto_number='$apnum' ";
+
+		$exec77= mysqli_query($GLOBALS["___mysqli_ston"], $query77) or die ("Error in Query77".mysqli_error($GLOBALS["___mysqli_ston"]));
+
+	
+
+	if($billtype == 'PAY NOW')
+
+	{
+
+		$query3 = "select * from master_visitentry where patientcode = '$patientcode' and billtype = 'PAY NOW' and  consultationdate = '$consultationdate'";
+
+		$exec3 = mysqli_query($GLOBALS["___mysqli_ston"], $query3) or die ("Error in Query3".mysqli_error($GLOBALS["___mysqli_ston"]));
+
+		$rowcount3 = mysqli_num_rows($exec3);
+
+		if ($rowcount3 > 1)
+
+		{
+
+			header ("location:visitentry_op_new.php?errorcode=errorcode1failed");
+
+			exit();
+
+		}	
+
+	}
+
+	else
+
+	{
+
+	$totalunbilled=0;
+
+	$query211 = "select * from master_visitentry where patientcode = '$patientcode' order by auto_number desc";
+
+	$exec211 = mysqli_query($GLOBALS["___mysqli_ston"], $query211) or die ("Error in Query211".mysqli_error($GLOBALS["___mysqli_ston"]));
+
+	while($res211 = mysqli_fetch_array($exec211)){
+
+	$oldvisitcode1 = $res211['visitcode'];
+
+	$oldbilltype = $res211['billtype'];
+
+	
+
+	$payrows = 0;
+
+	if($oldvisitcode1 != '')
+
+	{
+
+		if($oldbilltype == 'PAY NOW')
+
+		{
+
+			$query2215 = "select patientvisitcode from master_consultation where patientvisitcode='$oldvisitcode1'";
+
+			$exec2215 = mysqli_query($GLOBALS["___mysqli_ston"], $query2215) or die(mysqli_error($GLOBALS["___mysqli_ston"]));
+
+			$res2215 = mysqli_num_rows($exec2215);
+
+			$res2215=1;
+
+
+
+			$query2214 = "select * from billing_paynow where visitcode='$oldvisitcode1'";
+
+			$exec2214 = mysqli_query($GLOBALS["___mysqli_ston"], $query2214) or die(mysqli_error($GLOBALS["___mysqli_ston"]));
+
+			$res2214 = mysqli_num_rows($exec2214);
+
+			$res221 = 0;
+
+		}
+
+		else 
+
+		{
+
+			$res2215 = '0';
+
+			$query221 = "select * from billing_paylater where visitcode='$oldvisitcode1'";
+
+			$exec221 = mysqli_query($GLOBALS["___mysqli_ston"], $query221) or die(mysqli_error($GLOBALS["___mysqli_ston"]));
+
+			$res221 = mysqli_num_rows($exec221);
+
+			if ($res221 == 0)
+			{
+				header ("location:visitentry_op_new.php?errorcode=errorcode11failed");
+				exit();
+				
+			}
+
+			$res2214 = 0;
+
+		}
+
+		
+
+
+
+	
+
+	$payrows = $res221 + $res2214 + $res2215;
+
+	if ($payrows == 0)
+
+	{
+
+	$totalunbilled=$totalunbilled+1;
+
+	}
+
+	}
+
+	}
+
+	
+
+	if ($totalunbilled >= 3)
+
+	{
+
+		header ("location:visitentry_op_new.php?errorcode=errorcode10failed");
+
+			exit();
+
+		
+
+	}
+
+	}	
+
+	
+
+		if($billtype == 'PAY LATER')
+
+	{
+
+		$totalunbilled=0;
+
+	$query211 = "select * from master_visitentry where patientcode = '$patientcode' order by auto_number desc";
+
+	$exec211 = mysqli_query($GLOBALS["___mysqli_ston"], $query211) or die ("Error in Query211".mysqli_error($GLOBALS["___mysqli_ston"]));
+
+	while($res211 = mysqli_fetch_array($exec211)){
+
+	$oldvisitcode1 = $res211['visitcode'];
+
+	$oldbilltype = $res211['billtype'];
+
+	
+
+	$payrows = 0;
+
+	if($oldvisitcode1 != '')
+
+	{
+
+		if($oldbilltype == 'PAY NOW')
+
+		{
+
+			$query2215 = "select patientvisitcode from master_consultation where patientvisitcode='$oldvisitcode1'";
+
+			$exec2215 = mysqli_query($GLOBALS["___mysqli_ston"], $query2215) or die(mysqli_error($GLOBALS["___mysqli_ston"]));
+
+			$res2215 = mysqli_num_rows($exec2215);
+
+			$res2215=1;
+
+
+
+			$query2214 = "select * from billing_paynow where visitcode='$oldvisitcode1'";
+
+			$exec2214 = mysqli_query($GLOBALS["___mysqli_ston"], $query2214) or die(mysqli_error($GLOBALS["___mysqli_ston"]));
+
+			$res2214 = mysqli_num_rows($exec2214);
+
+			$res221 = 0;
+
+		}
+
+		else 
+
+		{
+
+			$res2215 = '0';
+
+			$query221 = "select * from billing_paylater where visitcode='$oldvisitcode1'";
+
+			$exec221 = mysqli_query($GLOBALS["___mysqli_ston"], $query221) or die(mysqli_error($GLOBALS["___mysqli_ston"]));
+
+			$res221 = mysqli_num_rows($exec221);
+
+			if ($res221 == 0)
+			{
+				header ("location:visitentry_op_new.php?errorcode=errorcode11failed");
+				exit();
+				
+			}
+
+			$res2214 = 0;
+
+		}
+
+		
+
+
+
+	
+
+	$payrows = $res221 + $res2214 + $res2215;
+
+	if ($payrows == 0)
+
+	{
+
+	$totalunbilled=$totalunbilled+1;
+
+	}
+
+	}
+
+	}
+
+	
+
+	if ($totalunbilled >= 3)
+
+	{
+
+		header ("location:visitentry_op_new.php?errorcode=errorcode10failed");
+
+			exit();
+
+		
+
+	}
+
+	
+
+/* 	
+
+			$query225 = "select visitcode from billing_paylater where patientcode = '$patientcode' and billdate = '$consultationdate'";
+
+			$exec225 = mysql_query($query225) or die(mysql_error());
+
+			$res225 = mysql_num_rows($exec225);
+
+			if ($res225 > 2)
+
+			{
+
+				header ("location:visitentry_op_new.php?errorcode=visitlimitexceed");
+
+				exit();
+
+				
+
+			}
+
+	 */
+
+	}
+
+		
+
+				$query = "select * from login_locationdetails where username='$username' and docno='$docno' order by locationname";
+
+$exec = mysqli_query($GLOBALS["___mysqli_ston"], $query) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
+
+$res = mysqli_fetch_array($exec);
+
+	
+
+	$res12location = $res["locationname"];
+
+	$res12locationcode = $res["locationcode"];
+
+	$res12locationanum = $res["auto_number"];
+
+	$locationname = $res["locationname"];
+
+	$locationcode = $res["locationcode"];
+
+
+$query3 = "select * from master_company where companystatus = 'Active'"; 
+
+	$exec3 = mysqli_query($GLOBALS["___mysqli_ston"], $query3) or die ("Error in Query3".mysqli_error($GLOBALS["___mysqli_ston"]));
+
+	$res3 = mysqli_fetch_array($exec3);
+
+	$visitcodeprefix = $res3['visitcodeprefix'];
+
+	$visitcodeprefix=chop($visitcodeprefix,"-");
+
+$query3s = "select auto_number from master_location where status = '' and locationcode='$res12locationcode'";
+
+$exec3s = mysqli_query($GLOBALS["___mysqli_ston"], $query3s) or die ("Error in Query3".mysqli_error($GLOBALS["___mysqli_ston"]));
+
+$res3s = mysqli_fetch_array($exec3s);
+
+ $loc_anum = $res3s['auto_number'];
+
+$query2 = "select * from master_visitentry  order by auto_number desc limit 0, 1";
+
+$exec2 = mysqli_query($GLOBALS["___mysqli_ston"], $query2) or die ("Error in Query2".mysqli_error($GLOBALS["___mysqli_ston"]));
+
+$num=mysqli_num_rows($exec2);
+
+$res2 = mysqli_fetch_array($exec2);
+
+ $res2visitcode = $res2["visitcode"];
+
+ if($num!='')
+
+ {
+ $res2visitnum=strlen($res2visitcode);
+ $vvcode6=explode("-",$res2visitcode);
+$testvalue= $vvcode6[1];
+$value6=strlen($testvalue);
+$visitcodepre6=$res2visitnum-$value6;
+ }
+if ($res2visitcode == '')
+
+{
+$visitcode =$visitcodeprefix.'-'.'1'.'-'.$loc_anum; 
+$openingbalance = '0.00';
+
+}
+
+else
+
+{
+
+
+
+	$res2visitcode = $res2["visitcode"];
+
+	$visitcode = substr($res2visitcode,$visitcodepre6,$res2visitnum);
+
+	$visitcode = intval($visitcode);
+//$visitcode = $visitcode + 1;
+$visitcode = $testvalue + 1;
+
+	$maxanum = $visitcode;
+	$visitcode = $visitcodeprefix.'-'.$maxanum.'-'.$loc_anum; 
+
+	$openingbalance = '0.00';
+
+}
+
+	$query4 = "select * from master_planname where auto_number = '$planname'";
+
+	$exec4 = mysqli_query($GLOBALS["___mysqli_ston"], $query4) or die ("Error in Query4".mysqli_error($GLOBALS["___mysqli_ston"]));
+
+	$res4 = mysqli_fetch_array($exec4);
+
+	$planstatus = $res4['planstatus'];
+
+	$elaimstatus = $res4['smartap'];
+	
+	$lablimit = $res4['lablimit'];
+	$radiologylimit = $res4['radiologylimit'];
+	$serviceslimit = $res4['serviceslimit'];
+	$pharmacylimit = $res4['pharmacylimit'];
+
+	if($planstatus=='IP')
+
+	{
+
+	?>
+
+	<script>
+
+	alert('Sorry Here OP Only !');
+
+	</script>
+
+	<?php
+
+	
+
+	}
+
+	
+
+	$queryopchk = "select * from master_visitentry where visitcode = '$visitcode' order by auto_number";
+
+	$execopchk = mysqli_query($GLOBALS["___mysqli_ston"], $queryopchk) or die ("Error in queryopchk".mysqli_error($GLOBALS["___mysqli_ston"]));
+
+	$resopchk = mysqli_num_rows($execopchk);
+
+	if($resopchk == 0)
+
+	{
+
+	
+
+	if($planstatus!='IP')
+
+	{
+
+	
+
+	$query_edition = "select * from master_edition where `from` <= '$currentdate' and `end` >= '$currentdate' and status = 'ACTIVE'";
+
+	$execed = mysqli_query($GLOBALS["___mysqli_ston"], $query_edition) or die ("Error in Query2".mysqli_error($GLOBALS["___mysqli_ston"]));
+
+	$resed = mysqli_num_rows($execed);
+
+	if($resed > 0)
+
+	{
+
+	
+
+	if(($planfixedamount =='0.00' && $planpercentageamount =='0.00') && ($consultationfees =='0'))
+
+	{
+//echo 'loop1';
+// exit;
+	$query2 = "select * from master_visitentry where visitcode = '$visitcode'";
+
+	$exec2 = mysqli_query($GLOBALS["___mysqli_ston"], $query2) or die ("Error in Query2".mysqli_error($GLOBALS["___mysqli_ston"]));
+
+	$res2 = mysqli_num_rows($exec2);
+
+	
+
+	if ($res2 == 0)
+
+	{
+
+		$query56="insert into master_visitentry(patientcode, visitcode, patientfirstname,patientmiddlename, patientlastname,consultationtype,consultingdoctor,consultingdoctorcode,accountname,accountexpirydate,paymenttype,subtype,planname,planexpirydate,visitlimit,overalllimit,availablelimit,billtype,visitcount,department,consultationdate,consultationtime,consultationfees,patientspent,planfixedamount,planpercentage,patientfullname,paymentstatus,triagestatus,age,gender,scheme_id,accountfullname,departmentname,username,complaint,consultationrefund,locationname1,locationcode,admitid,smartbenefitno,hospitalfees,doctorfees,memberno,plandue,registrationfees,mcc,lablimit,radiologylimit,serviceslimit,pharmacylimit,slade_payload,payer_code,savannah_authid,savannah_authflag,savannahvalid_from,savannahvalid_to,visittype,eclaim_id,is_revisit)values('$patientcode','$visitcode','$patientfirstname','$patientmiddlename','$patientlastname','$consultationtype','$consultingdoctor','$consultingdoctorcode','$accountname','$accountexpirydate','$paymenttype','$subtype','$planname','$planexpirydate','$visitlimit','$overalllimit','$availablelimit','$billtype',
+
+		'$visitcount','$department','$consultationdate','$consultationtime','$consultationfees','$patientspent','$planfixedamount','$planpercentageamount','$patientfullname','completed','$triagestatus','$age','$gender','$scheme_id','$accname','$departmentname','$username','$triag','torefund','$locationname','$locationcode','$admitid','$smartbenefitno','$hospitalfees','$doctorfees','$memberno','$plandue','$registrationfees','$mcc','$lablimit','$radiologylimit','$serviceslimit','$pharmacylimit','$slade_authentication_token','$payer_code','$savannah_authid','$savannah_authflag','$savannahvalid_from','$savannahvalid_to','$type','$smartap','$revisit')"; 
+
+		$exec56=mysqli_query($GLOBALS["___mysqli_ston"], $query56) ;
+		if( mysqli_errno($GLOBALS["___mysqli_ston"]) == 1062) {
+           goto visitcreate;
+		}
+		else if(mysqli_errno($GLOBALS["___mysqli_ston"]) > 0){
+           die ("Error in query56".mysqli_error($GLOBALS["___mysqli_ston"]));
+		}
+		
+
+	if($triagestatus=='completed')
+
+	{
+
+		$query002="insert into master_triage (patientcode,patientfirstname,patientmiddlename,patientlastname,patientfullname,visitcode,consultingdoctor,consultationtype,department,consultationdate,consultationtime,consultationfees,referredby,consultationremarks,visitcount,complaint,registrationdate,user,consultation,billtype,accountname,department_refer,paymenttype,subtype,locationname,locationcode,triagestatus,daycare,closesvisits) values('$patientcode','$patientfirstname','$patientmiddlename','$patientlastname','$patientfullname','$visitcode','$consultingdoctor','$consultationtypetriage','$departmentname','$consultationdate','$consultationtime','$consultationfees','$referredby','$consultationremarks','$visitcount','$complaint','$registrationdate','$username','incomplete','$billtype','$accountnametriage','','$paymenttypetriage','$subtypetriage','$locationname','$locationcode','$triagestatus','','')"; 
+
+			$exec002=mysqli_query($GLOBALS["___mysqli_ston"], $query002) or die ("Error in Query002".mysqli_error($GLOBALS["___mysqli_ston"]));
+
+	}
+
+
+
+
+        if($elaimstatus==3){
+		  
+		  //@file_get_contents("$myBase/slade-claimvisit.php?visitcode=$visitcode");
+		} 
+		header("location:visitentry_op_new.php?oppatientcode=$patientcode");
+
+		exit();
+
+}
+
+
+
+	}
+
+/* 	else if(($planfixedamount =='0.00' && $planpercentageamount =='0.00') && ($department =='2'))
+{
+		//echo 'loop2';
+//exit;
+
+	
+
+	$query2 = "select * from master_visitentry where visitcode = '$visitcode'";
+
+	$exec2 = mysqli_query($GLOBALS["___mysqli_ston"], $query2) or die ("Error in Query2".mysqli_error($GLOBALS["___mysqli_ston"]));
+
+	$res2 = mysqli_num_rows($exec2);
+
+	if ($res2 == 0)
+
+	{
+
+	$query56="insert into master_visitentry(patientcode, visitcode, patientfirstname,patientmiddlename, patientlastname,consultationtype,consultingdoctor,consultingdoctorcode,accountname,accountexpirydate,paymenttype,subtype,planname,planexpirydate,visitlimit,overalllimit,availablelimit,billtype,
+
+		visitcount,department,consultationdate,consultationtime,consultationfees,patientspent,planfixedamount,planpercentage,patientfullname,paymentstatus,triagestatus,age,gender,scheme_id,accountfullname,departmentname,username,complaint,consultationrefund,locationname,locationcode,admitid,smartbenefitno,hospitalfees,doctorfees,memberno,plandue,registrationfees,mcc,lablimit,radiologylimit,serviceslimit,pharmacylimit,slade_payload,payer_code,savannah_authid,savannah_authflag,savannahvalid_from,savannahvalid_to,visittype,eclaim_id,is_revisit)values('$patientcode','$visitcode','$patientfirstname','$patientmiddlename','$patientlastname','$consultationtype','$consultingdoctor','$consultingdoctorcode','$accountname','$accountexpirydate','$paymenttype','$subtype','$planname','$planexpirydate','$visitlimit','$overalllimit','$availablelimit','$billtype','$visitcount','$department','$consultationdate','$consultationtime','$consultationfees','$patientspent','$planfixedamount','$planpercentageamount','$patientfullname','completed','$triagestatus','$age','$gender','$scheme_id','$accname','$departmentname','$username','$triag','torefund','$locationname1','$locationcode','$admitid','$smartbenefitno','$hospitalfees','$doctorfees','$memberno','$plandue','$registrationfees','$mcc','$lablimit','$radiologylimit','$serviceslimit','$pharmacylimit','$slade_authentication_token','$payer_code','$savannah_authid','$savannah_authflag','$savannahvalid_from','$savannahvalid_to','$type','$smartap','$revisit')";
+
+		$exec56=mysqli_query($GLOBALS["___mysqli_ston"], $query56) ;
+		if( mysqli_errno($GLOBALS["___mysqli_ston"]) == 1062) {
+           goto visitcreate;
+		}
+		else if(mysqli_errno($GLOBALS["___mysqli_ston"]) > 0){
+           die ("Error in query56".mysqli_error($GLOBALS["___mysqli_ston"]));
+		}
+
+
+	if($triagestatus=='completed')
+
+	{
+
+		$query002="insert into master_triage (patientcode,patientfirstname,patientmiddlename,patientlastname,patientfullname,visitcode,consultingdoctor,consultationtype,department,consultationdate,consultationtime,consultationfees,referredby,consultationremarks,visitcount,complaint,registrationdate,user,consultation,billtype,accountname,department_refer,paymenttype,subtype,locationname,locationcode,triagestatus,daycare,closesvisits) values('$patientcode','$patientfirstname','$patientmiddlename','$patientlastname','$patientfullname','$visitcode','$consultingdoctor','$consultationtypetriage','$departmentname','$consultationdate','$consultationtime','$consultationfees','$referredby','$consultationremarks','$visitcount','$complaint','$registrationdate','$username','incomplete','$billtype','$accountnametriage','','$paymenttypetriage','$subtypetriage','$locationname','$locationcode','$triagestatus','','')"; 
+
+			$exec002=mysqli_query($GLOBALS["___mysqli_ston"], $query002) or die ("Error in Query002".mysqli_error($GLOBALS["___mysqli_ston"]));
+
+	}
+
+
+
+		
+        if($elaimstatus==3){
+		 
+		  //@file_get_contents("$myBase/slade-claimvisit.php?visitcode=$visitcode");
+		} 
+		header("location:visitentry_op_new.php?oppatientcode=$patientcode");
+
+	exit();
+
+	}
+
+	}
+
+	
+
+	else if(($planfixedamount =='0.00' && $planpercentageamount =='0.00') && ($department =='3'))
+
+	
+ 
+	{
+
+	$query2 = "select * from master_visitentry where visitcode = '$visitcode'";
+
+	$exec2 = mysqli_query($GLOBALS["___mysqli_ston"], $query2) or die ("Error in Query2".mysqli_error($GLOBALS["___mysqli_ston"]));
+
+	$res2 = mysqli_num_rows($exec2);
+
+	if ($res2 == 0)
+
+	{
+
+	$query56="insert into master_visitentry(patientcode, visitcode, patientfirstname,patientmiddlename, patientlastname,consultationtype,consultingdoctor,consultingdoctorcode,accountname,accountexpirydate,paymenttype,subtype,planname,planexpirydate,visitlimit,overalllimit,availablelimit,billtype,
+
+		visitcount,department,consultationdate,consultationtime,consultationfees,patientspent,planfixedamount,planpercentage,patientfullname,paymentstatus,triagestatus,age,gender,scheme_id,accountfullname,departmentname,username,complaint,consultationrefund,locationname,locationcode,admitid,smartbenefitno,hospitalfees,doctorfees,memberno,plandue,registrationfees,mcc,lablimit,radiologylimit,serviceslimit,pharmacylimit,slade_payload,payer_code,savannah_authid,savannah_authflag,savannahvalid_from,savannahvalid_to,visittype,eclaim_id,is_revisit)values('$patientcode','$visitcode','$patientfirstname','$patientmiddlename','$patientlastname','$consultationtype','$consultingdoctor','$consultingdoctorcode','$accountname','$accountexpirydate','$paymenttype','$subtype','$planname','$planexpirydate','$visitlimit','$overalllimit','$availablelimit','$billtype',
+
+		'$visitcount','$department','$consultationdate','$consultationtime','$consultationfees','$patientspent','$planfixedamount','$planpercentageamount','$patientfullname','completed','$triagestatus','$age','$gender','$scheme_id','$accname','$departmentname','$username','$triag','torefund','$locationname1','$locationcode','$admitid','$smartbenefitno','$hospitalfees','$doctorfees','$memberno','$plandue','$registrationfees','$mcc','$lablimit','$radiologylimit','$serviceslimit','$pharmacylimit','$slade_authentication_token','$payer_code','$savannah_authid','$savannah_authflag','$savannahvalid_from','$savannahvalid_to','$type','$smartap','$revisit')";
+
+		$exec56=mysqli_query($GLOBALS["___mysqli_ston"], $query56) ;
+		if( mysqli_errno($GLOBALS["___mysqli_ston"]) == 1062) {
+           goto visitcreate;
+		}
+		else if(mysqli_errno($GLOBALS["___mysqli_ston"]) > 0){
+           die ("Error in query56".mysqli_error($GLOBALS["___mysqli_ston"]));
+		}
+
+
+
+	if($triagestatus=='completed')
+
+	{
+
+		$query002="insert into master_triage (patientcode,patientfirstname,patientmiddlename,patientlastname,patientfullname,visitcode,consultingdoctor,consultationtype,department,consultationdate,consultationtime,consultationfees,referredby,consultationremarks,visitcount,complaint,registrationdate,user,consultation,billtype,accountname,department_refer,paymenttype,subtype,locationname,locationcode,triagestatus,daycare,closesvisits) values('$patientcode','$patientfirstname','$patientmiddlename','$patientlastname','$patientfullname','$visitcode','$consultingdoctor','$consultationtypetriage','$departmentname','$consultationdate','$consultationtime','$consultationfees','$referredby','$consultationremarks','$visitcount','$complaint','$registrationdate','$username','incomplete','$billtype','$accountnametriage','','$paymenttypetriage','$subtypetriage','$locationname','$locationcode','$triagestatus','','')"; 
+
+			$exec002=mysqli_query($GLOBALS["___mysqli_ston"], $query002) or die ("Error in Query002".mysqli_error($GLOBALS["___mysqli_ston"]));
+
+	}
+
+
+
+		
+        if($elaimstatus==3){
+		  
+		  //@file_get_contents("$myBase/slade-claimvisit.php?visitcode=$visitcode");
+		} 
+		header("location:visitentry_op_new.php?oppatientcode=$patientcode");
+
+	exit();
+
+	}
+
+		}
+*/
+	else if($planfixedamount =='0.00' && $planpercentageamount =='0.00' && $billtype != 'PAY NOW') 
+
+		{
+			/* echo 'loop4';
+			echo $planfixedamount.'--'.$planpercentageamount;
+			exit; */
+
+		$query2 = "select * from master_visitentry where visitcode = '$visitcode'";
+
+	$exec2 = mysqli_query($GLOBALS["___mysqli_ston"], $query2) or die ("Error in Query2".mysqli_error($GLOBALS["___mysqli_ston"]));
+
+	$res2 = mysqli_num_rows($exec2);
+
+	if ($res2 == 0)
+
+	{
+
+	$query56="insert into master_visitentry(patientcode, visitcode, patientfirstname,patientmiddlename, patientlastname,consultationtype,consultingdoctor,consultingdoctorcode,accountname,accountexpirydate,paymenttype,subtype,planname,planexpirydate,visitlimit,overalllimit,availablelimit,billtype,
+
+		visitcount,department,consultationdate,consultationtime,consultationfees,patientspent,planfixedamount,planpercentage,patientfullname,paymentstatus,triagestatus,age,gender,scheme_id,accountfullname,departmentname,username,complaint,consultationrefund,locationname,locationcode,admitid,smartbenefitno,hospitalfees,doctorfees,memberno,plandue,registrationfees,mcc,lablimit,radiologylimit,serviceslimit,pharmacylimit,slade_payload,payer_code,savannah_authid,savannah_authflag,savannahvalid_from,savannahvalid_to,visittype,eclaim_id,is_revisit)values('$patientcode','$visitcode','$patientfirstname','$patientmiddlename','$patientlastname','$consultationtype','$consultingdoctor','$consultingdoctorcode','$accountname','$accountexpirydate','$paymenttype','$subtype','$planname','$planexpirydate','$visitlimit','$overalllimit','$availablelimit','$billtype',
+
+		'$visitcount','$department','$consultationdate','$consultationtime','$consultationfees','$patientspent','$planfixedamount','$planpercentageamount','$patientfullname','completed','$triagestatus','$age','$gender','$scheme_id','$accname','$departmentname','$username','$triag','torefund','$locationname1','$locationcode','$admitid','$smartbenefitno','$hospitalfees','$doctorfees','$memberno','$plandue','$registrationfees','$mcc','$lablimit','$radiologylimit','$serviceslimit','$pharmacylimit','$slade_authentication_token','$payer_code','$savannah_authid','$savannah_authflag','$savannahvalid_from','$savannahvalid_to','$type','$smartap','$revisit')";
+
+		$exec56=mysqli_query($GLOBALS["___mysqli_ston"], $query56) ;
+		if( mysqli_errno($GLOBALS["___mysqli_ston"]) == 1062) {
+           goto visitcreate;
+		}
+		else if(mysqli_errno($GLOBALS["___mysqli_ston"]) > 0){
+           die ("Error in query56".mysqli_error($GLOBALS["___mysqli_ston"]));
+		}
+
+
+	if($triagestatus=='completed')
+
+	{
+
+		$query002="insert into master_triage (patientcode,patientfirstname,patientmiddlename,patientlastname,patientfullname,visitcode,consultingdoctor,consultationtype,department,consultationdate,consultationtime,consultationfees,referredby,consultationremarks,visitcount,complaint,registrationdate,user,consultation,billtype,accountname,department_refer,paymenttype,subtype,locationname,locationcode,triagestatus,daycare,closesvisits) values('$patientcode','$patientfirstname','$patientmiddlename','$patientlastname','$patientfullname','$visitcode','$consultingdoctor','$consultationtypetriage','$departmentname','$consultationdate','$consultationtime','$consultationfees','$referredby','$consultationremarks','$visitcount','$complaint','$registrationdate','$username','incomplete','$billtype','$accountnametriage','','$paymenttypetriage','$subtypetriage','$locationname','$locationcode','$triagestatus','','')"; 
+
+			$exec002=mysqli_query($GLOBALS["___mysqli_ston"], $query002) or die ("Error in Query002".mysqli_error($GLOBALS["___mysqli_ston"]));
+
+	}
+
+
+
+		
+        if($elaimstatus==3){
+		  
+		  //@file_get_contents("$myBase/slade-claimvisit.php?visitcode=$visitcode");
+		} 
+		header("location:visitentry_op_new.php?oppatientcode=$patientcode");
+
+		exit();
+
+		}
+
+		}
+
+		else if($consultationfees =='0')
+
+		{
+//echo 'loop5';
+//exit;
+		$query2 = "select * from master_visitentry where visitcode = '$visitcode'";
+
+	$exec2 = mysqli_query($GLOBALS["___mysqli_ston"], $query2) or die ("Error in Query2".mysqli_error($GLOBALS["___mysqli_ston"]));
+
+	$res2 = mysqli_num_rows($exec2);
+
+	if ($res2 == 0)
+
+	{
+
+		$query56="insert into master_visitentry(patientcode, visitcode, patientfirstname,patientmiddlename, patientlastname,consultationtype,consultingdoctor,consultingdoctorcode,accountname,accountexpirydate,paymenttype,subtype,planname,planexpirydate,visitlimit,overalllimit,availablelimit,billtype,
+
+		visitcount,department,consultationdate,consultationtime,consultationfees,patientspent,planfixedamount,planpercentage,patientfullname,paymentstatus,triagestatus,age,gender,scheme_id,accountfullname,departmentname,username,complaint,consultationrefund,locationname,locationcode,admitid,smartbenefitno,hospitalfees,doctorfees,memberno,plandue,registrationfees,mcc,lablimit,radiologylimit,serviceslimit,pharmacylimit,slade_payload,payer_code,savannah_authid,savannah_authflag,savannahvalid_from,savannahvalid_to,visittype,eclaim_id,is_revisit)values('$patientcode','$visitcode','$patientfirstname','$patientmiddlename','$patientlastname','$consultationtype','$consultingdoctor','$consultingdoctorcode','$accountname','$accountexpirydate','$paymenttype','$subtype','$planname','$planexpirydate','$visitlimit','$overalllimit','$availablelimit','$billtype',
+
+		'$visitcount','$department','$consultationdate','$consultationtime','$consultationfees','$patientspent','$planfixedamount','$planpercentageamount','$patientfullname','completed','$triagestatus','$age','$gender','$scheme_id','$accname','$departmentname','$username','$triag','torefund','$locationname1','$locationcode','$admitid','$smartbenefitno','$hospitalfees','$doctorfees','$memberno','$plandue','$registrationfees','$mcc','$lablimit','$radiologylimit','$serviceslimit','$pharmacylimit','$slade_authentication_token','$payer_code','$savannah_authid','$savannah_authflag','$savannahvalid_from','$savannahvalid_to','$type','$smartap','$revisit')";
+
+		$exec56=mysqli_query($GLOBALS["___mysqli_ston"], $query56) ;
+		if( mysqli_errno($GLOBALS["___mysqli_ston"]) == 1062) {
+           goto visitcreate;
+		}
+		else if(mysqli_errno($GLOBALS["___mysqli_ston"]) > 0){
+           die ("Error in query56".mysqli_error($GLOBALS["___mysqli_ston"]));
+		}
+
+
+	if($triagestatus=='completed')
+
+	{
+
+		$query002="insert into master_triage (patientcode,patientfirstname,patientmiddlename,patientlastname,patientfullname,visitcode,consultingdoctor,consultationtype,department,consultationdate,consultationtime,consultationfees,referredby,consultationremarks,visitcount,complaint,registrationdate,user,consultation,billtype,accountname,department_refer,paymenttype,subtype,locationname,locationcode,triagestatus,daycare,closesvisits) values('$patientcode','$patientfirstname','$patientmiddlename','$patientlastname','$patientfullname','$visitcode','$consultingdoctor','$consultationtypetriage','$departmentname','$consultationdate','$consultationtime','$consultationfees','$referredby','$consultationremarks','$visitcount','$complaint','$registrationdate','$username','incomplete','$billtype','$accountnametriage','','$paymenttypetriage','$subtypetriage','$locationname','$locationcode','$triagestatus','','')"; 
+
+			$exec002=mysqli_query($GLOBALS["___mysqli_ston"], $query002) or die ("Error in Query002".mysqli_error($GLOBALS["___mysqli_ston"]));
+
+	}
+
+
+
+		
+        if($elaimstatus==3){
+		 
+		  //@file_get_contents("$myBase/slade-claimvisit.php?visitcode=$visitcode");
+		} 
+		header("location:visitentry_op_new.php?oppatientcode=$patientcode");
+
+	exit();
+
+		}
+
+		}
+/* 
+		else if($department =='2')
+
+		{
+//echo 'loop6';
+//exit;
+		$query2 = "select * from master_visitentry where visitcode = '$visitcode'";
+
+	$exec2 = mysqli_query($GLOBALS["___mysqli_ston"], $query2) or die ("Error in Query2".mysqli_error($GLOBALS["___mysqli_ston"]));
+
+	$res2 = mysqli_num_rows($exec2);
+
+	if ($res2 == 0)
+
+	{
+
+		$query56="insert into master_visitentry(patientcode, visitcode, patientfirstname,patientmiddlename, patientlastname,consultationtype,consultingdoctor,consultingdoctorcode,accountname,accountexpirydate,paymenttype,subtype,planname,planexpirydate,visitlimit,overalllimit,availablelimit,billtype,
+
+		visitcount,department,consultationdate,consultationtime,consultationfees,patientspent,planfixedamount,planpercentage,patientfullname,paymentstatus,triagestatus,age,gender,scheme_id,accountfullname,departmentname,username,consultationrefund,complaint,locationname,locationcode,admitid,smartbenefitno,hospitalfees,doctorfees,memberno,plandue,registrationfees,mcc,lablimit,radiologylimit,serviceslimit,pharmacylimit,slade_payload,payer_code,savannah_authid,savannah_authflag,savannahvalid_from,savannahvalid_to,visittype,eclaim_id,is_revisit)values('$patientcode','$visitcode','$patientfirstname','$patientmiddlename','$patientlastname','$consultationtype','$consultingdoctor','$consultingdoctorcode','$accountname','$accountexpirydate','$paymenttype','$subtype','$planname','$planexpirydate','$visitlimit','$overalllimit','$availablelimit','$billtype',
+
+		'$visitcount','$department','$consultationdate','$consultationtime','$consultationfees','$patientspent','$planfixedamount','$planpercentageamount','$patientfullname','','$triagestatus','$age','$gender','$scheme_id','$accname','$departmentname','$username','torefund','$triag','$locationname1','$locationcode','$admitid','$smartbenefitno','$hospitalfees','$doctorfees','$memberno','$plandue','$registrationfees','$mcc','$lablimit','$radiologylimit','$serviceslimit','$pharmacylimit','$slade_authentication_token','$payer_code','$savannah_authid','$savannah_authflag','$savannahvalid_from','$savannahvalid_to','$type','$smartap','$revisit')";
+
+		$exec56=mysqli_query($GLOBALS["___mysqli_ston"], $query56) ;
+		if( mysqli_errno($GLOBALS["___mysqli_ston"]) == 1062) {
+           goto visitcreate;
+		}
+		else if(mysqli_errno($GLOBALS["___mysqli_ston"]) > 0){
+           die ("Error in query56".mysqli_error($GLOBALS["___mysqli_ston"]));
+		}
+
+
+	if($triagestatus=='completed')
+
+	{
+
+		$query002="insert into master_triage (patientcode,patientfirstname,patientmiddlename,patientlastname,patientfullname,visitcode,consultingdoctor,consultationtype,department,consultationdate,consultationtime,consultationfees,referredby,consultationremarks,visitcount,complaint,registrationdate,user,consultation,billtype,accountname,department_refer,paymenttype,subtype,locationname,locationcode,triagestatus,daycare,closesvisits) values('$patientcode','$patientfirstname','$patientmiddlename','$patientlastname','$patientfullname','$visitcode','$consultingdoctor','$consultationtypetriage','$departmentname','$consultationdate','$consultationtime','$consultationfees','$referredby','$consultationremarks','$visitcount','$complaint','$registrationdate','$username','incomplete','$billtype','$accountnametriage','','$paymenttypetriage','$subtypetriage','$locationname','$locationcode','$triagestatus','','')"; 
+
+			$exec002=mysqli_query($GLOBALS["___mysqli_ston"], $query002) or die ("Error in Query002".mysqli_error($GLOBALS["___mysqli_ston"]));
+
+	}
+
+
+
+		
+        if($elaimstatus==3){
+		  
+		  //@file_get_contents("$myBase/slade-claimvisit.php?visitcode=$visitcode");
+		}  
+		header("location:visitentry_op_new.php?oppatientcode=$patientcode");
+	    exit();
+
+		}
+
+		}
+
+		else if($department =='3')
+
+		{
+//echo 'loop7';
+//exit;
+		$query2 = "select * from master_visitentry where visitcode = '$visitcode'";
+
+	$exec2 = mysqli_query($GLOBALS["___mysqli_ston"], $query2) or die ("Error in Query2".mysqli_error($GLOBALS["___mysqli_ston"]));
+
+	$res2 = mysqli_num_rows($exec2);
+
+	if ($res2 == 0)
+
+	{
+
+		$query56="insert into master_visitentry(patientcode, visitcode, patientfirstname,patientmiddlename, patientlastname,consultationtype,consultingdoctor,consultingdoctorcode,accountname,accountexpirydate,paymenttype,subtype,planname,planexpirydate,visitlimit,overalllimit,availablelimit,billtype,
+
+		visitcount,department,consultationdate,consultationtime,consultationfees,patientspent,planfixedamount,planpercentage,patientfullname,paymentstatus,triagestatus,age,gender,scheme_id,accountfullname,departmentname,username,consultationrefund,complaint,locationname,locationcode,admitid,smartbenefitno,hospitalfees,doctorfees,memberno,plandue,registrationfees,mcc,lablimit,radiologylimit,serviceslimit,pharmacylimit,slade_payload,payer_code,savannah_authid,savannah_authflag,savannahvalid_from,savannahvalid_to,visittype,eclaim_id,is_revisit)values('$patientcode','$visitcode','$patientfirstname','$patientmiddlename','$patientlastname','$consultationtype','$consultingdoctor','$consultingdoctorcode','$accountname','$accountexpirydate','$paymenttype','$subtype','$planname','$planexpirydate','$visitlimit','$overalllimit','$availablelimit','$billtype',
+
+		'$visitcount','$department','$consultationdate','$consultationtime','$consultationfees','$patientspent','$planfixedamount','$planpercentageamount','$patientfullname','','$triagestatus','$age','$gender','$scheme_id','$accname','$departmentname','$username','torefund','$triag','$locationname1','$locationcode','$admitid','$smartbenefitno','$hospitalfees','$doctorfees','$memberno','$plandue','$registrationfees','$mcc','$lablimit','$radiologylimit','$serviceslimit','$pharmacylimit','$slade_authentication_token','$payer_code','$savannah_authid','$savannah_authflag','$savannahvalid_from','$savannahvalid_to','$type','$smartap','$revisit')";
+
+		$exec56=mysqli_query($GLOBALS["___mysqli_ston"], $query56) ;
+		if( mysqli_errno($GLOBALS["___mysqli_ston"]) == 1062) {
+           goto visitcreate;
+		}
+		else if(mysqli_errno($GLOBALS["___mysqli_ston"]) > 0){
+           die ("Error in query56".mysqli_error($GLOBALS["___mysqli_ston"]));
+		}
+
+
+	if($triagestatus=='completed')
+
+	{
+
+		$query002="insert into master_triage (patientcode,patientfirstname,patientmiddlename,patientlastname,patientfullname,visitcode,consultingdoctor,consultationtype,department,consultationdate,consultationtime,consultationfees,referredby,consultationremarks,visitcount,complaint,registrationdate,user,consultation,billtype,accountname,department_refer,paymenttype,subtype,locationname,locationcode,triagestatus,daycare,closesvisits) values('$patientcode','$patientfirstname','$patientmiddlename','$patientlastname','$patientfullname','$visitcode','$consultingdoctor','$consultationtypetriage','$departmentname','$consultationdate','$consultationtime','$consultationfees','$referredby','$consultationremarks','$visitcount','$complaint','$registrationdate','$username','incomplete','$billtype','$accountnametriage','','$paymenttypetriage','$subtypetriage','$locationname','$locationcode','$triagestatus','','')"; 
+
+			$exec002=mysqli_query($GLOBALS["___mysqli_ston"], $query002) or die ("Error in Query002".mysqli_error($GLOBALS["___mysqli_ston"]));
+
+	}
+
+
+
+		if($elaimstatus==3){
+		  
+		  //@file_get_contents("$myBase/slade-claimvisit.php?visitcode=$visitcode");
+		} 
+		header("location:visitentry_op_new.php?oppatientcode=$patientcode");
+
+	exit();
+
+	}
+
+		} */
+
+		else
+
+		{
+//echo 'loop8';
+//exit;
+	$query2 = "select * from master_visitentry where visitcode = '$visitcode'";
+
+	$exec2 = mysqli_query($GLOBALS["___mysqli_ston"], $query2) or die ("Error in Query2".mysqli_error($GLOBALS["___mysqli_ston"]));
+
+	$res2 = mysqli_num_rows($exec2);
+
+	if ($res2 == 0)
+
+	{
+
+		$query1 = "insert into master_visitentry (patientcode, visitcode, patientfirstname,patientmiddlename, patientlastname,patientfullname, consultingdoctor,consultingdoctorcode,
+
+		department,paymenttype,subtype,billtype,accountname,accountexpirydate,planname,planexpirydate,consultationdate,consultationtime,consultationtype,consultationfees,referredby,consultationremarks,complaint,registrationdate,visitlimit,overalllimit,availablelimit,visitcount,patientspent,planpercentage,planfixedamount,age,gender,scheme_id,accountfullname,itemrefund,departmentname,username,consultationrefund,locationname,locationcode,admitid,smartbenefitno,hospitalfees,doctorfees,memberno,plandue,registrationfees,mcc,lablimit,radiologylimit,serviceslimit,pharmacylimit,slade_payload,payer_code,savannah_authid,savannah_authflag,savannahvalid_from,savannahvalid_to,visittype,eclaim_id,is_revisit) 
+
+		values('$patientcode','$visitcode','$patientfirstname','$patientmiddlename','$patientlastname','$patientfullname','$consultingdoctor','$consultingdoctorcode',
+
+		'$department','$paymenttype','$subtype','$billtype','$accountname','$accountexpirydate','$planname','$planexpirydate','$consultationdate','$consultationtime','$consultationtype','$consultationfees','$referredby', '$consultationremarks','$triag','$registrationdate','$visitlimit','$overalllimit','$availablelimit','$visitcount','$patientspent','$planpercentageamount','$planfixedamount','$age','$gender','$scheme_id','$accname','torefund','$departmentname','$username','torefund','$locationname1','$locationcode','$admitid','$smartbenefitno','$hospitalfees','$doctorfees','$memberno','$plandue','$registrationfees','$mcc','$lablimit','$radiologylimit','$serviceslimit','$pharmacylimit','$slade_authentication_token','$payer_code','$savannah_authid','$savannah_authflag','$savannahvalid_from','$savannahvalid_to','$type','$smartap','$revisit')";
+
+		$exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1);
+		if( mysqli_errno($GLOBALS["___mysqli_ston"]) == 1062) {
+           goto visitcreate;
+		}
+		else if(mysqli_errno($GLOBALS["___mysqli_ston"]) > 0){
+           die ("Error in query1".mysqli_error($GLOBALS["___mysqli_ston"]));
+		}
+
+
+	if($triagestatus=='completed')
+
+	{
+
+		$query002="insert into master_triage (patientcode,patientfirstname,patientmiddlename,patientlastname,patientfullname,visitcode,consultingdoctor,consultationtype,department,consultationdate,consultationtime,consultationfees,referredby,consultationremarks,visitcount,complaint,registrationdate,user,consultation,billtype,accountname,department_refer,paymenttype,subtype,locationname,locationcode,triagestatus,daycare,closesvisits) values('$patientcode','$patientfirstname','$patientmiddlename','$patientlastname','$patientfullname','$visitcode','$consultingdoctor','$consultationtypetriage','$departmentname','$consultationdate','$consultationtime','$consultationfees','$referredby','$consultationremarks','$visitcount','$complaint','$registrationdate','$username','incomplete','$billtype','$accountnametriage','','$paymenttypetriage','$subtypetriage','$locationname','$locationcode','$triagestatus','','')"; 
+
+			$exec002=mysqli_query($GLOBALS["___mysqli_ston"], $query002) or die ("Error in Query002".mysqli_error($GLOBALS["___mysqli_ston"]));
+
+	}
+
+
+
+					
+
+					
+
+		//$patientcode = '';
+
+		//$visitcode = '';
+
+		$patientfirstname = '';
+
+		$patientmiddlename = '';
+
+		$patientlastname = '';
+
+		$consultingdoctor = '';
+
+
+
+		$department = '';
+
+		$paymenttype = '';
+
+		$subtype = '';
+
+		$accountname = '';
+
+		$accountexpirydate = '';
+
+		$planname = '';
+
+		$planstatus='';
+
+		$planexpirydate = '';
+
+		$consultationdate = '';
+
+		$consultationtime = '';
+
+		$consultationtype = '';
+
+		$consultationfees = '';
+
+		$referredby = '';
+
+		$consultationremarks = '';
+
+		$complaint = '';
+
+		$registrationdate = '';
+
+		$visittype = '';
+
+		$visitlimit ='';
+
+		$overalllimit = '';
+
+		$planfixedamount = '';
+
+		$planpercentageamount = '';
+
+		$billtype ='';
+
+		$patientspent='';
+
+		$visitcount='';
+
+		$registrationfees='';
+
+		if($elaimstatus==3){
+		  
+		  //@file_get_contents("$myBase/slade-claimvisit.php?visitcode=$visitcode");
+		} 
+
+		header("location:visitentry_op_new.php?oppatientcode=$patientcode");
+
+		exit();
+
+	?>
+
+	<?php		
+
+	}
+
+	else
+
+	{
+
+		header ("location:visitentry_op_new.php?patientcode=$patientcode&&st=failed");
+
+		exit;
+
+	}
+
+	}
+
+	}
+
+	}
+
+	}//opvisit duplicate check
+
+	else
+
+	{
+
+		header ("location:visitentry_op_new.php?errorcode=errorcode1failedop");
+
+		exit();
+
+	}
+
+
+
+}
+
+else
+
+{
+
+	$patientcode = '';
+
+	$visitcode = '';
+
+	$patientfirstname = '';
+
+	$patientmiddlename = '';
+
+	$patientlastname = '';
+
+	$consultingdoctor = '';
+
+	$department = '';
+
+	$paymenttype = '';
+
+	$subtype = '';
+
+	$accountname = '';
+	$account_active = '';
+	$scheme_id = '';
+
+	$accountexpirydate = '';
+
+	$planname = '';
+
+	$planstatus='';
+
+	$planexpirydate = '';
+
+	$consultationdate = '';
+
+	$consultationtime = '';
+
+	$consultationtype = '';
+
+	$consultationfees = '';
+
+	$referredby = '';
+
+	$consultationremarks = '';
+
+	$complaint = '';
+
+	$registrationdate = '';
+
+	$visittype = '';
+
+	$visitlimit = '';
+
+	$overalllimit = '';
+
+	$planfixedamount = '';
+
+	$planpercentageamount = '';
+
+	$billtype = '';
+
+	$patientspent='';
+
+	$visitcount='';
+
+	$age='';
+
+	$gender='';
+
+	$lastvisitdate = '';
+
+	$visitdays = '';
+
+	$registrationfees='';
+	$is_savannah='';
+
+	
+
+	//$visitlimit='';
+
+}
+
+
+
+if (isset($_REQUEST["st"])) { $st = $_REQUEST["st"]; } else { $st = ""; }
+
+if ($st == 'success')
+
+{
+
+		$errmsg = "Success. New Visit Updated.";
+
+		if (isset($_REQUEST["cpynum"])) { $cpynum = $_REQUEST["cpynum"]; } else { $cpynum = ""; }
+
+		if ($cpynum == 1) //for first company.
+
+		{
+
+			$errmsg = "Success. New Visit Updated.";
+
+		}
+
+}
+
+else if ($st == 'failed')
+
+{
+
+		$errmsg = "Failed. Visit Code Already Exists.";
+
+}
+
+$query = "select * from login_locationdetails where username='$username' and docno='$docno' order by locationname";
+
+$exec = mysqli_query($GLOBALS["___mysqli_ston"], $query) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
+
+$res = mysqli_fetch_array($exec);
+
+	
+
+	$res12location = $res["locationname"];
+
+	$res12locationcode = $res['locationcode'];
+
+	$res12locationanum = $res["auto_number"];
+
+
+$query3 = "select * from master_company where companystatus = 'Active'"; 
+
+	$exec3 = mysqli_query($GLOBALS["___mysqli_ston"], $query3) or die ("Error in Query3".mysqli_error($GLOBALS["___mysqli_ston"]));
+
+	$res3 = mysqli_fetch_array($exec3);
+
+	$visitcodeprefix = $res3['visitcodeprefix'];
+
+	$visitcodeprefix=chop($visitcodeprefix,"-");
+
+$query3s = "select auto_number from master_location where status = '' and locationcode='$res12locationcode'";
+
+$exec3s = mysqli_query($GLOBALS["___mysqli_ston"], $query3s) or die ("Error in Query3".mysqli_error($GLOBALS["___mysqli_ston"]));
+
+$res3s = mysqli_fetch_array($exec3s);
+
+ $loc_anum = $res3s['auto_number'];
+
+
+$query2 = "select * from master_visitentry  order by auto_number desc limit 0, 1";
+
+$exec2 = mysqli_query($GLOBALS["___mysqli_ston"], $query2) or die ("Error in Query2".mysqli_error($GLOBALS["___mysqli_ston"]));
+
+$res2 = mysqli_fetch_array($exec2);
+
+$res2visitcode = $res2["visitcode"];
+
+if($res2visitcode!='')
+
+{
+ $res2visitnum=strlen($res2visitcode);
+ $vvcode6=explode("-",$res2visitcode);
+ $testvalue= $vvcode6[1];
+$value6=strlen($testvalue);
+$visitcodepre6=$res2visitnum-$value6;
+}
+
+if ($res2visitcode == '')
+{
+$maxanum= '1';
+$visitcode =$visitcodeprefix.'-'.'1'.'-'.$loc_anum;
+$openingbalance = '0.00';
+}else{
+$res2visitcode = $res2["visitcode"];
+$visitcode = substr($res2visitcode,$visitcodepre6,$res2visitnum);
+$visitcode = intval($visitcode);
+//$visitcode = $visitcode + 1;
+$visitcode = $testvalue + 1;
+$maxanum = $visitcode;
+$visitcode = $visitcodeprefix.'-'.$maxanum.'-'.$loc_anum;
+$openingbalance = '0.00';
+}
+
+?>
+
+<script>
+
+
+
+function locationform(frm,val)
+
+{
+
+
+
+<?php $query11 = "select * from master_location";
+
+    $exec11 = mysqli_query($GLOBALS["___mysqli_ston"], $query11) or die ("Error in Query11".mysqli_error($GLOBALS["___mysqli_ston"]));
+
+	while ($res11 = mysqli_fetch_array($exec11))
+
+	{
+
+	$scriptlocationcode = $res11["locationcode"];
+
+	$scriptlocationprefix = $res11["prefix"];
+
+	?>
+
+	if(document.getElementById("location").value=="<?php echo $scriptlocationcode; ?>")
+
+		{
+
+		//document.getElementById("visitcode").value = "<?php echo $scriptlocationprefix.'-'.$maxanum; ?>";
+
+		
+
+		}
+
+	<?php
+
+	 }?>
+
+	//document.form1.customercode.value='ok';
+
+	funcLocationDepartmentChange();
+
+}
+
+
+
+</script>
+
+
+
+<?php
+
+$res11locationcode='';
+
+$query31 = "select * from master_company where companystatus = 'Active'";
+
+$exec31 = mysqli_query($GLOBALS["___mysqli_ston"], $query31) or die ("Error in Query3".mysqli_error($GLOBALS["___mysqli_ston"]));
+
+$res31 = mysqli_fetch_array($exec31);
+
+$consultationprefix = $res31['consultationprefix'];
+
+
+
+$query21 = "select * from master_billing order by auto_number desc limit 0, 1";
+
+$exec21 = mysqli_query($GLOBALS["___mysqli_ston"], $query21) or die ("Error in Query2".mysqli_error($GLOBALS["___mysqli_ston"]));
+
+$res21 = mysqli_fetch_array($exec21);
+
+$billnumber = $res21["billnumber"];
+
+if ($billnumber == '')
+
+{
+
+	$billnumbercode =$consultationprefix.'1';
+
+	$openingbalance = '0.00';
+
+}
+
+else
+
+{
+
+	$billnumber = $res21["billnumber"];
+
+	$billnumbercode = substr($billnumber, 3, 8);
+
+	$billnumbercode = intval($billnumbercode);
+
+	$billnumbercode = $billnumbercode + 1;
+
+
+
+	$maxanum = $billnumbercode;
+
+	
+
+	
+
+	$billnumbercode = $consultationprefix.$maxanum;
+
+	$openingbalance = '0.00';
+
+	//echo $companycode;
+
+}
+
+	function arrayHasOnlyInts($array)
+
+{
+
+$count=0;
+
+$count1=0;
+
+    foreach ($array as $key => $value)
+
+    {
+
+        if (is_numeric($value)) // there are several ways to do this
+
+        {
+
+		$count1++;    
+
+		
+
+        }
+
+		else
+
+		{
+
+		$count=$count+1;
+
+		
+
+		}
+
+    }
+
+    return $count1; 
+
+}	
+
+
+
+$registrationdate = date('Y-m-d');
+
+$consultationdate = date('Y-m-d');
+
+$consultationtime = date('H:i');
+
+
+
+if (isset($_REQUEST["patientcode"])) { $patientcode = $_REQUEST["patientcode"]; } else { $patientcode = ""; }
+
+//$patientcode = 'MSS000000014';
+
+if ($patientcode != '')
+
+{
+
+	//echo 'Inside Patient Code Condition.';
+
+	
+
+	
+
+	$query3 = "select * from master_customer where customercode = '$patientcode'";
+
+	$exec3 = mysqli_query($GLOBALS["___mysqli_ston"], $query3) or die ("Error in Query3".mysqli_error($GLOBALS["___mysqli_ston"]));
+
+	$res3 = mysqli_fetch_array($exec3);
+
+	
+
+	$patientfirstname = $res3['customername'];
+
+	$patientfirstname = strtoupper($patientfirstname);
+
+
+
+	$patientmiddlename = $res3['customermiddlename'];
+
+	$patientmiddlename = strtoupper($patientmiddlename);
+
+
+
+	$patientlastname = $res3['customerlastname'];
+
+	$patientlastname = strtoupper($patientlastname);
+
+	
+
+	$patientfullname = $res3['customerfullname'];
+
+	$patientfullname = strtoupper($patientfullname);
+
+
+
+    $paymenttype1 = $res3['paymenttype'];
+
+	
+
+	$paymenttype = $res3['paymenttype'];
+
+	
+
+	$mrdno = $res3['mrdno'];
+
+	$memberno = $res3['memberno'];
+
+	$photoavailable = $res3['photoavailable'];
+
+	
+
+	$res11locationcode=$res3['locationcode'];
+
+	$patientspent=$res3['opdue'];
+
+	
+
+	$query4 = "select * from master_paymenttype where auto_number = '$paymenttype'";
+
+	$exec4 = mysqli_query($GLOBALS["___mysqli_ston"], $query4) or die ("Error in Query4".mysqli_error($GLOBALS["___mysqli_ston"]));
+
+	$res4 = mysqli_fetch_array($exec4);
+
+	$paymenttypeanum = $res4['auto_number'];
+
+	$paymenttype = $res4['paymenttype'];
+
+	
+
+	$subtype = $res3['subtype'];
+
+	$query4 = "select * from master_location where auto_number = '$subtype'";
+
+	$exec4 = mysqli_query($GLOBALS["___mysqli_ston"], $query4) or die ("Error in Query4".mysqli_error($GLOBALS["___mysqli_ston"]));
+
+	$res4 = mysqli_fetch_array($exec4);
+
+	 
+
+	//$subtype = $res4['subtype'];
+
+
+
+	$billtype = $res3['billtype'];
+
+	$age = $res3['age'];
+
+	$dateofbirth = $res3["dateofbirth"];
+
+	$todate = date("Y-m-d");
+
+	$diff = abs(strtotime($todate) - strtotime($dateofbirth));
+
+	
+
+	$years = floor($diff / (365*60*60*24));
+
+	$months = floor(($diff - $years * 365*60*60*24) / (30*60*60*24));
+
+	$days = floor(($diff - $years * 365*60*60*24 - $months*30*60*60*24)/ (60*60*24));
+
+	if($years == 0 && $months == 0)
+
+	{
+
+	$age = $days.' '.'Days';
+
+	}
+
+	if($years == 0 && $months != 0)
+
+	{
+
+	$age = $months.' '.'Months';
+
+	}
+
+	else 
+
+	{
+
+	$age = $years.' '.'Years';
+
+	}
+
+	$gender = $res3['gender'];
+
+	
+
+	//get subtype name
+
+	$query24 = "select subtype,auto_number,is_savannah from master_subtype where auto_number = '$subtype'";
+
+	$exec4 = mysqli_query($GLOBALS["___mysqli_ston"], $query24) or die ("Error in Query24".mysqli_error($GLOBALS["___mysqli_ston"]));
+
+	$res4 = mysqli_fetch_array($exec4);
+
+	 $subtype = $res4['subtype'];
+
+	 $subtypeanum = $res4['auto_number'];
+	 $is_savannah=$res4['is_savannah'];
+
+	 //end of get subtype name
+
+	
+
+	$accountname = $res3['accountname'];
+
+	
+
+	$query4 = "select * from master_accountname where auto_number = '$accountname'";
+
+	$exec4 = mysqli_query($GLOBALS["___mysqli_ston"], $query4) or die ("Error in Query4".mysqli_error($GLOBALS["___mysqli_ston"]));
+
+	$res4 = mysqli_fetch_array($exec4);
+
+	$accountnameanum = $res4['auto_number'];
+
+	//$accountname = $res4['accountname'];
+
+	$is_mcc = $res4['mcc'];
+
+	
+
+	
+
+	$accountexpirydate = $res3['accountexpirydate'];
+	
+$scheme_id = $res3["scheme_id"];
+	$query_sc = "select * from master_planname where scheme_id = '$scheme_id'";
+
+	$exec_sc = mysqli_query($GLOBALS["___mysqli_ston"], $query_sc) or die ("Error in query_sc".mysqli_error($GLOBALS["___mysqli_ston"]));
+
+	$res_sc = mysqli_fetch_array($exec_sc);
+
+	//$plannameanum = $res4['auto_number'];
+
+	$accountname = $res_sc['scheme_name'];
+	$accountexpirydate = $res_sc['scheme_expiry'];
+	$account_active = $res_sc['scheme_active_status'];
+	
+
+	 $planname = $res3['planname'];
+
+	 $query4 = "select * from master_planname where auto_number = '$planname'";
+
+	$exec4 = mysqli_query($GLOBALS["___mysqli_ston"], $query4) or die ("Error in Query4".mysqli_error($GLOBALS["___mysqli_ston"]));
+
+	$res4 = mysqli_fetch_array($exec4);
+
+	$plannameanum = $res4['auto_number'];
+
+	$planname = $res4['planname'];
+
+    $planstatus=$res4['recordstatus'];
+
+	$planfixedamount = $res4['planfixedamount'];
+
+	$planpercentageamount = $res4['planpercentage'];
+
+	$smartap = $res4['smartap'];
+
+	$planapplicable = $res4['planapplicable'];
+
+	
+
+	$query5 = "select * from master_visitentry where patientcode = '$patientcode' and recordstatus = ''";
+
+	$exec5 = mysqli_query($GLOBALS["___mysqli_ston"], $query5) or die ("Error in Query5".mysqli_error($GLOBALS["___mysqli_ston"]));
+
+	$rowcount5 = mysqli_num_rows($exec5);
+
+	$visitcount = $rowcount5 + 1;
+
+	if($rowcount5 == 0 ){
+
+		if($billtype == 'PAY NOW')
+
+		{
+
+			$registrationfees = $res31['registrationfees'];
+
+		}else{
+
+			$registrationfees = '0.00';
+
+		}
+
+	}else{
+
+		$registrationfees = '0.00';
+
+	}
+
+	
+
+	
+
+	$query51 = "select * from master_visitentry where patientcode = '$patientcode' and recordstatus = '' order by auto_number desc limit 0,1";
+
+	$exec51 = mysqli_query($GLOBALS["___mysqli_ston"], $query51) or die ("Error in Query51".mysqli_error($GLOBALS["___mysqli_ston"]));
+
+	$res51 = mysqli_fetch_array($exec51);
+
+    $lastvisitdate = $res51['consultationdate'];
+
+	if($lastvisitdate == '')
+
+	{
+
+	$lastvisitdate = $consultationdate;
+
+	}
+
+	$todaysdatetime = strtotime($consultationdate);
+
+	$lastvisitdatetime = strtotime($lastvisitdate);
+
+	$datediff = $todaysdatetime - $lastvisitdatetime;
+
+	$visitdays = floor($datediff/(60*60*24));
+
+	
+
+	
+
+	
+
+	$planexpirydate = $res3['planexpirydate'];
+
+	$registrationdate = $res3['registrationdate'];
+
+	
+
+	 $visitlimit = $res4['opvisitlimit'];	
+
+	$overalllimit = $res4['overalllimitop'];
+
+	if($visitcount == 1)
+
+	{
+
+	/// $availablelimit=$overalllimit-$patientspent;
+	$availablelimit=$overalllimit;
+	if($visitlimit!=0)
+
+	{
+
+		$availablelimit=$visitlimit ;
+
+		}
+
+	}
+
+	else
+
+	{
+
+	 ///$availablelimit=$overalllimit-$patientspent;
+	$availablelimit=$overalllimit;
+	if($visitlimit!=0)
+
+	{
+
+		$availablelimit=$visitlimit ;
+
+		}
+
+	}
+
+	
+
+	if($planapplicable=='1')
+
+	{
+
+		$query88 = "select sum(plandue) as overallplandue from master_customer where planname = '$plannameanum'";
+
+		$exec88 = mysqli_query($GLOBALS["___mysqli_ston"], $query88) or die ("Error in Query88".mysqli_error($GLOBALS["___mysqli_ston"]));
+
+		$res88 = mysqli_fetch_array($exec88);
+
+		$overallplandue = $res88['overallplandue'];
+
+		$availablelimit = $overalllimit-$overallplandue;	
+
+	}
+
+	else
+
+	{
+
+		$overallplandue = 0;	
+
+	}
+
+	
+
+}
+
+
+
+
+
+
+
+//$consultationfees = '500';
+
+
+
+if (isset($_REQUEST["errorcode"])) { $errorcode = $_REQUEST["errorcode"]; } else { $errorcode = ""; }
+
+//$patientcode = 'MSS00000009';
+
+if ($errorcode == 'errorcode1failed')
+
+{
+
+	$errmsg = 'Patient Already Visited Today. Cannot Proceed With Visit Entry. Save Not Completed.';	
+
+}
+
+if ($errorcode == 'errorcode10failed')
+
+{
+
+	$errmsg = 'Patient Already Having 3 Pending Bills. Cannot Proceed With Visit Entry. Save Not Completed.';	
+
+}
+
+if ($errorcode == 'errorcode11failed')
+
+{
+
+	$errmsg = 'Patient Already Having a Pending Bills. Cannot Proceed With Visit Entry. Save Not Completed.';	
+
+}
+
+
+
+if ($errorcode == 'errorcode1failedop')
+
+{
+
+	$errmsg = 'Duplicate in Visitentry. Save Not Completed. Pls create Visit again';	
+
+}
+
+if ($errorcode == 'visitlimitexceed')
+
+{
+
+	$errmsg = 'Maximum visit per day exceeded. Save Not Completed.';	
+
+}
+
+
+
+?>
+
+<style type="text/css">
+
+<!--
+
+body {
+
+	margin-left: 0px;
+
+	margin-top: 0px;
+
+	background-color: #ecf0f5;
+
+}
+
+.bodytext3 {	FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3B3B3C; FONT-FAMILY: Tahoma
+
+}
+
+-->
+
+</style>
+
+
+
+<script type="text/javascript" src="js/disablebackenterkey.js"></script>
+
+<script type="text/javascript" src="js/membervalidation.js"></script>
+
+<script language="javascript">
+
+function process1backkeypress1()
+
+{
+
+	//alert ("Back Key Press");
+
+	if (event.keyCode==8) 
+
+	{
+
+		event.keyCode=0; 
+
+		return event.keyCode 
+
+		return false;
+
+	}
+
+}
+
+
+
+
+
+</script>
+
+
+
+<?php	$query1111 = "select * from master_employee where username = '$username'";
+
+    $exec1111 = mysqli_query($GLOBALS["___mysqli_ston"], $query1111) or die ("Error in Query1111".mysqli_error($GLOBALS["___mysqli_ston"]));
+
+	while ($res1111 = mysqli_fetch_array($exec1111))
+
+	{
+
+	$username = $res1111["username"];
+
+	$locationnumber = $res1111["location"];
+
+	$query1112 = "select * from master_location where auto_number = '$locationnumber' and status <> 'deleted'";
+
+    $exec1112 = mysqli_query($GLOBALS["___mysqli_ston"], $query1112) or die ("Error in Query1112".mysqli_error($GLOBALS["___mysqli_ston"]));
+
+	while ($res1112 = mysqli_fetch_array($exec1112))
+
+	{
+
+		 $locationname = $res1112["locationname"];		  
+
+		 $locationcode = $res1112["locationcode"];
+
+		 $prefix = $res1112["prefix"];
+
+		 $suffix = $res1112["suffix"];
+
+	}
+
+	}
+
+
+
+?>
+
+<style type="text/css">
+
+.ui-menu .ui-menu-item{ zoom:1 !important; }
+
+
+
+.bodytext31 {FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3b3b3c; FONT-FAMILY: Tahoma; text-decoration:none
+
+}
+
+.bodytext3 {FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3b3b3c; FONT-FAMILY: Tahoma; text-decoration:none
+
+}
+
+.bodytext32 {FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3B3B3C; FONT-FAMILY: Tahoma
+
+}
+
+.bodytext32 {FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3b3b3c; FONT-FAMILY: Tahoma; text-decoration:none
+
+}
+
+.bodytext312 {FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3b3b3c; FONT-FAMILY: Tahoma
+
+}
+a.btn-primary{}
+</style>
+
+</head>
+
+<link href="autocomplete.css" rel="stylesheet">
+
+<script src="js/jquery-1.11.1.min.js"></script>
+<!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"> -->
+
+<!-- <link href="css/bootstrap-custom.css" rel="stylesheet"> -->
+<!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script> -->
+<!-- <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script> -->
+
+
+<!-- <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script> -->
+<script src="js/jquery.min-autocomplete.js"></script>
+<!-- link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css"> -->
+ 
+ <script src="js/jquery-ui.min.js"></script> 
+
+<script type="text/javascript" src="js/autocustomercodesearch2op_new1.js"></script>
+
+<script type="text/javascript" src="js/autocomplete_paymenttype.js"></script>
+
+<script type="text/javascript" src="js/autosuggestpaymenttype.js"></script>
+
+<script type="text/javascript" src="js/autocomplete_subtypes.js"></script>
+
+<script type="text/javascript" src="js/autosuggestsubtypes.js"></script>
+
+<script type="text/javascript" src="js/autocomplete_account.js"></script>
+
+<script type="text/javascript" src="js/autosuggestaccount.js"></script>
+ 
+
+
+<script language="javascript">
+
+
+
+
+
+function ajaxlocationfunction(val)
+
+{ 
+
+if (window.XMLHttpRequest)
+
+					  {// code for IE7+, Firefox, Chrome, Opera, Safari
+
+					  xmlhttp=new XMLHttpRequest();
+
+					  }
+
+					else
+
+					  {// code for IE6, IE5
+
+					  xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+
+					  }
+
+					xmlhttp.onreadystatechange=function()
+
+					  {
+
+					  if (xmlhttp.readyState==4 && xmlhttp.status==200)
+
+						{
+
+						document.getElementById("ajaxlocation").innerHTML=xmlhttp.responseText;
+
+						}
+
+					  }
+
+					xmlhttp.open("GET","ajax/ajaxgetlocationname.php?loccode="+val,true);
+
+					xmlhttp.send();
+
+}
+
+					
+
+//ajax to get location which is selected ends here
+
+
+
+function enabtriage()
+
+{
+
+
+
+  if (document.getElementById("enabtriag") != null) 
+
+     {
+
+	 document.getElementById("enabtriag").style.display = 'none';
+
+	}
+
+	if (document.getElementById("enabtriag") != null) 
+
+	  {
+
+	  document.getElementById("enabtriag").style.display = '';
+
+	 }
+
+
+
+}
+
+function distriage()
+
+{		
+
+ if (document.getElementById("enabtriag") != null) 
+
+	{
+
+	document.getElementById("enabtriag").style.display = 'none';
+
+	}	
+
+}
+
+function process1()
+
+{
+
+	document.getElementById('submit').disabled="true";
+
+	//alert ("Before Function");
+
+	//To validate patient is not registered for the current date.
+
+	//funcVisitEntryPatientCodeValidation1();
+
+	//return false;
+
+
+
+    if (document.form1.type.value == "")
+	{
+		alert ("Please Select Type.");
+		document.form1.type.focus();
+		document.getElementById('submit').disabled="";
+		return false;
+	}
+
+	if (document.form1.consultingdoctorcode.value == "")
+
+	{
+
+		alert ("Please Enter Consultingdoctor.");
+
+		document.form1.consultingdoctorcode.focus();
+
+		document.getElementById('submit').disabled="";
+
+		return false;
+
+	}
+
+	if (document.form1.consultingdoctor.value == "")
+
+	{
+
+		alert ("Please Enter Consultingdoctor.");
+
+		document.form1.consultingdoctor.focus();
+
+		document.getElementById('submit').disabled="";
+
+		return false;
+
+	}
+
+	if(document.getElementById("billtype").value == "PAY LATER")
+
+	{
+
+	  if(document.getElementById("memberno").value == "")
+
+	   {
+
+	    alert("Member Number Cannot be Empty");
+
+		document.form1.memberno.focus();
+
+		document.getElementById('submit').disabled="";
+
+		return false;
+
+	   }
+
+	}
+
+	
+
+	/*if(document.getElementById("billtype").value = "PAY LATER")
+
+	 {
+
+	  if(document.getElementById("planname").value == "")
+
+	   {
+
+	    alert("Plan Name Cannot be Empty");
+
+		document.form1.planname.focus();
+
+		return false;
+
+		}
+
+	}
+
+	
+
+	*/
+
+/*	if (document.form1.visittype.value == "")
+
+	{
+
+		alert ("Please Select Visit Type.");
+
+		document.form1.visittype.focus();
+
+		return false;
+
+	}*/
+
+	//alert(document.getElementById("recordstatus").value);
+
+	if(document.getElementById("recordstatus").value == 'DELETED')
+
+	{
+
+	alert("Account has been suspended.Please Contact Accounts.");
+
+		document.getElementById("accountnamename").focus();
+
+		document.getElementById('submit').disabled="";
+
+			return false;
+
+	}
+
+	
+
+	if(document.getElementById("paymenttypename").value != "CASH" && document.getElementById("subtypename").value !="CASH")
+
+	{
+
+		 var VarVisitLimit = document.getElementById("visitlimit").value;
+
+		 var VarVisitCount = document.getElementById("visitcount").value;
+
+		// alert (VarVisitLimit);
+
+		/*<!-- if(VarVisitCount > VarVisitLimit)	
+
+		 {
+
+			alert("Your Visit Limit Is Finished .You Cannot Proceed");
+
+			document.getElementById("department").focus();
+
+			return false;
+
+		}-->
+
+			*/
+
+	if (document.form1.availablelimit.value == 0)
+
+	  {
+
+		alert ("Available Limit Cannot be Empty.");
+
+		document.form1.availablelimit.focus();
+
+		document.getElementById('submit').disabled="";
+
+		return false;
+
+	  }		
+
+  }
+
+  
+
+  
+
+	
+
+	if (document.form1.department.value == "")
+
+	{
+
+		alert ("Please Select Department.");
+
+		document.form1.department.focus();
+
+		document.getElementById('submit').disabled="";
+
+		return false;
+
+	}
+
+	
+
+	/*if (document.form1.consultingdoctor.value == "")
+
+	{
+
+		alert ("Please Select Consulting Doctor.");
+
+		document.form1.consultingdoctor.focus();
+
+		document.getElementById('submit').disabled="";
+
+		return false;
+
+	}	
+
+	*/
+
+	if (document.form1.consultationtype.value == "")
+
+	{
+
+		alert ("Please Select Consultation Type.");
+
+		document.form1.consultationtype.focus();
+
+		document.getElementById('submit').disabled="";
+
+		return false;
+
+	}
+
+	
+
+	if(document.getElementById("billtype").value == "PAY LATER" && document.getElementById("availablelimit").value <= 0)
+
+	{
+
+	alert ("Available Limit Cannot be Zero.");	
+
+	document.getElementById('submit').disabled="";
+
+	  return false;		
+
+  	}
+
+	
+
+	if (document.getElementById("accountexpirydate").value != "")
+
+	{
+
+		<?php $date = mktime(0,0,0,date("m"),date("d"),date("Y")); 
+
+		$currentdate = date("Y/m/d",$date);
+
+		?>
+
+		var currentdate = "<?php echo $currentdate; ?>";
+
+		var expirydate = document.getElementById("accountexpirydate").value; 
+		var account_active = document.getElementById("account_active").value; 
+
+		var currentdate = Date.parse(currentdate);
+
+		var expirydate = Date.parse(expirydate);
+
+		
+
+		if(( expirydate < currentdate)||(account_active!='ACTIVE'))
+
+		{
+
+			alert("Account Expired. Please contact Finance.");
+
+			//document.getElementById("accountexpirydate").focus();
+
+			document.getElementById('submit').disabled="";
+
+			return false;
+
+		}
+
+	}
+
+	
+
+	/*if(document.getElementById("visitdays").value > 1)
+
+	{
+
+	if(document.getElementById("consultationfees").value == 0)
+
+	{
+
+	alert("Review Fees is not Applicable");
+
+	return false;
+
+	}
+
+	}*/
+
+	
+
+    if(document.getElementById("paymenttypename").value != "CASH" && document.getElementById("subtypename").value != "CASH")
+
+	   {
+
+		 /*if (document.getElementById("planfixedamount").value == 0)
+
+		  {
+
+			alert ("For Consultation Visit Entry, Plan Fixed Amount Cannot Be Zero. Please Refer Your Plan Details.");
+
+			return false;
+
+		 }*/
+
+		
+
+		/*if (parseFloat(document.getElementById("visitlimit").value) < parseFloat(document.getElementById("consultationfees").value))
+
+		 {
+
+			alert ("Consultation Fees Crossed Visit Limit Amount Level. Cannot Proceed.");
+
+			return false;
+
+		 }*/
+
+		//return false;
+
+		 var VarVisitLimit = document.getElementById("visitlimit").value;
+
+		 var VarVisitCount = document.getElementById("visitcount").value;
+
+		 
+
+		/* if(VarVisitCount > VarVisitLimit)
+
+		  {
+
+			alert("Your Visit Limit Is Finished .You Cannot Proceed");
+
+			document.getElementById("department").focus();
+
+			return false;
+
+		 }
+
+		*/
+
+		
+
+		var VarOverallLimit = document.getElementById("overalllimit").value;
+
+		var Varavaliablelimit = document.getElementById("availablelimit").value;
+
+		
+
+		if(Varavaliablelimit == 0)
+
+		{
+
+			alert("You Cannot Proceed Because No Available Balance");
+
+			document.getElementById("department").focus();
+
+			document.getElementById('submit').disabled="";
+
+			return false;
+
+		}
+
+		if (document.form1.subtype_mcc.value == 1)
+
+		{
+
+			/*if (document.form1.mccno.value == '') {
+
+				alert ("Please Enter MCC number.");
+
+				document.form1.mccno.focus();
+
+				document.getElementById('submit').disabled="";
+
+				return false;
+
+			}*/
+
+		}
+
+	}
+
+
+
+
+
+	var Varplanstatus = document.getElementById("planstatus").value;
+
+if(Varplanstatus!='IP')
+
+	{
+
+
+
+var patientcode = document.getElementById("patientcode").value;
+
+var popWin; 
+
+//popWin = window.open("print_opvisit_label.php?patientcode="+patientcode,"OriginalWindowA4",'width=800,height=800,toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=1,resizable=1,left=25,top=25'); 
+
+}
+
+if(confirm("Do You Want To Save The Record?")==false){
+	    document.getElementById('submit').disabled="";
+		return false;
+
+}
+$("#department").prop( "disabled", false );
+return true;
+
+}
+
+
+
+/*
+
+function funcVisitLimt()
+
+{
+
+<?php
+
+	/*$query11 = "select * from master_customer where status = 'ACTIVE'";
+
+	$exec11 = mysql_query($query11) or die ("Error in Query11".mysql_error());
+
+	while ($res11 = mysql_fetch_array($exec11))
+
+	{
+
+	$res11customername = $res11["customername"];
+
+	$res11visitlimit = $res11['visitlimit'];
+
+	$res11patientfirstname=$res11patientfirstname['patientfirstname'];*/
+
+	
+
+		?>
+
+		if(document.getElementById("customername").value == "<?php echo $res11customername; ?>")
+
+		{
+
+
+
+			document.getElementById("visitlimit").value = <?php echo $res11visitlimit; ?>;
+
+			document.getElementById("patientfirstname").value = <?php echo $res11patientfirstname; ?>;
+
+			document.getElementById("customername").value = <?php echo $res11customername; ?>;
+
+	
+
+			return false;
+
+		}
+
+	<?php
+
+	//}
+
+	?>
+
+}
+
+*/
+
+function chkrevisit(){
+	if (document.getElementById('revisit').checked) 
+    {
+      document.getElementById('department').value=document.getElementById('lastdepartment').value;
+	  document.getElementById('consultingdoctor').value=document.getElementById('lastconsultingdoctor').value;
+	  document.getElementById('consultingdoctorcode').value=document.getElementById('lastconsultingdoctorcode').value;
+	  document.getElementById("consultingdoctor").readOnly =true;
+
+	   var department = document.getElementById("department").value;
+
+	    $("#department").prop( "disabled", true );
+
+		var location = document.getElementById("location").value;
+
+		var location = location.trim();
+
+		var subtype = document.getElementById("subtype").value;
+
+		var subtype = subtype.trim();
+
+		var consultingdoctorcode = document.getElementById("consultingdoctorcode").value;
+
+		var consultingdoctorcode = consultingdoctorcode.trim();
+
+	  $.ajax({
+
+				type: "POST",
+
+				url: "ajaxAddConsultationTypeOptionsreview.php",
+
+				datatype: "json",
+
+				async: false,
+
+				data:{'department':department,'subtype':subtype,'location' : location,'doctorcode' : consultingdoctorcode },
+
+				catch : false,
+
+				success:function(data){
+
+				//alert(data);
+
+				//console.log("Inside ajax: "+data); 
+
+				var options = data.split('^');
+
+				var option = options[0];
+
+				var options1 = options[1];
+
+				var optfees = options1.split(',');
+
+				var fees = optfees[1];
+
+				//alert(option);
+
+				//alert(fees);
+
+				$('#consultationtype').html(option);
+
+				$('#consultationfees').val(fees)
+
+
+
+				}
+
+			});
+
+
+	}else{
+        $("#department").prop( "disabled", false );
+		document.getElementById('department').value='';
+	  document.getElementById('consultingdoctor').value='';
+	  document.getElementById('consultingdoctorcode').value='';
+	  document.getElementById("consultingdoctor").readOnly =false;
+	  document.getElementById("consultationtype").options.length=null; 
+	  $('#consultationtype').html('<option value="" selected="selected">Select Consultation Type</option>');
+	  document.getElementById("consultationfees").value = '';
+
+	}
+
+}
+
+function funcDepartmentChange()
+
+{
+
+	<?php
+
+	$query11 = "select auto_number,department from master_department where recordstatus = '' order by auto_number ASC";
+
+    $exec11 = mysqli_query($GLOBALS["___mysqli_ston"], $query11) or die ("Error in Query11".mysqli_error($GLOBALS["___mysqli_ston"]));
+
+	while ($res11 = mysqli_fetch_array($exec11))
+
+	{
+
+	$res11departmentanum = $res11['auto_number'];
+
+	$res11department = $res11["department"];
+
+	
+
+	$query4 = "select auto_number,locationcode from master_location where status = ''";
+
+	$exec4 = mysqli_query($GLOBALS["___mysqli_ston"], $query4) or die ("Error in Query4".mysqli_error($GLOBALS["___mysqli_ston"]));
+
+	while($res4 = mysqli_fetch_array($exec4))
+
+	{
+
+	
+
+	$res4locanum = $res4['auto_number'];
+
+	$res4loccode = $res4['locationcode'];
+
+	
+
+	$query41 = "select auto_number from master_subtype where recordstatus = ''";
+
+	$exec41 = mysqli_query($GLOBALS["___mysqli_ston"], $query41) or die ("Error in Query41".mysqli_error($GLOBALS["___mysqli_ston"]));
+
+	while($res41 = mysqli_fetch_array($exec41))
+
+	{
+
+	$subanum = $res41['auto_number']; 
+
+	?>
+
+		if(document.getElementById("department").value == "<?php echo $res11departmentanum; ?>")
+
+		{
+
+		if(document.getElementById("location").value == "<?php echo $res4loccode; ?>")
+
+		{
+
+		var subtype = document.getElementById("subtype").value;
+
+		var subtype = subtype.trim();
+
+		if(subtype == "<?php echo $subanum; ?>")
+
+		{
+
+		//alert(document.getElementById("department").value);
+
+		document.getElementById("consultationfees").value = "";
+		document.getElementById("consultingdoctor").value = "";
+
+		document.getElementById("consultingdoctorcode").value = "";
+
+		document.getElementById("consultationtype").options.length=null; 
+
+		var combo = document.getElementById('consultationtype');
+
+		
+
+		$('#consultationtype').html('<option value="" selected="selected">Select Consultation Type</option>');
+
+		
+
+		}
+
+		}
+
+		}
+
+	<?php
+
+	}
+
+	}
+
+	}
+
+	?>
+
+}
+
+
+
+function funcConsultationTypeChange()
+
+{
+
+//alert("hi");
+
+document.getElementById("consultationfees").value = '';
+
+	<?php
+
+	$query11 = "select auto_number,consultationtype,consultationfees from master_consultationtype where recordstatus = '' ";
+
+    $exec11 = mysqli_query($GLOBALS["___mysqli_ston"], $query11) or die ("Error in Query11".mysqli_error($GLOBALS["___mysqli_ston"]));
+
+	while ($res11 = mysqli_fetch_array($exec11))
+
+	{
+
+	$res11consultationanum = $res11["auto_number"];
+	
+	$query_sub = "select consultationfees from locationwise_consultation_fees where consultation_id='$res11consultationanum' and locationcode = '$this_location'  and recordstatus <> 'Deleted' limit 1";
+
+ 
+
+	$res11consultationtype = $res11["consultationtype"];
+
+	
+  $exec_sub = mysqli_query($GLOBALS["___mysqli_ston"], $query_sub) or die ("Error in query_sub".mysqli_error($GLOBALS["___mysqli_ston"]));
+$res_sub = mysqli_fetch_array($exec_sub);
+$res_num = mysqli_num_rows($exec_sub);
+if($res_num>0){
+$res11consultationfees=$res_sub["consultationfees"]; 
+}else
+{
+	$res11consultationfees=0;
+}
+	?>
+
+	var varconsultationanum =  "<?php echo $res11consultationanum; ?>";
+
+	//alert(varconsultationanum);
+
+	var varconsultationtype = document.getElementById("consultationtype").value;
+
+	//alert(varconsultationtype);
+
+		if(parseInt(varconsultationtype) == parseInt(varconsultationanum))
+
+		{
+
+		    //alert('hi');
+
+			document.getElementById("consultationfees").value = <?php echo $res11consultationfees; ?>;
+
+			document.getElementById("consultationfees").focus();
+
+		}
+
+	<?php
+
+	}
+
+	?>
+
+}
+
+
+
+function funcDepartmentChangeNew()
+
+{
+
+		var department = document.getElementById("department").value;
+
+		var location = document.getElementById("location").value;
+
+		var location = location.trim();
+
+		var subtype = document.getElementById("subtype").value;
+
+		var subtype = subtype.trim();
+
+		var consultingdoctorcode = document.getElementById("consultingdoctorcode").value;
+
+		var consultingdoctorcode = consultingdoctorcode.trim();
+
+		
+
+  	if(location == "")
+
+	{
+
+		alert("Please Select Location.");
+
+		document.getElementById("location").focus();
+
+		return false;
+
+	}
+
+	if(subtype == "")
+
+	{
+
+		alert("Please Select Patient.");
+
+		document.getElementById("customer").focus();
+
+		return false;
+
+	}
+
+	
+
+	if(department == "")
+
+	{
+
+		alert("Please Select Department.");
+
+		document.getElementById("customer").focus();
+
+		return false;
+
+	}
+
+	//alert(department+" department "+subtype+" subtype "+location+" location "+consultingdoctorcode+" consultingdoctorcode");
+
+	
+
+	if(consultingdoctorcode != "")
+
+	{
+
+	
+
+			$.ajax({
+
+				type: "POST",
+
+				url: "ajaxAddConsultationTypeOptions.php",
+
+				datatype: "json",
+
+				async: false,
+
+				data:{'department':department,'subtype':subtype,'location' : location,'doctorcode' : consultingdoctorcode },
+
+				catch : false,
+
+				success:function(data){
+
+				//alert(data);
+
+				//console.log("Inside ajax: "+data); 
+
+				var options = data.split('^');
+
+				var option = options[0];
+
+				var options1 = options[1];
+
+				var optfees = options1.split(',');
+
+				var fees = optfees[1];
+
+				//alert(option);
+
+				//alert(fees);
+
+				$('#consultationtype').html(option);
+
+				$('#consultationfees').val(fees)
+
+
+
+				}
+
+			});
+
+			
+
+	}else{
+
+		
+
+		alert("Please Select Consulting Doctor.");
+
+		document.getElementById("consultingdoctor").focus();
+
+		return false;
+
+	} 
+
+	 
+
+}
+
+
+
+function funcLocationDepartmentChange()
+
+{
+		document.getElementById("department").options.length=null; 
+
+		var combo = document.getElementById('department'); 
+
+		<?php 
+
+		$loopcount=0;
+
+		?>
+
+		combo.options[<?php echo $loopcount;?>] = new Option ("Select Department", ""); 
+
+		combo.options[<?php echo $loopcount;?>].selected ="selected"; 
+
+		<?php 
+
+		$loopcount=1;
+
+		?>
+
+		<?php
+
+		$query10 = "select * from master_department where  recordstatus = ''";
+
+		$exec10 = mysqli_query($GLOBALS["___mysqli_ston"], $query10) or die ("error in query10".mysqli_error($GLOBALS["___mysqli_ston"]));
+
+		while ($res10 = mysqli_fetch_array($exec10))
+
+		{
+
+		
+
+		//if($loopcount == 1) {$loopcount = 0; }
+
+		$res10consultationtypeanum = $res10['auto_number'];
+
+		$res10consultationtype = $res10["department"];
+
+		?>
+
+		combo.options[<?php echo $loopcount;?>] = new Option ("<?php echo $res10consultationtype;?>", "<?php echo $res10consultationtypeanum;?>"); 
+
+		<?php 
+
+		$loopcount = $loopcount+1;
+
+		}
+
+		?>
+
+
+	//funcDepartmentChange();
+
+}
+
+
+
+function funcOnLoadBodyFunctionCall()
+
+{ 
+
+	//alert ("Inside Body On Load Fucntion.");
+
+	//document.getElementById("fetchbtn").style.display = "none";
+
+	//funcBodyOnLoad(); //To reset any previous values in text boxes. source .js - sales1scripting1.php
+
+	locationform();
+
+	//funcDepartmentChange();
+
+	//funcConsultationTypeChange();
+
+	funcbankDropDownSearch1();
+
+	//funcCustomerDropDownSearch1(); //To handle ajax dropdown list.
+
+	distriage();
+
+	//OpPrint();
+
+	
+
+}
+
+
+
+function OpPrint()
+
+{
+
+	var patientcode = "<?php echo $oppatientcode; ?>";
+
+	if(patientcode != '')
+
+	{
+
+		var popWin; 
+
+		//popWin = window.open("print_opvisit_label.php?patientcode="+patientcode,"OriginalWindowA4",'width=800,height=800,toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=1,resizable=1,left=25,top=25'); 
+
+	}
+
+}
+
+
+
+
+
+function funcaccountexpiry()
+
+{
+
+    <?php $date = mktime(0,0,0,date("m"),date("d"),date("Y")); 
+
+	$currentdate = date("Y/m/d",$date);
+
+	?>
+
+	var currentdate = "<?php echo $currentdate; ?>";
+
+	var expirydate = document.getElementById("expirydate").value; 
+
+	var currentdate = Date.parse(currentdate);
+
+	var expirydate = Date.parse(expirydate);
+
+	
+
+	if( expirydate > currentdate)
+
+	{
+
+	alert("Please Select Correct Account Expiry date");
+
+	document.getElementById("expirydate").focus();
+
+	return false;
+
+	}
+
+}
+
+
+
+
+
+function expirydatewarning()
+
+{
+
+	<?php 
+
+	$date = mktime(0,0,0,date("m"),date("d"),date("Y")); 
+
+	$currentdate = date("Y/m/d",$date);
+
+	?>
+
+	//alert("hi");
+
+	var currentdate = "<?php echo $currentdate; ?>";
+
+	var expirydate = document.getElementById("planexpirydate").value;
+
+	var billtype1 = document.getElementById("billtype").value;
+
+	var overalllimit1 = document.getElementById("overalllimit").value;
+
+	var visitlimit1 = document.getElementById("visitlimit").value;
+
+	var availablelimit1 = document.getElementById("availablelimit").value;
+	var planstatus = document.getElementById("planstatus").value;
+
+	
+
+	//var currentdate = Date.parse(currentdate);
+
+	//var expirydate = Date.parse(expirydate);
+
+	var expirydate = expirydate.replace(/-/gi, "/");
+
+	//alert(expirydate);
+
+	//alert(currentdate);
+
+	//alert(availablelimit1);
+
+	
+
+	if(billtype1 != "PAY NOW")
+
+{
+
+	if(overalllimit1 > 0)
+
+	{
+
+	if( availablelimit1 <= 0)
+
+	{
+
+	alert("Overall limit Exceeded");
+
+	return false;
+
+	}
+
+	}
+
+	if((expirydate < currentdate)||(planstatus!='ACTIVE'))
+
+	{
+
+	alert("Plan Expired");
+
+	
+
+return false;
+
+	}
+
+}
+
+funcRegistrationOPLabel();
+
+
+
+}
+
+
+
+$(function() {
+
+	
+
+$('#customer').autocomplete({
+
+		
+
+	source:'ajaxcustomernewserach.php', 
+
+	//alert(source);
+
+	minLength:3,
+
+	delay: 0,
+
+	html: true, 
+
+		select: function(event,ui){
+
+			var code = ui.item.id;
+
+			var customercode = ui.item.customercode;
+
+			var accountname = ui.item.accountname;
+
+			$('#customercode').val(customercode);
+
+			//$('#accountnamename').val(accountname);
+
+			$('#patientcode').val(customercode);
+
+			
+
+			funcCustomerSearch2();
+
+			$('#editpatientlink').show();
+			var currentpage = "visitentry_op_new.php";
+			var url = '<?php echo "http://" . $_SERVER['SERVER_NAME'] . $_SERVER['REQUEST_URI']; ?>';
+			
+			url = url.substring(0, url.indexOf('?'));
+			var editpatienturl = "editpatientop.php?patientcode="+customercode;
+			var url = url.replace(currentpage, editpatienturl);
+			
+			console.log(url)
+			console.log(currentpage)
+			$('#editpatientlink').attr("href",url);
+
+
+			},
+
+    });
+
+});
+
+
+
+</script>
+
+
+
+<?php include ("js/dropdownlist1newscripting1.php"); ?>
+
+<?php include ("js/dropdownlistdoctorname.php"); ?>
+
+
+
+<script type="text/javascript" src="js/autosuggestnew1.js"></script> <!-- For searching customer -->
+
+<script type="text/javascript" src="js/autocomplete_newcustomer.js"></script>
+
+
+
+
+
+<script type="text/javascript" src="js/autosuggestdoctorvis.js"></script> 
+
+<script type="text/javascript" src="js/autocomplete_doctorvis.js"></script>
+
+<script type="text/javascript" src="js/autosuggestdoctorfees.js"></script> 
+
+
+
+  <script type="text/javascript" src="js/disablebackenterkey.js"></script>
+
+<script type="text/javascript" src="js/visitentrypatientcodevalidation1.js"></script>
+
+<!--<script src="js/autocustomersmartsearch.js"></script>-->
+
+<script src="js/datetimepicker_css.js"></script>
+
+
+
+<script type="text/javascript">
+
+function funfetchsavannah(smartap)
+{
+
+if(smartap==1)
+{
+var customersearch=document.getElementById("patientcode").value;
+	//alert(customersearch);
+var registrationdate=document.getElementById("registrationdate").value;
+var data = "customersearch="+customersearch+"&&registrationdate="+registrationdate;	
+$.ajax({
+  type : "get",
+  url : "autocustomersmartsearch.php",
+  data : data,
+  cache : false,
+  success : function (t){
+  if(t!='')
+	{
+	//document.getElementById("price").innerHTML=t;
+	var varCompleteStringReturned=t;
+	//alert (varCompleteStringReturned);
+	var varNewLineValue=varCompleteStringReturned.split("#");
+	//alert(varNewLineValue);
+	//alert(varNewLineValue.length);
+	var varNewLineLength = varNewLineValue.length;
+	//alert(varNewLineLength);
+	
+	var Benefitno = varNewLineValue[0];
+	var BenefitAmt = varNewLineValue[1];
+	var Admitid = varNewLineValue[2];
+	var availablelimit = document.getElementById("availablelimit").value;
+	//if(availablelimit == 0){
+	document.getElementById("availablelimit").value = BenefitAmt;
+	document.getElementById("smartbenefitno").value = Benefitno;
+	document.getElementById("admitid").value = Admitid;
+	//}
+	if(Admitid=='' || Admitid==null || Admitid==0){
+		alert('Admit id is not available, try to reforward and fetch.');
+		return false;
+	}
+	else
+	  alert("Smart Fetch Successfull");
+
+
+	
+	if(parseFloat($('#availablelimit').val()) > 0.00)
+    {
+     $('#submit').prop("disabled",false);
+    }
+	
+	}
+	}
+    
+ });
+}
+else if(smartap==2)
+{
+	$('#savannah_authflag').val("");
+
+	if(document.getElementById('consultationfees').value == '')
+	{
+		alert("Please select consultation type.");
+		document.getElementById('consultationfees').focus();
+		return false;
+	}
+
+	if(document.getElementById('savannah_authid').value == '')
+	{
+		alert("Slade auth id. can not be empty.");
+		document.getElementById('savannah_authid').focus();
+		return false;
+	}
+	else
+	{
+	FuncPopup();
+	memberno = document.getElementById('savannah_authid').value;
+	first_name = document.getElementById('patientfirstname').value;
+	last_name = document.getElementById('patientlastname').value;
+	data = "auth_token="+memberno+"&first_name="+first_name+"&last_name="+last_name;
+	$.ajax({
+	  type : "get",
+	  url : "slade-check.php",
+	  data : data,
+	  cache : false,
+	  timeout:30000,
+	  success : function (data){
+	   var jsondata = JSON.parse(data);
+	   if(jsondata.length !=0 && jsondata['status'] == 'Success'){
+	  if(jsondata['has_op'] == 'Y')
+	  {
+	  //alert("check savannah");
+	   $('#visitlimit').val(jsondata['visit_limit']);
+	   $('#savannahvalid_from').val(jsondata['valid_from']);
+	   $('#savannahvalid_to').val(jsondata['valid_to']);
+	   $('#slade_authentication_token').val(jsondata['slade_authentication_token']);
+	   $('#memberno').val(jsondata['member_number']);
+	   $('#savannah_authlb').removeClass("style1");
+	   $('#savannah_authflag').val("");
+		$('#savannah_authid').prop("readonly",true);
+	   if(smartap==2)
+	   {
+		 $('#availablelimit').val(jsondata['visit_limit']);
+		 alert("Slade Fetch Sucessful.");
+	   }
+		
+	   if(parseFloat($('#availablelimit').val()) > 0.00 && parseFloat(jsondata['visit_limit']) >= parseFloat(document.getElementById('consultationfees').value))
+	   {
+	   $('#submit').prop("disabled",false);
+	   }
+	   else{
+         alert("Insufficient benefit balance.");
+	   }
+	  }
+	else
+	{
+	alert('Member not covered for Out-Patient');
+	}
+	   }
+	   else{
+	     alert(jsondata['error']);
+		
+	   } 
+
+	   document.getElementById("imgloader").style.display = "none";
+	  },error: function(x, t, m) {
+         alert("Unable to connect slade server.");	
+		 document.getElementById("imgloader").style.display = "none";
+		 return false;
+      }
+		
+	 });
+	}
+}
+else if(smartap==3)
+{
+    if(document.getElementById('savannah_authid').value == '')
+	{
+		alert("Slade auth id. can not be empty.");
+		document.getElementById('savannah_authid').focus();
+		return false;
+	}
+   FuncPopup();
+ var memberno = document.getElementById('savannah_authid').value;
+
+var customersearch=document.getElementById("patientcode").value;
+var registrationdate=document.getElementById("registrationdate").value;
+var data = "customersearch="+customersearch+"&&registrationdate="+registrationdate;	
+$.ajax({
+  type : "get",
+  url : "autocustomersmartsearch.php",
+  data : data,
+  cache : false,
+  success : function (t){
+  if(t!='')
+	{
+	//document.getElementById("price").innerHTML=t;
+	var varCompleteStringReturned=t;
+	//alert (varCompleteStringReturned);
+	var varNewLineValue=varCompleteStringReturned.split("#");
+	//alert(varNewLineValue);
+	//alert(varNewLineValue.length);
+	var varNewLineLength = varNewLineValue.length;
+	//alert(varNewLineLength);
+	
+	var Benefitno = varNewLineValue[0];
+	var BenefitAmt = varNewLineValue[1];
+	var Admitid = varNewLineValue[2];
+
+	
+	var availablelimit = document.getElementById("availablelimit").value;
+	//if(availablelimit == 0){
+	document.getElementById("availablelimit").value = BenefitAmt;
+	document.getElementById("smartbenefitno").value = Benefitno;
+	document.getElementById("admitid").value = Admitid;
+	//}
+	if(Admitid=='' || Admitid==null || Admitid==0){
+		alert('Admit id is not available, try to reforward and fetch.');
+		document.getElementById("imgloader").style.display = "none";
+		return false;
+	}
+	else{
+	  first_name = document.getElementById('patientfirstname').value;
+	  last_name = document.getElementById('patientlastname').value;
+	  data = "auth_token="+memberno+"&first_name="+first_name+"&last_name="+last_name;
+	  $.ajax({
+	  type : "get",
+	  url : "slade-check.php",
+	  data : data,
+	  cache : false,
+	  timeout:30000,
+	  success : function (data){
+	   var jsondata = JSON.parse(data);
+	   if(jsondata.length !=0 && jsondata['status'] == 'Success'){
+	  if(jsondata['has_op'] == 'Y')
+	  {
+	   
+	   $('#savannahvalid_from').val(jsondata['valid_from']);
+	   $('#savannahvalid_to').val(jsondata['valid_to']);
+	   $('#slade_authentication_token').val(jsondata['slade_authentication_token']);
+	   $('#savannah_authlb').removeClass("style1");
+	   $('#savannah_authflag').val("");
+	   $('#savannah_authid').prop("readonly",true);
+
+	    if(parseFloat($('#availablelimit').val()) > 0.00)
+		{
+		 $('#submit').prop("disabled",false);
+		}
+	   
+	  }
+	  else
+	  {
+	   alert('Member not covered for Out-Patient');
+	   }
+	  } 
+	  else if(jsondata['error']!='Insufficient benefit balance'){
+	     alert(jsondata['error']);
+		
+	   }else{
+        $('#submit').prop("disabled",false);
+	   }
+
+	   document.getElementById("imgloader").style.display = "none";
+	  },error: function(x, t, m) {
+                 alert("Unable to connect slade server.");	
+		 document.getElementById("imgloader").style.display = "none";
+		 return false;
+      }
+		
+});
+
+	}
+	
+	}
+	}
+    
+ });
+}
+}
+function funcCheckSavannah(patientcode)
+{
+
+data = "patientcode="+patientcode;
+$.ajax({
+  type : "get",
+  url : "ajaxchecksavannah.php",
+  data : data,
+  cache : false,
+  success : function (data){
+  data = data.split('||');
+
+  if(data[0].trim()=='true')
+  {
+
+	document.getElementById("fetchbtn").style.display = "";
+	//$('#fetchbtn').css('display','');
+   //alert(data[1]);
+   Onclick =""+data[1]+"";
+   $('#fetch').attr('onclick',Onclick);
+   $('#fetch').prop('disabled',false);
+    $('#submit').prop("disabled",true);
+	$('#savannah_authflag').val("");
+	return false;
+   }
+    else{
+   $('#fetchbtn').hide();
+   $('#fetch').prop('disabled',true);
+   $('#fetch').attr('onclick','');
+   $('#savannahvalid_from').val('');
+   $('#savannahvalid_to').val('');
+   $('#slade_authentication_token').val('');
+   $('#payer_code').val('');
+    $('#submit').prop("disabled",false);
+	$('#savannah_authflag').val("");
+   }    
+  }
+    
+ });
+}
+
+function ShowImage(imgval,flg)
+
+{
+
+	var imgval = document.getElementById('patientcode').value;
+
+	if(imgval != '')
+
+	{
+
+		if(flg == 'Show Image') {
+
+		var photoavailable = document.getElementById('photoavailable').value;
+
+		if(photoavailable == 'YES') {
+
+		document.getElementById('patientimage').src = 'patientphoto/'+imgval+'.jpg';
+
+		} else {
+
+		document.getElementById('patientimage').src = 'patientphoto/noimage.jpg';
+
+		}
+
+		document.getElementById('imgbtn').value = "Hide Image";
+
+		} else {
+
+		document.getElementById('patientimage').src = '';
+
+		document.getElementById('imgbtn').value = "Show Image";
+
+		}
+
+	}
+
+	else
+
+	{
+
+		alert("Patient Code is Empty");
+
+	}
+
+}
+
+
+function FuncPopup()
+{
+	window.scrollTo(0,0);
+	document.getElementById("imgloader").style.display = "";
+}
+</script>
+
+<link rel="stylesheet" type="text/css" href="css/autosuggest.css" />        
+<style type="text/css">
+.imgloader { background-color:#FFFFFF; }
+#imgloader1 {
+    position: absolute;
+    top: 158px;
+    left: 487px;
+    width: 28%;
+    height: 24%;
+}
+</style>
+<body onLoad="funcOnLoadBodyFunctionCall()">
+
+<div align="center" class="imgloader" id="imgloader" style="display:none;">
+	<div align="center" class="imgloader" id="imgloader1" style="display:;">
+	    <p style="text-align:center;" id='claim_msg'></p>
+		<p style="text-align:center;"><strong>Processing <br><br> Please be patient...</strong></p>
+		<img src="images/ajaxloader.gif">
+	</div>
+</div>
+
+<table width="103%" border="0" cellspacing="0" cellpadding="2">
+
+  <tr>
+
+    <td colspan="10" bgcolor="#ecf0f5"><?php include ("includes/alertmessages1.php"); ?></td>
+
+  </tr>
+
+  <tr>
+
+    <td colspan="10" bgcolor="#ecf0f5"><?php include ("includes/title1.php"); ?></td>
+
+  </tr>
+
+  <tr>
+
+    <td colspan="10" bgcolor="#ecf0f5">
+
+	<?php 
+
+	
+
+		include ("includes/menu1.php"); 
+
+	
+
+	//	include ("includes/menu2.php"); 
+
+	
+
+	?>	</td>
+
+  </tr>
+
+  <tr>
+
+    <td colspan="10">&nbsp;</td>
+
+  </tr>
+
+  <tr>
+
+    <td width="1%">&nbsp;</td>
+
+    <td width="2%" valign="top">&nbsp;</td>
+
+    <td width="97%" valign="top">
+
+
+
+
+
+      	  <form name="form1" id="form1" method="post" action="visitentry_op_new.php" onKeyDown="return disableEnterKey(event)" onSubmit="return process1()">
+
+      <table width="100%" border="0" cellspacing="0" cellpadding="0">
+
+        <tr>
+
+          <td width="860"><table width="1258" height="282" border="0" align="left" cellpadding="4" cellspacing="0" bordercolor="#666666" id="AutoNumber3" style="border-collapse: collapse">
+
+            <tbody>
+
+              <tr bgcolor="#011E6A">
+
+                <td bgcolor="#ecf0f5" class="bodytext3" colspan="2"><strong>Visit Entry </strong></td>
+
+                <!--<td colspan="2" bgcolor="#ecf0f5" class="bodytext3"><?php echo $errmgs; ?>&nbsp;</td>-->
+
+               
+
+                 <td colspan="5" bgcolor="#ecf0f5" class="bodytext3" id="ajaxlocation"><strong> Location </strong>
+
+             
+
+            
+
+                  <?php
+
+						
+
+						$query1 = "select locationname from login_locationdetails where username='$username' and docno='$docno' group by locationname order by locationname";
+
+						$exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
+
+						$res1 = mysqli_fetch_array($exec1);
+
+						
+
+						echo $res1location = $res1["locationname"];
+
+						//$res1locationanum = $res1["locationcode"];
+
+						?>
+
+						
+
+						
+
+                  
+
+                  </td>
+
+                <td bgcolor="#ecf0f5" class="bodytext3"></td>
+
+                
+
+              </tr>
+
+              <tr bgcolor="#011E6A">
+
+                
+
+               
+
+                 <td colspan="8" bgcolor="#ecf0f5" class="bodytext3" id="ajaxlocation"><strong> Search Sequence : First Name | Middle Name | Last Name | Date of Birth | Location | Mobile Number | National ID | Registration No | Member No.   (*Use "|" symbol to skip sequence)</strong>
+
+             
+
+            
+
+          
+
+                
+
+              </tr>
+
+  
+
+             <tr>
+
+                <td colspan="11" align="left" valign="middle"  bgcolor="<?php if ($errmsg == '') { echo '#FFFFFF'; } else { echo 'red'; } ?>" class="bodytext3"><?php echo $errmsg;?>&nbsp;</td>
+
+               
+
+              </tr>
+
+              
+
+              <!--<tr bordercolor="#000000" >
+
+                  <td  align="left" valign="middle"  class="bodytext3"  colspan="4"><strong>Registration</strong></font></div></td>
+
+                </tr>-->
+
+              <!--<tr>
+
+                  <tr  bordercolor="#000000" >
+
+                  <td  align="left" valign="middle"  class="bodytext3" colspan="4"><div align="right">* Indicates Mandatory</div></td>
+
+                </tr>-->
+
+				<tr>
+
+				  <td align="left" valign="middle"  bgcolor="#ecf0f5" class="bodytext3">Patient Search </td>
+
+				  <td colspan="4" align="left" valign="middle"  bgcolor="#ecf0f5">
+
+				  <input type="hidden" name="photoavailable" id="photoavailable" size="10" autocomplete="off" value="<?php echo $photoavailable; ?>">
+
+				  <input name="customer" id="customer" size="60" autocomplete="off">
+
+				  <input name="customerhiddentextbox" id="customerhiddentextbox" value="" type="hidden">
+
+				  <input name="customercode" id="customercode" value="" type="hidden">
+
+				  <input name="nationalid" id="nationalid" value = "" type = "hidden">
+
+				  <input name="accountnames" id="accountnames" value="" type="hidden">
+
+				  <input name = "mobilenumber111" id="mobilenumber111" value="" type="hidden">
+
+ 				<input type="hidden" name="recordstatus" id="recordstatus">
+
+				  <input type="hidden" name="billnumbercode" id="billnumbercode" value="<?php echo $billnumbercode; ?>" readonly style="border: 1px solid #001E6A;">	
+
+				  <input name="apnum" id="apnum" value="<?php echo $apnum; ?>" type="hidden">
+
+				  			  <?php /*?><input type="hidden" name="planstartdate" id="planstartdate">
+
+                             
+
+                              <font  class="bodytext3" style="font-weight:bold;" <?php if($visitlimit==''){?> hidden="true"<?php }?>>
+
+                              
+
+                                  Total Visit:<span id="totalvisit"><?php echo $visitlimit;?></span>
+
+                                  Visited:<span id="visited"><?php $visitcount1=''; echo  $visitcount1=$visitcount-1;?></span>
+
+                                  Visitavailable:<span id="visitavailable"><?php echo $visitavailable=$visitlimit-$visitcount1;?></span>
+
+                                  <input type="hidden" name="visitavailable" id="visitavailable" value="<?php echo $vvisitavailable;?>">
+
+                              </font><?php */?>
+
+                              </td>
+
+
+					<td colspan="2">
+					 <span align="middle" id="edit"><?php if($patientcode!=''){ ?> <a href='editpatient_new.php?patientcode=<?php echo $patientcode; ?>&&op=1'><input type='button' value='Edit Patient Details'/></a><?php } ?></span>
+					</td>
+				  </tr>
+
+				
+
+				<tr><td  class="bodytext3" ><strong> Location </strong></td>
+
+              <td  class="bodytext3" >
+
+              <select name="location" id="location" onChange="locationform(form1,this.value); ajaxlocationfunction(this.value);"  style="border: 1px solid #001E6A;">
+
+                  <?php
+
+						
+
+						$query1 = "select * from login_locationdetails where username='$username' and docno='$docno' group by locationname order by locationname";
+
+						$exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
+
+						while ($res1 = mysqli_fetch_array($exec1))
+
+						{
+
+						$res1location = $res1["locationname"];
+
+						$res1locationanum = $res1["locationcode"];
+
+						?>
+
+						<option value="<?php echo $res1locationanum; ?>" <?php if($res11locationcode!=''){if($res11locationcode == $res1locationanum){echo "selected";}}?>><?php echo $res1location; ?></option>
+
+						<?php
+
+						}
+
+						?>
+
+                  </select>
+
+                  <input type="hidden" name="locationnamenew" value="<?php echo $locationname; ?>">
+
+                <input type="hidden" name="locationcodenew" value="<?php echo $res1locationanum; ?>">
+
+             </td>
+			 <td align="left" valign="middle"  bgcolor="#ecf0f5" class="bodytext3">Type &nbsp;&nbsp;&nbsp;
+				  
+                  <select name="type" id="type" style="border: 1px solid #001E6A;">
+                  <option value="">select</option>
+                  <option value="hospital" selected >Hospital</option>
+                  <option value="private">Private</option>
+                  </select>
+                  </td>
+
+             <td width="13%" align="left" valign="middle"  bgcolor="#ecf0f5">
+			 <span data-toggle="modal" data-target="#myModal" style="display: none;" id="editpatientlink" ></span>
+              <!--<button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal" style="display: none;" id="editpatientlink" onclick="editPatient()">Edit Patient</button>-->
+                <!-- <a style="display: none;" href="" class="btn btn-lg btn-primary" id="editpatientlink" data-toggle="modal" data-target="#myModal" >Edit Patient</a> 
+ -->
+         </td>
+				  <td align="left" valign="middle"  bgcolor="#ecf0f5" class="bodytext3"></td>
+
+				  <td width="14%" align="left" valign="middle"  bgcolor="#ecf0f5" class="bodytext3"><div style="display: none;" id="revisitdiv" ><input type="checkbox" id="revisit" name="revisit" value="1" onclick='chkrevisit();'> <strong><font color='red' size='3'>Revisit</font></strong></div></td>
+
+				  <td width="12%" align="left" valign="middle"  bgcolor="#ecf0f5">&nbsp;</td>
+
+				  <td width="13%" align="left" valign="middle"  bgcolor="#ecf0f5">&nbsp;</td>
+
+				
+
+				  <td width="26%" rowspan="6" align="center" valign="middle"  bgcolor="#ecf0f5"><img width="150" height="150" id="patientimage" src="">
+
+				  <br/> <input type="button" name="imgbtn" id="imgbtn" value="Show Image" onClick="return ShowImage('<?php echo $patientcode; ?>',this.value);"><br/>
+
+				  <div id="fetchbtn" style="display:<?php if($smartap > 0 ){ echo ""; } else { echo "none"; } ?>">
+				  <input name="fetch" type="button"  value="<?php if($smartap ==1 ){ echo "Smart"; } elseif($smartap ==2 ) { echo "Slade"; } elseif($smartap ==3 ) { echo "Smart+Slade"; } ?>" <?php if($smartap > 0 ){ echo ""; } else { echo "disabled"; } ?> class="button" id="fetch" onClick="funfetchsavannah('<?php echo $smartap; ?>');" style="background-color:#FF9900;color:#FFFFFF; font-weight:bold; height:50px; width:100px; cursor:pointer;" /></div></td>
+
+				  </tr>
+
+				<tr>
+
+				  <td align="left" valign="middle"  bgcolor="#ecf0f5" class="bodytext3">Patient</td>
+
+				  <td align="left" valign="middle"  bgcolor="#ecf0f5">
+
+				  <input name="patientfirstname" id="patientfirstname" value="<?php echo $patientfirstname; ?>" readonly  size="20" /></td>
+
+				  <td align="left" valign="middle"  bgcolor="#ecf0f5">
+
+				  <input name="patientmiddlename" id="patientmiddlename" value="<?php echo $patientmiddlename; ?>" readonly size="20" /></td>
+
+				  <td align="left" valign="middle"  bgcolor="#ecf0f5"><input name="patientlastname" id="patientlastname" value="<?php echo $patientlastname; ?>" readonly size="20" /></td>
+
+				  <td align="left" valign="middle"  bgcolor="#ecf0f5" class="bodytext3">Age</td>
+
+				  <td align="left" valign="middle"  bgcolor="#ecf0f5"><input type="text" name="age" id="age" value="<?php echo $age; ?>" readonly></td>
+
+				  <td align="left" valign="middle"  bgcolor="#ecf0f5">&nbsp;</td>
+
+				 </tr>
+
+				<tr>
+
+				  <td align="left" valign="middle"  bgcolor="#ecf0f5" class="bodytext3">Patient Reg ID </td>
+
+				  <td align="left" valign="middle"  bgcolor="#ecf0f5">
+
+				  <input name="patientcode" id="patientcode" size="20" value="<?php echo $patientcode; ?>" readonly/></td>
+
+				  <td align="left" valign="middle"  bgcolor="#ecf0f5"><span class="bodytext32">Registration Date </span></td>
+
+				  <td align="left" valign="middle"  bgcolor="#ecf0f5"><input type="text" name="registrationdate" id="registrationdate" value="<?php echo $consultationdate; ?>" ></td>
+
+				  <td align="left" valign="middle"  bgcolor="#ecf0f5" class="bodytext3">Gender</td>
+
+				  <td align="left" valign="middle"  bgcolor="#ecf0f5"><input type="text" name="gender" value="<?php echo $gender; ?>" id="gender" readonly></td>
+
+				  <td align="left" valign="middle"  bgcolor="#ecf0f5">&nbsp;</td>
+
+				  </tr>
+
+				<tr>
+
+				  <td align="left" valign="middle"  bgcolor="#ecf0f5" class="bodytext3">Type</td>
+
+				  <td align="left" valign="middle"  bgcolor="#ecf0f5"><input type="text" name="paymenttypename" id="paymenttypename"  value="<?php echo $paymenttype;?>" readonly>
+
+				    <input type="hidden" name="paymenttype" id="paymenttype"  value="<?php echo $paymenttypeanum;?>" readonly   style="border: 1px solid #001E6A;">					</td>
+
+				  <td align="left" valign="middle"  bgcolor="#ecf0f5" class="bodytext3"><span class="bodytext32">Visit ID </span></td>
+
+				  <td align="left" valign="middle"  bgcolor="#ecf0f5"><input name="visitcode" id="visitcode" value="<?php echo $visitcode; ?>" readonly size="20" /></td>
+
+				  <td align="left" valign="middle"  bgcolor="#ecf0f5"><span class="bodytext32">Account</span></td>
+
+				  <td align="left" valign="middle"  bgcolor="#ecf0f5"><input type="text" name="accountnamename" id="accountnamename"  value="<?php echo $accountname;?>"  readonly="readonly" style="width: 250px">
+
+				    <input type="hidden" name="accountname" id="accountname"  value="<?php echo $accountnameanum;?>"  readonly="readonly"  style="border: 1px solid #001E6A;"></td>
+				    <input type="hidden" name="scheme_id" id="scheme_id"  value="<?php echo $scheme_id;?>"  readonly="readonly"  style="border: 1px solid #001E6A;"></td>
+
+				  <td align="left" valign="middle"  bgcolor="#ecf0f5">&nbsp;</td>
+
+				</tr>
+
+				<tr>
+
+				  <td align="left" valign="middle"  bgcolor="#ecf0f5" class="bodytext3">Sub Type </td>
+
+				  <td align="left" valign="middle"  bgcolor="#ecf0f5"><label>
+
+                 
+
+				    <input type="text" name="subtypename" id="subtypename"  value="<?php echo $subtype;?>"  readonly="readonly"  >
+
+				    <input type="hidden" name="subtype" id="subtype"  value="<?php echo $subtypeanum;?>"  readonly="readonly"  style="border: 1px solid #001E6A;">
+
+					<input type="hidden" name="subtype_mcc" id="subtype_mcc"  value="<?php echo $is_mcc;?>"  readonly="readonly"  style="border: 1px solid #001E6A;">
+
+				  </label></td>
+
+				  <td align="left" valign="middle"  bgcolor="#ecf0f5" class="bodytext3"><span class="bodytext32">Bill Type </span></td>
+
+				  <td align="left" valign="middle"  bgcolor="#ecf0f5"><input type="text" name="billtype" id="billtype"  value="<?php echo $billtype;?>"  readonly="readonly" ></td>
+
+				  <td align="left" valign="middle"  bgcolor="#ecf0f5"><span class="bodytext32">Account Expiry</span></td>
+
+				  <td align="left" valign="middle"  bgcolor="#ecf0f5">
+				  <input type="text" name="accountexpirydate" id="accountexpirydate"  value="<?php echo $accountexpirydate;?>"  readonly="readonly" >
+				  <input type="text" style="display:none" name="account_active" id="account_active"  value="<?php echo $account_active;?>"  readonly="readonly" >
+				  </td>
+
+				  <td align="left" valign="middle"  bgcolor="#ecf0f5">&nbsp;</td>
+
+				  </tr>
+
+				
+
+				<tr>
+
+				  <td align="left" valign="middle"  bgcolor="#ecf0f5" class="bodytext3">Plan Name </td>
+
+				  <td align="left" valign="middle"  bgcolor="#ecf0f5"><label>
+
+                    <input type="text" name="plannamename" id="plannamename"  value="<?php echo $planname;?>"   readonly="readonly">
+
+                    <input type="hidden" name="planname" id="planname"  value="<?php echo $plannameanum;?>"   readonly="readonly" style="border: 1px solid #001E6A;">
+
+					<input type="hidden" name="planstatus" id="planstatus"  value="<?php echo $planstatus;?>"   readonly="readonly">
+
+                  </label></td>
+
+				  <td align="left" valign="middle"  bgcolor="#ecf0f5" class="bodytext3">Plan Expiry </td>
+
+				  <td align="left" valign="middle"  bgcolor="#ecf0f5"><input type="text" name="planexpirydate" id="planexpirydate"  value="<?php echo $planexpirydate;?>"   readonly="readonly" ></td>
+
+				  <td align="left" valign="middle"  bgcolor="#ecf0f5"><span class="bodytext32">Last Visit</span></td>
+
+				  <td align="left" valign="middle"  bgcolor="#ecf0f5"><input type="text" name="lastvisitdate" id="lastvisitdate" value="<?php echo $lastvisitdate; ?>" readonly>
+
+				   </td>
+
+				  <td align="left" valign="middle"  bgcolor="#ecf0f5"><label></label></td>
+
+				  </tr>
+
+				<tr>
+
+				  <td align="left" valign="middle"  bgcolor="#ecf0f5" class="bodytext3"><span class="bodytext32">Fixed Amt </span></td>
+
+				  <td align="left" valign="middle"  bgcolor="#ecf0f5"><label>
+
+				  <input type="text" name="planfixedamount" id="planfixedamount"  value="<?php echo $planfixedamount;?>">
+
+				  </label></td>
+
+				  <td align="left" valign="middle"  bgcolor="#ecf0f5" class="bodytext3">Overall Limit </td>
+
+				  <td align="left" valign="middle"  bgcolor="#ecf0f5"><input type="text" name="overalllimit" id="overalllimit"  value="<?php echo $overalllimit;?>"   readonly="readonly"></td>
+
+				  <td align="left" valign="middle"  bgcolor="#ecf0f5"><span class="bodytext32">Patient Due</span></td>
+
+				  <td align="left" valign="middle"  bgcolor="#ecf0f5"><input type="text" name="patientspent" id="patientspent"  value="<?php echo $patientspent;?>"   readonly="readonly" ></td>
+
+				  <td align="left" valign="middle"  bgcolor="#ecf0f5"><label></label></td>
+
+				  </tr>
+
+				
+
+				<tr>
+
+				  <td align="left" valign="middle"  bgcolor="#ecf0f5" class="bodytext3">Percentage</td>
+
+				  <td align="left" valign="middle"  bgcolor="#ecf0f5"><label>
+
+				 <input type="text" name="planpercentageamount" id="planpercentageamount"  value="<?php echo $planpercentageamount;?>"   readonly="readonly" ></label> </td>
+
+				  <td align="left" valign="middle"  bgcolor="#ecf0f5" class="bodytext3">Available Limit </td>
+
+				  <td align="left" valign="middle"  bgcolor="#ecf0f5"><input type="text" name="availablelimit" id="availablelimit"  value="<?php echo $availablelimit;?>"   readonly></td>
+
+				  <td align="left" valign="middle"  bgcolor="#ecf0f5"><span class="bodytext32">Visit Days </span></td>
+
+				  <td align="left" valign="middle"  bgcolor="#ecf0f5"><strong>
+
+				    <input type="text" name="visitdays" id="visitdays" value="<?php echo $visitdays; ?>" readonly>
+
+				    <input type="hidden" name="visitcount" id="visitcount"  value="<?php echo $visitcount;?>"   readonly="readonly" >
+
+				    <input name="visittype" id="visittype" value="" type="hidden">
+
+				  </strong></td>
+
+				  <td align="left" valign="middle"  bgcolor="#ecf0f5"><label></label></td>
+
+				</tr>
+
+				
+
+				<tr>
+
+				  <td align="left" valign="middle"  bgcolor="#ecf0f5" class="bodytext3"><span class="bodytext32" style="color:red" >*Department</span></td>
+
+				  <td align="left" valign="middle"  bgcolor="#ecf0f5"><strong>
+
+				      <select name="department" id="department" onChange="return funcDepartmentChange()">
+
+                        <?php
+
+				$query6 = "select * from master_department where recordstatus = '' order by auto_number ASC";
+
+				$exec6 = mysqli_query($GLOBALS["___mysqli_ston"], $query6) or die ("Error in Query5".mysqli_error($GLOBALS["___mysqli_ston"]));
+
+				while ($res6 = mysqli_fetch_array($exec6))
+
+				{
+
+				$res6anum = $res6["auto_number"];
+
+				$res6department = $res6["department"];
+
+				?>
+
+                        <!--<option value="<?php echo $res6anum; ?>" ><?php echo $res6department; ?></option>-->
+
+                        <?php
+
+				}
+
+				?>
+
+                      </select>
+
+				  </strong></td>
+
+				  <td align="left" valign="middle"  bgcolor="#ecf0f5"><span class="bodytext32" style="color:red" >*Consulting Doctor </span></td>
+
+				  <td align="left" valign="middle"  bgcolor="#ecf0f5"><strong>
+
+			<input name="consultingdoctor" id="consultingdoctor" value="" autocomplete="off" />
+
+            <input type="hidden" name="consultingdoctorcode" id="consultingdoctorcode" value="" />
+
+			<input type="hidden" name="hospitalfees" id="hospitalfees" value="" />
+
+			<input type="hidden" name="doctorfees" id="doctorfees" value="" />
+
+			<input name="consultingdoctorsearch" id="consultingdoctorsearch" value="" type="hidden" />
+
+				  </strong></td>
+
+				  
+
+				  <td align="left" valign="middle"  bgcolor="#ecf0f5"><span class="bodytext32" style="color:red" >* Fee Type</span></td>
+
+				  <td align="left" valign="middle"  bgcolor="#ecf0f5"><strong>
+
+				    <select name="consultationtype" id="consultationtype" onChange="return funcConsultationTypeChange()">
+
+                     <option value="" selected="selected">Select Consultation Type</option>
+
+                      
+
+					  
+
+					  
+
+					  
+
+					  <?php 
+
+					 
+
+					  $que = "select * from login_locationdetails where username='$username' and docno='$docno' order by auto_number desc";
+
+						$exe = mysqli_query($GLOBALS["___mysqli_ston"], $que) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
+
+						$res = mysqli_fetch_array($exe);
+
+						
+
+						$resultlocation = $res["locationname"];
+
+						$resultlocationanum = $res["locationcode"];
+
+						
+
+						$s =0 ;
+
+						$t=0;
+
+				  $query52="select * from master_consultationtype where locationcode = '$resultlocationanum' and recordstatus = ''";
+
+				  $exec52=mysqli_query($GLOBALS["___mysqli_ston"], $query52) or die(mysqli_error($GLOBALS["___mysqli_ston"]));
+
+				  while($res52=mysqli_fetch_array($exec52))
+
+				  {
+
+				  $res52anum=$res52["auto_number"];
+
+				  $res52consultationtype=$res52["consultationtype"];
+
+				  $s = $s + 1;
+
+				  if($s == 1)
+
+				  {
+
+					  $res52fees = $res52["consultationtype"];
+
+				  }
+
+				  ?>
+
+                      <!--<option value="<?php echo $res52anum; ?>" ><?php echo $res52consultationtype; ?></option>-->
+
+                      <?php
+
+				  }
+
+					  
+
+				  ?>
+
+                    </select>
+
+				  </strong></td>
+
+				  <td align="left" valign="middle"  bgcolor="#ecf0f5" rowspan='2'>
+                     <div id='copaymsg'>
+					 <?php
+					 if($planpercentageamount>0 || $planfixedamount>0){
+                        echo "<span style='color:red;FONT-WEIGHT:bold;FONT-SIZE: 20px;'>COPAY TO BE COLLECTED</span>";
+				      }
+					 ?>
+					 </div>
+				  </td>
+
+				</tr>
+
+				<tr>
+
+                <td width="9%" align="left" valign="middle"  bgcolor="#ecf0f5" class="bodytext3"><span class="bodytext32">Visit Date </span></td>
+
+                <td align="left" valign="middle"  bgcolor="#ecf0f5"><input type="text" name="consultationdate" id="consultationdate" value="<?php echo $consultationdate; ?>" readonly ></td>
+
+                <td align="left" valign="middle"  bgcolor="#ecf0f5"><span class="bodytext32"> Time </span></td>
+
+                <td align="left" valign="middle"  bgcolor="#ecf0f5"><input name="consultationtime" id="consultationtime" value="<?php echo $consultationtime; ?>" readonly size="10" /></td>
+
+                <td align="left" valign="middle"  bgcolor="#ecf0f5"><span class="bodytext32">Consultation Fees </span></td>
+
+              <?php  
+
+			  
+
+			  
+
+               /* $query53="select * from master_consultationtype where locationcode = '$resultlocationanum' and department = '1' and recordstatus = '' order by consultationtype";
+
+				
+
+				  $exec53=mysql_query($query53) or die(mysql_error());
+
+				  $res53=mysql_fetch_array($exec53);
+
+				  
+
+				  $res53anum=$res52["auto_number"];
+
+				  $res53consultationfees=$res53["consultationfees"];*/
+
+				  
+
+				  ?>
+
+                  
+
+                <td align="left" valign="middle"  bgcolor="#ecf0f5"><input name="consultationfees" id="consultationfees" value="<?php //echo $res53consultationfees; ?>" onFocus="return funcVisitEntryPatientCodeValidation1()" size="20" readonly/></td>
+
+               
+
+                <td align="left" valign="middle"  bgcolor="#ecf0f5">&nbsp;</td>
+
+				</tr>
+
+				 
+
+				 <tr>
+
+				   <td align="left" valign="middle"  bgcolor="#ecf0f5" class="bodytext3"><span class="bodytext32">Member No </span></td>
+
+				   <td align="left" valign="middle"  bgcolor="#ecf0f5"><input name="memberno" id="memberno" value="<?= $memberno ?>" size="20" readonly /></td>
+
+				   <td align="left" valign="middle"  bgcolor="#ecf0f5" class="bodytext3"><span class="bodytext32"><label onClick="return enabtriage();">MRD NO </label></span></td>
+
+				   <td align="left" valign="middle"  bgcolor="#ecf0f5"><input name="mrdno" id="mrdno" value="<?php echo $mrdno; ?>"readonly="readonly" size="20" /></td>
+
+				   <td align="left" valign="middle"  bgcolor="#ecf0f5" class="bodytext3"><span class="bodytext32">Registration Fees </span></td>
+
+				   <td align="left" valign="middle"  bgcolor="#ecf0f5"><input name="registrationfees" id="registrationfees" value="<?php echo $registrationfees; ?>" readonly size="20" /></td>
+
+				   <td align="left" valign="middle"  bgcolor="#ecf0f5">&nbsp;</td>
+
+				 </tr>
+
+				 
+
+				 
+
+			 <tr id="enabtriag">
+
+				   <td align="left" valign="middle"  bgcolor="#ecf0f5" class="bodytext3">Triage</td>
+
+				   <td colspan="5" align="left" valign="middle"  bgcolor="#ecf0f5"><input type="checkbox" name="triag" id="triag" checked="checked"></td>
+
+			      </tr>
+
+			 
+
+				 <tr>
+
+                 <td align="left" class="bodytext3">Plan Used</td>
+
+               	   <td align="left" class="bodytext31"><input type="text" name="plandue" id="plandue" readonly value="<?php echo $overallplandue; ?>"></td>
+
+				   <td align="left" valign="middle"  bgcolor="#ecf0f5" class="bodytext3">Visit Limit</td>
+
+				   <td align="left" valign="middle"  bgcolor="#ecf0f5"> <input type="text" name="visitlimit" id="visitlimit"  value="<?php echo $visitlimit;?>"></td>
+
+				   <td align="left" valign="middle"  bgcolor="#ecf0f5" id='mccarea' <?php if($is_mcc==1){ } else { ?> style='display:none' <?php } ?>><!--<span class="bodytext32" style="color:red" >*MCC</span>--></td>
+
+				   <td align="left" valign="middle"  bgcolor="#ecf0f5" id='mccareaval' <?php if($is_mcc==1){ } else { ?> style='display:none' <?php } ?>><input type='hidden' name="mccno" id="mccno" value="1" size="20"  /></td>
+
+
+
+				   <td align="left" valign="middle"  bgcolor="#ecf0f5">&nbsp;</td>
+
+                 </tr>
+
+                 <tr>
+
+                 <td align="left" valign="middle"  bgcolor="#ecf0f5" class="bodytext3"><span class="bodytext32">Smart Benefit No </span></td>
+
+				   <td align="left" valign="middle"  bgcolor="#ecf0f5"><input name="smartbenefitno" id="smartbenefitno" value="" size="20"  readonly/></td>
+
+				   <td align="left" valign="middle"  bgcolor="#ecf0f5" class="bodytext3"><span class="bodytext32"><label onClick="return enabtriage();">Admit ID </label></span></td>
+
+				   <td align="left" valign="middle"  bgcolor="#ecf0f5"><input name="admitid" id="admitid" value="" size="20" readonly/></td>
+
+				<td align="left" valign="middle"  bgcolor="#ecf0f5" class="bodytext3"><span id="savannah_authlb" class="bodytext32">Slade Authentication No</span></td>
+				   <td align="left" valign="middle"  bgcolor="#ecf0f5"><input name="savannah_authid" id="savannah_authid" value="" size="20"  /><input name="savannah_authflag" id="savannah_authflag" value="" size="20" type="hidden" /></td>
+				 
+                <td  align="middle"  bgcolor="#ecf0f5"><div align="left"> <font color="#000000" size="1" face="Verdana, Arial, Helvetica, sans-serif"> <font color="#000000" size="1" face="Verdana, Arial, Helvetica, sans-serif"> <font color="#000000" size="1" face="Verdana, Arial, Helvetica, sans-serif"> <font color="#000000" size="1" face="Verdana, Arial, Helvetica, sans-serif"> <font color="#000000" size="1" face="Verdana, Arial, Helvetica, sans-serif">
+				<input name="savannahvalid_from" id="savannahvalid_from" value="" type="hidden" />
+				<input name="savannahvalid_to" id="savannahvalid_to" value="" type="hidden" />
+				<input name="slade_authentication_token" id="slade_authentication_token" value="" type="hidden" />
+				<input name="payer_code" id="payer_code" value="" type="hidden" />
+
+				<input name="lastdepartment" id="lastdepartment" value="" type="hidden" />
+				<input name="lastconsultingdoctor" id="lastconsultingdoctor" value="" type="hidden" />
+				<input name="lastconsultingdoctorcode" id="lastconsultingdoctorcode" value="" type="hidden" />
+
+                  <input type="hidden" name="frmflag1" value="frmflag1" />
+
+                  <input type="hidden" name="loopcount" value="<?php echo $i - 1; ?>" />
+
+                  <input name="Submit222" type="submit"  value="Save Visit Entry (Alt+S)" accesskey="s" class="button" id="submit" onClick="return expirydatewarning()" <?php if($smartap > 0) echo "disabled"; ?>/> 
+
+                </font></font></font></font></font></div>
+
+             
+
+     </td>
+
+     
+
+              </tr>
+
+            </tbody>
+
+          </table></td>
+
+        </tr>
+
+        <tr>
+
+          <td>&nbsp;</td>
+
+        </tr>
+
+    </table>
+
+	</form>
+
+</table>
+
+
+
+
+<script>
+function editPatient() {
+	var href = $('#editpatientlink').attr("href");
+	console.log(href)
+  //window.open(href, "_blank", "toolbar=yes,scrollbars=yes,resizable=yes,top=100,left=50,width=1200,height=550");
+ 	var new_window =  window.open(href, "_blank", "width="+screen.availWidth+",height="+screen.availHeight);
+ 	//new_window.onbeforeunload = function(){ 
+
+	new_window.onunload = function(){ 
+ 	console.log('before close');//alert('closed') 
+	
+	 funcCustomerSearch2();
+	 var patienfn = $('#patientfirstname').val();
+	 $('#customer').val(patienfn);
+}
+  
+}
+
+//var new_window = window.open('some url')
+
+</script>
+
+
+<?php include ("includes/footer1.php"); ?>
+
+</body>
+
+</html>
+

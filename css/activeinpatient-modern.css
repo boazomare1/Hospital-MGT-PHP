@@ -1,0 +1,704 @@
+/* Active Inpatient List Modern CSS */
+:root {
+    --medstar-primary: #1e40af;
+    --medstar-primary-light: #3b82f6;
+    --medstar-secondary: #64748b;
+    --medstar-accent: #f59e0b;
+    --background-primary: #ffffff;
+    --background-secondary: #f8fafc;
+    --background-accent: #f1f5f9;
+    --text-primary: #1f2937;
+    --text-secondary: #64748b;
+    --border-color: #e2e8f0;
+    --border-radius: 8px;
+    --border-radius-small: 4px;
+    --shadow-light: 0 1px 3px rgba(0, 0, 0, 0.1);
+    --shadow-medium: 0 4px 6px rgba(0, 0, 0, 0.1);
+    --transition: all 0.3s ease;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: var(--background-secondary);
+    color: var(--text-primary);
+    line-height: 1.6;
+}
+
+/* Hospital Header */
+.hospital-header {
+    background: linear-gradient(135deg, var(--medstar-primary), var(--medstar-primary-light));
+    color: white;
+    text-align: center;
+    padding: 2rem 1rem;
+    box-shadow: var(--shadow-medium);
+}
+
+.hospital-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.hospital-subtitle {
+    font-size: 1.1rem;
+    opacity: 0.9;
+}
+
+/* User Information Bar */
+.user-info-bar {
+    background: var(--background-primary);
+    padding: 1rem 2rem;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: var(--shadow-light);
+}
+
+.user-welcome {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.welcome-text {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.location-info {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.user-actions {
+    display: flex;
+    gap: 1rem;
+}
+
+/* Navigation Breadcrumb */
+.nav-breadcrumb {
+    background: var(--background-primary);
+    padding: 1rem 2rem;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.nav-breadcrumb a {
+    color: var(--medstar-primary);
+    text-decoration: none;
+    transition: var(--transition);
+}
+
+.nav-breadcrumb a:hover {
+    color: var(--medstar-primary-light);
+}
+
+.nav-breadcrumb span {
+    color: var(--text-secondary);
+}
+
+/* Floating Menu Toggle */
+.floating-menu-toggle {
+    position: fixed;
+    top: 120px;
+    left: 20px;
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(135deg, var(--medstar-primary), var(--medstar-primary-light));
+    color: white;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: var(--shadow-medium);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    transition: var(--transition);
+    opacity: 0.9;
+}
+
+.floating-menu-toggle:hover {
+    opacity: 1;
+    transform: scale(1.05);
+}
+
+/* Main Container with Sidebar */
+.main-container-with-sidebar {
+    display: flex;
+    min-height: calc(100vh - 200px);
+    transition: var(--transition);
+}
+
+.main-container-with-sidebar.sidebar-collapsed .main-content {
+    margin-left: 0;
+}
+
+.main-container-with-sidebar.sidebar-collapsed .left-sidebar {
+    transform: translateX(-100%);
+}
+
+/* Left Sidebar */
+.left-sidebar {
+    width: 280px;
+    background: var(--background-primary);
+    border-right: 1px solid var(--border-color);
+    box-shadow: var(--shadow-medium);
+    transition: var(--transition);
+    z-index: 100;
+    position: fixed;
+    height: calc(100vh - 200px);
+    overflow-y: auto;
+}
+
+.sidebar-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+    background: var(--background-secondary);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.sidebar-header h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.sidebar-toggle {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: var(--border-radius-small);
+    transition: var(--transition);
+}
+
+.sidebar-toggle:hover {
+    background: var(--background-accent);
+    color: var(--text-primary);
+}
+
+.sidebar-nav {
+    padding: 1rem 0;
+}
+
+.nav-list {
+    list-style: none;
+}
+
+.nav-item {
+    margin: 0;
+}
+
+.nav-link {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 1.5rem;
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: var(--transition);
+    border-left: 3px solid transparent;
+    gap: 0.75rem;
+}
+
+.nav-link:hover {
+    background: var(--background-secondary);
+    color: var(--text-primary);
+    border-left-color: var(--medstar-primary);
+}
+
+.nav-link.active {
+    background: var(--background-secondary);
+    color: var(--medstar-primary);
+    border-left-color: var(--medstar-primary);
+    font-weight: 600;
+}
+
+.nav-link i {
+    width: 1.25rem;
+    text-align: center;
+}
+
+/* Main Content */
+.main-content {
+    flex: 1;
+    margin-left: 280px;
+    padding: 2rem;
+    transition: margin-left 0.3s ease;
+}
+
+/* Page Header */
+.page-header {
+    background: var(--background-primary);
+    padding: 2rem;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-light);
+    margin-bottom: 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.page-header-content h2 {
+    font-size: 1.875rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+}
+
+.page-header-content p {
+    color: var(--text-secondary);
+    font-size: 1rem;
+    margin: 0;
+}
+
+.page-header-actions {
+    display: flex;
+    gap: 1rem;
+}
+
+/* Form Section */
+.form-section {
+    background: var(--background-primary);
+    padding: 2rem;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-light);
+    margin-bottom: 2rem;
+}
+
+.form-header {
+    margin-bottom: 1.5rem;
+}
+
+.form-header h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-label {
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+}
+
+.form-input,
+.form-select {
+    padding: 0.75rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-small);
+    font-size: 1rem;
+    transition: var(--transition);
+    background-color: var(--background-primary);
+}
+
+.form-input:focus,
+.form-select:focus {
+    outline: none;
+    border-color: var(--medstar-primary);
+    box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.1);
+}
+
+.form-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-start;
+    margin-top: 1.5rem;
+}
+
+/* Summary Section */
+.summary-section {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.summary-card {
+    background: var(--background-primary);
+    padding: 1.5rem;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-light);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    transition: var(--transition);
+}
+
+.summary-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-medium);
+}
+
+.summary-icon {
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, var(--medstar-primary), var(--medstar-primary-light));
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+}
+
+.summary-content h3 {
+    font-size: 1.875rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.summary-content p {
+    color: var(--text-secondary);
+    margin: 0;
+    font-size: 0.875rem;
+}
+
+/* Button Styles */
+.btn {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: var(--border-radius-small);
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btn-primary {
+    background: var(--medstar-primary);
+    color: white;
+}
+
+.btn-primary:hover {
+    background: var(--medstar-primary-light);
+}
+
+.btn-secondary {
+    background: var(--background-accent);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+}
+
+.btn-secondary:hover {
+    background: var(--border-color);
+}
+
+.btn-outline {
+    background: transparent;
+    color: var(--medstar-primary);
+    border: 1px solid var(--medstar-primary);
+}
+
+.btn-outline:hover {
+    background: var(--medstar-primary);
+    color: white;
+}
+
+/* Data Section */
+.data-section {
+    background: var(--background-primary);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-light);
+    overflow: hidden;
+}
+
+.section-header {
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid var(--border-color);
+    background: var(--background-secondary);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.section-icon {
+    font-size: 1.5rem;
+}
+
+.section-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+/* Table Container */
+.table-container {
+    padding: 2rem;
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 2rem;
+}
+
+.data-table th {
+    background: var(--background-secondary);
+    padding: 1rem;
+    text-align: left;
+    font-weight: 600;
+    color: var(--text-primary);
+    border-bottom: 1px solid var(--border-color);
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.data-table td {
+    padding: 1rem;
+    border-bottom: 1px solid var(--background-accent);
+    vertical-align: middle;
+}
+
+.data-table tbody tr:hover {
+    background: var(--background-secondary);
+}
+
+/* Package Label */
+.package-label {
+    background: #ef4444;
+    color: white;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-align: center;
+    display: inline-block;
+    min-width: 40px;
+}
+
+/* Action Dropdown */
+.action-dropdown {
+    padding: 0.5rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-small);
+    background: var(--background-primary);
+    color: var(--text-primary);
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: var(--transition);
+    min-width: 120px;
+}
+
+.action-dropdown:focus {
+    outline: none;
+    border-color: var(--medstar-primary);
+    box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.1);
+}
+
+.action-dropdown:hover {
+    background: var(--background-secondary);
+}
+
+/* Pagination Controls */
+.pagination-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 0;
+    border-top: 1px solid var(--border-color);
+}
+
+.pagination-info {
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+}
+
+.pagination-buttons {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.page-numbers {
+    display: flex;
+    gap: 0.25rem;
+}
+
+.page-numbers button {
+    padding: 0.5rem 0.75rem;
+    border: 1px solid var(--border-color);
+    background: var(--background-primary);
+    color: var(--text-primary);
+    border-radius: var(--border-radius-small);
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.page-numbers button:hover {
+    background: var(--background-secondary);
+}
+
+.page-numbers button.active {
+    background: var(--medstar-primary);
+    color: white;
+    border-color: var(--medstar-primary);
+}
+
+.items-per-page {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.items-select {
+    padding: 0.5rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-small);
+    background: var(--background-primary);
+}
+
+/* Loading and No Data States */
+.loading-spinner {
+    text-align: center;
+    padding: 2rem;
+    color: var(--text-secondary);
+}
+
+.loading-spinner i {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    color: var(--medstar-primary);
+}
+
+.loading-spinner p {
+    margin: 0;
+    font-size: 1rem;
+}
+
+.no-data {
+    text-align: center;
+    padding: 2rem;
+    color: var(--text-secondary);
+}
+
+.no-data i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    color: var(--text-secondary);
+    opacity: 0.5;
+}
+
+.no-data p {
+    margin: 0;
+    font-size: 1rem;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .left-sidebar {
+        transform: translateX(-100%);
+    }
+    
+    .main-container-with-sidebar.sidebar-collapsed .left-sidebar {
+        transform: translateX(0);
+    }
+    
+    .main-content {
+        margin-left: 0;
+    }
+    
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+    
+    .summary-section {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .hospital-header {
+        padding: 1rem;
+    }
+    
+    .hospital-title {
+        font-size: 2rem;
+    }
+    
+    .user-info-bar {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+    }
+    
+    .main-content {
+        padding: 1rem;
+    }
+    
+    .page-header {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+    }
+    
+    .page-header-actions {
+        justify-content: center;
+    }
+    
+    .form-section,
+    .data-section {
+        padding: 1.5rem;
+    }
+    
+    .table-container {
+        padding: 1rem;
+    }
+    
+    .data-table {
+        font-size: 0.875rem;
+    }
+    
+    .data-table th,
+    .data-table td {
+        padding: 0.75rem 0.5rem;
+    }
+    
+    .pagination-controls {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+    }
+    
+    .btn {
+        width: 100%;
+        justify-content: center;
+    }
+}

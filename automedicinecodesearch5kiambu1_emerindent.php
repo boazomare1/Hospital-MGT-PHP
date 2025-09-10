@@ -1,0 +1,72 @@
+<?php
+session_start();
+include ("db/db_connect.php");
+$medicinesearch = $_REQUEST["medicinesearch"];
+$searchsuppliercode = $_REQUEST["searchsuppliercode"];
+$companyanum = $_SESSION['companyanum'];
+$username = $_SESSION['username'];
+//$medicinesearch = strtoupper($medicinesearch);
+$docno = $_SESSION['docno'];
+$query = "select * from login_locationdetails where username='$username' and docno='$docno' order by locationname";
+$exec = mysqli_query($GLOBALS["___mysqli_ston"], $query) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
+$res = mysqli_fetch_array($exec);
+$locationname  = $res["locationname"];
+$locationcode = $res["locationcode"];
+$searchresult2 = "";
+$query2 = "select * from master_medicine where itemcode = '$medicinesearch' order by itemname";
+$exec2 = mysqli_query($GLOBALS["___mysqli_ston"], $query2) or die ("Error in Query2".mysqli_error($GLOBALS["___mysqli_ston"]));
+while ($res2 = mysqli_fetch_array($exec2))
+{
+	$itemcode = $res2["itemcode"];
+	$itemname = $res2["itemname"];
+	$itemname = strtoupper($itemname);
+	$rateperunit = $res2["purchaseprice"];
+	$packagename = $res2["packagename"];
+	$strength = $res2["roq"];
+	$categoryname = $res2["categoryname"];
+	
+	
+	$query234 = "select rate from  master_itemmapsupplier where suppliercode = '$searchsuppliercode' and itemcode='$itemcode' and fav_supplier='1'";
+	$exec234 = mysqli_query($GLOBALS["___mysqli_ston"], $query234) or die('Error in query234'.mysqli_error($GLOBALS["___mysqli_ston"]));
+	$res234 = mysqli_fetch_array($exec234);
+	$costprice = $res234['rate'];
+
+	
+	//$costprice =$rateperunit;
+
+	$query231 = "select * from master_employeelocation where username='$username' and locationcode='$locationcode' and defaultstore='default' order by auto_number desc";
+	$exec231 = mysqli_query($GLOBALS["___mysqli_ston"], $query231) or die(mysqli_error($GLOBALS["___mysqli_ston"]));
+	$res231 = mysqli_fetch_array($exec231);
+	$res7locationanum1 = $res231['locationcode'];
+
+	$location = $res231['locationname'];
+	$res7storeanum1 = $res231['storecode'];
+	$query751 = "select * from master_store where auto_number='$res7storeanum1'";
+	$exec751 = mysqli_query($GLOBALS["___mysqli_ston"], $query751) or die(mysqli_error($GLOBALS["___mysqli_ston"]));
+	$res751 = mysqli_fetch_array($exec751);
+	$store = $res751['store'];
+	$storecode = $res751['storecode'];
+
+	$itemcode = $itemcode;
+
+$querybatstock2 = "select sum(batch_quantity) as batch_quantity from transaction_stock where batch_stockstatus='1' and itemcode='$itemcode' and storecode = '$storecode'";
+$execbatstock2 = mysqli_query($GLOBALS["___mysqli_ston"], $querybatstock2) or die ("Error in batQuery2".mysqli_error($GLOBALS["___mysqli_ston"]));
+$resbatstock2 = mysqli_fetch_array($execbatstock2);
+$bat_quantity = $resbatstock2["batch_quantity"];
+	$currentstock = $bat_quantity;
+	
+	if ($searchresult2 == '')
+	{
+	    $searchresult2 = ''.$itemcode.'||'.$itemname.'||'.$costprice.'||'.$currentstock.'||'.$packagename.'||'.$categoryname.'||'.$strength.'||'.$storecode;
+	}
+	else
+	{
+		$searchresult2 = $searchresult2.'||^||'.$itemcode.'||'.$itemname.'||'.$costprice.'||'.$currentstock.'||'.$packagename.'||'.$categoryname.'||'.$strength.'||'.$storecode;
+	}
+	
+}
+if ($searchresult2 != '')
+{
+ echo $searchresult2;
+}
+?>

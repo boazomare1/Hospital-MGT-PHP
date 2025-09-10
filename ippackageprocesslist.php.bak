@@ -1,0 +1,477 @@
+<?php
+session_start();
+include ("includes/loginverify.php"); 
+include ("db/db_connect.php");
+echo $menu_id;
+include ("includes/check_user_access.php");
+$ipaddress = $_SERVER['REMOTE_ADDR'];
+$updatedatetime = date('Y-m-d');
+$username = $_SESSION['username'];
+$docno=$_SESSION['docno'];
+$companyanum = $_SESSION['companyanum'];
+$companyname = $_SESSION['companyname'];
+
+
+$docno = $_SESSION['docno'];
+
+ //get location for sort by location purpose
+   $location=isset($_REQUEST['location'])?$_REQUEST['location']:'';
+	if($location!='')
+	{
+		  $locationcode=$location;
+		}
+
+?>
+<style type="text/css">
+<!--
+body {
+	margin-left: 0px;
+	margin-top: 0px;
+	background-color: #ecf0f5;
+}
+.bodytext3 {	FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3B3B3C; FONT-FAMILY: Tahoma
+}
+-->
+</style>
+<link href="css/datepickerstyle.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="js/adddate.js"></script>
+<script type="text/javascript" src="js/adddate2.js"></script>
+<script language="javascript">
+
+function ajaxlocationfunction(val)
+{ 
+if (window.XMLHttpRequest)
+					  {// code for IE7+, Firefox, Chrome, Opera, Safari
+					  xmlhttp=new XMLHttpRequest();
+					  }
+					else
+					  {// code for IE6, IE5
+					  xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+					  }
+					xmlhttp.onreadystatechange=function()
+					  {
+					  if (xmlhttp.readyState==4 && xmlhttp.status==200)
+						{
+						document.getElementById("ajaxlocation").innerHTML=xmlhttp.responseText;
+						}
+					  }
+					xmlhttp.open("GET","ajax/ajaxgetlocationname.php?loccode="+val,true);
+					xmlhttp.send();
+}
+					
+//ajax to get location which is selected ends here
+
+
+</script>
+<script type="text/javascript">
+
+function funcSubTypeChange1()
+{
+	<?php 
+	$query12 = "select * from master_location";
+	$exec12 = mysqli_query($GLOBALS["___mysqli_ston"], $query12) or die ("Error in Query11".mysqli_error($GLOBALS["___mysqli_ston"]));
+	while ($res12 = mysqli_fetch_array($exec12))
+	{
+	 $res12subtypeanum = $res12["auto_number"];
+	$res12locationname = $res12["locationname"];
+	$res12locationcode = $res12["locationcode"];
+	?>
+
+	if(document.getElementById("location").value=="<?php echo $res12locationcode; ?>")
+	{
+
+		document.getElementById("ward").options.length=null; 
+		var combo = document.getElementById('ward'); 	
+		<?php 
+		$loopcount=0; 
+		?>
+		combo.options[<?php echo $loopcount;?>] = new Option ("Select Ward", ""); 
+		<?php
+		$query10 = "select * from master_ward where locationname = '$res12locationname' and recordstatus = '' order by ward";
+		$exec10 = mysqli_query($GLOBALS["___mysqli_ston"], $query10) or die ("error in query10".mysqli_error($GLOBALS["___mysqli_ston"]));
+		while ($res10 = mysqli_fetch_array($exec10))
+		{
+		$loopcount = $loopcount+1;
+		$res10accountnameanum = $res10["auto_number"];
+		$ward = $res10["ward"];
+		?>
+			combo.options[<?php echo $loopcount;?>] = new Option ("<?php echo $ward;?>", "<?php echo $res10accountnameanum;?>"); 
+		<?php 
+		}
+		?>
+	}
+	<?php
+	}
+	?>	
+}
+function disableEnterKey(varPassed)
+{
+	//alert ("Back Key Press");
+	if (event.keyCode==8) 
+	{
+		event.keyCode=0; 
+		return event.keyCode 
+		return false;
+	}
+	
+	var key;
+	if(window.event)
+	{
+		key = window.event.keyCode;     //IE
+	}
+	else
+	{
+		key = e.which;     //firefox
+	}
+
+	if(key == 13) // if enter key press
+	{
+		//alert ("Enter Key Press2");
+		return false;
+	}
+	else
+	{
+		return true;
+	}
+}
+
+
+function process1backkeypress1()
+{
+	//alert ("Back Key Press");
+	if (event.keyCode==8) 
+	{
+		event.keyCode=0; 
+		return event.keyCode 
+		return false;
+	}
+}
+
+function disableEnterKey()
+{
+	//alert ("Back Key Press");
+	if (event.keyCode==8) 
+	{
+		event.keyCode=0; 
+		return event.keyCode 
+		return false;
+	}
+	
+	var key;
+	if(window.event)
+	{
+		key = window.event.keyCode;     //IE
+	}
+	else
+	{
+		key = e.which;     //firefox
+	}
+	
+	if(key == 13) // if enter key press
+	{
+		return false;
+	}
+	else
+	{
+		return true;
+	}
+
+}
+</script>
+
+<link rel="stylesheet" type="text/css" href="css/autosuggest.css" />        
+<style type="text/css">
+<!--
+.bodytext3 {FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3b3b3c; FONT-FAMILY: Tahoma; text-decoration:none
+}
+.bodytext31 {FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3b3b3c; FONT-FAMILY: Tahoma; text-decoration:none
+}
+.bodytext311 {FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3b3b3c; FONT-FAMILY: Tahoma; text-decoration:none
+}
+-->
+.bal
+{
+border-style:none;
+background:none;
+text-align:right;
+}
+.bali
+{
+text-align:right;
+}
+</style>
+</head>
+
+<script src="js/datetimepicker_css.js"></script>
+
+<body>
+<table width="101%" border="0" cellspacing="0" cellpadding="2">
+  <tr>
+    <td colspan="10" bgcolor="#ecf0f5"><?php include ("includes/alertmessages1.php"); ?></td>
+  </tr>
+  <tr>
+    <td colspan="10" bgcolor="#ecf0f5"><?php include ("includes/title1.php"); ?></td>
+  </tr>
+  <tr>
+    <td colspan="10" bgcolor="#ecf0f5"><?php include ("includes/menu1.php"); ?></td>
+  </tr>
+  <tr>
+    <td class="bodytext31">&nbsp;</td>
+    <td class="bodytext31">&nbsp;</td>
+   
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+  </tr>
+  <tr>
+    <td width="1%">&nbsp;</td>
+    <td width="2%" valign="top"><?php //include ("includes/menu4.php"); ?>
+      &nbsp;</td>
+    <td width="97%" valign="top"><table width="116%" border="0" cellspacing="0" cellpadding="0">
+      <tr>
+        <td width="860">
+		
+		
+              <form name="cbform1" method="post" action="ippackageprocesslist.php">
+		<table width="910" border="0" align="left" cellpadding="4" cellspacing="0" bordercolor="#666666" id="AutoNumber3" style="border-collapse: collapse">
+          <tbody>
+            <tr bgcolor="#011E6A">
+              <td colspan="2" bgcolor="#ecf0f5" class="bodytext3"><strong>Inpatient Package Processing Request</strong></td>
+              <td colspan="2" align="right" bgcolor="#ecf0f5" class="bodytext3" id="ajaxlocation"><strong> Location </strong>
+             
+            
+                  <?php
+						
+						if ($location!='')
+						{
+						$query12 = "select locationname from master_location where locationcode='$location' order by locationname";
+						$exec12 = mysqli_query($GLOBALS["___mysqli_ston"], $query12) or die ("Error in Query12".mysqli_error($GLOBALS["___mysqli_ston"]));
+						$res12 = mysqli_fetch_array($exec12);
+						
+						echo $res1location = $res12["locationname"];
+						//echo $location;
+						}
+						else
+						{
+						$query1 = "select locationname from login_locationdetails where username='$username' and docno='$docno' group by locationname order by locationname";
+						$exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
+						$res1 = mysqli_fetch_array($exec1);
+						
+						echo $res1location = $res1["locationname"];
+						//$res1locationanum = $res1["locationcode"];
+						}
+						?>
+						
+						
+                  
+                  </td>
+
+              </tr>
+          <tr>
+		   <td width="68" align="left" valign="center"  bgcolor="#FFFFFF" class="style1"><span class="bodytext31"><strong> Location </strong></span></td>
+          <td  colspan="3" align="left" valign="center"  bgcolor="#ffffff"><span class="bodytext31">
+           <select name="location" id="location" onChange=" funcSubTypeChange1(); ajaxlocationfunction(this.value);">
+           <?php
+		   			$query1 = "select * from login_locationdetails where username='$username' and docno='$docno' group by locationname order by locationname";
+			$exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
+			while ($res1 = mysqli_fetch_array($exec1))
+			{
+						 $locationname = $res1["locationname"];
+						 $locationcode = $res1["locationcode"];
+?>
+		   <option value="<?php echo $locationcode; ?>" <?php if($location!='')if($location==$locationcode){echo "selected";}?>><?php echo $locationname; ?></option>
+  <?php         }?>
+		   </select></span>
+            <input type="hidden" name="locationcodeget" value="<?php echo $locationcodeget?>">
+				<input type="hidden" name="locationnameget" value="<?php echo $locationnameget?>">
+
+				<input type="hidden" name="cbfrmflag1" value="cbfrmflag1">
+               &nbsp; <input  type="submit" value="Search" name="Submit" onClick="return funcvalidcheck();"/>
+
+				</td>
+          </tr>
+            <tr>
+            	<td width="23%" align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3" colspan="2">&nbsp;</td>
+            
+              
+              <td width="62%" align="left" valign="top"  bgcolor="#FFFFFF"></td>
+            </tr>
+             </tbody>
+        </table>
+		  <iframe marginheight="1" marginwidth="50" src="inpatientlabtestscrolling.php" frameborder="0" scrolling="no" width="450" height="70"></iframe>
+		</form>		</td>
+      </tr>
+	  <form name="form1" id="form1" method="post" action="ipdischargelist.php">	
+	  <tr>
+        <td>
+	
+		
+<?php
+	$colorloopcount=0;
+	$sno=0;
+if (isset($_REQUEST["cbfrmflag1"])) { $cbfrmflag1 = $_REQUEST["cbfrmflag1"]; } else { $cbfrmflag1 = ""; }
+//$cbfrmflag1 = $_POST['cbfrmflag1'];
+if ($cbfrmflag1 == 'cbfrmflag1')
+{
+	 
+	 $locationcode = $_REQUEST['location'];
+	
+	
+		   
+		  					
+?>
+		<table id="AutoNumber3" style="BORDER-COLLAPSE: collapse" 
+            bordercolor="#666666" cellspacing="0" cellpadding="4" width="1200" 
+            align="left" border="0">
+          <tbody>
+             
+            <tr>
+              <td width="3%" class="bodytext31" valign="center"  align="left" 
+                bgcolor="#ffffff"><div align="center"><strong>No.</strong></div></td>
+					 <td width="18%" class="bodytext31" valign="center"  align="left" 
+                bgcolor="#ffffff"><div align="center"><strong>Patient Name</strong></div></td>
+				 <td width="7%" class="bodytext31" valign="center"  align="left" 
+                bgcolor="#ffffff"><div align="center"><strong>Reg No</strong></div></td>
+				  <td width="7%" class="bodytext31" valign="center"  align="left" 
+                bgcolor="#ffffff"><div align="center"><strong>DOA</strong></div></td>
+                
+				 <td width="7%" class="bodytext31" valign="center"  align="left" 
+                bgcolor="#ffffff"><div align="center"><strong>IP Visit</strong></div></td>
+				
+			 <td width="12%"  align="left" valign="center" 
+                bgcolor="#ffffff" class="bodytext31"><div align="center"><strong>Package Name</strong></div></td>
+                  <td width="17%"  align="left" valign="center" 
+                bgcolor="#ffffff" class="bodytext31"><div align="center"><strong>Sub Type</strong></div></td>
+				 <td width="17%"  align="left" valign="center" 
+                bgcolor="#ffffff" class="bodytext31"><div align="center"><strong>Account</strong></div></td>
+              
+					 <td width="8%"  align="left" valign="center" 
+                bgcolor="#ffffff" class="bodytext31"><div align="center"><strong>Action</strong></div></td>
+               
+             
+              </tr>
+           
+			<?php 
+
+			$query82 = "select mipv.* from master_ipvisitentry mipv inner join package_items pi on mipv.package = pi.package_id where mipv.locationcode='$locationcode' and mipv.package_process<> 'completed' group by mipv.visitcode";
+		   $exec82 = mysqli_query($GLOBALS["___mysqli_ston"], $query82) or die(mysqli_error($GLOBALS["___mysqli_ston"]));
+		   $num82 = mysqli_num_rows($exec82);
+		   while($res82 = mysqli_fetch_array($exec82))
+		   {
+
+				$patientname = $res82['patientfullname'];
+				$patientcode = $res82['patientcode'];
+				$visitcode = $res82['visitcode'];
+				$date = $res82['consultationdate'];
+				$accountid = $res82['accountname'];
+
+				$query = mysqli_query($GLOBALS["___mysqli_ston"], "select main.accountname accountname, sub.accountssub accountssub from master_accountname main inner join master_accountssub sub on main.accountssub=sub.auto_number  where main.auto_number = '$accountid'");
+				$res = mysqli_fetch_array($query);
+				$accoutname = $res['accountname'];
+				$accsub =      $res['accountssub'];
+				
+				$package = $res82['package'];
+
+				$query401 = "select packagename from master_ippackage where   auto_number = '$package'";
+				$exec401 = mysqli_query($GLOBALS["___mysqli_ston"], $query401) or die(mysqli_error($GLOBALS["___mysqli_ston"]));
+				$res401 = mysqli_fetch_array($exec401);
+				$packagename = $res401['packagename'];
+
+				$colorloopcount = $colorloopcount + 1;
+			$showcolor = ($colorloopcount & 1); 
+			if ($showcolor == 0)
+			{
+				//echo "if";
+				$colorcode = 'bgcolor="#CBDBFA"';
+			}
+			else
+			{
+				//echo "else";
+				$colorcode = 'bgcolor="#ecf0f5"';
+			}
+
+			?>
+			
+          <tr <?php echo $colorcode; ?>>
+              <td class="bodytext31" valign="center"  align="left"><div align="center"><?php echo $sno = $sno + 1; ?></div></td>
+		
+			  <td class="bodytext31" valign="center"  align="left">
+			    <div align="center"><?php echo $patientname; ?></div></td>
+				
+				  <td class="bodytext31" valign="center"  align="left">
+			    <div align="center"><?php echo $patientcode; ?></div></td>
+					  <td class="bodytext31" valign="center"  align="left"><div align="center"><?php echo $date; ?></div></td>
+				  <td class="bodytext31" valign="center"  align="left">
+			    <div align="center"><?php echo $visitcode; ?></div></td>
+               
+				  <td class="bodytext31" valign="center"  align="left">
+			    <div align="center"><?php echo $packagename; ?></div></td>
+			     <td class="bodytext31" valign="center"  align="left">
+			    <div align="center"><?php echo $accsub; ?></div></td>
+			     <td class="bodytext31" valign="center"  align="left">
+			    <div align="center"><?php echo $accoutname; ?></div></td>
+			   
+				<td class="bodytext31" valign="center"  align="center">
+	<!-- <a href="ipdischargerequest.php?patientcode=<?php echo $patientcode; ?>&&visitcode=<?php echo $visitcode;?>&&patientlocation=<?php echo $location;?>">Discharge</a> -->
+	<a href="ippackageprocessing.php?packageid=<?php echo $package; ?>&&patientcode=<?php echo $patientcode; ?>&&visitcode=<?php echo $visitcode;?>&&patientlocation=<?php echo $location;?>&&menuid=<?php echo $menu_id; ?>" style="font-weight: bold;">Process Package</a>
+				</td>
+               
+                
+              </tr>
+
+              <?php 
+
+              } ?>
+		   
+           
+            <tr>
+              <td class="bodytext311" valign="center" bordercolor="#f3f3f3" align="left" 
+                bgcolor="#ecf0f5">&nbsp;</td>
+				<td class="bodytext311" valign="center" bordercolor="#f3f3f3" align="left" 
+                bgcolor="#ecf0f5">&nbsp;</td>
+			
+				<td class="bodytext311" valign="center" bordercolor="#f3f3f3" align="left" 
+                bgcolor="#ecf0f5">&nbsp;</td>
+             	<td class="bodytext311" valign="center" bordercolor="#f3f3f3" align="left" 
+                bgcolor="#ecf0f5">&nbsp;</td>
+            
+              <td class="bodytext311" valign="center" bordercolor="#f3f3f3" align="left" 
+                bgcolor="#ecf0f5">&nbsp;</td>
+				   <td class="bodytext311" valign="center" bordercolor="#f3f3f3" align="left" 
+                bgcolor="#ecf0f5">&nbsp;</td>
+				   <td class="bodytext311" valign="center" bordercolor="#f3f3f3" align="left" 
+                bgcolor="#ecf0f5">&nbsp;</td>
+                <td class="bodytext311" valign="center" bordercolor="#f3f3f3" align="left" 
+                bgcolor="#ecf0f5">&nbsp;</td>
+				   <td class="bodytext311" valign="center" bordercolor="#f3f3f3" align="left" 
+                bgcolor="#ecf0f5">&nbsp;</td>
+				  
+			</tr>
+          </tbody>
+        </table>
+<?php
+}
+
+
+?>		</td>
+      </tr>
+      <tr>
+        <td>&nbsp;</td>
+      </tr>
+      <tr>
+        <td>&nbsp;</td>
+      </tr>
+      <tr>
+        <td>&nbsp;</td>
+      </tr>
+	  </form>
+    </table>
+  </table>
+<?php include ("includes/footer1.php"); ?>
+</body>
+</html>
+

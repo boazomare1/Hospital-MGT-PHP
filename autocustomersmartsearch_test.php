@@ -1,0 +1,63 @@
+<?php
+$hostname = '172.16.0.16:3307';
+$hostlogin = 'integ_user';
+$hostpassword = 'integ123';
+$databasename = 'smartlink';
+
+//Folder Name Change Only Necessary
+
+$link = ($GLOBALS["___mysqli_ston"] = mysqli_connect($hostname, $hostlogin, $hostpassword)) or die('Could not connect Database : ' . mysqli_error($GLOBALS["___mysqli_ston"]));
+mysqli_select_db($GLOBALS["___mysqli_ston"], $databasename) or die('Could not select database'. mysqli_error($GLOBALS["___mysqli_ston"]));
+$customersearch = $_REQUEST['customersearch'];
+$registrationdate = $_REQUEST['registrationdate'];
+
+if(isset($_REQUEST['visitcode']))
+  $visitcode = $_REQUEST['visitcode'];
+ else
+   $visitcode ='';
+
+if(isset($_REQUEST['InOut_Type'])) { $InOut_Type = $_REQUEST['InOut_Type']; } else { $InOut_Type = '1'; }
+if($InOut_Type == '2'){
+$query1 = "select * from exchange_files where Member_Nr = '$customersearch' and Progress_Flag = '1' and InOut_Type = '$InOut_Type'  order by ID DESC";
+}else{
+echo $query1 = "select * from exchange_files where Member_Nr = '$customersearch' and Progress_Flag = '1' and InOut_Type = '$InOut_Type' and DATE(Smart_Date) = '$registrationdate' order by ID DESC";
+}
+//$query1 = "select * from exchange_files where Progress_Flag = '1'";
+$exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
+$num = mysqli_num_rows($exec1);
+
+$res1 = mysqli_fetch_array($exec1);
+
+
+    $amt=0;
+	$Smart_File = $res1['Smart_File'];
+	$Admit_ID = $res1['Admit_ID'];
+//echo $Member_Nr = $res1['Member_Nr'];
+	//echo $Smart_Date = $res1['Smart_Date'];
+	
+	$myXMLData = $Smart_File;
+	
+	if($num > 0)
+	{
+		$xml=simplexml_load_string($myXMLData) or die("Error: Cannot create object");
+		print_r($xml);
+		$amt=$xml->Benefits->Benefit->Amount;
+	}
+	
+	
+	if($num > 0)
+	{
+	    if($visitcode!='' && $amt>0){
+	    include ("db/db_connect.php");
+		$query2 = "UPDATE master_visitentry SET availablelimit = '$amt' WHERE patientcode = '".$customersearch."' AND visitcode='".$visitcode."' ";
+        $exec2 = mysqli_query($GLOBALS["___mysqli_ston"], $query2);
+	  }
+		echo $xml->Benefits->Benefit->Nr."#".$xml->Benefits->Benefit->Amount."#".$Admit_ID.'';
+	}
+	else
+	{
+		echo '0'."#".'0'."#".'0';
+	}
+
+
+?>

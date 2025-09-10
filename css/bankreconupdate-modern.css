@@ -1,0 +1,1008 @@
+/* Bank Reconciliation Update Modern CSS */
+/* Modern, responsive styling with enhanced UI components for bank reconciliation update management */
+
+/* Import Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+/* CSS Variables */
+:root {
+    --primary-color: #3498db;
+    --primary-dark: #2980b9;
+    --secondary-color: #2ecc71;
+    --accent-color: #e74c3c;
+    --warning-color: #f39c12;
+    --success-color: #27ae60;
+    --info-color: #3498db;
+    
+    --text-primary: #2c3e50;
+    --text-secondary: #7f8c8d;
+    --text-muted: #95a5a6;
+    
+    --bg-primary: #ffffff;
+    --bg-secondary: #f8f9fa;
+    --bg-tertiary: #ecf0f1;
+    
+    --border-color: #e1e8ed;
+    --border-light: #ecf0f1;
+    
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+    --shadow-md: 0 4px 6px rgba(0,0,0,0.1), 0 1px 3px rgba(0,0,0,0.08);
+    --shadow-lg: 0 10px 20px rgba(0,0,0,0.15), 0 3px 6px rgba(0,0,0,0.10);
+    
+    --radius-sm: 4px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    
+    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --text-primary: #ecf0f1;
+        --text-secondary: #bdc3c7;
+        --text-muted: #95a5a6;
+        
+        --bg-primary: #2c3e50;
+        --bg-secondary: #34495e;
+        --bg-tertiary: #3d4852;
+        
+        --border-color: #4a5568;
+        --border-light: #5a6c7d;
+    }
+}
+
+/* Base Styles */
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+    line-height: 1.6;
+    font-size: 14px;
+}
+
+/* Typography */
+.bodytext3, .bodytext31, .bodytext312 {
+    font-weight: 400;
+    font-size: 14px;
+    color: var(--text-primary);
+    font-family: 'Inter', sans-serif;
+    text-decoration: none;
+}
+
+/* Layout */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0;
+    padding: 0;
+}
+
+/* Header Section */
+.hospital-header {
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+    color: white;
+    padding: 1.5rem;
+    text-align: center;
+    box-shadow: var(--shadow-md);
+}
+
+.hospital-title {
+    margin: 0;
+    font-size: 2rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.hospital-subtitle {
+    font-size: 1.1rem;
+    opacity: 0.9;
+    margin: 0;
+}
+
+/* User Info Bar */
+.user-info-bar {
+    background: var(--bg-primary);
+    padding: 0.75rem 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border-light);
+    box-shadow: var(--shadow-sm);
+}
+
+.user-info, .datetime {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.user-info i, .datetime i {
+    color: var(--primary-color);
+}
+
+/* Breadcrumb Navigation */
+.breadcrumb-nav {
+    background: var(--bg-primary);
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--border-light);
+}
+
+.breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.breadcrumb a {
+    color: var(--primary-color);
+    text-decoration: none;
+    transition: var(--transition);
+}
+
+.breadcrumb a:hover {
+    color: var(--primary-dark);
+}
+
+.breadcrumb .separator {
+    color: var(--text-muted);
+}
+
+.breadcrumb span:last-child {
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+/* Floating Menu Toggle */
+.floating-menu-toggle {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 0.75rem;
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: var(--shadow-lg);
+    z-index: 1000;
+    transition: var(--transition);
+}
+
+.floating-menu-toggle:hover {
+    background: var(--primary-dark);
+    transform: scale(1.1);
+}
+
+/* Main Container */
+.main-container {
+    display: flex;
+    min-height: calc(100vh - 200px);
+}
+
+/* Left Sidebar */
+.left-sidebar {
+    width: 280px;
+    background: var(--bg-primary);
+    border-right: 1px solid var(--border-light);
+    transition: var(--transition);
+    box-shadow: var(--shadow-sm);
+}
+
+.sidebar-header {
+    background: var(--bg-secondary);
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--border-light);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.sidebar-header h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    color: var(--text-primary);
+}
+
+.sidebar-toggle {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 0.25rem;
+    border-radius: var(--radius-sm);
+    transition: var(--transition);
+}
+
+.sidebar-toggle:hover {
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+}
+
+.sidebar-nav {
+    padding: 1rem 0;
+}
+
+/* Main Content */
+.main-content {
+    flex: 1;
+    padding: 2rem;
+    background: var(--bg-secondary);
+}
+
+/* Page Header */
+.page-header {
+    background: var(--bg-primary);
+    padding: 1.5rem;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    margin-bottom: 2rem;
+    border: 1px solid var(--border-light);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.page-title h2 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.8rem;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.page-title h2 i {
+    color: var(--primary-color);
+}
+
+.page-title p {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 1rem;
+}
+
+.page-header-actions {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+/* Buttons */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-weight: 500;
+    text-decoration: none;
+    cursor: pointer;
+    transition: var(--transition);
+    font-size: 14px;
+    text-align: center;
+}
+
+.btn-primary {
+    background: var(--primary-color);
+    color: white;
+}
+
+.btn-primary:hover {
+    background: var(--primary-dark);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+}
+
+.btn-secondary {
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+}
+
+.btn-secondary:hover {
+    background: var(--border-color);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
+}
+
+/* Alert Messages */
+.alert {
+    padding: 1rem 1.5rem;
+    border-radius: var(--radius-md);
+    margin-bottom: 1.5rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.alert-success {
+    background: rgba(39, 174, 96, 0.1);
+    color: var(--success-color);
+    border: 1px solid rgba(39, 174, 96, 0.3);
+}
+
+.alert-error {
+    background: rgba(231, 76, 60, 0.1);
+    color: var(--accent-color);
+    border: 1px solid rgba(231, 76, 60, 0.3);
+}
+
+.alert-warning {
+    background: rgba(243, 156, 18, 0.1);
+    color: var(--warning-color);
+    border: 1px solid rgba(243, 156, 18, 0.3);
+}
+
+.alert-icon {
+    font-size: 1.1rem;
+}
+
+/* Bank Reconciliation Section */
+.bank-recon-section {
+    background: var(--bg-primary);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border-light);
+    margin-bottom: 2rem;
+    overflow: hidden;
+}
+
+.section-header {
+    background: var(--bg-secondary);
+    padding: 1rem 1.5rem;
+    border-bottom: 2px solid var(--border-color);
+}
+
+.section-header h3 {
+    margin: 0;
+    font-size: 1.2rem;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.section-header h3 i {
+    color: var(--primary-color);
+}
+
+/* Bank Reconciliation Form */
+.bank-recon-form {
+    padding: 1.5rem;
+}
+
+.form-container {
+    overflow-x: auto;
+}
+
+/* Reconciliation Table */
+.recon-table {
+    width: 100%;
+    min-width: 1200px;
+    border-collapse: collapse;
+    margin-bottom: 1.5rem;
+}
+
+.recon-table th {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    font-weight: 600;
+    padding: 1rem 0.75rem;
+    text-align: left;
+    border-bottom: 2px solid var(--border-color);
+    font-size: 14px;
+    white-space: nowrap;
+}
+
+.recon-table td {
+    padding: 1rem 0.75rem;
+    border-bottom: 1px solid var(--border-light);
+    vertical-align: middle;
+}
+
+.recon-table tr:nth-child(even) {
+    background: var(--bg-secondary);
+}
+
+.recon-table tr:hover {
+    background: var(--bg-tertiary);
+    transition: var(--transition);
+}
+
+/* Table Column Styles */
+.account-name {
+    font-weight: 600;
+    color: var(--text-primary);
+    min-width: 150px;
+}
+
+.doc-no {
+    font-family: 'Courier New', monospace;
+    color: var(--primary-color);
+    font-weight: 600;
+    min-width: 100px;
+}
+
+.inst-no {
+    font-family: 'Courier New', monospace;
+    color: var(--text-secondary);
+    min-width: 80px;
+}
+
+.amount {
+    font-family: 'Courier New', monospace;
+    font-weight: 600;
+    text-align: right;
+    color: var(--primary-color);
+    min-width: 120px;
+}
+
+.posting-date {
+    font-family: 'Courier New', monospace;
+    color: var(--text-secondary);
+    min-width: 100px;
+}
+
+.cheque-date {
+    font-family: 'Courier New', monospace;
+    color: var(--text-secondary);
+    min-width: 100px;
+}
+
+.posted-by {
+    color: var(--text-primary);
+    min-width: 100px;
+}
+
+.remarks {
+    color: var(--text-secondary);
+    max-width: 200px;
+    word-wrap: break-word;
+}
+
+.bank-amount {
+    min-width: 120px;
+}
+
+.bank-date {
+    min-width: 120px;
+}
+
+.action {
+    min-width: 100px;
+    text-align: center;
+}
+
+/* Form Inputs */
+.form-input {
+    width: 100%;
+    padding: 0.75rem;
+    border: 2px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    transition: var(--transition);
+    background: var(--bg-primary);
+    color: var(--text-primary);
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+}
+
+.form-input:disabled {
+    background-color: var(--bg-tertiary);
+    color: var(--text-muted);
+    cursor: not-allowed;
+}
+
+.form-input.datepicker {
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="%2395a5a6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>');
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    background-size: 16px;
+    padding-right: 2.5rem;
+}
+
+/* Transaction Type Indicators */
+.transaction-type {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+    text-transform: uppercase;
+    margin-left: 0.5rem;
+}
+
+.type-receivable {
+    background: rgba(39, 174, 96, 0.1);
+    color: var(--success-color);
+    border: 1px solid rgba(39, 174, 96, 0.3);
+}
+
+.type-payable {
+    background: rgba(231, 76, 60, 0.1);
+    color: var(--accent-color);
+    border: 1px solid rgba(231, 76, 60, 0.3);
+}
+
+.type-expense {
+    background: rgba(243, 156, 18, 0.1);
+    color: var(--warning-color);
+    border: 1px solid rgba(243, 156, 18, 0.3);
+}
+
+.type-receipt {
+    background: rgba(52, 152, 219, 0.1);
+    color: var(--primary-color);
+    border: 1px solid rgba(52, 152, 219, 0.3);
+}
+
+.type-bank {
+    background: rgba(26, 188, 156, 0.1);
+    color: #1abc9c;
+    border: 1px solid rgba(26, 188, 156, 0.3);
+}
+
+.type-journal {
+    background: rgba(52, 73, 94, 0.1);
+    color: #34495e;
+    border: 1px solid rgba(52, 73, 94, 0.3);
+}
+
+/* Status Indicators */
+.status-indicator {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+    text-transform: uppercase;
+}
+
+.status-posted {
+    background: rgba(39, 174, 96, 0.1);
+    color: var(--success-color);
+    border: 1px solid rgba(39, 174, 96, 0.3);
+}
+
+.status-pending {
+    background: rgba(243, 156, 18, 0.1);
+    color: var(--warning-color);
+    border: 1px solid rgba(243, 156, 18, 0.3);
+}
+
+.status-unpresented {
+    background: rgba(52, 152, 219, 0.1);
+    color: var(--primary-color);
+    border: 1px solid rgba(52, 152, 219, 0.3);
+}
+
+.status-uncleared {
+    background: rgba(155, 89, 182, 0.1);
+    color: #9b59b6;
+    border: 1px solid rgba(155, 89, 182, 0.3);
+}
+
+/* Summary Section */
+.summary-section {
+    background: var(--bg-primary);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border-light);
+    margin-bottom: 2rem;
+    overflow: hidden;
+}
+
+.summary-header {
+    background: var(--bg-secondary);
+    padding: 1rem 1.5rem;
+    border-bottom: 2px solid var(--border-color);
+}
+
+.summary-header h3 {
+    margin: 0;
+    font-size: 1.2rem;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.summary-header h3 i {
+    color: var(--primary-color);
+}
+
+.summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    padding: 1.5rem;
+}
+
+.summary-card {
+    background: var(--bg-secondary);
+    padding: 1.5rem;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-light);
+    text-align: center;
+    transition: var(--transition);
+}
+
+.summary-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.summary-amount {
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    font-family: 'Courier New', monospace;
+}
+
+.summary-amount.posted {
+    color: var(--success-color);
+}
+
+.summary-amount.pending {
+    color: var(--warning-color);
+}
+
+.summary-label {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    font-weight: 500;
+}
+
+/* Form Validation */
+.field-error {
+    color: var(--accent-color);
+    font-size: 12px;
+    margin-top: 4px;
+    font-weight: 500;
+}
+
+.form-field.error .form-input {
+    border-color: var(--accent-color);
+}
+
+.form-field.success .form-input {
+    border-color: var(--success-color);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .hospital-header {
+        padding: 1rem;
+    }
+    
+    .hospital-title {
+        font-size: 1.5rem;
+    }
+    
+    .user-info-bar {
+        flex-direction: column;
+        gap: 0.5rem;
+        text-align: center;
+    }
+    
+    .main-container {
+        flex-direction: column;
+    }
+    
+    .left-sidebar {
+        width: 100%;
+        order: 2;
+    }
+    
+    .main-content {
+        padding: 1rem;
+        order: 1;
+    }
+    
+    .page-header {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .page-header-actions {
+        justify-content: center;
+    }
+    
+    .bank-recon-form {
+        padding: 1rem;
+    }
+    
+    .recon-table {
+        font-size: 12px;
+        min-width: 800px;
+    }
+    
+    .recon-table th,
+    .recon-table td {
+        padding: 0.5rem;
+    }
+    
+    .summary-grid {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+        padding: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .hospital-header {
+        padding: 0.75rem;
+    }
+    
+    .bank-recon-form {
+        padding: 0.75rem;
+    }
+    
+    .main-content {
+        padding: 0.75rem;
+    }
+    
+    .btn {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .form-input {
+        font-size: 16px; /* Prevent zoom on iOS */
+    }
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* High Contrast Mode */
+@media (prefers-contrast: high) {
+    :root {
+        --border-color: #000000;
+        --border-light: #333333;
+        --text-primary: #000000;
+        --bg-primary: #ffffff;
+    }
+}
+
+/* Print Styles */
+@media print {
+    .floating-menu-toggle,
+    .left-sidebar,
+    .page-header-actions,
+    .btn {
+        display: none;
+    }
+    
+    .main-content {
+        padding: 0;
+    }
+    
+    .bank-recon-section,
+    .summary-section {
+        box-shadow: none;
+        border: 1px solid #000;
+    }
+    
+    body {
+        background: white;
+        color: black;
+    }
+    
+    .hospital-header {
+        background: white !important;
+        color: black !important;
+        border: 2px solid #000;
+    }
+}
+
+/* Touch Device Enhancements */
+.touch-device .btn,
+.touch-device .form-input {
+    min-height: 44px;
+}
+
+/* Loading States */
+.loading {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+.loading::after {
+    content: '';
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid transparent;
+    border-top: 2px solid currentColor;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-left: 8px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Focus Management */
+.btn:focus,
+.form-input:focus {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+}
+
+/* Enhanced Form Controls */
+.form-input::placeholder {
+    color: var(--text-muted);
+    opacity: 0.7;
+}
+
+.form-input:hover {
+    border-color: var(--text-secondary);
+}
+
+/* Mobile Table Enhancements */
+@media (max-width: 768px) {
+    .recon-table td[data-label]::before {
+        content: attr(data-label) ": ";
+        font-weight: 600;
+        color: var(--text-secondary);
+        display: block;
+        margin-bottom: 0.25rem;
+    }
+    
+    .recon-table td[data-label] {
+        text-align: left;
+        padding: 0.75rem 0.5rem;
+    }
+    
+    .recon-table th {
+        display: none;
+    }
+    
+    .recon-table tr {
+        display: block;
+        margin-bottom: 1rem;
+        border: 1px solid var(--border-light);
+        border-radius: var(--radius-sm);
+        background: var(--bg-primary);
+    }
+    
+    .recon-table td {
+        display: block;
+        text-align: left;
+        border: none;
+        border-bottom: 1px solid var(--border-light);
+    }
+    
+    .recon-table td:last-child {
+        border-bottom: none;
+    }
+}
+
+/* Enhanced Transaction Display */
+.transaction-row {
+    transition: var(--transition);
+}
+
+.transaction-row:hover {
+    background: var(--bg-tertiary);
+}
+
+.transaction-description {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.transaction-main {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.transaction-status {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+/* Success Animation */
+@keyframes successPulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+.success-animation {
+    animation: successPulse 0.5s ease;
+}
+
+/* Enhanced Date Input */
+.date-input-group {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.date-input-group input {
+    padding-right: 2.5rem;
+}
+
+.date-input-group::after {
+    content: '📅';
+    position: absolute;
+    right: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    font-size: 1.2rem;
+}
+
+/* Quick Date Buttons */
+.quick-date-buttons {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.quick-date-btn {
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    padding: 0.25rem 0.5rem;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-size: 12px;
+    transition: var(--transition);
+}
+
+.quick-date-btn:hover {
+    background: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+/* Enhanced Amount Display */
+.amount-display {
+    font-family: 'Courier New', monospace;
+    font-weight: 600;
+    text-align: right;
+}
+
+.amount-credit {
+    color: var(--success-color);
+}
+
+.amount-debit {
+    color: var(--accent-color);
+}
+
+.amount-neutral {
+    color: var(--primary-color);
+}

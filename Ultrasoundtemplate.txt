@@ -1,0 +1,17 @@
+Patient: xxxxx               Age:  xxx               Gender:  xxxxxx
+Abdominal Ultrasound
+* The liver is normal in size and shape with normal parenchymal tissue outline. Gall bladder is well distended and appears normal in size and shape with normal wall thickness. No evidence of sludge or renal stones noted.
+* Pancreas, spleen and both kidneys are normal in size ,shape and site.
+* Uterus is retro verted and non-gravid with homogenous texture and echo pattern.
+* Endometrium is not thickened.
+* Urinary bladder is fully distended with normal wall thickness.
+* Right ovary has simple cyst measuring xx cm,left ovary is normal.
+* Cervix is normal.
+* No ascites or free fluid in the adnexia.
+* No abdominal/pelvic mass noted.
+
+CONCLUSION
+* Simple right ovary cyst.
+
+
+

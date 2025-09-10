@@ -1,0 +1,28 @@
+body {
+  margin: 0;
+  padding: 0;
+}
+
+.horizontal-menu {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  background-color: #333;
+  display: flex;
+}
+
+.horizontal-menu li {
+  flex: 1;
+}
+
+.horizontal-menu li a {
+  display: block;
+  text-align: center;
+  color: #fff;
+  text-decoration: none;
+  padding: 14px 16px;
+}
+
+.horizontal-menu li a:hover {
+  background-color: #444;
+}

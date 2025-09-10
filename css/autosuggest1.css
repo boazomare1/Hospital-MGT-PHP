@@ -1,0 +1,18 @@
+div.suggestions1 {
+    -moz-box-sizing: border-box;
+    /*box-sizing: border-box;*/
+    border: 1px solid black;
+	font-size:11px;
+    position: absolute;
+	background-color:#FFFFFF; /* COLOR OF THE DROP DOWN LIST BACKGROUND */ 
+}
+
+div.suggestions1 div {
+    cursor: default;
+    padding: 0px 1px;
+}
+
+div.suggestions1 div.current1 {
+    background-color: #3366cc; /* COLOR OF THE MOUSE OVER LIST ITEM */
+    color: white;
+}

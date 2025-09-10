@@ -48,3 +48,46 @@ Thumbs.db
 *.mov
 *.wmv
 
+# PHP specific files
+*.bak
+*.backup
+*.orig
+*.swp
+*.swo
+*~
+
+# Configuration files (may contain sensitive data)
+user.ini
+php.ini
+.env
+.env.local
+.env.production
+.env.staging
+
+# Database files
+*.sql
+*.db
+*.sqlite
+*.sqlite3
+
+# PHP session files
+sess_*
+
+# PHP error logs
+error_log
+php_errors.log
+
+# Composer
+/vendor/
+composer.lock
+
+# IDE and editor files
+.vscode/
+*.sublime-project
+*.sublime-workspace
+
+# Temporary files
+*.tmp
+*.temp
+*.cache
+

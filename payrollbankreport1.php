@@ -1,49 +1,69 @@
 <?php
 session_start();
-$pagename = '';
-//include ("includes/loginverify.php"); //to prevent indefinite loop, loginverify is disabled.
-if (!isset($_SESSION['username'])) header ("location:index.php");
+include ("includes/loginverify.php");
 include ("db/db_connect.php");
+include ("includes/check_user_access.php");
+
+$username = $_SESSION['username'];
+$companyanum = $_SESSION['companyanum'];
 
 $ipaddress = $_SERVER['REMOTE_ADDR'];
 $updatedatetime = date('Y-m-d H:i:s');
-$sessionusername = $_SESSION['username'];
-$username = $_SESSION['username'];
-$companyanum = $_SESSION['companyanum'];
-$errmsg = '';
+$errmsg = "";
 $bgcolorcode = "";
-$colorloopcount = "";  
+$colorloopcount = "";
 
-$month = date('M-Y');
-
-$query81 = "select * from master_company where auto_number = '$companyanum'";
+// Get company information
+$query81 = "SELECT * FROM master_company WHERE auto_number = '$companyanum'";
 $exec81 = mysqli_query($GLOBALS["___mysqli_ston"], $query81) or die ("Error in Query81".mysqli_error($GLOBALS["___mysqli_ston"]));
 $res81 = mysqli_fetch_array($exec81);
 $companycode = $res81['companycode'];
 $companyname = $res81['employername'];
 
-if (isset($_REQUEST["searchemployee"])) { $searchemployee = $_REQUEST["searchemployee"]; } else { $searchemployee = ""; }
-if (isset($_REQUEST["searchbank"])) { $searchbank = $_REQUEST["searchbank"]; } else { $searchbank = ""; }
-if (isset($_REQUEST["searchmonth"])) { $searchmonth = $_REQUEST["searchmonth"]; } else { $searchmonth = date('M'); }
-if (isset($_REQUEST["searchyear"])) { $searchyear = $_REQUEST["searchyear"]; } else { $searchyear = date('Y'); }
-
-if (isset($_REQUEST["frmflag1"])) { $frmflag1 = $_REQUEST["frmflag1"]; } else { $frmflag1 = ""; }
-
-//$frmflag1 = $_REQUEST['frmflag1'];
-if ($frmflag1 == 'frmflag1')
-{
-	
+// Handle form submission and search parameters
+if (isset($_REQUEST["searchemployee"])) { 
+    $searchemployee = $_REQUEST["searchemployee"]; 
+} else { 
+    $searchemployee = ""; 
 }
 
-if (isset($_REQUEST["st"])) { $st = $_REQUEST["st"]; } else { $st = ""; }
-//$st = $_REQUEST['st'];
-if ($st == 'success')
-{
-		$errmsg = "";
+if (isset($_REQUEST["searchbank"])) { 
+    $searchbank = $_REQUEST["searchbank"]; 
+} else { 
+    $searchbank = ""; 
 }
-else if ($st == 'failed')
-{
-		$errmsg = "";
+
+if (isset($_REQUEST["searchmonth"])) { 
+    $searchmonth = $_REQUEST["searchmonth"]; 
+} else { 
+    $searchmonth = date('M'); 
+}
+
+if (isset($_REQUEST["searchyear"])) { 
+    $searchyear = $_REQUEST["searchyear"]; 
+} else { 
+    $searchyear = date('Y'); 
+}
+
+if (isset($_REQUEST["frmflag1"])) { 
+    $frmflag1 = $_REQUEST["frmflag1"]; 
+} else { 
+    $frmflag1 = ""; 
+}
+
+// Handle status messages
+if (isset($_REQUEST["st"])) { 
+    $st = $_REQUEST["st"]; 
+} else { 
+    $st = ""; 
+}
+
+if ($st == 'success') {
+    $errmsg = "Report generated successfully.";
+    $bgcolorcode = 'success';
+} else if ($st == 'failed') {
+    $errmsg = "Failed to generate report.";
+    $bgcolorcode = 'failed';
 }
 
 ?>
@@ -53,8 +73,15 @@ else if ($st == 'failed')
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Payroll Bank Report - <?php echo $companyname; ?></title>
-    <link rel="stylesheet" href="css/payrollbankreport1-modern.css">
+    <title>Payroll Bank Report - MedStar</title>
+    
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <!-- Modern CSS -->
+    <link rel="stylesheet" href="css/payrollbankreport1-modern.css?v=<?php echo time(); ?>">
+    
+    <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
@@ -63,152 +90,201 @@ else if ($st == 'failed')
 
     <!-- Hospital Header -->
     <header class="hospital-header">
-        <h1 class="hospital-title"><?php echo $companyname; ?></h1>
-        <p class="hospital-subtitle">Payroll Bank Report System</p>
+        <h1 class="hospital-title">🏥 MedStar Hospital Management</h1>
+        <p class="hospital-subtitle">Advanced Healthcare Management Platform</p>
     </header>
 
-    <!-- User Info Bar -->
+    <!-- User Information Bar -->
     <div class="user-info-bar">
-        <div class="user-info">
-            <i class="fas fa-user"></i>
-            <span>Welcome, <?php echo $username; ?></span>
+        <div class="user-welcome">
+            <span class="welcome-text">Welcome, <strong><?php echo htmlspecialchars($username); ?></strong></span>
+            <span class="location-info">📍 Company: <?php echo htmlspecialchars($companyname); ?></span>
         </div>
-        <div class="datetime">
-            <i class="fas fa-calendar"></i>
-            <span><?php echo date('d M Y, h:i A'); ?></span>
+        <div class="user-actions">
+            <a href="mainmenu1.php" class="btn btn-outline">🏠 Main Menu</a>
+            <a href="logout.php" class="btn btn-outline">🚪 Logout</a>
         </div>
     </div>
 
     <!-- Navigation Breadcrumb -->
-    <nav class="breadcrumb-nav">
-        <div class="breadcrumb">
-            <a href="index.php">Home</a>
-            <span class="separator">/</span>
-            <span>Payroll</span>
-            <span class="separator">/</span>
-            <span>Bank Report</span>
-        </div>
+    <nav class="nav-breadcrumb">
+        <a href="mainmenu1.php">🏠 Home</a>
+        <span>→</span>
+        <span>Payroll Bank Report</span>
     </nav>
 
     <!-- Floating Menu Toggle -->
-    <button id="menuToggle" class="floating-menu-toggle">
+    <div id="menuToggle" class="floating-menu-toggle">
         <i class="fas fa-bars"></i>
-    </button>
+    </div>
 
-    <!-- Main Container -->
-    <div class="main-container">
+    <!-- Main Container with Sidebar -->
+    <div class="main-container-with-sidebar">
         <!-- Left Sidebar -->
         <aside id="leftSidebar" class="left-sidebar">
             <div class="sidebar-header">
-                <h3>Navigation</h3>
+                <h3>Quick Navigation</h3>
                 <button id="sidebarToggle" class="sidebar-toggle">
                     <i class="fas fa-chevron-left"></i>
                 </button>
             </div>
+            
             <nav class="sidebar-nav">
-                <?php include ("includes/menu1.php"); ?>
+                <ul class="nav-list">
+                    <li class="nav-item">
+                        <a href="mainmenu1.php" class="nav-link">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="addaccountsmain.php" class="nav-link">
+                            <i class="fas fa-chart-line"></i>
+                            <span>Accounts Main</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="addaccountssub.php" class="nav-link">
+                            <i class="fas fa-chart-pie"></i>
+                            <span>Accounts Sub Type</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="addbank1.php" class="nav-link">
+                            <i class="fas fa-university"></i>
+                            <span>Bank Master</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="bankreconupdate.php" class="nav-link">
+                            <i class="fas fa-balance-scale"></i>
+                            <span>Bank Reconciliation</span>
+                        </a>
+                    </li>
+                    <li class="nav-item active">
+                        <a href="payrollbankreport1.php" class="nav-link">
+                            <i class="fas fa-file-invoice-dollar"></i>
+                            <span>Payroll Bank Report</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="vat.php" class="nav-link">
+                            <i class="fas fa-receipt"></i>
+                            <span>VAT Master</span>
+                        </a>
+                    </li>
+                </ul>
             </nav>
         </aside>
 
         <!-- Main Content -->
         <main class="main-content">
+            <!-- Alert Container -->
+            <div id="alertContainer">
+                <?php if (!empty($errmsg)): ?>
+                    <div class="alert alert-<?php echo $bgcolorcode === 'success' ? 'success' : ($bgcolorcode === 'failed' ? 'error' : 'info'); ?>">
+                        <i class="fas fa-<?php echo $bgcolorcode === 'success' ? 'check-circle' : ($bgcolorcode === 'failed' ? 'exclamation-triangle' : 'info-circle'); ?> alert-icon"></i>
+                        <span><?php echo htmlspecialchars($errmsg); ?></span>
+                    </div>
+                <?php endif; ?>
+            </div>
+
             <!-- Page Header -->
             <div class="page-header">
-                <div class="page-title">
-                    <h2><i class="fas fa-file-invoice-dollar"></i> Payroll Bank Report</h2>
-                    <p>Generate and view payroll bank reports by employee, bank, month, and year</p>
+                <div class="page-header-content">
+                    <h2>Payroll Bank Report</h2>
+                    <p>Generate and view comprehensive payroll bank reports by employee, bank, month, and year.</p>
                 </div>
                 <div class="page-header-actions">
-                    <button onclick="refreshPage()" class="btn btn-secondary">
+                    <button type="button" class="btn btn-secondary" onclick="refreshPage()">
                         <i class="fas fa-sync-alt"></i> Refresh
                     </button>
-                    <button onclick="exportToExcel()" class="btn btn-secondary">
-                        <i class="fas fa-file-excel"></i> Export
+                    <button type="button" class="btn btn-outline" onclick="exportToExcel()">
+                        <i class="fas fa-download"></i> Export
                     </button>
                 </div>
             </div>
 
-            <!-- Alert Messages -->
-            <?php include ("includes/alertmessages1.php"); ?>
-
-            <!-- Search Form -->
-            <section class="search-section">
-                <div class="section-header">
-                    <h3><i class="fas fa-search"></i> Search Report</h3>
+            <!-- Add Form Section -->
+            <div class="add-form-section">
+                <div class="add-form-header">
+                    <i class="fas fa-search add-form-icon"></i>
+                    <h3 class="add-form-title">Search Payroll Bank Report</h3>
                 </div>
                 
-                <form name="form1" id="form1" method="post" action="payrollbankreport1.php" class="search-form">
-                    <div class="form-grid">
-                        <div class="form-group">
-                            <label for="searchemployee" class="form-label">Search Employee</label>
-                            <input type="hidden" name="autobuildemployee" id="autobuildemployee">
-                            <input type="hidden" name="searchemployeecode" id="searchemployeecode">
-                            <input type="text" name="searchemployee" id="searchemployee" 
-                                   autocomplete="off" value="<?php echo $searchemployee; ?>" 
-                                   class="form-input" placeholder="Enter employee name or code" />
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="searchbank" class="form-label">Search Bank</label>
-                            <input type="text" name="searchbank" id="searchbank" 
-                                   autocomplete="off" value="<?php echo $searchbank; ?>" 
-                                   class="form-input" placeholder="Enter bank name" />
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="searchmonth" class="form-label">Search Month</label>
-                            <select name="searchmonth" id="searchmonth" class="form-select">
-                                <?php if($searchmonth != ''): ?>
-                                    <option value="<?php echo $searchmonth; ?>"><?php echo $searchmonth; ?></option>
-                                <?php endif; ?>
-                                <?php
-                                $arraymonth = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-                                $monthcount = count($arraymonth);
-                                for($i=0;$i<$monthcount;$i++)
-                                {
-                                ?>
-                                <option value="<?php echo $arraymonth[$i]; ?>"><?php echo $arraymonth[$i]; ?></option>
-                                <?php
-                                }
-                                ?>
-                            </select>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="searchyear" class="form-label">Search Year</label>
-                            <select name="searchyear" id="searchyear" class="form-select">
-                                <?php if($searchyear != ''): ?>
-                                    <option value="<?php echo $searchyear; ?>"><?php echo $searchyear; ?></option>
-                                <?php endif; ?>
-                                <?php
-                                for($j=2010;$j<=date('Y');$j++)
-                                {
-                                ?>
-                                <option value="<?php echo $j; ?>"><?php echo $j; ?></option>
-                                <?php
-                                }
-                                ?>
-                            </select>
-                        </div>
+                <form id="payrollForm" name="form1" method="post" action="payrollbankreport1.php" class="add-form">
+                    <div class="form-group">
+                        <label for="searchemployee" class="form-label">Search Employee</label>
+                        <input type="hidden" name="autobuildemployee" id="autobuildemployee">
+                        <input type="hidden" name="searchemployeecode" id="searchemployeecode">
+                        <input type="text" name="searchemployee" id="searchemployee" 
+                               autocomplete="off" value="<?php echo htmlspecialchars($searchemployee); ?>" 
+                               class="form-input" placeholder="Enter employee name or code" />
                     </div>
                     
-                    <div class="form-actions">
-                        <input type="hidden" name="frmflag1" id="frmflag1" value="frmflag1">
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-search"></i> Generate Report
+                    <div class="form-group">
+                        <label for="searchbank" class="form-label">Search Bank</label>
+                        <input type="text" name="searchbank" id="searchbank" 
+                               autocomplete="off" value="<?php echo htmlspecialchars($searchbank); ?>" 
+                               class="form-input" placeholder="Enter bank name" />
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="searchmonth" class="form-label">Search Month</label>
+                        <select name="searchmonth" id="searchmonth" class="form-input">
+                            <?php if($searchmonth != ''): ?>
+                                <option value="<?php echo $searchmonth; ?>"><?php echo $searchmonth; ?></option>
+                            <?php endif; ?>
+                            <?php
+                            $arraymonth = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+                            $monthcount = count($arraymonth);
+                            for($i=0;$i<$monthcount;$i++)
+                            {
+                            ?>
+                            <option value="<?php echo $arraymonth[$i]; ?>"><?php echo $arraymonth[$i]; ?></option>
+                            <?php
+                            }
+                            ?>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="searchyear" class="form-label">Search Year</label>
+                        <select name="searchyear" id="searchyear" class="form-input">
+                            <?php if($searchyear != ''): ?>
+                                <option value="<?php echo $searchyear; ?>"><?php echo $searchyear; ?></option>
+                            <?php endif; ?>
+                            <?php
+                            for($j=2010;$j<=date('Y');$j++)
+                            {
+                            ?>
+                            <option value="<?php echo $j; ?>"><?php echo $j; ?></option>
+                            <?php
+                            }
+                            ?>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <button type="submit" id="submitBtn" class="submit-btn">
+                            <i class="fas fa-search"></i>
+                            Generate Report
                         </button>
-                        <button type="button" onclick="clearForm()" class="btn btn-secondary">
-                            <i class="fas fa-eraser"></i> Clear Form
+                        <button type="button" class="btn btn-secondary" onclick="resetForm()">
+                            <i class="fas fa-undo"></i> Reset
                         </button>
                     </div>
-                </form>
-            </section>
 
-            <!-- Report Results -->
+                    <input type="hidden" name="frmflag1" id="frmflag1" value="frmflag1">
+                </form>
+            </div>
+
+            <!-- Data Table Section -->
             <?php if($frmflag1 == 'frmflag1'): ?>
-            <section class="report-section">
-                <div class="section-header">
-                    <h3><i class="fas fa-chart-bar"></i> Bank Report Results</h3>
+            <div class="data-table-section">
+                <div class="data-table-header">
+                    <i class="fas fa-chart-bar data-table-icon"></i>
+                    <h3 class="data-table-title">Payroll Bank Report Results</h3>
                 </div>
                 
                 <?php
@@ -231,19 +307,18 @@ else if ($st == 'failed')
                     </div>
                 </div>
                 
-                <div class="table-container">
-                    <table class="report-table">
-                        <thead>
-                            <tr>
-                                <th>S.No</th>
-                                <th>PAYROLL NUMBER</th>
-                                <th>EMPLOYEE NAME</th>
-                                <th>BRANCH NAME</th>
-                                <th>ACCOUNT NO</th>
-                                <th>AMOUNT</th>
-                            </tr>
-                        </thead>
-                        <tbody>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Payroll Number</th>
+                            <th>Employee Name</th>
+                            <th>Branch Name</th>
+                            <th>Account No</th>
+                            <th>Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
                             <?php
                             $totalamount = '0.00';
                             $query9 = "select * from master_employeeinfo where bankname like '%$searchbank%' and bankname <> '' group by bankname order by employeecode,bankname";
@@ -253,7 +328,7 @@ else if ($st == 'failed')
                                 $res9bankname = $res9['bankname'];
                             ?>
                             <tr class="bank-header">
-                                <td colspan="6"><strong><?php echo $res9bankname; ?></strong></td>
+                                <td colspan="6"><strong><?php echo htmlspecialchars($res9bankname); ?></strong></td>
                             </tr>
                             <?php
                                 $query2 = "select a.employeecode as employeecode, a.employeename as employeename from details_employeepayroll a JOIN master_employee b ON (a.employeecode = b.employeecode) where a.employeename like '%$searchemployee%' and a.1 > '0' and a.paymonth = '$searchmonthyear' and a.status <> 'deleted' and (b.payrollstatus = 'Active' or b.payrollstatus = 'Prorata') group by a.employeecode";
@@ -283,12 +358,14 @@ else if ($st == 'failed')
                                             $colorcode = 'bgcolor="#ecf0f5"';
                                         } 
                             ?>
-                            <tr <?php echo $colorcode; ?>>
-                                <td class="serial-number"><?php echo $colorloopcount; ?></td>
-                                <td class="payroll-number"><?php echo $payrollno; ?></td>
-                                <td class="employee-name"><?php echo $res2employeename; ?></td>
-                                <td class="branch-name"><?php echo $bankbranch; ?></td>
-                                <td class="account-number"><?php echo $accountnumber; ?></td>
+                            <tr>
+                                <td><?php echo $colorloopcount; ?></td>
+                                <td>
+                                    <span class="payroll-number-badge"><?php echo htmlspecialchars($payrollno); ?></span>
+                                </td>
+                                <td><?php echo htmlspecialchars($res2employeename); ?></td>
+                                <td><?php echo htmlspecialchars($bankbranch); ?></td>
+                                <td><?php echo htmlspecialchars($accountnumber); ?></td>
                                 <?php
                                     $totaldeduct = 0;
                                     $totalgrossper = 0;
@@ -312,38 +389,36 @@ else if ($st == 'failed')
                                     $componentamount = $totalgrossper - $totaldeduct;
                                     $totalamount = $totalamount + $componentamount;
                                 ?>
-                                <td class="amount"><?php echo number_format($componentamount,0,'.',','); ?></td>
+                                <td>
+                                    <span class="amount-badge"><?php echo number_format($componentamount,0,'.',','); ?></span>
+                                </td>
                             </tr>
                             <?php
                                     }
                                 }
                             }
                             ?>
-                        </tbody>
-                        <tfoot>
-                            <tr class="total-row">
-                                <td colspan="5" class="total-label"><strong>Total:</strong></td>
-                                <td class="total-amount"><strong><?php echo number_format($totalamount,0,'.',','); ?></strong></td>
-                            </tr>
-                        </tfoot>
-                    </table>
-                </div>
+                    </tbody>
+                    <tfoot>
+                        <tr class="total-row">
+                            <td colspan="5" class="total-label"><strong>Total:</strong></td>
+                            <td class="total-amount"><strong><?php echo number_format($totalamount,0,'.',','); ?></strong></td>
+                        </tr>
+                    </tfoot>
+                </table>
                 
                 <div class="export-actions">
-                    <a href="print_bankreportxl.php?<?php echo $url; ?>" class="btn btn-success">
+                    <a href="print_bankreportxl.php?<?php echo $url; ?>" class="btn btn-primary">
                         <i class="fas fa-file-excel"></i> Export to Excel
                     </a>
                 </div>
-            </section>
+            </div>
             <?php endif; ?>
         </main>
     </div>
 
-    <!-- Footer -->
-    <?php include ("includes/footer1.php"); ?>
-
-    <!-- Scripts -->
-    <script src="js/payrollbankreport1-modern.js"></script>
+    <!-- Modern JavaScript -->
+    <script src="js/payrollbankreport1-modern.js?v=<?php echo time(); ?>"></script>
 </body>
 </html>
 

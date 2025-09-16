@@ -1,100 +1,59 @@
 <?php
-
-error_reporting(0);
 session_start();
-
 include ("includes/loginverify.php");
-
 include ("db/db_connect.php");
-//echo $menu_id;
 include ("includes/check_user_access.php");
 
-
-$ipaddress = $_SERVER['REMOTE_ADDR'];
-
-$updatedatetime = date('Y-m-d');
-
-$username = $_SESSION['username'];
-
+$username = $_SESSION["username"];
+$companyanum = $_SESSION["companyanum"];
+$companyname = $_SESSION["companyname"];
 $docno = $_SESSION['docno'];
 
-$companyanum = $_SESSION['companyanum'];
-
-$companyname = $_SESSION['companyname'];
+$ipaddress = $_SERVER["REMOTE_ADDR"];
+$updatedatetime = date('Y-m-d H:i:s');
+$errmsg = "";
+$bgcolorcode = "";
+$colorloopcount = "";
 
 $transactiondatefrom = date('Y-m-d', strtotime('-1 month'));
-
 $transactiondateto = date('Y-m-d');
 
-$location =isset( $_REQUEST['location'])?$_REQUEST['location']:'';
+// Get location parameter
+$location = isset($_REQUEST['location']) ? $_REQUEST['location'] : '';
 
-
-
-$errmsg = "";
-
+// Initialize variables
 $banum = "1";
-
 $supplieranum = "";
-
 $custid = "";
-
 $custname = "";
-
 $balanceamount = "0.00";
-
 $openingbalance = "0.00";
-
 $searchsuppliername = "";
-
 $cbsuppliername = "";
 
 
 
-//This include updatation takes too long to load for hunge items database.
 
 
+// Handle supplier selection
+$getcanum = isset($_REQUEST["canum"]) ? $_REQUEST["canum"] : "";
 
-
-
-if (isset($_REQUEST["canum"])) { $getcanum = $_REQUEST["canum"]; } else { $getcanum = ""; }
-
-//$getcanum = $_GET['canum'];
-
-if ($getcanum != '')
-
-{
-
-	$query4 = "select * from master_supplier where auto_number = '$getcanum'";
-
-	$exec4 = mysqli_query($GLOBALS["___mysqli_ston"], $query4) or die ("Error in Query4".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-	$res4 = mysqli_fetch_array($exec4);
-
-	$cbsuppliername = $res4['suppliername'];
-
-	$suppliername = $res4['suppliername'];
-
+if ($getcanum != '') {
+    $query4 = "select * from master_supplier where auto_number = '$getcanum'";
+    $exec4 = mysqli_query($GLOBALS["___mysqli_ston"], $query4) or die ("Error in Query4".mysqli_error($GLOBALS["___mysqli_ston"]));
+    $res4 = mysqli_fetch_array($exec4);
+    $cbsuppliername = $res4['suppliername'];
+    $suppliername = $res4['suppliername'];
 }
 
 
 
-if(isset($_REQUEST['searchitem'])) { $searchitem = $_REQUEST['searchitem']; } else { $searchitem = ""; }
-
-
-
-if (isset($_REQUEST["cbfrmflag2"])) { $cbfrmflag2 = $_REQUEST["cbfrmflag2"]; } else { $cbfrmflag2 = ""; }
-
-//$cbfrmflag2 = $_REQUEST['cbfrmflag2'];
-
-if (isset($_REQUEST["frmflag2"])) { $frmflag2 = $_REQUEST["frmflag2"]; } else { $frmflag2 = ""; }
-
-//$frmflag2 = $_POST['frmflag2'];
-
-if (isset($_REQUEST["assignmonth"])) { $assignmonth = $_REQUEST["assignmonth"]; } else { $assignmonth = date('M-Y'); }
-
-
-
-if (isset($_REQUEST["frmflag56"])) { $frmflag56 = $_REQUEST["frmflag56"]; } else { $frmflag56 = ""; }
+// Handle form parameters
+$searchitem = isset($_REQUEST['searchitem']) ? $_REQUEST['searchitem'] : "";
+$cbfrmflag2 = isset($_REQUEST["cbfrmflag2"]) ? $_REQUEST["cbfrmflag2"] : "";
+$frmflag2 = isset($_REQUEST["frmflag2"]) ? $_REQUEST["frmflag2"] : "";
+$assignmonth = isset($_REQUEST["assignmonth"]) ? $_REQUEST["assignmonth"] : date('M-Y');
+$frmflag56 = isset($_REQUEST["frmflag56"]) ? $_REQUEST["frmflag56"] : "";
 
 
 
@@ -398,24 +357,18 @@ if ($frmflag56 == 'frmflag56')
 
 
 
-if (isset($_REQUEST["st"])) { $st = $_REQUEST["st"]; } else { $st = ""; }
+// Handle status messages
+$st = isset($_REQUEST["st"]) ? $_REQUEST["st"] : "";
 
-//$st = $_REQUEST['st'];
-
-if ($st == '1')
-
-{
-
-	$errmsg = "Success. Payment Entry Update Completed.";
-
-}
-
-if ($st == '2')
-
-{
-
-	$errmsg = "Failed. Payment Entry Not Completed.";
-
+if ($st == 'success') {
+    $errmsg = "Asset depreciation processed successfully.";
+    $bgcolorcode = 'success';
+} elseif ($st == '1') {
+    $errmsg = "Success. Payment Entry Update Completed.";
+    $bgcolorcode = 'success';
+} elseif ($st == '2') {
+    $errmsg = "Failed. Payment Entry Not Completed.";
+    $bgcolorcode = 'failed';
 }
 
 
@@ -443,8 +396,7 @@ if ($st == '2')
     
     <!-- Date Picker Scripts -->
     <script type="text/javascript" src="js/adddate.js"></script>
-
-<script type="text/javascript" src="js/adddate2.js"></script>
+    <script type="text/javascript" src="js/adddate2.js"></script>
 
 <?php include ("js/dropdownlistipbilling.php"); ?>
 
@@ -956,12 +908,69 @@ var billnumbers = "<?php echo $_REQUEST['billnumber']; ?>";
         <span>Asset Depreciation All</span>
     </nav>
 
-    <!-- Main Container -->
-    <div class="main-container">
-        <!-- Alert Container -->
-        <div id="alertContainer">
-            <?php include ("includes/alertmessages1.php"); ?>
-        </div>
+    <!-- Floating Menu Toggle -->
+    <div id="menuToggle" class="floating-menu-toggle">
+        <i class="fas fa-bars"></i>
+    </div>
+
+    <!-- Main Container with Sidebar -->
+    <div class="main-container-with-sidebar">
+        <!-- Left Sidebar -->
+        <aside id="leftSidebar" class="left-sidebar">
+            <div class="sidebar-header">
+                <h3>Quick Navigation</h3>
+                <button id="sidebarToggle" class="sidebar-toggle">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <ul class="nav-list">
+                    <li class="nav-item">
+                        <a href="mainmenu1.php" class="nav-link">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="fixedasset_acquisition_report.php" class="nav-link">
+                            <i class="fas fa-building"></i>
+                            <span>Fixed Asset Acquisition</span>
+                        </a>
+                    </li>
+                    <li class="nav-item active">
+                        <a href="assetdepreciationall.php" class="nav-link">
+                            <i class="fas fa-chart-line"></i>
+                            <span>Asset Depreciation</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="assets_register.php" class="nav-link">
+                            <i class="fas fa-list-alt"></i>
+                            <span>Asset Register</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="assets_disposal.php" class="nav-link">
+                            <i class="fas fa-trash-alt"></i>
+                            <span>Asset Disposal</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Alert Container -->
+            <div id="alertContainer">
+                <?php if (!empty($errmsg)): ?>
+                    <div class="alert alert-<?php echo $bgcolorcode === 'success' ? 'success' : ($bgcolorcode === 'failed' ? 'error' : 'info'); ?>">
+                        <i class="fas fa-<?php echo $bgcolorcode === 'success' ? 'check-circle' : ($bgcolorcode === 'failed' ? 'exclamation-triangle' : 'info-circle'); ?> alert-icon"></i>
+                        <span><?php echo htmlspecialchars($errmsg); ?></span>
+                    </div>
+                <?php endif; ?>
+            </div>
 
         <!-- Page Header -->
         <div class="page-header">
@@ -982,83 +991,50 @@ var billnumbers = "<?php echo $_REQUEST['billnumber']; ?>";
             </div>
         </div>
 
-        <!-- Search Form Section -->
-        <div class="form-section">
-            <h3><i class="fas fa-search"></i> Report Filters</h3>
-            
-            <form name="cbform1" method="post" action="assetdepreciationall.php">
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="location">Location</label>
-                        <select name="location" id="location" onChange="ajaxlocationfunction(this.value);">
-
-             
-
-            
-
-                  <?php
-
-						
-
-						if ($location!='')
-
-						{
-
-						$query12 = "select locationname from master_location where locationcode='$location' order by locationname";
-
-						$exec12 = mysqli_query($GLOBALS["___mysqli_ston"], $query12) or die ("Error in Query12".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-						$res12 = mysqli_fetch_array($exec12);
-
-						
-
-						echo $res1location = $res12["locationname"];
-
-						//echo $location;
-
-						}
-
-						else
-
-						{
-
-						$query1 = "select locationname from login_locationdetails where username='$username' and docno='$docno' group by locationname order by locationname";
-
-						$exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-						$res1 = mysqli_fetch_array($exec1);
-
-						
-
-						echo $res1location = $res1["locationname"];
-
-						//$res1locationanum = $res1["locationcode"];
-
-						}
-
-						?>                  </td>
-
-
-
-                        </select>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="assignmonth">Process Month</label>
-                        <div class="date-input-group">
-                            <input type="text" name="assignmonth" id="assignmonth" readonly="readonly" value="<?php echo $assignmonth; ?>" class="date-picker">
-                            <i class="fas fa-calendar-alt date-icon" onClick="javascript:NewCssCal('assignmonth','MMMYYYY')" style="cursor:pointer"></i>
+            <!-- Search Form Section -->
+            <div class="form-section">
+                <div class="form-section-header">
+                    <i class="fas fa-search form-section-icon"></i>
+                    <h3 class="form-section-title">Report Filters</h3>
+                </div>
+                
+                <form name="cbform1" method="post" action="assetdepreciationall.php" class="form-section-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="location" class="form-label">Location</label>
+                            <select name="location" id="location" class="form-input" onChange="ajaxlocationfunction(this.value);">
+                                <?php
+                                if ($location != '') {
+                                    $query12 = "select locationname from master_location where locationcode='$location' order by locationname";
+                                    $exec12 = mysqli_query($GLOBALS["___mysqli_ston"], $query12) or die ("Error in Query12".mysqli_error($GLOBALS["___mysqli_ston"]));
+                                    $res12 = mysqli_fetch_array($exec12);
+                                    echo $res1location = $res12["locationname"];
+                                } else {
+                                    $query1 = "select locationname from login_locationdetails where username='$username' and docno='$docno' group by locationname order by locationname";
+                                    $exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
+                                    $res1 = mysqli_fetch_array($exec1);
+                                    echo $res1location = $res1["locationname"];
+                                }
+                                ?>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="assignmonth" class="form-label">Process Month</label>
+                            <div class="date-input-group">
+                                <input type="text" name="assignmonth" id="assignmonth" readonly="readonly" value="<?php echo $assignmonth; ?>" class="form-input date-picker">
+                                <i class="fas fa-calendar-alt date-icon" onClick="javascript:NewCssCal('assignmonth','MMMYYYY')" style="cursor:pointer"></i>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>&nbsp;</label>
+                            <button type="submit" class="btn btn-primary" onClick="return funcvalidcheck();">
+                                <i class="fas fa-search"></i> Generate Report
+                            </button>
                         </div>
                     </div>
-                    
-                    <div class="form-group">
-                        <label>&nbsp;</label>
-                        <button type="submit" class="btn btn-primary" onClick="return funcvalidcheck();">
-                            <i class="fas fa-search"></i> Generate Report
-                        </button>
-                    </div>
-                </div>
-            </form>
+                </form>
             
             <!-- Current Location Display -->
             <div class="current-location">
@@ -1084,15 +1060,25 @@ var billnumbers = "<?php echo $_REQUEST['billnumber']; ?>";
             </div>
         </div>
 
-        <!-- Results Section -->
-        <div class="data-table-section">
-            <div class="table-header">
-                <h3><i class="fas fa-list"></i> Asset Depreciation Report</h3>
-                <div class="search-bar">
-                    <input type="text" placeholder="Search assets..." id="assetSearch">
-                    <i class="fas fa-search"></i>
+            <!-- Results Section -->
+            <div class="data-table-section">
+                <div class="data-table-header">
+                    <i class="fas fa-list data-table-icon"></i>
+                    <h3 class="data-table-title">Asset Depreciation Report</h3>
                 </div>
-            </div>
+                
+                <!-- Search Bar -->
+                <div style="margin-bottom: 1rem;">
+                    <div style="display: flex; gap: 1rem; align-items: center;">
+                        <input type="text" id="assetSearch" class="form-input" 
+                               placeholder="Search assets..." 
+                               style="flex: 1; max-width: 300px;"
+                               oninput="searchAssets(this.value)">
+                        <button type="button" class="btn btn-secondary" onclick="clearAssetSearch()">
+                            <i class="fas fa-times"></i> Clear
+                        </button>
+                    </div>
+                </div>
 
             <form name="form11" id="form11" method="post" action="">
             
@@ -1107,33 +1093,32 @@ var billnumbers = "<?php echo $_REQUEST['billnumber']; ?>";
                 $searchpatient = '';		
             ?>
             
-            <div class="export-section">
-                <a href="assetdepreciationall_xl.php?assignmonth=<?php echo $assignmonth ?>" class="btn btn-success">
-                    <i class="fas fa-file-excel"></i> Export to Excel
-                </a>
-            </div>
+                <div class="export-section">
+                    <a href="assetdepreciationall_xl.php?assignmonth=<?php echo $assignmonth ?>" class="btn btn-success">
+                        <i class="fas fa-file-excel"></i> Export to Excel
+                    </a>
+                </div>
 
-            <table class="data-table">
-                <thead>
-                    <tr>
-                        <th>No.</th>
-                        <th><input type="checkbox" name="checkall" id="checkall" value="1"> Select</th>
-                        <th>Category</th>
-                        <th>Department</th>
-                        <th>Asset ID</th>
-                        <th>Asset Name</th>
-                        <th>Acquisition Date</th>
-                        <th>Life</th>
-                        <th>Yearly Dep. %</th>
-                        <th>Dep. Start</th>
-
-                        <th>Purchase Cost</th>
-                        <th>Salvage</th>
-                        <th>Acc. Depreciation</th>
-                        <th>Net Book Value</th>
-                        <th>Depreciation</th>
-                    </tr>
-                </thead>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>No.</th>
+                            <th><input type="checkbox" name="checkall" id="checkall" value="1"> Select</th>
+                            <th>Category</th>
+                            <th>Department</th>
+                            <th>Asset ID</th>
+                            <th>Asset Name</th>
+                            <th>Acquisition Date</th>
+                            <th>Life</th>
+                            <th>Yearly Dep. %</th>
+                            <th>Dep. Start</th>
+                            <th>Purchase Cost</th>
+                            <th>Salvage</th>
+                            <th>Acc. Depreciation</th>
+                            <th>Net Book Value</th>
+                            <th>Depreciation</th>
+                        </tr>
+                    </thead>
                 <tbody>
 
 			  
@@ -1332,36 +1317,33 @@ $startyear = strtoupper($assignmonth);
 
 			
 
-                    <tr class="table-row <?php echo ($showcolor == 0) ? 'table-row-even' : 'table-row-odd'; ?>">
-                        <td><?php echo $sno; ?></td>
-                        <td class="text-center">
-                            <input type="checkbox" name="checkanum<?php echo $sno; ?>" id="checkanum<?php echo $sno; ?>" value="<?php echo $anum; ?>" <?php if($depreciationledgercode == '') { echo "readonly"; } ?> <?php if($disabled){echo "disabled";} ?> onClick="totalamount('<?php echo $sno; ?>','<?php echo $number; ?>')" class="depreciate_checkbox">
-                        </td>
-                        <td><?php echo htmlspecialchars($asset_class); ?></td>
-                        <td><?php echo htmlspecialchars($asset_department); ?></td>
-
-                        <td>
-                            <input type="hidden" name="assetanum<?php echo $sno; ?>" id="assetanum<?php echo $sno; ?>" value="<?php echo $anum; ?>">
-                            <input type="hidden" name="assetid<?php echo $sno; ?>" id="assetid<?php echo $sno; ?>" value="<?php echo $asset_id; ?>">
-                            <strong><?php echo htmlspecialchars($asset_id); ?></strong>
-                        </td>
-                        <td><?php echo htmlspecialchars($itemname); ?></td>
-                        <td><?php echo htmlspecialchars($entrydate); ?></td>
-                        <td><?php echo htmlspecialchars($asset_period); ?></td>
-                        <td><?php echo number_format($dep_yearly_per,2); ?>%</td>
-                        <td><?php echo htmlspecialchars($startyear); ?></td>
-
-                        <td class="text-right"><?php echo number_format($totalamount,2); ?></td>
-                        <td class="text-right"><?php echo number_format($salvage,2); ?></td>
-
-                        <td class="text-right"><?php echo number_format($accdepreciation,2); ?></td>
-                        <td class="text-right"><?php echo number_format($netbookvalue,2); ?></td>
-                        <td class="text-right">
-                            <?php $style = "style='text-align:right;'"; if($disabled){$style = "style='text-align:right;background-color:lightgrey;'";} ?> 
-                            <input type="text" name="depreciation<?php echo $sno; ?>" id="depreciation<?php echo $sno; ?>" value="<?php echo $depreciationmonth; ?>" readonly <?php echo $style; ?> class="depreciation-input">
-                            <input type="hidden" name="accdepreciationvalue<?php echo $sno; ?>" id="accdepreciationvalue<?php echo $sno; ?>" value="<?php echo $accdepreciation; ?>">
-                        </td>
-                    </tr>
+                        <tr class="table-row <?php echo ($showcolor == 0) ? 'table-row-even' : 'table-row-odd'; ?>">
+                            <td><?php echo $sno; ?></td>
+                            <td class="text-center">
+                                <input type="checkbox" name="checkanum<?php echo $sno; ?>" id="checkanum<?php echo $sno; ?>" value="<?php echo $anum; ?>" <?php if($depreciationledgercode == '') { echo "readonly"; } ?> <?php if($disabled){echo "disabled";} ?> onClick="totalamount('<?php echo $sno; ?>','<?php echo $number; ?>')" class="depreciate_checkbox">
+                            </td>
+                            <td><?php echo htmlspecialchars($asset_class); ?></td>
+                            <td><?php echo htmlspecialchars($asset_department); ?></td>
+                            <td>
+                                <input type="hidden" name="assetanum<?php echo $sno; ?>" id="assetanum<?php echo $sno; ?>" value="<?php echo $anum; ?>">
+                                <input type="hidden" name="assetid<?php echo $sno; ?>" id="assetid<?php echo $sno; ?>" value="<?php echo $asset_id; ?>">
+                                <strong><?php echo htmlspecialchars($asset_id); ?></strong>
+                            </td>
+                            <td><?php echo htmlspecialchars($itemname); ?></td>
+                            <td><?php echo htmlspecialchars($entrydate); ?></td>
+                            <td><?php echo htmlspecialchars($asset_period); ?></td>
+                            <td><?php echo number_format($dep_yearly_per,2); ?>%</td>
+                            <td><?php echo htmlspecialchars($startyear); ?></td>
+                            <td class="text-right"><?php echo number_format($totalamount,2); ?></td>
+                            <td class="text-right"><?php echo number_format($salvage,2); ?></td>
+                            <td class="text-right"><?php echo number_format($accdepreciation,2); ?></td>
+                            <td class="text-right"><?php echo number_format($netbookvalue,2); ?></td>
+                            <td class="text-right">
+                                <?php $style = "style='text-align:right;'"; if($disabled){$style = "style='text-align:right;background-color:lightgrey;'";} ?> 
+                                <input type="text" name="depreciation<?php echo $sno; ?>" id="depreciation<?php echo $sno; ?>" value="<?php echo $depreciationmonth; ?>" readonly <?php echo $style; ?> class="form-input depreciation-input">
+                                <input type="hidden" name="accdepreciationvalue<?php echo $sno; ?>" id="accdepreciationvalue<?php echo $sno; ?>" value="<?php echo $accdepreciation; ?>">
+                            </td>
+                        </tr>
 
 		  <?php
 		   }
@@ -1383,28 +1365,89 @@ $startyear = strtoupper($assignmonth);
             
             <input type="hidden" name="totalcount" id="totalcount" value="<?php echo $sno; ?>">
             
-            <div class="form-actions">&nbsp;
-
-                <input type="hidden" name="assignmonth" id="assignmonth" value="<?php echo $assignmonth; ?>">
-                <input type="hidden" name="frmflag56" value="frmflag56">
-                <button type="submit" name="submit56" id="submitbtn" class="btn btn-primary">
-                    <i class="fas fa-save"></i> Submit Depreciation
-                </button>
-            </div>
+                <div class="form-actions">
+                    <input type="hidden" name="assignmonth" id="assignmonth" value="<?php echo $assignmonth; ?>">
+                    <input type="hidden" name="frmflag56" value="frmflag56">
+                    <button type="submit" name="submit56" id="submitbtn" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Submit Depreciation
+                    </button>
+                    <button type="button" class="btn btn-secondary" onclick="resetForm()">
+                        <i class="fas fa-undo"></i> Reset
+                    </button>
+                </div>
             
             <?php
             }
             ?>
             
             </form>
-        </div>
+            </div>
+        </main>
     </div>
 
-    
     <!-- Modern JavaScript -->
+    <script>
+        // Modern JavaScript functions
+        function refreshPage() {
+            window.location.reload();
+        }
+
+        function exportToExcel() {
+            window.open("assetdepreciationall_xl.php?assignmonth=<?php echo $assignmonth ?>", "_blank");
+        }
+
+        function printReport() {
+            window.print();
+        }
+
+        function resetForm() {
+            document.getElementById("form11").reset();
+            document.getElementById("totaldepcreationamt").value = "0.00";
+        }
+
+        function searchAssets(searchTerm) {
+            const table = document.querySelector('.data-table tbody');
+            const rows = table.querySelectorAll('tr');
+            
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                if (text.includes(searchTerm.toLowerCase())) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+
+        function clearAssetSearch() {
+            document.getElementById('assetSearch').value = '';
+            searchAssets('');
+        }
+
+        // Sidebar functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const menuToggle = document.getElementById('menuToggle');
+            const sidebar = document.getElementById('leftSidebar');
+            const sidebarToggle = document.getElementById('sidebarToggle');
+
+            menuToggle.addEventListener('click', function() {
+                sidebar.classList.toggle('active');
+            });
+
+            sidebarToggle.addEventListener('click', function() {
+                sidebar.classList.toggle('active');
+            });
+
+            // Close sidebar when clicking outside
+            document.addEventListener('click', function(event) {
+                if (!sidebar.contains(event.target) && !menuToggle.contains(event.target)) {
+                    sidebar.classList.remove('active');
+                }
+            });
+        });
+    </script>
     <script src="js/assetdepreciationall-modern.js?v=<?php echo time(); ?>"></script>
 </body>
-
 </html>
 
 

@@ -1,40 +1,79 @@
-
-function StateSuggestions() {
-this.states = 
-[
-"DENNIS MUASYA #03-2000-22","DENTIST #03-2000-83","DR  ABEL ODOUR #03-2000-92","DR  DANIEL MUTONGA #03-2000-12","DR AISHA #03-2000-67","DR AJUA NKENG #03-2000-25","DR ALLAN #03-2000-43","DR ALLAN GRAY #03-2000-19","DR ALUORA #03-2000-36","DR AMBROSE #03-2000-54","DR ANN IRUNGU #03-2000-75","DR ARAKA #03-2000-50","DR AUSTIN OYWER #03-2000-9","DR BRUCE SEMO #03-2000-13","DR CHEBOI #03-2000-41","DR CLIFF MUTURI #03-2000-94","DR COLLINS MASINDE #03-2000-55","DR DAISY ODUNDA #03-2000-74","DR DUNCAN KIHONGO #03-2000-91","DR ENOCK #03-2000-65","DR GAKUO #03-2000-57","DR GATWIRI MERCY #03-2000-21","DR GLADYS MAINA #03-2000-31","DR HASSAN #03-2000-72","DR JACKLINE OTIENO #03-2000-6","DR JONATHAN #03-2000-5","DR KAARA #03-2000-73","DR KAKAI #03-2000-27","DR KANYATTA DANIEL #03-2000-7","DR KARANGA #03-2000-48","DR KAZOIYA #03-2000-47","DR KEEGAN #03-2000-95","DR KIMATHI DENNIS #03-2000-39","DR KOSGEI #03-2000-40","DR KURIA KAMAU #03-2000-62","DR LEAH OPERE #03-2000-3","DR LODENYO HUDSON #03-2000-44","DR LOLLA MOLLA #03-2000-10","DR LUCAS #03-2000-8","DR MAGARE #03-2000-76","DR MAKORI #03-2000-93","DR MANG'OLI PAUL #03-2000-49","DR MARJORIE #03-2000-60","DR MARTHA MONARI #03-2000-38","DR MASOUD #03-2000-90","DR MATHEKA #03-2000-70","DR MATHEKA #03-2000-77","DR MAUREEN SHABUYA #03-2000-58","DR MBURU #03-2000-16","DR MICHAEL #03-2000-68","DR MITEMA #03-2000-56","DR MOMANYI BRIAN #03-2000-28","DR MUGENDI #03-2000-66","DR MUIGAI #03-2000-26","DR MUIGAI ? UROLOGIST #03-2000-52","DR MUTIE #03-2000-64","DR MWAI #03-2000-34","DR MWEA MACHARIA #03-2000-45","DR NELLY KAMALE #03-2000-51","DR NGETICH #03-2000-46","DR OGOYE #03-2000-4","DR OKANGA #03-2000-59","DR OKIRIAMU #03-2000-11","DR OLOO BENARD #03-2000-30","DR OPONDO #03-2000-61","DR OYIENGO #03-2000-96","DR ROOPRAI #03-2000-17","DR ROSE MUNGE #03-2000-23","DR SIMIYU #03-2000-32","DR STEVEN ONYANGO #03-2000-79","DR VIVIAN #03-2000-42","DR WINNIE KIMANI #03-2000-63","DR. FAITH WANZA #03-2000-15","DR. GILBERT NGETICH #03-2000-80","DR. NICOLE #03-2000-2","DR. RAINA JONES #03-2000-88","DR. YASHAR MAJIAAHDAM #03-2000-89","E. MURIITHI #03-2000-14","ERNEST MUGUNA #03-2000-18","GENERAL PHYSICIAN #03-2000-82","IP NURSE #03-2000-81","KEISHA OUKO #03-2000-78","KEN MAINA #03-2000-35","MIDWIFE #03-2000-87","MUTUA #03-2000-71","OPTICIAN #03-2000-86","PHILIP MWACHAKA #03-2000-20","PHYSIOTHERAPIST #03-2000-84","RAY ODETTE #03-2000-69","SAMUEL MA ITHYA #03-2000-24","SHEILA MUGENDI #03-2000-37","STEPHEN MUTISYA #03-2000-33","STEVE #03-2000-29","WILLIAM MOROGA #03-2000-53"];
-}
-
-/**
- * Request suggestions for the given autosuggest control. 
- * @scope protected
- * @param oAutoSuggestControl The autosuggest control to provide suggestions for.
- */
-StateSuggestions.prototype.requestSuggestions = function (oAutoSuggestControl /*:AutoSuggestControl*/,
-                                                          bTypeAhead /*:boolean*/) {
-    var aSuggestions = [];
-    var sTextboxValue = oAutoSuggestControl.textbox.value;
-    
- 	var loopLength = 0;
-
-    if (sTextboxValue.length > 0){
-    
-	var sTextboxValue = sTextboxValue.toUpperCase();
-
-        //search for matching states
-        for (var i=0; i < this.states.length; i++) 
-		{ 
-            if (this.states[i].indexOf(sTextboxValue) >= 0) 
-			{
-                loopLength = loopLength + 1;
-				if (loopLength <= 15) //TO REDUCE THE SUGGESTIONS DROP DOWN LIST
-				{
-					aSuggestions.push(this.states[i]);
-				}
-            } 
-        }
-    }
-
-    //provide suggestions to the control
-    oAutoSuggestControl.autosuggest(aSuggestions, bTypeAhead);
+
+
+function StateSuggestions() {
+
+this.states = 
+
+[
+
+"DENNIS MUASYA #03-2000-22","DENTIST #03-2000-83","DR  ABEL ODOUR #03-2000-92","DR  DANIEL MUTONGA #03-2000-12","DR AISHA #03-2000-67","DR AJUA NKENG #03-2000-25","DR ALLAN #03-2000-43","DR ALLAN GRAY #03-2000-19","DR ALUORA #03-2000-36","DR AMBROSE #03-2000-54","DR ANN IRUNGU #03-2000-75","DR ARAKA #03-2000-50","DR AUSTIN OYWER #03-2000-9","DR BRUCE SEMO #03-2000-13","DR CHEBOI #03-2000-41","DR CLIFF MUTURI #03-2000-94","DR COLLINS MASINDE #03-2000-55","DR DAISY ODUNDA #03-2000-74","DR DUNCAN KIHONGO #03-2000-91","DR ENOCK #03-2000-65","DR GAKUO #03-2000-57","DR GATWIRI MERCY #03-2000-21","DR GLADYS MAINA #03-2000-31","DR HASSAN #03-2000-72","DR JACKLINE OTIENO #03-2000-6","DR JONATHAN #03-2000-5","DR KAARA #03-2000-73","DR KAKAI #03-2000-27","DR KANYATTA DANIEL #03-2000-7","DR KARANGA #03-2000-48","DR KAZOIYA #03-2000-47","DR KEEGAN #03-2000-95","DR KIMATHI DENNIS #03-2000-39","DR KOSGEI #03-2000-40","DR KURIA KAMAU #03-2000-62","DR LEAH OPERE #03-2000-3","DR LODENYO HUDSON #03-2000-44","DR LOLLA MOLLA #03-2000-10","DR LUCAS #03-2000-8","DR MAGARE #03-2000-76","DR MAKORI #03-2000-93","DR MANG'OLI PAUL #03-2000-49","DR MARJORIE #03-2000-60","DR MARTHA MONARI #03-2000-38","DR MASOUD #03-2000-90","DR MATHEKA #03-2000-70","DR MATHEKA #03-2000-77","DR MAUREEN SHABUYA #03-2000-58","DR MBURU #03-2000-16","DR MICHAEL #03-2000-68","DR MITEMA #03-2000-56","DR MOMANYI BRIAN #03-2000-28","DR MUGENDI #03-2000-66","DR MUIGAI #03-2000-26","DR MUIGAI ? UROLOGIST #03-2000-52","DR MUTIE #03-2000-64","DR MWAI #03-2000-34","DR MWEA MACHARIA #03-2000-45","DR NELLY KAMALE #03-2000-51","DR NGETICH #03-2000-46","DR OGOYE #03-2000-4","DR OKANGA #03-2000-59","DR OKIRIAMU #03-2000-11","DR OLOO BENARD #03-2000-30","DR OPONDO #03-2000-61","DR OYIENGO #03-2000-96","DR ROOPRAI #03-2000-17","DR ROSE MUNGE #03-2000-23","DR SIMIYU #03-2000-32","DR STEVEN ONYANGO #03-2000-79","DR VIVIAN #03-2000-42","DR WINNIE KIMANI #03-2000-63","DR. FAITH WANZA #03-2000-15","DR. GILBERT NGETICH #03-2000-80","DR. NICOLE #03-2000-2","DR. RAINA JONES #03-2000-88","DR. YASHAR MAJIAAHDAM #03-2000-89","E. MURIITHI #03-2000-14","ERNEST MUGUNA #03-2000-18","GENERAL PHYSICIAN #03-2000-82","IP NURSE #03-2000-81","KEISHA OUKO #03-2000-78","KEN MAINA #03-2000-35","MIDWIFE #03-2000-87","MUTUA #03-2000-71","OPTICIAN #03-2000-86","PHILIP MWACHAKA #03-2000-20","PHYSIOTHERAPIST #03-2000-84","RAY ODETTE #03-2000-69","SAMUEL MA ITHYA #03-2000-24","SHEILA MUGENDI #03-2000-37","STEPHEN MUTISYA #03-2000-33","STEVE #03-2000-29","WILLIAM MOROGA #03-2000-53"];
+
+}
+
+
+
+/**
+
+ * Request suggestions for the given autosuggest control. 
+
+ * @scope protected
+
+ * @param oAutoSuggestControl The autosuggest control to provide suggestions for.
+
+ */
+
+StateSuggestions.prototype.requestSuggestions = function (oAutoSuggestControl /*:AutoSuggestControl*/,
+
+                                                          bTypeAhead /*:boolean*/) {
+
+    var aSuggestions = [];
+
+    var sTextboxValue = oAutoSuggestControl.textbox.value;
+
+    
+
+ 	var loopLength = 0;
+
+
+
+    if (sTextboxValue.length > 0){
+
+    
+
+	var sTextboxValue = sTextboxValue.toUpperCase();
+
+
+
+        //search for matching states
+
+        for (var i=0; i < this.states.length; i++) 
+
+		{ 
+
+            if (this.states[i].indexOf(sTextboxValue) >= 0) 
+
+			{
+
+                loopLength = loopLength + 1;
+
+				if (loopLength <= 15) //TO REDUCE THE SUGGESTIONS DROP DOWN LIST
+
+				{
+
+					aSuggestions.push(this.states[i]);
+
+				}
+
+            } 
+
+        }
+
+    }
+
+
+
+    //provide suggestions to the control
+
+    oAutoSuggestControl.autosuggest(aSuggestions, bTypeAhead);
+
 };

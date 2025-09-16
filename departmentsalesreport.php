@@ -1,3 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Department Sales Report - MedStar</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="css/departmentsalesreport-modern.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="js/datetimepicker_css.js"></script>
+    <script src="js/autocomplete_accounts2.js"></script>
+    <script src="js/autosuggest4accounts.js"></script>
+    <script src="js/adddate.js"></script>
+    <script src="js/adddate2.js"></script>
+    <link href="css/datepickerstyle.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="css/autosuggest.css" />
+</head>
+<body>
+
 <?php
 error_reporting(0);
 session_start();
@@ -120,23 +139,36 @@ if ($st == '2')
 }
 
 ?>
-<style type="text/css">
-<!--
-body {
-	margin-left: 0px;
-	margin-top: 0px;
-	background-color: #ecf0f5;
-}
-.bodytext3 {	FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3B3B3C; FONT-FAMILY: Tahoma
-}
--->
-</style>
-<link href="css/datepickerstyle.css" rel="stylesheet" type="text/css" />
-<script type="text/javascript" src="js/adddate.js"></script>
-<script type="text/javascript" src="js/adddate2.js"></script>
+<!-- Modern Hospital Header -->
+<header class="hospital-header">
+    <h1 class="hospital-title">🏥 MedStar Hospital Management</h1>
+    <p class="hospital-subtitle">Advanced Healthcare Management Platform</p>
+</header>
 
-<script type="text/javascript" src="js/autocomplete_accounts2.js"></script>
-<script type="text/javascript" src="js/autosuggest4accounts.js"></script>
+<!-- User Info Bar -->
+<div class="user-info-bar">
+    <div class="user-welcome">
+        <span class="welcome-text">Welcome, <?php echo htmlspecialchars($username); ?></span>
+        <span class="location-info">Company: <?php echo htmlspecialchars($companyname); ?></span>
+    </div>
+    <div class="user-actions">
+        <a href="logout.php" class="btn btn-outline btn-sm">
+            <i class="fas fa-sign-out-alt"></i> Logout
+        </a>
+    </div>
+</div>
+
+<!-- Navigation Breadcrumb -->
+<nav class="nav-breadcrumb">
+    <a href="index.php">🏠 Home</a>
+    <span>→</span>
+    <span>Department Sales Report</span>
+</nav>
+
+<!-- Floating Menu Toggle -->
+<div class="floating-menu-toggle" id="menuToggle">
+    <i class="fas fa-bars"></i>
+</div>
 <script type="text/javascript">
 
 
@@ -437,301 +469,212 @@ document.getElementById("totaladjamt").value=grandtotaladjamt.toFixed(2);
 
 </script>
 <link rel="stylesheet" type="text/css" href="css/autosuggest.css" />        
-<style type="text/css">
-<!--
-.bodytext3 {FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3b3b3c; FONT-FAMILY: Tahoma; text-decoration:none
-}
-.bodytext31 {FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3b3b3c; FONT-FAMILY: Tahoma; text-decoration:none
-}
-.bodytext311 {FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3b3b3c; FONT-FAMILY: Tahoma; text-decoration:none
-}
--->
-.bal
-{
-border-style:none;
-background:none;
-text-align:right;
-}
-.bali
-{
-text-align:right;
-}
-</style>
-</head>
 
-<script src="js/datetimepicker_css.js"></script>
+<!-- Main Container with Sidebar -->
+<div class="main-container-with-sidebar">
+    <!-- Left Sidebar -->
+    <div class="left-sidebar" id="leftSidebar">
+        <div class="sidebar-header">
+            <h3>Navigation</h3>
+            <button class="sidebar-toggle" id="sidebarToggle">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+        </div>
+        <nav class="sidebar-nav">
+            <ul class="nav-list">
+                <li class="nav-item active">
+                    <a href="departmentsalesreport.php" class="nav-link">
+                        <i class="fas fa-chart-line"></i>
+                        Department Sales Report
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="index.php" class="nav-link">
+                        <i class="fas fa-home"></i>
+                        Dashboard
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="reports.php" class="nav-link">
+                        <i class="fas fa-file-alt"></i>
+                        Reports
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </div>
 
-<body>
-<table width="101%" border="0" cellspacing="0" cellpadding="2">
-  <tr>
-    <td colspan="10" bgcolor="#ecf0f5"><?php include ("includes/alertmessages1.php"); ?></td>
-  </tr>
-  <tr>
-    <td colspan="10" bgcolor="#ecf0f5"><?php include ("includes/title1.php"); ?></td>
-  </tr>
-  <tr>
-    <td colspan="10" bgcolor="#ecf0f5"><?php include ("includes/menu1.php"); ?></td>
-  </tr>
-  <tr>
-    <td colspan="10">&nbsp;</td>
-  </tr>
-  <tr>
-    <td width="1%">&nbsp;</td>
-    <td width="2%" valign="top"><?php //include ("includes/menu4.php"); ?>
-      &nbsp;</td>
-    <td width="97%" valign="top"><table width="98%" border="0" cellspacing="0" cellpadding="0">
-      <tr>
-        <td width="860">
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Alert Container -->
+        <div id="alertContainer">
+            <?php if ($errmsg != ""): ?>
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i>
+                    <span><?php echo htmlspecialchars($errmsg); ?></span>
+                </div>
+            <?php endif; ?>
+        </div>
+
+        <!-- Page Header -->
+        <div class="page-header">
+            <div class="page-header-content">
+                <h2>Department Sales Report</h2>
+                <p>Generate comprehensive sales reports by department</p>
+            </div>
+            <div class="page-header-actions">
+                <button type="button" class="btn btn-outline" onclick="printReport()">
+                    <i class="fas fa-print"></i> Print
+                </button>
+                <button type="button" class="btn btn-outline" onclick="exportToExcel()">
+                    <i class="fas fa-file-excel"></i> Export
+                </button>
+                <button type="button" class="btn btn-outline" onclick="refreshPage()">
+                    <i class="fas fa-sync-alt"></i> Refresh
+                </button>
+            </div>
+        </div>
+
+        <!-- Search Form Container -->
+        <div class="search-form-container">
 		
 		
-              <form name="cbform1" method="post" action="departmentsalesreport.php">
-		<table width="800" border="0" align="left" cellpadding="4" cellspacing="0" bordercolor="#666666" id="AutoNumber3" style="border-collapse: collapse">
-          <tbody>
-            <tr bgcolor="#011E6A">
-              <td colspan="2" bgcolor="#ecf0f5" class="bodytext3"><strong>Department Sales Report</strong></td>
-              <td colspan="2" align="right" bgcolor="#ecf0f5" class="bodytext3" id="ajaxlocation"><strong> Location </strong>
-             
-            
-                  <?php
-						
-						/*if ($location!='')
-						{
-						$query12 = "select locationname from master_location where locationcode='$location' order by locationname";
-						$exec12 = mysqli_query($GLOBALS["___mysqli_ston"], $query12) or die ("Error in Query12".mysqli_error($GLOBALS["___mysqli_ston"]));
-						$res12 = mysqli_fetch_array($exec12);
-						
-						echo $res1location = $res12["locationname"];
-				
-						}
-						else
-						{
-						$query1 = "select locationname from login_locationdetails where username='$username' and docno='$docno' group by locationname order by locationname";
-						$exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
-						$res1 = mysqli_fetch_array($exec1);
-						
-						echo $res1location = $res1["locationname"];
-						
-						}*/
-						?>
-						
-						
-                  
-                  </td> 
-              </tr>
-            <!--<tr>
-              <td colspan="4" align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">
-			  <input name="printreceipt1" type="reset" id="printreceipt1" onClick="return funcPrintReceipt1()" style="border: 1px solid #001E6A" value="Print Receipt - Previous Payment Entry" /> 
-                *To Print Other Receipts Please Go To Menu:	Reports	-&gt; Payments Given 
-				</td>
-              </tr>-->
+            <form name="cbform1" method="post" action="departmentsalesreport.php" class="search-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="location" class="form-label">Location</label>
+                        <select name="location" id="location" class="form-control" onChange="ajaxlocationfunction(this.value);">
+                            <option value="All">All</option>
+                            <?php
+                            $query1 = "select locationname,locationcode from master_location order by auto_number desc";
+                            $exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
+                            while ($res1 = mysqli_fetch_array($exec1)) {
+                                $locationname = $res1["locationname"];
+                                $locationcode = $res1["locationcode"];
+                            ?>
+                                <option value="<?php echo $locationcode; ?>" <?php if($location!='')if($location==$locationcode){echo "selected";}?>><?php echo $locationname; ?></option>
+                            <?php } ?>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="department" class="form-label">Department</label>
+                        <select id="department" name="department" class="form-control">
+                            <option value="">--Select Department--</option>
+                            <?php
+                            $result = mysqli_query($GLOBALS["___mysqli_ston"], "SELECT auto_number,department FROM master_department order by department asc ");
+                            while($row = mysqli_fetch_array($result)){ ?>
+                                <option value="<?=$row['auto_number'];?>" <?php if($search_department==$row['auto_number']) echo 'selected'; ?>><?=$row['department'];?></option>
+                            <?php } ?>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="reporttype" class="form-label">Report Type</label>
+                        <select id="reporttype" name="reporttype" class="form-control">
+                            <option value="summary" <?php if($reporttype=="summary") echo 'selected'; ?>>Summary</option>
+                            <option value="detailed" <?php if($reporttype=="detailed") echo 'selected'; ?>>Detailed</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="ADate1" class="form-label">Date From</label>
+                        <input name="ADate1" id="ADate1" value="<?php if($ADate2!=""){ echo $ADate1;}else{ echo $paymentreceiveddateto; } ?>" class="form-control" readonly="readonly" onKeyDown="return disableEnterKey()" />
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="ADate2" class="form-label">Date To</label>
+                        <input name="ADate2" id="ADate2" value="<?php if($ADate2!=""){ echo $ADate2;}else{ echo $paymentreceiveddateto; } ?>" class="form-control" readonly="readonly" onKeyDown="return disableEnterKey()" />
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">&nbsp;</label>
+                        <div style="display: flex; gap: 0.5rem; align-items: center;">
+                            <img src="images2/cal.gif" onClick="javascript:NewCssCal('ADate1')" style="cursor:pointer" title="Select Date From"/>
+                            <img src="images2/cal.gif" onClick="javascript:NewCssCal('ADate2')" style="cursor:pointer" title="Select Date To"/>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <input type="hidden" name="searchsuppliername" id="searchsuppliername" value="<?php echo $searchsuppliername; ?>">
+                    <input type="hidden" name="searchsuppliercode" id="searchsuppliercode" value="<?php echo $searchsuppliercode; ?>">
+                    <input type="hidden" name="cbfrmflag1" value="cbfrmflag1">
+                    <button type="submit" name="Submit" class="btn btn-primary">
+                        <i class="fas fa-search"></i> Search
+                    </button>
+                    <button type="reset" name="resetbutton" class="btn btn-outline" onclick="clearForm()">
+                        <i class="fas fa-undo"></i> Reset
+                    </button>
+                </div>
+            </form>
+        </div>
 
-            <!-- <tr> -->
-              <!-- <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">Search Account </td> -->
-              <!-- <td width="82%" colspan="3" align="left" valign="top"  bgcolor="#FFFFFF"><span class="bodytext3"> -->
-                <input name="searchsuppliername" type="hidden" id="searchsuppliername" value="<?php echo $searchsuppliername; ?>" size="50" autocomplete="off">
-              <!-- </span></td> -->
-              <!-- </tr> -->
-
-              <tr>
-             <td  align="left" valign="center" 
-			    width="10%" align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">Location</td>
-              <td width="30%" align="left" valign="top"  bgcolor="#FFFFFF"><span class="bodytext3">
-			 
-				 <select name="location" id="location" onChange="ajaxlocationfunction(this.value);">
-                   <option value="All">All</option>
-                    <?php
-						
-						$query1 = "select locationname,locationcode from master_location  order by auto_number desc";
-						$exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
-						$loccode=array();
-						while ($res1 = mysqli_fetch_array($exec1))
-						{
-						$locationname = $res1["locationname"];
-						$locationcode = $res1["locationcode"];
-						
-						?>
-						 <option value="<?php echo $locationcode; ?>" <?php if($location!='')if($location==$locationcode){echo "selected";}?>><?php echo $locationname; ?></option>
-						<?php
-						} 
-						?>
-                      </select>
-					 
-              </span></td>
-			   <td width="10%" align="left" colspan="2" valign="middle"  bgcolor="#FFFFFF" class="bodytext3"></td>
-			  </tr>	
-
-              <tr>
-	              <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">Department</td>
-	              <td width="82%" colspan="3" align="left" valign="top"  bgcolor="#FFFFFF"><span class="bodytext3">
-	              	 
-	              	<!-- <input name="subtype"  list="subtype" type="text"  size="50" autocomplete="off"> -->
-	              	<!-- <datalist  id="subtype"> -->
-	              	<select  id="department" name="department" type="text" autocomplete="off">
-	              		<option value="">--Select Department--</option>
-	              		<?php
-	              		$result = mysqli_query($GLOBALS["___mysqli_ston"], "SELECT auto_number,department FROM master_department order by department asc ");
-	              		
-			 
-	              		while($row = mysqli_fetch_array($result)){ ?>
-	              			<option value="<?=$row['auto_number'];?>" <?php if($search_department==$row['auto_number']) echo 'selected'; ?>><?=$row['department'];?></option>
-	              		<?php }
-						?>
-					</select>
-	              	<!-- </datalist> -->
-	                
-	              </span></td>
-              </tr> 
-
-               <tr>
-	              <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">Report Type</td>
-	              <td width="82%" colspan="3" align="left" valign="top"  bgcolor="#FFFFFF"><span class="bodytext3">
-	             
-	              	<select  id="reporttype" name="reporttype" type="text" autocomplete="off">
-	              		<!-- <option value="">--Select Report Type--</option> -->
-	              			<option value="summary" <?php if($reporttype=="summary") echo 'selected'; ?>>Summary</option>
-	              			<option value="detailed" <?php if($reporttype=="detailed") echo 'selected'; ?>>Detailed</option>
-	              		
-					</select>
-	              </span></td>
-              </tr>  
-            
-			  <tr>
-                      <td class="bodytext31" valign="center"  align="left" 
-                bgcolor="#FFFFFF"> Date From </td>
-                      <td width="30%" align="left" valign="center"  bgcolor="#FFFFFF" class="bodytext31"><input name="ADate1" id="ADate1" value="<?php if($ADate2!=""){ echo $ADate1;}else{ echo $paymentreceiveddateto; } ?>"  size="10"  readonly="readonly" onKeyDown="return disableEnterKey()" />
-                          <img src="images2/cal.gif" onClick="javascript:NewCssCal('ADate1')" style="cursor:pointer"/> </td>
-                      <td width="16%" align="left" valign="center"  bgcolor="#FFFFFF" class="bodytext31"> Date To </td>
-                      <td width="33%" align="left" valign="center"  bgcolor="#FFFFFF"><span class="bodytext31">
-                        <input name="ADate2" id="ADate2" value="<?php if($ADate2!=""){ echo $ADate2;}else{ echo $paymentreceiveddateto; } ?>"  size="10"  readonly="readonly" onKeyDown="return disableEnterKey()" />
-                        <img src="images2/cal.gif" onClick="javascript:NewCssCal('ADate2')" style="cursor:pointer"/> </span></td>
-                  </tr>
-				
-            <tr>
-              <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3"><input type="hidden" name="searchsuppliercode" onBlur="return suppliercodesearch1()" onKeyDown="return suppliercodesearch2()" id="searchsuppliercode" style="text-transform:uppercase" value="<?php echo $searchsuppliercode; ?>" size="20" /></td>
-              <td colspan="3" align="left" valign="top"  bgcolor="#FFFFFF">
-			  <input type="hidden" name="cbfrmflag1" value="cbfrmflag1">
-                  <input  type="submit" value="Search" name="Submit" />
-                  <input name="resetbutton" type="reset" id="resetbutton" value="Reset" /></td>
-            </tr>
-          </tbody>
-        </table>
-		</form>		</td>
-      </tr>
-    
-       <tr>
-        <td><table id="AutoNumber3" style="BORDER-COLLAPSE: collapse" 
-            bordercolor="#666666" cellspacing="0" cellpadding="4" width="1546" 
-            align="left" border="0">
-          <tbody>
-            <tr>
-              <td width="2%"  class="bodytext31">&nbsp;</td>
-              <td colspan="19"  class="bodytext31">
-              <?php
-				if (isset($_REQUEST["cbfrmflag1"])) { $cbfrmflag1 = $_REQUEST["cbfrmflag1"]; } else { $cbfrmflag1 = ""; }
-				//$cbfrmflag1 = $_REQUEST['cbfrmflag1'];
-				if ($cbfrmflag1 == 'cbfrmflag1')
-				{
-					if (isset($_REQUEST["cbcustomername"])) { $cbcustomername = $_REQUEST["cbcustomername"]; } else { $cbcustomername = ""; }
-					//$cbbillnumber = $_REQUEST['cbbillnumber'];
-					if (isset($_REQUEST["customername"])) { $customername = $_REQUEST["customername"]; } else { $customername = ""; }
-					//$cbbillstatus = $_REQUEST['cbbillstatus'];
-					
-					if (isset($_REQUEST["cbbillnumber"])) { $cbbillnumber = $_REQUEST["cbbillnumber"]; } else { $cbbillnumber = ""; }
-					//$cbbillnumber = $_REQUEST['cbbillnumber'];
-					if (isset($_REQUEST["cbbillstatus"])) { $cbbillstatus = $_REQUEST["cbbillstatus"]; } else { $cbbillstatus = ""; }
-					//$cbbillstatus = $_REQUEST['cbbillstatus'];
-					$locationcode1=isset($_REQUEST['location'])?$_REQUEST['location']:'';
-			  	}
-				?> 			</td>  
-            </tr>
+        <!-- Data Table Container -->
+        <div class="data-table-container">
             <?php
-            if ($cbfrmflag1 == 'cbfrmflag1')
-				{ ?>
-            <tr>
-            	<td align="right" valign="center" bgcolor="#ecf0f5" class="bodytext31"><a target="_blank" href="xl_departmentsalesreport.php?cbfrmflag1=cbfrmflag1&&locationcode=<?php echo $locationcode1; ?>&&ADate1=<?php echo $transactiondatefrom; ?>&&ADate2=<?php echo $transactiondateto; ?>&&user=<?php echo $searchsuppliername; ?>&&department=<?php echo $search_department; ?>&&reporttype=<?=$reporttype?>"><img src="images/excel-xls-icon.png" width="30" height="30"></a></td>
-            </tr>
-        <?php } ?>
+            if (isset($_REQUEST["cbfrmflag1"])) { $cbfrmflag1 = $_REQUEST["cbfrmflag1"]; } else { $cbfrmflag1 = ""; }
+            if ($cbfrmflag1 == 'cbfrmflag1') {
+                if (isset($_REQUEST["cbcustomername"])) { $cbcustomername = $_REQUEST["cbcustomername"]; } else { $cbcustomername = ""; }
+                if (isset($_REQUEST["customername"])) { $customername = $_REQUEST["customername"]; } else { $customername = ""; }
+                if (isset($_REQUEST["cbbillnumber"])) { $cbbillnumber = $_REQUEST["cbbillnumber"]; } else { $cbbillnumber = ""; }
+                if (isset($_REQUEST["cbbillstatus"])) { $cbbillstatus = $_REQUEST["cbbillstatus"]; } else { $cbbillstatus = ""; }
+                $locationcode1=isset($_REQUEST['location'])?$_REQUEST['location']:'';
+            }
+            ?>
+            
+            <?php if ($cbfrmflag1 == 'cbfrmflag1'): ?>
+                <div style="text-align: right; margin-bottom: 1rem;">
+                    <a target="_blank" href="xl_departmentsalesreport.php?cbfrmflag1=cbfrmflag1&&locationcode=<?php echo $locationcode1; ?>&&ADate1=<?php echo $transactiondatefrom; ?>&&ADate2=<?php echo $transactiondateto; ?>&&user=<?php echo $searchsuppliername; ?>&&department=<?php echo $search_department; ?>&&reporttype=<?=$reporttype?>" class="btn btn-success btn-sm">
+                        <i class="fas fa-file-excel"></i> Export to Excel
+                    </a>
+                </div>
+            <?php endif; ?>
 
-        <?php if($reporttype=="detailed"){ ?>
-            <tr>
-
-              <td class="bodytext31" valign="center"  align="left" 
-                bgcolor="#ffffff"><strong>No.</strong></td>
-              <td width="7%" align="left" valign="center"  
-                bgcolor="#ffffff" class="bodytext31"><div align="left"><strong>Visit No</strong></div></td>
-              <td width="6%" align="left" valign="center"  
-                bgcolor="#ffffff" class="bodytext31"><strong> Bill No </strong></td>
-              <td width="6%" align="left" valign="center"  
-                bgcolor="#ffffff" class="bodytext31"><strong> Bill Date </strong></td>
-              <td width="8%" align="left" valign="center"  
-                bgcolor="#ffffff" class="bodytext31"><div align="left"><strong>Reg No. </strong></div></td>
-				 <td width="8%" align="left" valign="center"  
-                bgcolor="#ffffff" class="bodytext31"><div align="left"><strong>Member No. </strong></div></td>
-              <td width="15%" align="left" valign="center"  
-                bgcolor="#ffffff" class="bodytext31"><div align="left"><strong>Patient</strong></div></td>
-				<td width="15%" align="left" valign="center"  
-                bgcolor="#ffffff" class="bodytext31"><div align="left"><strong>Accountname</strong></div></td>
-				<td width="15%" align="left" valign="center"  
-                bgcolor="#ffffff" class="bodytext31"><div align="left"><strong>Subtype</strong></div></td>
-				<td width="15%" align="left" valign="center"  
-                bgcolor="#ffffff" class="bodytext31"><div align="left"><strong>Department</strong></div></td>
-				<td width="15%" align="left" valign="center"  
-                bgcolor="#ffffff" class="bodytext31"><div align="left"><strong>Payment Type</strong></div></td>
-              <!-- <td width="12%" align="left" valign="center"  
-                bgcolor="#ffffff" class="bodytext31"><div align="left"><strong>Plan Name </strong></div></td> -->
-
-                <td width="6%" align="left" valign="center"  
-                bgcolor="#ffffff" class="bodytext31"><div align="right"><strong>Consultation</strong></div></td>
-
-              <td width="3%" align="left" valign="center"  
-                bgcolor="#ffffff" class="bodytext31"><div align="right"><strong>Lab</strong></div></td>
-              <td width="4%" align="left" valign="center"  
-                bgcolor="#ffffff" class="bodytext31"><div align="right"><strong>Service</strong></div></td>
-              <td width="5%" align="left" valign="center"  
-                bgcolor="#ffffff" class="bodytext31"><div align="right"><strong>Pharmacy</strong></div></td>
-              <td width="5%" align="left" valign="center"  
-                bgcolor="#ffffff" class="bodytext31"><div align="right"><strong>Radiology</strong></div></td>
-              
-              <td width="5%" align="left" valign="center"  
-                bgcolor="#ffffff" class="bodytext31"><div align="right"><strong>Referral</strong></div></td>
-              <td width="5%" align="left" valign="center"  
-                bgcolor="#ffffff" class="bodytext31"><strong>Total</strong></td>
-              <td width="5%" align="left" valign="center"  
-                bgcolor="#ffffff" class="bodytext31"><strong>Username</strong></td>
-              <td width="5%" align="left" valign="center"  
-                 bgcolor="#ffffff" class="bodytext31"><strong>View</strong></td>
-            </tr>
-        <?php } ?>
-
-
-           <?php if($reporttype=="summary"){ ?>
-            <tr>
-
-              <td class="bodytext31" valign="center"  align="left" 
-                bgcolor="#ffffff"><strong>No.</strong></td>
-             
-				<td width="15%" align="left" valign="center"  
-                bgcolor="#ffffff" class="bodytext31"><div align="left"><strong>Department</strong></div></td>
-				
-                <td width="6%" align="left" valign="center"  
-                bgcolor="#ffffff" class="bodytext31"><div align="right"><strong>Consultation</strong></div></td>
-
-              <td width="3%" align="left" valign="center"  
-                bgcolor="#ffffff" class="bodytext31"><div align="right"><strong>Lab</strong></div></td>
-              <td width="4%" align="left" valign="center"  
-                bgcolor="#ffffff" class="bodytext31"><div align="right"><strong>Service</strong></div></td>
-              <td width="5%" align="left" valign="center"  
-                bgcolor="#ffffff" class="bodytext31"><div align="right"><strong>Pharmacy</strong></div></td>
-              <td width="5%" align="left" valign="center"  
-                bgcolor="#ffffff" class="bodytext31"><div align="right"><strong>Radiology</strong></div></td>
-              
-              <td width="5%" align="left" valign="center"  
-                bgcolor="#ffffff" class="bodytext31"><div align="right"><strong>Referral</strong></div></td>
-              <td width="5%" align="right" valign="center"  
-                bgcolor="#ffffff" class="bodytext31"><strong>Total</strong></td>
-              
-            </tr>
-        <?php } ?>
+            <table class="modern-table">
+                <thead>
+                    <?php if($reporttype=="detailed"): ?>
+                        <tr>
+                            <th>No.</th>
+                            <th>Visit No</th>
+                            <th>Bill No</th>
+                            <th>Bill Date</th>
+                            <th>Reg No.</th>
+                            <th>Member No.</th>
+                            <th>Patient</th>
+                            <th>Account Name</th>
+                            <th>Subtype</th>
+                            <th>Department</th>
+                            <th>Payment Type</th>
+                            <th>Consultation</th>
+                            <th>Lab</th>
+                            <th>Service</th>
+                            <th>Pharmacy</th>
+                            <th>Radiology</th>
+                            <th>Referral</th>
+                            <th>Total</th>
+                            <th>Username</th>
+                            <th>View</th>
+                        </tr>
+                    <?php elseif($reporttype=="summary"): ?>
+                        <tr>
+                            <th>No.</th>
+                            <th>Department</th>
+                            <th>Consultation</th>
+                            <th>Lab</th>
+                            <th>Service</th>
+                            <th>Pharmacy</th>
+                            <th>Radiology</th>
+                            <th>Referral</th>
+                            <th>Total</th>
+                        </tr>
+                    <?php endif; ?>
+                </thead>
+                <tbody>
 			<?php
 			$totallab = $totalser = $totalpharm = $totalrad = $totalref = $totalcons = 0;
 			if (isset($_REQUEST["cbfrmflag1"])) { $cbfrmflag1 = $_REQUEST["cbfrmflag1"]; } else { $cbfrmflag1 = ""; }
@@ -1527,18 +1470,15 @@ text-align:right;
 
        
             
-			</tr>
+                </tr>
+                <?php } ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
 
-			  <?php }
-                ?>
-          </tbody>
-        </table></td>
-      </tr>
-	  
-    </table>
-</table>
-<?php include ("includes/footer1.php"); ?>
-    <!-- Modern JavaScript -->
-    <script src="js/departmentsalesreport-modern.js?v=<?php echo time(); ?>"></script>
+<!-- Modern JavaScript -->
+<script src="js/departmentsalesreport-modern.js?v=<?php echo time(); ?>"></script>
 </body>
 </html>

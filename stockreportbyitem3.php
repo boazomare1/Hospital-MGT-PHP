@@ -77,126 +77,6 @@ if ($searchitemname != '')
 </head>
 
 
-function stockinwardvalidation1()
-{
-	
-	if (document.stockinward.itemcode.value == "")
-	{
-		alert ("Please Select Item Name.")
-		return false;
-	}
-	else if (document.stockinward.servicename.value == "")
-	{
-		alert ("Please Select Item Name.")
-		document.stockinward.servicename.focus();
-		return false;
-	}
-	else if (document.stockinward.stockquantity.value == "")
-	{
-		alert ("Please Enter Stock Quantity.")
-		document.stockinward.stockquantity.focus();
-		return false;
-	}
-	else if (isNaN(document.stockinward.stockquantity.value))
-	{
-		alert ("Please Enter Only Numbers Stock Quantity.")
-		document.stockinward.stockquantity.focus();
-		return false;
-	}
-	else if (document.stockinward.stockquantity.value == "0")
-	{
-		alert ("Please Enter Stock Quantity.")
-		document.stockinward.stockquantity.focus();
-		return false;
-	}
-	else if (document.stockinward.stockquantity.value == "0.0")
-	{
-		alert ("Please Enter Stock Quantity.")
-		document.stockinward.stockquantity.focus();
-		return false;
-	}
-	else if (document.stockinward.stockquantity.value == "0.00")
-	{
-		alert ("Please Enter Stock Quantity.")
-		document.stockinward.stockquantity.focus();
-		return false;
-	}
-	else if (document.stockinward.stockquantity.value == "0.000")
-	{
-		alert ("Please Enter Stock Quantity.")
-		document.stockinward.stockquantity.focus();
-		return false;
-	}
-
-}
-
-
-function itemcodeentry2()
-{
-	var key;
-	if(window.event)
-	{
-		key = window.event.keyCode;     //IE
-	}
-	else
-	{
-		key = e.which;     //firefox
-	}
-	
-	if(key == 13) // if enter key press
-	{
-		//alert ("Enter Key Press2");
-		//itemcodeentry1();
-		return false;
-	}
-	else
-	{
-		return true;
-	}
-}
-
-function Locationcheck()
-{
-if(document.getElementById("location").value == '')
-{
-alert("Please Select Location");
-document.getElementById("location").focus();
-return false;
-}
-/*if(document.getElementById("store").value == '')
-{
-alert("Please Select Store");
-document.getElementById("store").focus();
-return false;
-}*/
-}
-
-//ajax function to get store for corrosponding location
-function storefunction(loc)
-{
-	var username=document.getElementById("username").value;
-	
-var xmlhttp;
-
-if (window.XMLHttpRequest)
-  {// code for IE7+, Firefox, Chrome, Opera, Safari
-  xmlhttp=new XMLHttpRequest();
-  }
-else
-  {// code for IE6, IE5
-  xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
-  }
-xmlhttp.onreadystatechange=function()
-  {
-  if (xmlhttp.readyState==4 && xmlhttp.status==200)
-    {
-    document.getElementById("store").innerHTML=xmlhttp.responseText;
-    }
-  }
-xmlhttp.open("GET","ajax/ajaxstore.php?loc="+loc+"&username="+username,true);
-xmlhttp.send();
-
-	}
 </script>
 <body onLoad="return funcCustomerDropDownSearch1();">
     <!-- Hospital Header -->
@@ -226,284 +106,273 @@ xmlhttp.send();
         <span>Stock Report by Item</span>
     </nav>
 
-    <!-- Main Container -->
-    <div class="main-container">
-<table width="101%" border="0" cellspacing="0" cellpadding="2">
-  <tr>
-    <td colspan="10" bgcolor="#ecf0f5"><?php include ("includes/alertmessages1.php"); ?></td>
-  </tr>
-  <tr>
-    <td colspan="10" bgcolor="#ecf0f5"><?php include ("includes/title1.php"); ?></td>
-  </tr>
-  <tr>
-    <td colspan="10" bgcolor="#ecf0f5"><?php include ("includes/menu1.php"); ?></td>
-  </tr>
-  <tr>
-    <td colspan="10">&nbsp;</td>
-  </tr>
-  <tr>
-    <td width="1%" rowspan="3">&nbsp;</td>
-    <td width="2%" rowspan="3" valign="top"><?php //include ("includes/menu4.php"); ?>
-      &nbsp;</td>
-    <td valign="top"><table width="98%" border="0" cellspacing="0" cellpadding="0">
-      <tr>
-        <td>
-		<form name="stockinward" action="" method="post" onKeyDown="return disableEnterKey()" onSubmit="return Locationcheck()">
-	<table id="AutoNumber3" style="BORDER-COLLAPSE: collapse" 
-            bordercolor="#666666" cellspacing="0" cellpadding="4" width="800" 
-            align="left" border="0">
-      <tbody id="foo">
-        <tr>
-          <td colspan="5" bgcolor="#ecf0f5" class="bodytext31"><strong>Closing Stock - Report By Item</strong></td>
-          </tr>
-        <tr>
-          <td colspan="5" align="left" valign="center"  
-                 bgcolor="<?php if ($errmsg == '') { echo '#FFFFFF'; } else { echo '#cbdbfa'; } ?>" class="bodytext31"><?php echo $errmsg; ?>&nbsp;</td>
-          </tr>
-        <script language="javascript">
+    <!-- Floating Menu Toggle -->
+    <div id="menuToggle" class="floating-menu-toggle">
+        <i class="fas fa-bars"></i>
+    </div>
 
-function disableEnterKey()
-{
-	//alert ("Back Key Press");
-	if (event.keyCode==8) 
-	{
-		event.keyCode=0; 
-		return event.keyCode 
-		return false;
-	}
-	
-	var key;
-	if(window.event)
-	{
-		key = window.event.keyCode;     //IE
-	}
-	else
-	{
-		key = e.which;     //firefox
-	}
-	
-	if(key == 13) // if enter key press
-	{
-		//alert ("Enter Key Press2");
-		return false;
-	}
-	else
-	{
-		return true;
-	}
-	
+    <!-- Main Container with Sidebar -->
+    <div class="main-container-with-sidebar">
+        <!-- Left Sidebar -->
+        <aside id="leftSidebar" class="left-sidebar">
+            <div class="sidebar-header">
+                <h3>Quick Navigation</h3>
+                <button id="sidebarToggle" class="sidebar-toggle">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <ul class="nav-list">
+                    <li class="nav-item">
+                        <a href="mainmenu1.php" class="nav-link">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="cashradiologyrefund.php" class="nav-link">
+                            <i class="fas fa-x-ray"></i>
+                            <span>Cash Radiology Refund</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="cashrefundapprovallist.php" class="nav-link">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Refund Approval List</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="chequescollected.php" class="nav-link">
+                            <i class="fas fa-money-check"></i>
+                            <span>Cheques Collected</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="claimtxnidedit.php" class="nav-link">
+                            <i class="fas fa-edit"></i>
+                            <span>Claim Transaction Edit</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="payrollprocess1.php" class="nav-link">
+                            <i class="fas fa-money-bill-wave"></i>
+                            <span>Payroll Process</span>
+                        </a>
+                    </li>
+                    <li class="nav-item active">
+                        <a href="stockreportbyitem3.php" class="nav-link">
+                            <i class="fas fa-boxes"></i>
+                            <span>Stock Report by Item</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
 
-}
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Alert Container -->
+            <div id="alertContainer">
+                <?php include ("includes/alertmessages1.php"); ?>
+            </div>
 
+            <!-- Page Header -->
+            <div class="page-header">
+                <div class="page-header-content">
+                    <h2>Stock Report by Item</h2>
+                    <p>Generate detailed stock reports by item with current inventory levels.</p>
+                </div>
+                <div class="page-header-actions">
+                    <button type="button" class="btn btn-secondary" onclick="refreshPage()">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                    <button type="button" class="btn btn-outline" onclick="exportToExcel()">
+                        <i class="fas fa-download"></i> Export
+                    </button>
+                </div>
+            </div>
+            <!-- Stock Report Section -->
+            <div class="stock-report-section">
+                <div class="stock-report-header">
+                    <div class="stock-report-icon">
+                        <i class="fas fa-boxes"></i>
+                    </div>
+                    <div class="stock-report-title">Closing Stock - Report By Item</div>
+                </div>
 
-function process1rateperunit()
-{
-	servicenameonchange1();
-}
+                <?php if ($errmsg != ''): ?>
+                <div class="alert alert-error">
+                    <?php echo htmlspecialchars($errmsg); ?>
+                </div>
+                <?php endif; ?>
 
-
-function deleterecord1(varEntryNumber,varAutoNumber)
-{
-	var varEntryNumber = varEntryNumber;
-	var varAutoNumber = varAutoNumber;
-	var fRet;
-	fRet = confirm('Are you sure want to delete the stock entry no. '+varEntryNumber+' ?');
-	//alert(fRet);
-	if (fRet == false)
-	{
-		alert ("Stock Entry Delete Not Completed.");
-		return false;
-	}
-	else
-	{
-		window.location="stockreport2.php?task=del&&delanum="+varAutoNumber;		
-	}
-}
-
-
-</script>
+                <form name="stockinward" action="" method="post" onKeyDown="return disableEnterKey()" onSubmit="return Locationcheck()" class="search-form">
        
-         <tr>
-              <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3"><strong>Location</strong></td>
-              <td  bgcolor="#FFFFFF" class="bodytext3"  colspan="3" ><select name="location" id="location" style="border: 1px solid #001E6A;" onChange="storefunction(this.value)">
-              <option value="">-Select Location-</option>
-                  <?php
-						
-						$query = "select * from login_locationdetails where username='$username' and docno='$docno' group by locationname order by locationname";
-						$exec = mysqli_query($GLOBALS["___mysqli_ston"], $query) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
-						while ($res = mysqli_fetch_array($exec))
-						{
-						$reslocation = $res["locationname"];
-						$reslocationanum = $res["locationcode"];
-						?>
-						<option value="<?php echo $reslocationanum; ?>" <?php if($location!='')if($location==$reslocationanum){echo "selected";}?>><?php echo $reslocation; ?></option>
-						<?php 
-						}
-						?>
-                  </select></td>
-                   
-                  <input type="hidden" name="locationnamenew" value="<?php echo $locationname; ?>">
-                <input type="hidden" name="locationcodenew" value="<?php echo $res1locationanum; ?>">
-                <input type="hidden" name="username" id="username" value="<?php echo $username; ?>">
-             
-              </tr>
-		<tr>
-		  <td width="104" align="left" valign="center"  bgcolor="#ffffff" class="bodytext31"><strong>Store</strong> </td>
-          <td colspan="4" width="680" align="left" valign="center"  bgcolor="#ffffff" class="bodytext31">
-		  <?php  $loc=isset($_REQUEST['location'])?$_REQUEST['location']:'';
- 				 $username=isset($_REQUEST['username'])?$_REQUEST['username']:'';
- 				 $frmflag1=isset($_REQUEST['frmflag1'])?$_REQUEST['frmflag1']:'';
-				 $store=isset($_REQUEST['store'])?$_REQUEST['store']:'';?>  
-                 <select name="store" id="store">
-		   <option value="">-Select Store-</option>
-           <?php if ($frmflag1 == 'frmflag1')
-{$loc=isset($_REQUEST['location'])?$_REQUEST['location']:'';
-$username=isset($_REQUEST['username'])?$_REQUEST['username']:'';
-$query5 = "select ms.auto_number,ms.storecode,ms.store from master_employeelocation as me LEFT JOIN master_store as ms ON me.storecode=ms.auto_number where me.locationcode = '".$loc."' AND me.username= '".$username."'";
-				$exec5 = mysqli_query($GLOBALS["___mysqli_ston"], $query5) or die ("Error in Query5".mysqli_error($GLOBALS["___mysqli_ston"]));
-				while ($res5 = mysqli_fetch_array($exec5))
-				{
-				$res5anum = $res5["storecode"];
-				$res5name = $res5["store"];
-				//$res5department = $res5["department"];
-?>
-<option value="<?php echo $res5anum;?>" <?php if($store==$res5anum){echo 'selected';}?>><?php echo $res5name;?></option>
-<?php }}?>
-		  </select>
-		  </td>
-		  </tr>
-           <tr>
-          <td align="left" valign="center"  
-                bgcolor="#ffffff" class="bodytext31"><strong>Category</strong></td>
-          <td colspan="4" align="left" valign="center"  bgcolor="#ffffff" class="bodytext31"><select name="categoryname" id="categoryname">
-            <?php
-			$categoryname = $_REQUEST['categoryname'];
-			if ($categoryname != '')
-			{
-			?>
-            <option value="<?php echo $categoryname; ?>" selected="selected"><?php echo $categoryname; ?></option>
-            <option value="">Show All Category</option>
-            <?php
-			}
-			else
-			{
-			?>
-            <option selected="selected" value="">Show All Category</option>
-            <?php
-			}
-			?>
-            <?php
-			$query42 = "select categoryname from master_medicine where status = '' group by categoryname order by categoryname";
-			$exec42 = mysqli_query($GLOBALS["___mysqli_ston"], $query42) or die ("Error in Query42".mysqli_error($GLOBALS["___mysqli_ston"]));
-				while ($res42 = mysqli_fetch_array($exec42))
-			{
-			$categoryname = $res42['categoryname'];
-			?>
-            <option value="<?php echo $categoryname; ?>"><?php echo $categoryname; ?></option>
-            <?php
-			}
-			?>
-          </select></td>
-        </tr>
-        <tr>
-          <td align="left" valign="center"  
-                bgcolor="#ffffff" class="bodytext31"><strong>Search</strong></td>
-          <td colspan="4" align="left" valign="center"  bgcolor="#ffffff" class="bodytext31"><input name="itemname" type="text" id="itemname" value="<?php echo $searchitemname; ?>" style="border: 1px solid #001E6A; text-align:left" size="50" autocomplete="off">
-		  <input type="hidden" name="searchitem1hiddentextbox" id="searchitem1hiddentextbox">
-		  <input type="hidden" name="searchitemcode" id="searchitemcode">
-            <input name="searchbutton12" type="submit" id="searchbutton12" style="border: 1px solid #001E6A" value="Search Item Name" /></td>
-        </tr>
-        <tr>
-          <td width="104" align="left" valign="top"  
-                bgcolor="#ffffff" class="bodytext31"><strong>Item Name </strong></td>
-          <td width="680" colspan="4" align="left" valign="center"  bgcolor="#ffffff" class="bodytext31">
-		  <select name="servicename" id="servicename" style="width:500px">
-            <option value="">All Items</option>
-           <?php
-				$query42 = "select itemcode, itemname from master_medicine where status <> 'DELETED' and itemcode <> '' order by itemname";
-				$exec42 = mysqli_query($GLOBALS["___mysqli_ston"], $query42) or die ("Error in Query42".mysqli_error($GLOBALS["___mysqli_ston"]));
-				while ($res42 = mysqli_fetch_array($exec42))
-				{
-				$itemcode42 = $res42['itemcode'];
-				$itemname42 = $res42['itemname'];
-				?>
-            <option value="<?php echo $itemcode42; ?>" <?php if($servicename == $itemcode42) { echo 'selected="selected"'; } ?>><?php echo $itemcode42.' - '.$itemname42; ?></option>
-            <?php
-				}
-				?>
-          </select>  
-       </tr>
-	    <tr>
-          
-          <td  align="left" valign="top"  bgcolor="#ffffff" class="bodytext31">
-		  
-			<strong>As On Date</strong>&nbsp;</td>
-            <td colspan="5" align="left" valign="center"  bgcolor="#ffffff" class="bodytext31">
-			<input name="ADate2" id="ADate2" value="<?php echo $transactiondateto; ?>"  size="10"  readonly="readonly" onKeyDown="return disableEnterKey()" />
-			<img src="images2/cal.gif" onClick="javascript:NewCssCal('ADate2')" style="cursor:pointer"/>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="location" class="form-label">Location</label>
+                            <select name="location" id="location" class="form-select" onChange="storefunction(this.value)">
+                                <option value="">-Select Location-</option>
+                                <?php
+                                $query = "select * from login_locationdetails where username='$username' and docno='$docno' group by locationname order by locationname";
+                                $exec = mysqli_query($GLOBALS["___mysqli_ston"], $query) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
+                                while ($res = mysqli_fetch_array($exec))
+                                {
+                                    $reslocation = $res["locationname"];
+                                    $reslocationanum = $res["locationcode"];
+                                ?>
+                                <option value="<?php echo $reslocationanum; ?>" <?php if($location!='')if($location==$reslocationanum){echo "selected";}?>><?php echo $reslocation; ?></option>
+                                <?php 
+                                }
+                                ?>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="store" class="form-label">Store</label>
+                            <select name="store" id="store" class="form-select">
+                                <option value="">-Select Store-</option>
+                                <?php 
+                                $loc=isset($_REQUEST['location'])?$_REQUEST['location']:'';
+                                $username=isset($_REQUEST['username'])?$_REQUEST['username']:'';
+                                $frmflag1=isset($_REQUEST['frmflag1'])?$_REQUEST['frmflag1']:'';
+                                $store=isset($_REQUEST['store'])?$_REQUEST['store']:'';?>  
+                                <?php if ($frmflag1 == 'frmflag1')
+                                {
+                                    $loc=isset($_REQUEST['location'])?$_REQUEST['location']:'';
+                                    $username=isset($_REQUEST['username'])?$_REQUEST['username']:'';
+                                    $query5 = "select ms.auto_number,ms.storecode,ms.store from master_employeelocation as me LEFT JOIN master_store as ms ON me.storecode=ms.auto_number where me.locationcode = '".$loc."' AND me.username= '".$username."'";
+                                    $exec5 = mysqli_query($GLOBALS["___mysqli_ston"], $query5) or die ("Error in Query5".mysqli_error($GLOBALS["___mysqli_ston"]));
+                                    while ($res5 = mysqli_fetch_array($exec5))
+                                    {
+                                        $res5anum = $res5["storecode"];
+                                        $res5name = $res5["store"];
+                                ?>
+                                <option value="<?php echo $res5anum;?>" <?php if($store==$res5anum){echo 'selected';}?>><?php echo $res5name;?></option>
+                                <?php 
+                                    }
+                                }
+                                ?>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <input type="hidden" name="locationnamenew" value="<?php echo htmlspecialchars($locationname); ?>">
+                    <input type="hidden" name="locationcodenew" value="<?php echo htmlspecialchars($res1locationanum); ?>">
+                    <input type="hidden" name="username" id="username" value="<?php echo htmlspecialchars($username); ?>">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="categoryname" class="form-label">Category</label>
+                            <select name="categoryname" id="categoryname" class="form-select">
+                                <?php
+                                $categoryname = $_REQUEST['categoryname'];
+                                if ($categoryname != '')
+                                {
+                                ?>
+                                <option value="<?php echo htmlspecialchars($categoryname); ?>" selected="selected"><?php echo htmlspecialchars($categoryname); ?></option>
+                                <option value="">Show All Category</option>
+                                <?php
+                                }
+                                else
+                                {
+                                ?>
+                                <option selected="selected" value="">Show All Category</option>
+                                <?php
+                                }
+                                ?>
+                                <?php
+                                $query42 = "select categoryname from master_medicine where status = '' group by categoryname order by categoryname";
+                                $exec42 = mysqli_query($GLOBALS["___mysqli_ston"], $query42) or die ("Error in Query42".mysqli_error($GLOBALS["___mysqli_ston"]));
+                                while ($res42 = mysqli_fetch_array($exec42))
+                                {
+                                    $categoryname = $res42['categoryname'];
+                                ?>
+                                <option value="<?php echo htmlspecialchars($categoryname); ?>"><?php echo htmlspecialchars($categoryname); ?></option>
+                                <?php
+                                }
+                                ?>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="servicename" class="form-label">Item Name</label>
+                            <select name="servicename" id="servicename" class="form-select">
+                                <option value="">All Items</option>
+                                <?php
+                                $query42 = "select itemcode, itemname from master_medicine where status <> 'DELETED' and itemcode <> '' order by itemname";
+                                $exec42 = mysqli_query($GLOBALS["___mysqli_ston"], $query42) or die ("Error in Query42".mysqli_error($GLOBALS["___mysqli_ston"]));
+                                while ($res42 = mysqli_fetch_array($exec42))
+                                {
+                                    $itemcode42 = $res42['itemcode'];
+                                    $itemname42 = $res42['itemname'];
+                                ?>
+                                <option value="<?php echo htmlspecialchars($itemcode42); ?>" <?php if($servicename == $itemcode42) { echo 'selected="selected"'; } ?>><?php echo htmlspecialchars($itemcode42.' - '.$itemname42); ?></option>
+                                <?php
+                                }
+                                ?>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="itemname" class="form-label">Search Item</label>
+                            <input name="itemname" type="text" id="itemname" value="<?php echo htmlspecialchars($searchitemname); ?>" class="form-input" placeholder="Search by item name or code..." autocomplete="off">
+                            <input type="hidden" name="searchitem1hiddentextbox" id="searchitem1hiddentextbox">
+                            <input type="hidden" name="searchitemcode" id="searchitemcode">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="ADate2" class="form-label">As On Date</label>
+                            <div class="date-input-group">
+                                <input name="ADate2" id="ADate2" value="<?php echo htmlspecialchars($transactiondateto); ?>" class="form-input" readonly onKeyDown="return disableEnterKey()" />
+                                <img src="images2/cal.gif" onClick="javascript:NewCssCal('ADate2')" class="date-picker-icon" style="cursor:pointer"/>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <input type="hidden" name="cbfrmflag1" value="cbfrmflag1">
+                    <input type="hidden" name="frmflag1" value="frmflag1" id="frmflag1">
+                    <input type="hidden" name="itemcode2" id="itemcode2" value="<?php echo htmlspecialchars($itemcode); ?>" readonly />
+                    
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-search"></i> Search
+                        </button>
+                        <button type="reset" class="btn btn-outline">
+                            <i class="fas fa-undo"></i> Reset
+                        </button>
+                    </div>
+                </form>
+            </div>
 
-			<br><br>        
-		  <input type="hidden" name="cbfrmflag1" value="cbfrmflag1">
-            <input  style="border: 1px solid #001E6A" type="submit" value="Search" name="Submit" />
-            <input name="resetbutton" type="reset" id="resetbutton"  style="border: 1px solid #001E6A" value="Reset" /></td>
-			<input type="hidden" name="frmflag1" value="frmflag1" id="frmflag1">
-		  
-          </tr>
-		  
-        <tr>
-          <td class="bodytext31" valign="center"  align="left" bgcolor="#ffffff"><input type="hidden" name="itemcode2" id="itemcode2" style="border: 1px solid #001E6A; text-align:left" onKeyDown="return disableEnterKey()" value="<?php echo $itemcode; ?>" size="10" readonly /></td>
-          <td colspan="4" align="left" valign="center"  bgcolor="#ffffff" class="bodytext31">&nbsp;		  </td>
-          </tr>
-      </tbody>
-    </table>
-    </form>		</td>
-      </tr>
-      <tr>
-        <td>&nbsp;</td>
-      </tr>
-      <tr>
-        <td><table id="AutoNumber3" style="BORDER-COLLAPSE: collapse" 
-            bordercolor="#666666" cellspacing="0" cellpadding="4" width="1100" 
-            align="left" border="0">
-          <tbody>
-            <tr>
-              <td width="3%" bgcolor="#ecf0f5" class="bodytext31">&nbsp;</td>
-              <td width="8%" bgcolor="#ecf0f5" class="bodytext31">&nbsp;</td>
-              <td width="19%" bgcolor="#ecf0f5" class="bodytext31">&nbsp;</td>
-                  <td width="12%" bgcolor="#ecf0f5" class="bodytext31">&nbsp;</td>
-              <td width="9%" bgcolor="#ecf0f5" class="bodytext31">&nbsp;</td>
-                    <td width="9%" bgcolor="#ecf0f5" class="bodytext31"><a 
-                  href="#"></a></td>
-                     <td width="9%" bgcolor="#ecf0f5" class="bodytext31"></td>
-			    <td width="9%" bgcolor="#ecf0f5" class="bodytext31">&nbsp;</td>
-				<td width="" bgcolor="" class="bodytext31">&nbsp;</td>
-					<td width="8" bgcolor="" class="bodytext31">&nbsp;</td>
-            </tr>
+            <!-- Results Section -->
+            <div class="results-section">
+                <div class="results-header">
+                    <div class="results-title">Stock Report Results</div>
+                    <div class="results-actions">
+                        <button type="button" class="btn btn-outline" onclick="printReport()">
+                            <i class="fas fa-print"></i> Print
+                        </button>
+                    </div>
+                </div>
 
-            <tr>
-              <th class="bodytext31" valign="center"  align="left" 
-                bgcolor="#ffffff"><strong>No.</strong></th>
-              <th align="left" valign="center"  
-                bgcolor="#ffffff" class="bodytext31"><strong>Item Code </strong></th>
-              <th align="left" valign="center"  
-                bgcolor="#ffffff" class="bodytext31"><strong>Item Name </strong></th>
-              <th align="left" valign="center"  
-                bgcolor="#ffffff" class="bodytext31"><strong>Category</strong></th>
-				<th align="left" valign="center"  
-                bgcolor="#ffffff" class="bodytext31"><strong>Formula</strong></th>
-                 <th align="left" valign="center"  
-                bgcolor="#ffffff" class="bodytext31"><strong>Batch Number</strong></th>
-				      <th align="left" valign="center"  
-                bgcolor="#ffffff" class="bodytext31"><div align="right"><strong>CP</strong></div></th>
-   
-                  <th align="left" valign="center"  
-                bgcolor="#ffffff" class="bodytext31"><div align="right"><strong>Current Stock </strong></div></th>
-                             <th align="left" valign="center"  
-                bgcolor="#ffffff" class="bodytext31"><div align="right"><strong>Inv.Val </strong></div></th>
-			     <!-- <td width="4%" align="left" valign="center"  
-                bgcolor="#ffffff" class="bodytext31"><div align="right"><strong>COGS </strong></div></td> -->
-        
-            </tr>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>No.</th>
+                            <th>Item Code</th>
+                            <th>Item Name</th>
+                            <th>Category</th>
+                            <th>Formula</th>
+                            <th>Batch Number</th>
+                            <th>CP</th>
+                            <th>Current Stock</th>
+                            <th>Inv.Val</th>
+                        </tr>
+                    </thead>
+                    <tbody>
             <?php
 			if (isset($_REQUEST["categoryname"])) { $categoryname = $_REQUEST["categoryname"]; } else { $categoryname = ""; }
 			if (isset($_REQUEST["store"]) && $_REQUEST["store"]!='') { $store = $_REQUEST["store"]; } else { $store = ""; }
@@ -810,39 +679,19 @@ $query2 = "select a.auto_number,a.itemcode,a.itemname,a.categoryname,a.`$rateper
 			
 
 			?>
-            <tr <?php echo $colorcode; ?>>
-              <td class="bodytext31" valign="center"  align="left"><?php echo $sno; ?></td>
-              <td class="bodytext31" valign="center"  align="left">
-			  <div class="bodytext31"><?php echo $itemcode; ?></div></td>
-              <td class="bodytext31" valign="center"  align="left">
-			  <div class="bodytext31"><?php echo $itemname; ?></div></td>
-              <td class="bodytext31" valign="center"  align="left"><div class="bodytext31">
-                  <div align="left"><?php echo $res2categoryname; ?>&nbsp;</div>
-              </div></td>
-			  <td class="bodytext31" valign="center"  align="left"><div class="bodytext31">
-                  <div align="left"><?php echo $res123['formula']; ?>&nbsp;</div>
-              </div></td>
-			  <td class="bodytext31" valign="center"  align="left"><div class="bodytext31">
-                  <div align="left"><?php echo $batchnumber; ?>&nbsp;</div>
-              </div></td>
-			    <td class="bodytext31" valign="center"  align="left"><div class="bodytext31">
-                  <div align="right"><?php echo number_format($costprice,2,'.',','); ?>&nbsp;</div>
-              </div></td>
-    
-            
-              <td class="bodytext31" valign="center"  align="left">
-			  <div class="bodytext31">
-			    <div align="right"><?php echo $currentstock; ?>&nbsp;</div>
-			  </div></td>
-             
-             
-                      <td class="bodytext31" valign="center"  align="left"><div class="bodytext31">
-                  <div align="right"><?php echo number_format($totalinventoryvalue,2,'.',','); ?>&nbsp;</div>
-              </div></td>
-			   <!-- <td class="bodytext31" valign="center"  align="left"><div class="bodytext31">
-                  <div align="right"><?php //echo number_format($cogs,2,'.',','); ?>&nbsp;</div>
-              </div></td>-->
-            </tr>
+                        <tr class="<?php echo ($sno % 2 == 0) ? 'even-row' : 'odd-row'; ?>">
+                            <td><?php echo $sno; ?></td>
+                            <td><span class="item-code"><?php echo htmlspecialchars($itemcode); ?></span></td>
+                            <td><span class="item-name"><?php echo $itemname; ?></span></td>
+                            <td><span class="category-badge"><?php echo htmlspecialchars($res2categoryname); ?></span></td>
+                            <td><?php echo htmlspecialchars($res123['formula']); ?></td>
+                            <td><span class="batch-number"><?php echo htmlspecialchars($batchnumber); ?></span></td>
+                            <td class="amount-cell"><?php echo number_format($costprice,2,'.',','); ?></td>
+                            <td class="stock-quantity <?php echo ($currentstock <= 0) ? 'stock-out' : (($currentstock <= 10) ? 'stock-low' : 'stock-normal'); ?>">
+                                <?php echo $currentstock; ?>
+                            </td>
+                            <td class="amount-cell amount-positive"><?php echo number_format($totalinventoryvalue,2,'.',','); ?></td>
+                        </tr>
             <?php
 			$currentstock = '';
 			$itemrate = '';
@@ -857,64 +706,39 @@ $query2 = "select a.auto_number,a.itemcode,a.itemname,a.categoryname,a.`$rateper
 			$totalpurchaseprice1 = 0;
 			}
 			?>
-            <tr>
-              <td class="bodytext31" valign="center"  align="left" 
-                bgcolor="#ecf0f5">&nbsp;</td>
-              <td class="bodytext31" valign="center"  align="left" 
-                bgcolor="#ecf0f5">&nbsp;</td>
-				<td class="bodytext31" valign="center"  align="left" 
-                bgcolor="#ecf0f5">&nbsp;</td>
-              <td class="bodytext31" valign="center"  align="left" 
-                bgcolor="#ecf0f5"><div align="right"><strong>&nbsp; </strong></div></td>
-                        <td class="bodytext31" valign="center"  align="left" 
-                bgcolor="#ecf0f5"><div align="right"><strong><?php //echo $totalcurrentstock1; ?>&nbsp;</strong></div></td>
-              <td class="bodytext31" valign="center"  align="left" 
-                bgcolor="#ecf0f5">&nbsp;</td>
-				<td class="bodytext31" valign="center"  align="left" 
-                bgcolor="#ecf0f5">&nbsp;</td>
-              <td class="bodytext31" valign="center"  align="left" 
-                bgcolor="#ecf0f5"><div align="right"><strong>&nbsp;</strong></div></td>
-                   <td class="bodytext31" valign="center"  align="left" 
-                bgcolor="#ecf0f5"><div align="right"><strong><?php echo number_format($totalpurchaseprice1,2,'.',','); ?>&nbsp;</strong></div></td>
-				   <!--<td class="bodytext31" valign="center"  align="left" 
-                bgcolor="#ecf0f5"><div align="right"><strong><?php //echo number_format($grandtotalcogs,2,'.',','); ?>&nbsp;</strong></div></td>-->
-       <td align="right" colspan=""> <a target="_blank" href="stockreportbyitemxl3.php?categoryname=<?= $categoryname; ?>&&store=<?= $store;?>&&location=<?= $reslocationanum;?>&&searchitemcode=<?= $searchcode;?>&&servicename=<?= $servicename;?>&ADate2=<?php echo $transactiondateto;?>"> <img src="images/excel-xls-icon.png" width="30" height="30"></a> </td>
-	  <td width="20%" bgcolor="" align="left" class="bodytext31"><a 
-                  href="print_itemlabel.php?categoryname=<?= $categoryname_1; ?>&&store=<?= $store;?>&&location=<?= $reslocationanum;?>&&searchitemcode=<?= $searchcode_12;?>&&servicename=<?= $servicename;?>&ADate2=<?php echo $transactiondateto;?>" target="_blank"  >Download Item Labels</a></td>
-		  
-	
-            </tr>
-			<?php if($freeqtytot>0){ ?>
-			<tr>
-			 <td class="bodytext31" valign="center"  align="right" 
-                bgcolor="#ecf0f5" colspan='7'><strong>Free/Bonus Qty Value</strong></td>
-              <td class="bodytext31" valign="center"  align="right" 
-                bgcolor="#ecf0f5"><strong>-<?php echo number_format($freeqtytot,2,'.',',');?></strong></td>
-			</tr>
-			<tr>
-			 <td class="bodytext31" valign="center"  align="right" 
-                bgcolor="#ecf0f5" colspan='7'><strong>Total</strong></td>
-              <td class="bodytext31" valign="center"  align="left" 
-                bgcolor="#ecf0f5"><strong><?php echo number_format(($totalpurchaseprice1-$freeqtytot),2,'.',',');?></strong></td>
-			</tr>
-			<?php
-			}
-			}
-			?>
-          </tbody>
-        </table></td>
-      </tr>
-      <tr>
-        <td>&nbsp;</td>
-      </tr>
-    </table>    
-	
-  <tr>
-    <td valign="top">    
-  <tr>
-    <td width="97%" valign="top">    
-</table>
-<?php include ("includes/footer1.php"); ?>
+                        <tr class="summary-row">
+                            <td colspan="7" class="summary-label">Total Inventory Value</td>
+                            <td class="summary-value"><?php echo number_format($totalpurchaseprice1,2,'.',','); ?></td>
+                        </tr>
+                        <?php if($freeqtytot>0): ?>
+                        <tr class="summary-row">
+                            <td colspan="7" class="summary-label">Free/Bonus Qty Value</td>
+                            <td class="summary-value amount-negative">-<?php echo number_format($freeqtytot,2,'.',',');?></td>
+                        </tr>
+                        <tr class="summary-row">
+                            <td colspan="7" class="summary-label">Final Total</td>
+                            <td class="summary-value"><?php echo number_format(($totalpurchaseprice1-$freeqtytot),2,'.',',');?></td>
+                        </tr>
+                        <?php endif; ?>
+                        <?php
+                        }
+                        ?>
+                    </tbody>
+                </table>
+
+                <!-- Export Actions -->
+                <div class="export-actions">
+                    <a target="_blank" href="stockreportbyitemxl3.php?categoryname=<?= $categoryname; ?>&&store=<?= $store;?>&&location=<?= $reslocationanum;?>&&searchitemcode=<?= $searchcode;?>&&servicename=<?= $servicename;?>&ADate2=<?php echo $transactiondateto;?>" class="export-btn">
+                        <img src="images/excel-xls-icon.png" alt="Excel">
+                        Export to Excel
+                    </a>
+                    <a href="print_itemlabel.php?categoryname=<?= $categoryname_1; ?>&&store=<?= $store;?>&&location=<?= $reslocationanum;?>&&searchitemcode=<?= $searchcode_12;?>&&servicename=<?= $servicename;?>&ADate2=<?php echo $transactiondateto;?>" target="_blank" class="export-btn">
+                        <i class="fas fa-tags"></i>
+                        Download Item Labels
+                    </a>
+                </div>
+            </div>
+        </main>
     </div>
 
     <!-- Modern JavaScript -->

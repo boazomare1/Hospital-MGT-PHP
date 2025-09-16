@@ -4,31 +4,84 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>OTC Walk-in Services - MedStar Hospital Management</title>
-    <link rel="stylesheet" type="text/css" href="css/otc_walkin_services-modern.css" />
+    <link rel="stylesheet" type="text/css" href="css/vat-modern.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" type="text/css" href="css/autosuggest.css" />
     <link rel="stylesheet" type="text/css" href="css/autocomplete.css" />
+    
+    <style>
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 9999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .loading-content {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #007bff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .loading-content p {
+            margin: 5px 0;
+            color: #333;
+            font-size: 16px;
+        }
+        
+        .loading-content p:first-of-type {
+            font-weight: bold;
+            font-size: 18px;
+        }
+    </style>
 </head>
 <body>
 <?php
 session_start();
 error_reporting(0);
-//date_default_timezone_set('Asia/Calcutta');
 include ("db/db_connect.php");
 include ("includes/loginverify.php");
+
+$username = $_SESSION["username"];
+$companyanum = $_SESSION["companyanum"];
+$companyname = $_SESSION["companyname"];
+$financialyear = $_SESSION["financialyear"];
+$docno = $_SESSION['docno'];
+
+$ipaddress = $_SERVER["REMOTE_ADDR"];
 $updatedatetime = date("Y-m-d H:i:s");
 $indiandatetime = date ("d-m-Y H:i:s");
 $dateonly = date("Y-m-d");
 $timeonly = date("H:i:s");
-$username = $_SESSION["username"];
-$ipaddress = $_SERVER["REMOTE_ADDR"];
-$companyanum = $_SESSION["companyanum"];
-$companyname = $_SESSION["companyname"];
-$financialyear = $_SESSION["financialyear"];
 $currentdate = date("Y-m-d");
-$updatedate=date("Y-m-d");
+$updatedate = date("Y-m-d");
 $titlestr = 'SALES BILL';
-$docno = $_SESSION['docno'];
+
+$errmsg = "";
+$bgcolorcode = "";
 /// Hardcoded for quick fix
 $accountname='603';
 $accname_full='Cash Patient';
@@ -51,7 +104,8 @@ $locationname = $res1["locationname"];
 $locationcode = $res1["locationcode"];
 }
 						
-if (isset($_REQUEST["frm1submit1"])) { $frm1submit1 = $_REQUEST["frm1submit1"]; } else { $frm1submit1 = ""; }
+// Handle form submission
+$frm1submit1 = isset($_REQUEST["frm1submit1"]) ? $_REQUEST["frm1submit1"] : "";
 if ($frm1submit1 == 'frm1submit1')
 {
 		$paynowbillprefix = 'EB-';
@@ -731,6 +785,7 @@ function validcheck()
 	if (varUserChoice == false)
 	{
 		document.getElementById("Submit222").disabled=false;
+		hideLoadingOverlay();
 		return false;
 	}
 	else
@@ -742,9 +797,15 @@ function validcheck()
 function FuncPopup()
 {
 	window.scrollTo(0,0);
-	document.body.style.overflow='auto';
-	document.getElementById("imgloader").style.display = "";
+	document.body.style.overflow='hidden';
+	document.getElementById("imgloader").style.display = "flex";
 	//return false;
+}
+
+function hideLoadingOverlay()
+{
+	document.body.style.overflow='auto';
+	document.getElementById("imgloader").style.display = "none";
 }
 function validatenumerics(key) {
    //getting key code of pressed key
@@ -981,7 +1042,7 @@ function checkptdet()
 ?>     
 
     <!-- Loading Overlay -->
-    <div class="loading-overlay" id="imgloader">
+    <div class="loading-overlay" id="imgloader" style="display: none;">
         <div class="loading-content">
             <div class="loading-spinner"></div>
             <p><strong>Saving</strong></p>
@@ -989,41 +1050,31 @@ function checkptdet()
         </div>
     </div>
 
-    <!-- Modern Header -->
-    <header class="modern-header">
-        <div class="header-content">
-            <div class="hospital-logo">
-                <div class="hospital-icon">
-                    <i class="fas fa-user-md"></i>
-                </div>
-                <div class="hospital-info">
-                    <h1>MedStar Hospital Management</h1>
-                    <p>OTC Walk-in Services System</p>
-                </div>
-            </div>
-            <div class="user-info">
-                <div class="user-avatar">
-                    <?php echo strtoupper(substr($username, 0, 2)); ?>
-                </div>
-                <div class="user-details">
-                    <h3><?php echo $username; ?></h3>
-                    <p><?php echo $companyname; ?></p>
-                </div>
-            </div>
-        </div>
+    <!-- Hospital Header -->
+    <header class="hospital-header">
+        <h1 class="hospital-title">🏥 MedStar Hospital Management</h1>
+        <p class="hospital-subtitle">Advanced Healthcare Management Platform</p>
     </header>
+
+    <!-- User Information Bar -->
+    <div class="user-info-bar">
+        <div class="user-welcome">
+            <span class="welcome-text">Welcome, <strong><?php echo htmlspecialchars($username); ?></strong></span>
+            <span class="location-info">📍 Company: <?php echo htmlspecialchars($companyname); ?></span>
+        </div>
+        <div class="user-actions">
+            <a href="mainmenu1.php" class="btn btn-outline">🏠 Main Menu</a>
+            <a href="logout.php" class="btn btn-outline">🚪 Logout</a>
+        </div>
+    </div>
 
     <!-- Navigation Breadcrumb -->
     <nav class="nav-breadcrumb">
-        <div class="breadcrumb-content">
-            <div class="breadcrumb">
-                <a href="dashboard.php">Dashboard</a>
-                <span class="breadcrumb-separator">›</span>
-                <a href="patient_management.php">Patient Management</a>
-                <span class="breadcrumb-separator">›</span>
-                <span>OTC Walk-in Services</span>
-            </div>
-        </div>
+        <a href="mainmenu1.php">🏠 Home</a>
+        <span>→</span>
+        <span>Patient Management</span>
+        <span>→</span>
+        <span>OTC Walk-in Services</span>
     </nav>
 
     <!-- Floating Menu Toggle -->
@@ -1041,6 +1092,7 @@ function checkptdet()
                     <i class="fas fa-chevron-left"></i>
                 </button>
             </div>
+            
             <nav class="sidebar-nav">
                 <ul class="nav-list">
                     <li class="nav-item">
@@ -1050,45 +1102,51 @@ function checkptdet()
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="admissionlist.php" class="nav-link">
+                        <a href="patient_registration.php" class="nav-link">
                             <i class="fas fa-user-plus"></i>
-                            <span>Admission List</span>
+                            <span>Patient Registration</span>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="ipbeddiscountlist.php" class="nav-link">
-                            <i class="fas fa-percentage"></i>
-                            <span>Bed Discount</span>
+                        <a href="consultation.php" class="nav-link">
+                            <i class="fas fa-stethoscope"></i>
+                            <span>Consultation</span>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="addbed.php" class="nav-link">
-                            <i class="fas fa-bed"></i>
-                            <span>Add Bed</span>
+                        <a href="laboratory.php" class="nav-link">
+                            <i class="fas fa-flask"></i>
+                            <span>Laboratory</span>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="bedoccupancysummary.php" class="nav-link">
-                            <i class="fas fa-chart-bar"></i>
-                            <span>Bed Occupancy</span>
+                        <a href="radiology.php" class="nav-link">
+                            <i class="fas fa-x-ray"></i>
+                            <span>Radiology</span>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="bedtransferlist.php" class="nav-link">
-                            <i class="fas fa-exchange-alt"></i>
-                            <span>Bed Transfer</span>
+                        <a href="pharmacy.php" class="nav-link">
+                            <i class="fas fa-pills"></i>
+                            <span>Pharmacy</span>
                         </a>
                     </li>
-                    <li class="nav-item">
-                        <a href="otc_walkin_services.php" class="nav-link active">
+                    <li class="nav-item active">
+                        <a href="otc_walkin_services.php" class="nav-link">
                             <i class="fas fa-walking"></i>
-                            <span>OTC Walk-in</span>
+                            <span>OTC Walk-in Services</span>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="vat.php" class="nav-link">
-                            <i class="fas fa-percentage"></i>
-                            <span>VAT Master</span>
+                        <a href="billing.php" class="nav-link">
+                            <i class="fas fa-receipt"></i>
+                            <span>Billing</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="reports.php" class="nav-link">
+                            <i class="fas fa-chart-line"></i>
+                            <span>Reports</span>
                         </a>
                     </li>
                 </ul>
@@ -1097,158 +1155,165 @@ function checkptdet()
 
         <!-- Main Content -->
         <main class="main-content">
-            <div class="main-container">
-        <!-- Page Header -->
-        <div class="page-header">
-            <div class="page-title">
-                <div class="page-icon">
-                    <i class="fas fa-walking"></i>
+            <!-- Alert Container -->
+            <div id="alertContainer">
+                <?php if (!empty($errmsg)): ?>
+                    <div class="alert alert-<?php echo $bgcolorcode === 'success' ? 'success' : ($bgcolorcode === 'failed' ? 'error' : 'info'); ?>">
+                        <i class="fas fa-<?php echo $bgcolorcode === 'success' ? 'check-circle' : ($bgcolorcode === 'failed' ? 'exclamation-triangle' : 'info-circle'); ?> alert-icon"></i>
+                        <span><?php echo htmlspecialchars($errmsg); ?></span>
+                    </div>
+                <?php endif; ?>
+            </div>
+
+            <!-- Page Header -->
+            <div class="page-header">
+                <div class="page-header-content">
+                    <h2>OTC Walk-in Services</h2>
+                    <p>Register walk-in patients and manage their laboratory, radiology, and other services with real-time calculations and validation.</p>
                 </div>
-                <div>
-                    <h1>OTC Walk-in Services</h1>
-                    <p class="page-subtitle">Register walk-in patients and manage their laboratory, radiology, and other services</p>
+                <div class="page-header-actions">
+                    <button type="button" class="btn btn-secondary" onclick="refreshPage()">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                    <button type="button" class="btn btn-outline" onclick="exportToExcel()">
+                        <i class="fas fa-download"></i> Export
+                    </button>
+                    <button type="button" class="btn btn-outline" onclick="printReport()">
+                        <i class="fas fa-print"></i> Print
+                    </button>
                 </div>
             </div>
-            
-            <!-- Quick Actions -->
-            <div class="quick-actions">
-                <a href="patient_list.php" class="action-btn">
-                    <i class="fas fa-list"></i>
-                    View Patients
-                </a>
-                <a href="service_management.php" class="action-btn">
-                    <i class="fas fa-cogs"></i>
-                    Manage Services
-                </a>
-                <a href="billing_dashboard.php" class="action-btn">
-                    <i class="fas fa-chart-line"></i>
-                    Billing Dashboard
-                </a>
-            </div>
-        </div>
 
-        <form name="form1" id="frmsales" method="post" action="" onSubmit="return validcheck()">
-            <!-- Hidden Fields -->
-            <input type="hidden" name="opdate" id="opdate" value="<?= date('Y-m-d') ?>">
-            <input type="hidden" name="ipaddress" id="ipaddress" value="<?php echo $ipaddress; ?>">
-            <input type="hidden" name="entrytime" id="entrytime" value="<?php echo $timeonly; ?>">   
-            <input type="hidden" name="locationnameget" id="locationnameget" value="<?php echo $locationname;?>">
-            <input type="hidden" name="locationcodeget" id="locationcodeget" value="<?php echo $locationcode;?>">
-            <input type="hidden" name="locationcode" id="locationcode" value="<?php echo $locationcode;?>">
-            <input name="billtype" id="billtype" value="<?php echo $billingtype;?>" type="hidden">
-            <input name="billtypes" id="billtypes" value="<?php echo $billingtype;?>" type="hidden">
-            <input name="paymenttype" id="paymenttype" value="<?php echo $paymenttype;?>" type="hidden">
-            <input name="payment" id="payment" value="<?php echo $paymenttype;?>" type="hidden">
-            <input name="subtypeano" id="subtypeano" value="<?php echo $subtype;?>" type="hidden">
-            <input name="subtype" id="subtype" value="CASH" type="hidden">
-            <input name="dateofbirth" id="dateofbirth" value="" type="hidden">
+            <form name="form1" id="frmsales" method="post" action="" onSubmit="return validcheck()">
+                <!-- Hidden Fields -->
+                <input type="hidden" name="opdate" id="opdate" value="<?= date('Y-m-d') ?>">
+                <input type="hidden" name="ipaddress" id="ipaddress" value="<?php echo $ipaddress; ?>">
+                <input type="hidden" name="entrytime" id="entrytime" value="<?php echo $timeonly; ?>">   
+                <input type="hidden" name="locationnameget" id="locationnameget" value="<?php echo $locationname;?>">
+                <input type="hidden" name="locationcodeget" id="locationcodeget" value="<?php echo $locationcode;?>">
+                <input type="hidden" name="locationcode" id="locationcode" value="<?php echo $locationcode;?>">
+                <input name="billtype" id="billtype" value="<?php echo $billingtype;?>" type="hidden">
+                <input name="billtypes" id="billtypes" value="<?php echo $billingtype;?>" type="hidden">
+                <input name="paymenttype" id="paymenttype" value="<?php echo $paymenttype;?>" type="hidden">
+                <input name="payment" id="payment" value="<?php echo $paymenttype;?>" type="hidden">
+                <input name="subtypeano" id="subtypeano" value="<?php echo $subtype;?>" type="hidden">
+                <input name="subtype" id="subtype" value="CASH" type="hidden">
+                <input name="dateofbirth" id="dateofbirth" value="" type="hidden">
 
-            <!-- Patient Details -->
-            <div class="form-container">
-                <div class="form-header">
-                    <div class="form-header-icon">
-                        <i class="fas fa-user"></i>
+                <!-- Patient Details -->
+                <div class="form-section">
+                    <div class="form-section-header">
+                        <i class="fas fa-user form-section-icon"></i>
+                        <h3 class="form-section-title">Patient Details</h3>
+                        <div class="location-info">
+                            <strong>📍 Location: <?php echo $locationname; ?></strong>
+                        </div>
                     </div>
-                    <h2>Patient Details</h2>
-                    <div style="margin-left: auto; color: var(--white);">
-                        <strong>Location: <?php echo $locationname; ?></strong>
-                    </div>
-                </div>
-                <div class="form-body">
-                    <!-- Patient Type Selection -->
-                    <div class="patient-type-selection">
-                        <div class="patient-type-options">
-                            <div class="radio-group">
-                                <input type="radio" name="searchpaymenttype" id="searchpaymenttype11" value="1">
-                                <label for="searchpaymenttype11">New Patient</label>
-                            </div>
-                            <div class="radio-group">
-                                <input type="radio" name="searchpaymenttype" id="searchpaymenttype12" value="2">
-                                <label for="searchpaymenttype12">Existing Patient</label>
+                    
+                    <div class="form-section-form">
+                        <!-- Patient Type Selection -->
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Patient Type</label>
+                                <div class="radio-group">
+                                    <label class="radio-label">
+                                        <input type="radio" name="searchpaymenttype" id="searchpaymenttype11" value="1">
+                                        <span class="radio-text">New Patient</span>
+                                    </label>
+                                    <label class="radio-label">
+                                        <input type="radio" name="searchpaymenttype" id="searchpaymenttype12" value="2">
+                                        <span class="radio-text">Existing Patient</span>
+                                    </label>
+                                </div>
+                                <input type="hidden" name="searchpaymentcode" id="searchpaymentcode">
                             </div>
                         </div>
-                        <input type="hidden" name="searchpaymentcode" id="searchpaymentcode">
-                    </div>
 
-                    <!-- Patient Search (for existing patients) -->
-                    <div class="patient-search" id="oldsearch" style="display: none;">
-                        <h3>
-                            <div class="patient-search-icon">
-                                <i class="fas fa-search"></i>
+                        <!-- Patient Search (for existing patients) -->
+                        <div class="form-section" id="oldsearch" style="display: none;">
+                            <div class="form-section-header">
+                                <i class="fas fa-search form-section-icon"></i>
+                                <h3 class="form-section-title">Patient Search</h3>
                             </div>
-                            Patient Search
-                        </h3>
-                        <input name="customersearch" id="customersearch" class="form-control" value="" autocomplete="off" placeholder="Search for existing patient...">
-                    </div>
+                            <div class="form-section-form">
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="customersearch" class="form-label">Search Existing Patient</label>
+                                        <input name="customersearch" id="customersearch" class="form-input" value="" autocomplete="off" placeholder="Search for existing patient...">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
 
-                    <!-- Patient Information -->
-                    <div class="form-grid">
-                        <div class="form-group">
-                            <label for="customername">First Name *</label>
-                            <input name="customername" id="customername" class="form-control" value="" autocomplete="off" placeholder="Enter first name">
-                            <input type="hidden" name="customercode" id="customercode" value="">
-                            <input type="hidden" name="nameofrelative" id="nameofrelative" value="<?php echo $nameofrelative; ?>">
+                        <!-- Patient Information -->
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="customername" class="form-label">First Name *</label>
+                                <input name="customername" id="customername" class="form-input" value="" autocomplete="off" placeholder="Enter first name">
+                                <input type="hidden" name="customercode" id="customercode" value="">
+                                <input type="hidden" name="nameofrelative" id="nameofrelative" value="<?php echo $nameofrelative; ?>">
+                            </div>
+                            <div class="form-group">
+                                <label for="customermiddlename" class="form-label">Middle Name</label>
+                                <input name="customermiddlename" id="customermiddlename" class="form-input" value="" autocomplete="off" placeholder="Enter middle name">
+                            </div>
+                            <div class="form-group">
+                                <label for="customerlastname" class="form-label">Last Name *</label>
+                                <input name="customerlastname" id="customerlastname" class="form-input" value="" autocomplete="off" placeholder="Enter last name">
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label for="customermiddlename">Middle Name</label>
-                            <input name="customermiddlename" id="customermiddlename" class="form-control" value="" autocomplete="off" placeholder="Enter middle name">
-                        </div>
-                        <div class="form-group">
-                            <label for="customerlastname">Last Name *</label>
-                            <input name="customerlastname" id="customerlastname" class="form-control" value="" autocomplete="off" placeholder="Enter last name">
-                        </div>
-                        <div class="form-group">
-                            <label for="age">Age *</label>
-                            <div style="display: flex; gap: 0.5rem;">
-                                <input type="text" name="age" id="age" class="form-control" value="" onKeyUp="return dobcalc();" onKeyPress="return validatenumerics(event);" autocomplete="off" placeholder="Age" style="flex: 1;">
-                                <select name="duration" id="duration" class="form-control form-select" style="flex: 1;">
-                                    <option value="YEARS">YEARS</option>
-                                    <option value="MONTHS">MONTHS</option>
-                                    <option value="DAYS">DAYS</option>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="age" class="form-label">Age *</label>
+                                <div class="form-input-group">
+                                    <input type="text" name="age" id="age" class="form-input" value="" onKeyUp="return dobcalc();" onKeyPress="return validatenumerics(event);" autocomplete="off" placeholder="Age">
+                                    <select name="duration" id="duration" class="form-input">
+                                        <option value="YEARS">YEARS</option>
+                                        <option value="MONTHS">MONTHS</option>
+                                        <option value="DAYS">DAYS</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="gender" class="form-label">Gender *</label>
+                                <select name="gender" id="gender" class="form-input">
+                                    <option value="">Select Gender</option>
+                                    <option value="Male">Male</option>
+                                    <option value="Female">Female</option>
                                 </select>
                             </div>
+                            <div class="form-group">
+                                <label for="mobilenumber" class="form-label">Mobile Number</label>
+                                <input name="mobilenumber" id="mobilenumber" class="form-input" value="" type="text" autocomplete="off" placeholder="Enter mobile number">
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label for="gender">Gender *</label>
-                            <select name="gender" id="gender" class="form-control form-select">
-                                <option value="">Select Gender</option>
-                                <option value="Male">Male</option>
-                                <option value="Female">Female</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="mobilenumber">Mobile Number</label>
-                            <input name="mobilenumber" id="mobilenumber" class="form-control" value="" type="text" autocomplete="off" placeholder="Enter mobile number">
-                        </div>
-                        <div class="form-group">
-                            <label for="billdate">Bill Date</label>
-                            <input type="text" name="billdate" id="billdate" class="form-control" value="<?php echo $dateonly; ?>" readonly>
-                        </div>
-                        <div class="form-group">
-                            <label for="billno">Bill Number</label>
-                            <input type="text" name="billno" id="billno" class="form-control" value="<?php echo $billnumbercode; ?>" readonly>
-                        </div>
-                        <div class="form-group">
-                            <label for="billtype">Bill Type</label>
-                            <input name="billtype" id="billtype" class="form-control" value="PAY NOW" type="text" readonly>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="billdate" class="form-label">Bill Date</label>
+                                <input type="text" name="billdate" id="billdate" class="form-input" value="<?php echo $dateonly; ?>" readonly>
+                            </div>
+                            <div class="form-group">
+                                <label for="billno" class="form-label">Bill Number</label>
+                                <input type="text" name="billno" id="billno" class="form-input" value="<?php echo $billnumbercode; ?>" readonly>
+                            </div>
+                            <div class="form-group">
+                                <label for="billtype" class="form-label">Bill Type</label>
+                                <input name="billtype" id="billtype" class="form-input" value="PAY NOW" type="text" readonly>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-		
-            <!-- Laboratory Services -->
-            <div class="services-section">
-                <div class="services-header" onclick="toggleServiceSection(this)">
-                    <div class="services-header-icon">
-                        <i class="fas fa-flask"></i>
+
+                <!-- Laboratory Services -->
+                <div class="data-table-section">
+                    <div class="data-table-header">
+                        <i class="fas fa-flask data-table-icon"></i>
+                        <h3 class="data-table-title">Laboratory Services</h3>
                     </div>
-                    <h3>Laboratory Services</h3>
-                    <div class="toggle-icon">
-                        <i class="fas fa-plus"></i>
-                    </div>
-                </div>
-                <div class="services-content">
-                    <table class="service-items-table">
+                    
+                    <table class="data-table">
                         <thead>
                             <tr>
                                 <th>Laboratory Test</th>
@@ -1262,53 +1327,57 @@ function checkptdet()
                     </table>
                     
                     <!-- Add Lab Service Form -->
-                    <div class="add-service-form">
-                        <div class="add-service-grid">
-                            <div class="form-group">
-                                <label for="lab">Laboratory Test</label>
-                                <input name="lab[]" id="lab" type="text" class="form-control" autocomplete="off" onclick="checkptdet()" placeholder="Enter lab test name">
-                                <input type="hidden" name="labcode" id="labcode" value="">
-                            </div>
-                            <div class="form-group">
-                                <label for="rate5">Rate</label>
-                                <input name="rate5[]" type="text" id="rate5" class="form-control" readonly placeholder="Rate">
-                                <input type="hidden" id="r1" readonly>
-                            </div>
-                            <div class="form-group">
-                                <label>&nbsp;</label>
-                                <button type="button" name="Add1" id="Add1" onClick="insertitem2()" class="add-service-btn">
-                                    <i class="fas fa-plus"></i>
-                                    Add Lab Test
-                                </button>
-                            </div>
+                    <div class="form-section">
+                        <div class="form-section-header">
+                            <i class="fas fa-plus form-section-icon"></i>
+                            <h3 class="form-section-title">Add Laboratory Test</h3>
                         </div>
-                        <input type="hidden" name="serial1" id="serial1" value="1"> 
-                        <input type="hidden" name="serialnumber1" id="serialnumber17" value="1">
-                        <input type="hidden" name="hiddenlab" id="hiddenlab">
+                        
+                        <div class="form-section-form">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="lab" class="form-label">Laboratory Test</label>
+                                    <input name="lab[]" id="lab" type="text" class="form-input" autocomplete="off" onclick="checkptdet()" placeholder="Enter lab test name">
+                                    <input type="hidden" name="labcode" id="labcode" value="">
+                                </div>
+                                <div class="form-group">
+                                    <label for="rate5" class="form-label">Rate</label>
+                                    <input name="rate5[]" type="text" id="rate5" class="form-input" readonly placeholder="Rate">
+                                    <input type="hidden" id="r1" readonly>
+                                </div>
+                                <div class="form-group">
+                                    <label>&nbsp;</label>
+                                    <button type="button" name="Add1" id="Add1" onClick="insertitem2()" class="btn btn-primary">
+                                        <i class="fas fa-plus"></i>
+                                        Add Lab Test
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <input type="hidden" name="serial1" id="serial1" value="1"> 
+                            <input type="hidden" name="serialnumber1" id="serialnumber17" value="1">
+                            <input type="hidden" name="hiddenlab" id="hiddenlab">
+                        </div>
                     </div>
                     
                     <!-- Lab Total -->
-                    <div class="service-totals">
-                        <div class="service-total-label">Laboratory Total</div>
-                        <div class="service-total-amount">
-                            <input type="text" id="total1" readonly style="border: none; background: none; text-align: right; font-weight: bold; color: var(--success-color);">
+                    <div class="total-section">
+                        <div class="total-display">
+                            <div class="total-label">Laboratory Total</div>
+                            <div class="total-amount" id="lab-total-display">$0.00</div>
                         </div>
+                        <input type="text" id="total1" readonly style="display: none;">
                     </div>
                 </div>
             </div> 
-            <!-- Radiology Services -->
-            <div class="services-section">
-                <div class="services-header" onclick="toggleServiceSection(this)">
-                    <div class="services-header-icon">
-                        <i class="fas fa-x-ray"></i>
+                <!-- Radiology Services -->
+                <div class="data-table-section">
+                    <div class="data-table-header">
+                        <i class="fas fa-x-ray data-table-icon"></i>
+                        <h3 class="data-table-title">Radiology Services</h3>
                     </div>
-                    <h3>Radiology Services</h3>
-                    <div class="toggle-icon">
-                        <i class="fas fa-plus"></i>
-                    </div>
-                </div>
-                <div class="services-content">
-                    <table class="service-items-table">
+                    
+                    <table class="data-table">
                         <thead>
                             <tr>
                                 <th>Radiology Test</th>
@@ -1322,52 +1391,55 @@ function checkptdet()
                     </table>
                     
                     <!-- Add Radiology Service Form -->
-                    <div class="add-service-form">
-                        <div class="add-service-grid">
-                            <div class="form-group">
-                                <label for="radiology">Radiology Test</label>
-                                <input name="radiology[]" id="radiology" type="text" class="form-control" autocomplete="off" onclick="checkptdet()" placeholder="Enter radiology test name">
-                                <input type="hidden" name="radiologycode" id="radiologycode" value="">
-                            </div>
-                            <div class="form-group">
-                                <label for="rate8">Rate</label>
-                                <input name="rate8[]" type="text" id="rate8" class="form-control" readonly placeholder="Rate">
-                            </div>
-                            <div class="form-group">
-                                <label>&nbsp;</label>
-                                <button type="button" name="Add2" id="Add2" onClick="return insertitem3()" class="add-service-btn">
-                                    <i class="fas fa-plus"></i>
-                                    Add Radiology Test
-                                </button>
-                            </div>
+                    <div class="form-section">
+                        <div class="form-section-header">
+                            <i class="fas fa-plus form-section-icon"></i>
+                            <h3 class="form-section-title">Add Radiology Test</h3>
                         </div>
-                        <input type="hidden" name="serialnumber2" id="serialnumber27" value="1">
-                        <input type="hidden" name="hiddenradiology" id="hiddenradiology" value="">
+                        
+                        <div class="form-section-form">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="radiology" class="form-label">Radiology Test</label>
+                                    <input name="radiology[]" id="radiology" type="text" class="form-input" autocomplete="off" onclick="checkptdet()" placeholder="Enter radiology test name">
+                                    <input type="hidden" name="radiologycode" id="radiologycode" value="">
+                                </div>
+                                <div class="form-group">
+                                    <label for="rate8" class="form-label">Rate</label>
+                                    <input name="rate8[]" type="text" id="rate8" class="form-input" readonly placeholder="Rate">
+                                </div>
+                                <div class="form-group">
+                                    <label>&nbsp;</label>
+                                    <button type="button" name="Add2" id="Add2" onClick="return insertitem3()" class="btn btn-primary">
+                                        <i class="fas fa-plus"></i>
+                                        Add Radiology Test
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <input type="hidden" name="serialnumber2" id="serialnumber27" value="1">
+                            <input type="hidden" name="hiddenradiology" id="hiddenradiology" value="">
+                        </div>
                     </div>
                     
                     <!-- Radiology Total -->
-                    <div class="service-totals">
-                        <div class="service-total-label">Radiology Total</div>
-                        <div class="service-total-amount">
-                            <input type="text" id="total2" readonly style="border: none; background: none; text-align: right; font-weight: bold; color: var(--success-color);">
+                    <div class="total-section">
+                        <div class="total-display">
+                            <div class="total-label">Radiology Total</div>
+                            <div class="total-amount" id="rad-total-display">$0.00</div>
                         </div>
+                        <input type="text" id="total2" readonly style="display: none;">
                     </div>
                 </div>
-            </div>
 
-            <!-- General Services -->
-            <div class="services-section">
-                <div class="services-header" onclick="toggleServiceSection(this)">
-                    <div class="services-header-icon">
-                        <i class="fas fa-stethoscope"></i>
+                <!-- General Services -->
+                <div class="data-table-section">
+                    <div class="data-table-header">
+                        <i class="fas fa-stethoscope data-table-icon"></i>
+                        <h3 class="data-table-title">General Services</h3>
                     </div>
-                    <h3>General Services</h3>
-                    <div class="toggle-icon">
-                        <i class="fas fa-plus"></i>
-                    </div>
-                </div>
-                <div class="services-content">
-                    <table class="service-items-table">
+                    
+                    <table class="data-table">
                         <thead>
                             <tr>
                                 <th>Service</th>
@@ -1386,74 +1458,83 @@ function checkptdet()
                     </table>
                     
                     <!-- Add Service Form -->
-                    <div class="add-service-form">
-                        <div class="add-service-grid">
-                            <div class="form-group">
-                                <label for="services">Service</label>
-                                <input name="services[]" type="text" id="services" class="form-control" autocomplete="off" onclick="checkptdet()" placeholder="Enter service name">
-                                <input type="hidden" name="servicescode" id="servicescode" value="">
-                            </div>
-                            <div class="form-group">
-                                <label for="rate3">Base Rate</label>
-                                <input name="rate3[]" type="text" id="rate3" class="form-control" readonly placeholder="Base Rate">
-                            </div>
-                            <div class="form-group">
-                                <label for="baseunit">Base Unit</label>
-                                <input name="baseunit[]" type="text" id="baseunit" class="form-control" readonly placeholder="Base Unit">
-                            </div>
-                            <div class="form-group">
-                                <label for="incrqty">Incr Qty</label>
-                                <input name="incrqty[]" type="text" id="incrqty" class="form-control" readonly placeholder="Incr Qty">
-                            </div>
-                            <div class="form-group">
-                                <label for="incrrate">Incr Rate</label>
-                                <input name="incrrate[]" type="text" id="incrrate" class="form-control" readonly placeholder="Incr Rate">
-                                <input name="slab[]" type="hidden" id="slab" readonly>
-                                <input type='hidden' name='pkg2[]' id='pkg2'>
-                            </div>
-                            <div class="form-group">
-                                <label for="serviceqty">Qty</label>
-                                <input name="serviceqty[]" type="text" id="serviceqty" class="form-control" autocomplete="off" onKeyDown="return numbervaild(event)" onKeyUp="return sertotal()" placeholder="Qty">
-                            </div>
-                            <div class="form-group">
-                                <label for="serviceamount">Amount</label>
-                                <input name="serviceamount[]" type="text" id="serviceamount" class="form-control" readonly placeholder="Amount">
-                            </div>
-                            <div class="form-group">
-                                <label>&nbsp;</label>
-                                <button type="button" name="Add3" id="Add3" onClick="insertitem4()" class="add-service-btn">
-                                    <i class="fas fa-plus"></i>
-                                    Add Service
-                                </button>
-                            </div>
+                    <div class="form-section">
+                        <div class="form-section-header">
+                            <i class="fas fa-plus form-section-icon"></i>
+                            <h3 class="form-section-title">Add General Service</h3>
                         </div>
-                        <input type="hidden" name="serialnumber3" id="serialnumber3" value="1">
-                        <input type="hidden" name="hiddenservices" id="hiddenservices">
+                        
+                        <div class="form-section-form">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="services" class="form-label">Service</label>
+                                    <input name="services[]" type="text" id="services" class="form-input" autocomplete="off" onclick="checkptdet()" placeholder="Enter service name">
+                                    <input type="hidden" name="servicescode" id="servicescode" value="">
+                                </div>
+                                <div class="form-group">
+                                    <label for="rate3" class="form-label">Base Rate</label>
+                                    <input name="rate3[]" type="text" id="rate3" class="form-input" readonly placeholder="Base Rate">
+                                </div>
+                                <div class="form-group">
+                                    <label for="baseunit" class="form-label">Base Unit</label>
+                                    <input name="baseunit[]" type="text" id="baseunit" class="form-input" readonly placeholder="Base Unit">
+                                </div>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="incrqty" class="form-label">Incr Qty</label>
+                                    <input name="incrqty[]" type="text" id="incrqty" class="form-input" readonly placeholder="Incr Qty">
+                                </div>
+                                <div class="form-group">
+                                    <label for="incrrate" class="form-label">Incr Rate</label>
+                                    <input name="incrrate[]" type="text" id="incrrate" class="form-input" readonly placeholder="Incr Rate">
+                                    <input name="slab[]" type="hidden" id="slab" readonly>
+                                    <input type='hidden' name='pkg2[]' id='pkg2'>
+                                </div>
+                                <div class="form-group">
+                                    <label for="serviceqty" class="form-label">Qty</label>
+                                    <input name="serviceqty[]" type="text" id="serviceqty" class="form-input" autocomplete="off" onKeyDown="return numbervaild(event)" onKeyUp="return sertotal()" placeholder="Qty">
+                                </div>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="serviceamount" class="form-label">Amount</label>
+                                    <input name="serviceamount[]" type="text" id="serviceamount" class="form-input" readonly placeholder="Amount">
+                                </div>
+                                <div class="form-group">
+                                    <label>&nbsp;</label>
+                                    <button type="button" name="Add3" id="Add3" onClick="insertitem4()" class="btn btn-primary">
+                                        <i class="fas fa-plus"></i>
+                                        Add Service
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <input type="hidden" name="serialnumber3" id="serialnumber3" value="1">
+                            <input type="hidden" name="hiddenservices" id="hiddenservices">
+                        </div>
                     </div>
                     
                     <!-- Services Total -->
-                    <div class="service-totals">
-                        <div class="service-total-label">Services Total</div>
-                        <div class="service-total-amount">
-                            <input type="text" id="total3" readonly style="border: none; background: none; text-align: right; font-weight: bold; color: var(--success-color);">
+                    <div class="total-section">
+                        <div class="total-display">
+                            <div class="total-label">Services Total</div>
+                            <div class="total-amount" id="services-total-display">$0.00</div>
                         </div>
+                        <input type="text" id="total3" readonly style="display: none;">
                     </div>
                 </div>
-            </div>
 			
-            <!-- Primary Disease Section -->
-            <div class="services-section">
-                <div class="services-header" onclick="toggleServiceSection(this)">
-                    <div class="services-header-icon">
-                        <i class="fas fa-disease"></i>
+                <!-- Primary Disease Section -->
+                <div class="data-table-section">
+                    <div class="data-table-header">
+                        <i class="fas fa-disease data-table-icon"></i>
+                        <h3 class="data-table-title">Primary Disease</h3>
                     </div>
-                    <h3>Primary Disease</h3>
-                    <div class="toggle-icon">
-                        <i class="fas fa-plus"></i>
-                    </div>
-                </div>
-                <div class="services-content">
-                    <table class="service-items-table">
+                    
+                    <table class="data-table">
                         <thead>
                             <tr>
                                 <th>Type</th>
@@ -1468,47 +1549,49 @@ function checkptdet()
                     </table>
                     
                     <!-- Add Primary Disease Form -->
-                    <div class="add-service-form">
-                        <div class="add-service-grid">
-                            <div class="form-group">
-                                <label for="dis">Primary Disease</label>
-                                <input name="dis[]" id="dis" type="text" class="form-control" autocomplete="off" placeholder="Enter primary disease name">
-                                <input type="hidden" name="diseas" id="diseas" value="">
-                            </div>
-                            <div class="form-group">
-                                <label for="code">Disease Code</label>
-                                <input name="code[]" type="text" id="code" class="form-control" readonly placeholder="Disease Code">
-                                <input name="autonum" type="hidden" id="autonum" readonly>
-                                <input name="searchdisease1hiddentextbox" type="hidden" id="searchdisease1hiddentextbox">
-                                <input name="chapter[]" type="hidden" id="chapter" readonly>
-                            </div>
-                            <div class="form-group">
-                                <label>&nbsp;</label>
-                                <button type="button" name="Add2" id="Add2" onClick="return insertitem13()" class="add-service-btn">
-                                    <i class="fas fa-plus"></i>
-                                    Add Primary Disease
-                                </button>
-                            </div>
+                    <div class="form-section">
+                        <div class="form-section-header">
+                            <i class="fas fa-plus form-section-icon"></i>
+                            <h3 class="form-section-title">Add Primary Disease</h3>
                         </div>
-                        <input type="hidden" name="serialnumberdisease" id="serialnumberdisease" value="1">
+                        
+                        <div class="form-section-form">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="dis" class="form-label">Primary Disease</label>
+                                    <input name="dis[]" id="dis" type="text" class="form-input" autocomplete="off" placeholder="Enter primary disease name">
+                                    <input type="hidden" name="diseas" id="diseas" value="">
+                                </div>
+                                <div class="form-group">
+                                    <label for="code" class="form-label">Disease Code</label>
+                                    <input name="code[]" type="text" id="code" class="form-input" readonly placeholder="Disease Code">
+                                    <input name="autonum" type="hidden" id="autonum" readonly>
+                                    <input name="searchdisease1hiddentextbox" type="hidden" id="searchdisease1hiddentextbox">
+                                    <input name="chapter[]" type="hidden" id="chapter" readonly>
+                                </div>
+                                <div class="form-group">
+                                    <label>&nbsp;</label>
+                                    <button type="button" name="Add2" id="Add2" onClick="return insertitem13()" class="btn btn-primary">
+                                        <i class="fas fa-plus"></i>
+                                        Add Primary Disease
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <input type="hidden" name="serialnumberdisease" id="serialnumberdisease" value="1">
+                        </div>
                     </div>
                 </div>
-            </div>
 
 
-            <!-- Secondary Disease Section -->
-            <div class="services-section">
-                <div class="services-header" onclick="toggleServiceSection(this)">
-                    <div class="services-header-icon">
-                        <i class="fas fa-disease"></i>
+                <!-- Secondary Disease Section -->
+                <div class="data-table-section">
+                    <div class="data-table-header">
+                        <i class="fas fa-disease data-table-icon"></i>
+                        <h3 class="data-table-title">Secondary Disease</h3>
                     </div>
-                    <h3>Secondary Disease</h3>
-                    <div class="toggle-icon">
-                        <i class="fas fa-plus"></i>
-                    </div>
-                </div>
-                <div class="services-content">
-                    <table class="service-items-table">
+                    
+                    <table class="data-table">
                         <thead>
                             <tr>
                                 <th>Type</th>
@@ -1523,60 +1606,70 @@ function checkptdet()
                     </table>
                     
                     <!-- Add Secondary Disease Form -->
-                    <div class="add-service-form">
-                        <div class="add-service-grid">
-                            <div class="form-group">
-                                <label for="dis1">Secondary Disease</label>
-                                <input name="dis1[]" id="dis1" type="text" class="form-control" autocomplete="off" placeholder="Enter secondary disease name">
-                                <input type="hidden" name="diseas1" id="diseas1" value="">
-                            </div>
-                            <div class="form-group">
-                                <label for="code1">Disease Code</label>
-                                <input name="code1[]" type="text" id="code1" class="form-control" readonly placeholder="Disease Code">
-                                <input name="autonum1" type="hidden" id="autonum1" readonly>
-                                <input name="searchdisease1hiddentextbox1" type="hidden" id="searchdisease1hiddentextbox1">
-                                <input name="chapter1[]" type="hidden" id="chapter1" readonly>
-                            </div>
-                            <div class="form-group">
-                                <label>&nbsp;</label>
-                                <button type="button" name="Add2" id="Add2" onClick="return insertitem14()" class="add-service-btn">
-                                    <i class="fas fa-plus"></i>
-                                    Add Secondary Disease
-                                </button>
-                            </div>
+                    <div class="form-section">
+                        <div class="form-section-header">
+                            <i class="fas fa-plus form-section-icon"></i>
+                            <h3 class="form-section-title">Add Secondary Disease</h3>
                         </div>
-                        <input type="hidden" name="serialnumberdisease1" id="serialnumberdisease1" value="1">
+                        
+                        <div class="form-section-form">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="dis1" class="form-label">Secondary Disease</label>
+                                    <input name="dis1[]" id="dis1" type="text" class="form-input" autocomplete="off" placeholder="Enter secondary disease name">
+                                    <input type="hidden" name="diseas1" id="diseas1" value="">
+                                </div>
+                                <div class="form-group">
+                                    <label for="code1" class="form-label">Disease Code</label>
+                                    <input name="code1[]" type="text" id="code1" class="form-input" readonly placeholder="Disease Code">
+                                    <input name="autonum1" type="hidden" id="autonum1" readonly>
+                                    <input name="searchdisease1hiddentextbox1" type="hidden" id="searchdisease1hiddentextbox1">
+                                    <input name="chapter1[]" type="hidden" id="chapter1" readonly>
+                                </div>
+                                <div class="form-group">
+                                    <label>&nbsp;</label>
+                                    <button type="button" name="Add2" id="Add2" onClick="return insertitem14()" class="btn btn-primary">
+                                        <i class="fas fa-plus"></i>
+                                        Add Secondary Disease
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <input type="hidden" name="serialnumberdisease1" id="serialnumberdisease1" value="1">
+                        </div>
                     </div>
                 </div>
-            </div>
-			
-			
-            <!-- Grand Total Section -->
-            <div class="grand-total-section">
-                <div class="grand-total-display">
-                    <div class="grand-total-label">Grand Total</div>
-                    <div class="grand-total-amount" id="grand-total-display">$0.00</div>
-                </div>
-                <input type="text" id="grandtotal" readonly style="display: none;">
-            </div>
 
-            <!-- Action Buttons -->
-            <div class="action-buttons">
-                <input type="hidden" name="frm1submit1" value="frm1submit1" />
-                <button type="button" class="btn btn-secondary" onclick="window.history.back()">
-                    <i class="fas fa-arrow-left"></i>
-                    Cancel
-                </button>
-                <button type="button" class="btn btn-secondary" onclick="clearForm()">
-                    <i class="fas fa-undo"></i>
-                    Clear Form
-                </button>
-                <button type="submit" class="btn btn-success" id="Submit222" accesskey="s">
-                    <i class="fas fa-save"></i>
-                    Save (Alt+S)
-                </button>
-            </div>
-        </form>
+                <!-- Grand Total Section -->
+                <div class="total-section">
+                    <div class="total-display">
+                        <div class="total-label">Grand Total</div>
+                        <div class="total-amount" id="grand-total-display">$0.00</div>
+                    </div>
+                    <input type="text" id="grandtotal" readonly style="display: none;">
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="form-actions">
+                    <input type="hidden" name="frm1submit1" value="frm1submit1" />
+                    
+                    <button type="button" class="btn btn-secondary" onclick="window.history.back()">
+                        <i class="fas fa-arrow-left"></i>
+                        Cancel
+                    </button>
+                    
+                    <button type="button" class="btn btn-secondary" onclick="clearForm()">
+                        <i class="fas fa-undo"></i>
+                        Clear Form
+                    </button>
+                    
+                    <button type="submit" class="btn btn-success" id="Submit222" accesskey="s">
+                        <i class="fas fa-save"></i>
+                        Save (Alt+S)
+                    </button>
+                </div>
+            </form>
+        </main>
     </div>
 
     <!-- Include Modern JavaScript -->
@@ -1586,6 +1679,18 @@ function checkptdet()
     <script type="text/javascript" src="js/jquery-1.11.1.min.js"></script>
     <script type="text/javascript" src="js/autocomplete_medicine1.js"></script>
     <script type="text/javascript" src="js/automedicinecodesearch5kiambu1.js"></script>
+    
+    <script>
+        // Ensure loading overlay is hidden on page load
+        window.addEventListener('load', function() {
+            hideLoadingOverlay();
+        });
+        
+        // Hide loading overlay if there are any JavaScript errors
+        window.addEventListener('error', function() {
+            hideLoadingOverlay();
+        });
+    </script>
     <script type="text/javascript" src="js/jquery.min-autocomplete.js"></script>
     <script type="text/javascript" src="js/jquery-ui.min.js"></script>
     <script type="text/javascript" src="js/autocomplete_purchaseorder.js"></script>
@@ -1593,35 +1698,64 @@ function checkptdet()
     <script type="text/javascript" src="js/datetimepicker_css.js"></script>
     <script type="text/javascript" src="js/otc_walkin_services.js"></script>
     
-    <script>
-    $(document).ready(function(e) {
-        $("#searchpaymenttype12").trigger('click');
-        $("#customersearch").focus();
-    });
-    
-    // Clear form function
-    function clearForm() {
-        if (confirm('Are you sure you want to clear the form? All entered data will be lost.')) {
-            document.getElementById('frmsales').reset();
-            document.getElementById('insertrow1').innerHTML = '';
-            document.getElementById('insertrow2').innerHTML = '';
-            document.getElementById('insertrow3').innerHTML = '';
-            document.getElementById('insertrow13').innerHTML = '';
-            document.getElementById('insertrow14').innerHTML = '';
-            document.getElementById('total1').value = '';
-            document.getElementById('total2').value = '';
-            document.getElementById('total3').value = '';
-            document.getElementById('grandtotal').value = '';
-            document.getElementById('grand-total-display').textContent = '$0.00';
-        }
-    }
-    </script>
-
-            </div>
-        </main>
-    </div>
-
     <!-- Modern JavaScript -->
-    <script src="js/otc_walkin_services-modern.js?v=<?php echo time(); ?>"></script>
+    <script>
+        // Modern JavaScript functions
+        function refreshPage() {
+            window.location.reload();
+        }
+
+        function exportToExcel() {
+            // Add export functionality here
+            alert('Export functionality will be implemented');
+        }
+
+        function printReport() {
+            window.print();
+        }
+
+        // Clear form function
+        function clearForm() {
+            if (confirm('Are you sure you want to clear the form? All entered data will be lost.')) {
+                document.getElementById('frmsales').reset();
+                document.getElementById('insertrow1').innerHTML = '';
+                document.getElementById('insertrow2').innerHTML = '';
+                document.getElementById('insertrow3').innerHTML = '';
+                document.getElementById('insertrow13').innerHTML = '';
+                document.getElementById('insertrow14').innerHTML = '';
+                document.getElementById('total1').value = '';
+                document.getElementById('total2').value = '';
+                document.getElementById('total3').value = '';
+                document.getElementById('grandtotal').value = '';
+                document.getElementById('grand-total-display').textContent = '$0.00';
+            }
+        }
+
+        // Sidebar functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const menuToggle = document.getElementById('menuToggle');
+            const sidebar = document.getElementById('leftSidebar');
+            const sidebarToggle = document.getElementById('sidebarToggle');
+
+            menuToggle.addEventListener('click', function() {
+                sidebar.classList.toggle('active');
+            });
+
+            sidebarToggle.addEventListener('click', function() {
+                sidebar.classList.toggle('active');
+            });
+
+            // Close sidebar when clicking outside
+            document.addEventListener('click', function(event) {
+                if (!sidebar.contains(event.target) && !menuToggle.contains(event.target)) {
+                    sidebar.classList.remove('active');
+                }
+            });
+
+            // Initialize form
+            $("#searchpaymenttype12").trigger('click');
+            $("#customersearch").focus();
+        });
+    </script>
 </body>
 </html>

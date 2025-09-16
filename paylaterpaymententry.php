@@ -1,51 +1,73 @@
 <?php
+// Enable strict error reporting for development
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
 
+// Start session and include security files
 session_start();
-
 include ("includes/loginverify.php");
-
 include ("db/db_connect.php");
-//echo $menu_id;
 include ("includes/check_user_access.php");
 
+// Set timezone
+date_default_timezone_set('Asia/Calcutta');
 
+// Security headers
+header('X-Content-Type-Options: nosniff');
+header('X-Frame-Options: DENY');
+header('X-XSS-Protection: 1; mode=block');
+header('Referrer-Policy: strict-origin-when-cross-origin');
+
+// Initialize variables with proper sanitization
 $ipaddress = $_SERVER['REMOTE_ADDR'];
-
 $updatedatetime = date('Y-m-d');
-
 $timeonly = date("H:i:s");
+$username = isset($_SESSION['username']) ? $_SESSION['username'] : '';
+$companyanum = isset($_SESSION['companyanum']) ? $_SESSION['companyanum'] : '';
+$companyname = isset($_SESSION['companyname']) ? $_SESSION['companyname'] : '';
+$docno = isset($_SESSION['docno']) ? $_SESSION['docno'] : '';
 
-$username = $_SESSION['username'];
-
-$companyanum = $_SESSION['companyanum'];
-
-$companyname = $_SESSION['companyname'];
-
+// Date range defaults
 $transactiondatefrom = date('Y-m-d', strtotime('-1 month'));
-
 $transactiondateto = date('Y-m-d');
 
-$suppliername="";
-
+// Initialize form variables
+$suppliername = "";
 $errmsg = "";
-
 $banum = "1";
-
 $supplieranum = "";
-
 $custid = "";
-
 $custname = "";
-
 $balanceamount = "0.00";
-
 $openingbalance = "0.00";
-
 $searchsuppliername = "";
-
 $cbsuppliername = "";
 
-$docno = $_SESSION['docno'];
+// Input sanitization function
+function sanitizeInput($input) {
+    return htmlspecialchars(trim($input), ENT_QUOTES, 'UTF-8');
+}
+
+// CSRF Token generation
+if (!isset($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(openssl_random_pseudo_bytes(32));
+}
+
+// CSRF Token validation function
+function validateCSRFToken($token) {
+    return isset($_SESSION['csrf_token']) && $_SESSION['csrf_token'] === $token;
+}
+
+// Handle form submissions with CSRF protection
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (!isset($_POST['csrf_token']) || !validateCSRFToken($_POST['csrf_token'])) {
+        die('CSRF token validation failed');
+    }
+    
+    // Sanitize POST data
+    $searchsuppliername = isset($_POST['searchsuppliername']) ? sanitizeInput($_POST['searchsuppliername']) : $searchsuppliername;
+    $cbsuppliername = isset($_POST['cbsuppliername']) ? sanitizeInput($_POST['cbsuppliername']) : $cbsuppliername;
+}
 
 
 
@@ -1795,48 +1817,239 @@ text-align:right;
 
 
 
-<!--<script src="js/datetimepicker_css_fin.js"></script>-->
-<script src="js/datetimepicker_css.js"></script>
-
-
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Pay Later Payment Entry - MedStar Hospital Management System">
+    <meta name="robots" content="noindex, nofollow">
+    <title>Pay Later Payment Entry - MedStar Hospital</title>
+    
+    <!-- Preload critical resources -->
+    <link rel="preload" href="css/paylaterpayment-modern.css" as="style">
+    <link rel="preload" href="js/paylaterpayment-modern.js" as="script">
+    
+    <!-- Modern CSS -->
+    <link rel="stylesheet" href="css/paylaterpayment-modern.css?v=<?php echo time(); ?>">
+    
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- Structured Data -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "MedStar Hospital Management System",
+        "description": "Advanced Healthcare Management Platform - Pay Later Payment Entry",
+        "url": "<?php echo $_SERVER['REQUEST_URI']; ?>",
+        "applicationCategory": "BusinessApplication",
+        "operatingSystem": "Web Browser"
+    }
+    </script>
+    
+    <!-- Legacy Scripts -->
+    <script src="js/datetimepicker_css.js"></script>
+</head>
 
 <body>
+    <!-- Modern MedStar Hospital Management Header -->
+    <header class="hospital-header">
+        <h1 class="hospital-title">🏥 MedStar Hospital Management</h1>
+        <p class="hospital-subtitle">Advanced Healthcare Management Platform</p>
+    </header>
 
-<table width="101%" border="0" cellspacing="0" cellpadding="2">
+    <!-- Navigation Breadcrumb -->
+    <nav class="nav-breadcrumb">
+        <a href="mainmenu1.php">🏠 Dashboard</a>
+        <span>→</span>
+        <span>Accounts</span>
+        <span>→</span>
+        <span>Accounts Receivables</span>
+        <span>→</span>
+        <span>Pay Later Payment Entry</span>
+    </nav>
 
-  <tr>
+    <!-- Floating Menu Toggle -->
+    <button class="floating-menu-toggle" id="mobileMenuToggle">
+        <i class="fas fa-bars"></i>
+    </button>
 
-    <td colspan="10" bgcolor="#ecf0f5"><?php include ("includes/alertmessages1.php"); ?></td>
+    <!-- Main Container with Sidebar -->
+    <div class="main-container-with-sidebar" id="mainContainer">
+        <!-- Left Sidebar -->
+        <aside id="leftSidebar" class="left-sidebar">
+            <div class="sidebar-header">
+                <h3>🏥 MedStar</h3>
+                <button class="sidebar-toggle" id="sidebarToggle">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <nav class="sidebar-nav">
+                <ul class="nav-list">
+                    <li class="nav-item">
+                        <a href="mainmenu1.php" class="nav-link">
+                            <i class="fas fa-home"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="addaccountsmain.php" class="nav-link">
+                            <i class="fas fa-chart-line"></i>
+                            <span>Account Main Types</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="addaccountssub.php" class="nav-link">
+                            <i class="fas fa-chart-bar"></i>
+                            <span>Account Sub Types</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="addaccountname1.php" class="nav-link">
+                            <i class="fas fa-tags"></i>
+                            <span>Account Names</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="accountstatement.php" class="nav-link">
+                            <i class="fas fa-file-invoice"></i>
+                            <span>Account Statement</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="accountreceivable.php" class="nav-link">
+                            <i class="fas fa-hand-holding-usd"></i>
+                            <span>Receivables</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="accountwiseoutstandingreport.php" class="nav-link">
+                            <i class="fas fa-chart-pie"></i>
+                            <span>Account Wise Outstanding</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="paylaterpaymententry.php" class="nav-link active">
+                            <i class="fas fa-credit-card"></i>
+                            <span>Pay Later Payment Entry</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="expenses.php" class="nav-link">
+                            <i class="fas fa-receipt"></i>
+                            <span>Expenses</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="income.php" class="nav-link">
+                            <i class="fas fa-dollar-sign"></i>
+                            <span>Income</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="addbank1.php" class="nav-link">
+                            <i class="fas fa-university"></i>
+                            <span>Bank Management</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="patientmanagement.php" class="nav-link">
+                            <i class="fas fa-user-injured"></i>
+                            <span>Patient Management</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="consultation.php" class="nav-link">
+                            <i class="fas fa-stethoscope"></i>
+                            <span>Consultation</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="labitems.php" class="nav-link">
+                            <i class="fas fa-flask"></i>
+                            <span>Lab Items</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="radiology.php" class="nav-link">
+                            <i class="fas fa-x-ray"></i>
+                            <span>Radiology</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="employeemanagement.php" class="nav-link">
+                            <i class="fas fa-users"></i>
+                            <span>Employee Management</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="departmentmanagement.php" class="nav-link">
+                            <i class="fas fa-building"></i>
+                            <span>Department Management</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="rightsaccess.php" class="nav-link">
+                            <i class="fas fa-shield-alt"></i>
+                            <span>Employee Rights Access</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
 
-  </tr>
-
-  <tr>
-
-    <td colspan="10" bgcolor="#ecf0f5"><?php include ("includes/title1.php"); ?></td>
-
-  </tr>
-
-  <tr>
-
-    <td colspan="10" bgcolor="#ecf0f5"><?php include ("includes/menu1.php"); ?></td>
-
-  </tr>
-
-  <tr>
-
-    <td colspan="10">&nbsp;</td>
-
-  </tr>
-
-  <tr>
-
-    <td width="1%">&nbsp;</td>
-
-    <td width="2%" valign="top"><?php //include ("includes/menu4.php"); ?>
-
-      &nbsp;</td>
-
-    <td width="97%" valign="top"><table width="116%" border="0" cellspacing="0" cellpadding="0">
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Alert Messages -->
+            <?php include ("includes/alertmessages1.php"); ?>
+            
+            <!-- Success/Error Messages -->
+            <?php if ($errmsg != ''): ?>
+                <div class="alert alert-<?php echo (strpos($errmsg, 'success') !== false) ? 'success' : 'error'; ?>">
+                    <i class="fas fa-<?php echo (strpos($errmsg, 'success') !== false) ? 'check-circle' : 'exclamation-triangle'; ?> alert-icon"></i>
+                    <span><?php echo $errmsg; ?></span>
+                </div>
+            <?php endif; ?>
+            
+            <!-- Account Search Section -->
+            <section class="account-search-section">
+                <div class="section-header">
+                    <span class="section-icon">🔍</span>
+                    <h3 class="section-title">Receivable Entry - Select Account</h3>
+                </div>
+                
+                <form name="cbform1" method="post" action="paylaterpaymententry.php" class="search-form">
+                    <!-- CSRF Token -->
+                    <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
+                    <input type="hidden" name="cbfrmflag1" value="cbfrmflag1">
+                    
+                    <div class="form-layout">
+                        <div class="form-group">
+                            <label for="searchsuppliername" class="form-label">Search Account *</label>
+                            <input name="searchsuppliername" type="text" id="searchsuppliername" value="<?php echo htmlspecialchars($searchsuppliername); ?>" class="form-input" placeholder="Type account name to search..." autocomplete="off" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="cbsuppliername" class="form-label">Account</label>
+                            <input name="cbsuppliername" type="text" id="cbsuppliername" value="<?php echo htmlspecialchars($cbsuppliername); ?>" class="form-input" placeholder="Selected account name..." autocomplete="off">
+                        </div>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="submit" onClick="return funcAccount();" class="btn btn-primary">
+                            <i class="fas fa-search"></i> Search
+                        </button>
+                        <button type="reset" class="btn btn-secondary">
+                            <i class="fas fa-undo"></i> Reset
+                        </button>
+                    </div>
+                </form>
+            </section>
+            
+            <!-- Legacy table structure for now -->
+            <table width="116%" border="0" cellspacing="0" cellpadding="0">
 
       <tr>
 
@@ -2235,10 +2448,11 @@ text-align:right;
 
   </table>
 
+    <!-- Modern JavaScript -->
+    <script src="js/paylaterpayment-modern.js?v=<?php echo time(); ?>"></script>
+
 <?php include ("includes/footer1.php"); ?>
-
 </body>
-
 </html>
 
 

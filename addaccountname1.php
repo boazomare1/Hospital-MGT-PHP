@@ -1,13 +1,25 @@
 <?php
+// Modern PHP with strict error reporting and security headers
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+ini_set('log_errors', 1);
+
+// Security headers
+header('X-Content-Type-Options: nosniff');
+header('X-Frame-Options: DENY');
+header('X-XSS-Protection: 1; mode=block');
+header('Referrer-Policy: strict-origin-when-cross-origin');
+
 session_start();
 include ("includes/loginverify.php");
 include ("db/db_connect.php");
 include ("includes/check_user_access.php");
 
-$username = $_SESSION["username"];
-$companyanum = $_SESSION["companyanum"];
-$companyname = $_SESSION["companyname"];
-$ipaddress = $_SERVER["REMOTE_ADDR"];
+// Initialize variables with proper validation
+$username = isset($_SESSION["username"]) ? $_SESSION["username"] : '';
+$companyanum = isset($_SESSION["companyanum"]) ? $_SESSION["companyanum"] : '';
+$companyname = isset($_SESSION["companyname"]) ? $_SESSION["companyname"] : '';
+$ipaddress = isset($_SERVER["REMOTE_ADDR"]) ? $_SERVER["REMOTE_ADDR"] : '';
 $updatedatetime = date('Y-m-d H:i:s');
 $errmsg = "";
 $bgcolorcode = "";
@@ -15,137 +27,197 @@ $colorloopcount = "";
 $dummy = '';
 $costcenteridsdb = array();
 
-if (isset($_POST["frmflag1"])) { $frmflag1 = $_POST["frmflag1"]; } else { $frmflag1 = ""; }
-if ($frmflag1 == 'frmflag1') {
-    $accountname = $_REQUEST["accountname"];
-    $accountname = strtoupper($accountname);
-    $accountname = trim($accountname);
-    $length = strlen($accountname);
-    
-    $expirydate = $_REQUEST['expirydate'];
-    $recordstatus = $_REQUEST['recordstatus'];
-    $address = $_REQUEST['address'];
-    $accountsmaintype = $_REQUEST['accountsmaintype'];
-    $accountssub = $_REQUEST['accountssub'];
-    $paymenttype = '';
-    $subtype = '';
-    $misreport = 0;
-    
-    if($accountssub == '2') {
-        $paymenttype = $_REQUEST['paymenttype'];
-    }
-    
-    $openingbalancecredit = $_REQUEST['openingbalancecredit'];
-    $openingbalancedebit = $_REQUEST['openingbalancedebit'];
-    
-    if(isset($_REQUEST['is_receivable'])) {
-        $is_receivable = $_REQUEST['is_receivable'];
-    } else {
-        $is_receivable = '';
-    }
-    
-    $id = $_REQUEST['id'];
-    $contact = $_REQUEST['contact'];
-    $phone = trim($_REQUEST['phone']);
-    $locationcode = $_REQUEST['location'];
-    $currency = $_REQUEST['currency'];
-    $fxrate = $_REQUEST['fxrate'];
-    
-    if(isset($_REQUEST['grnbackdate'])) {
-        $grnbackdate = $_REQUEST['grnbackdate'];
-    } else {
-        $grnbackdate = '';
-    }
-    
-    if(isset($_REQUEST['iscapitation'])) {
-        $iscapitation = $_REQUEST['iscapitation'];
-        $capitationservicename = $_REQUEST['capitationservicename'];
-        $capitationservicecode = $_REQUEST['capitationservicecode'];
-    } else {
-        $iscapitation = '';
-        $capitationservicename = '';
-        $capitationservicecode = '';
-    }
-    
-    if($accountsmaintype == '' || $accountssub == '') {
-        $errmsg = "Failed. Account Main and Account Sub Not selected properly.";
+// CSRF Token generation
+if (!isset($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(openssl_random_pseudo_bytes(32));
+}
+
+// CSRF Token validation
+function validateCSRFToken($token) {
+    return isset($_SESSION['csrf_token']) && $_SESSION['csrf_token'] === $token;
+}
+
+// Input sanitization function
+function sanitizeInput($input) {
+    return htmlspecialchars(trim($input), ENT_QUOTES, 'UTF-8');
+}
+
+// Validate and sanitize form data
+if (isset($_POST["frmflag1"]) && $_POST["frmflag1"] == 'frmflag1') {
+    // CSRF Token validation
+    if (!isset($_POST['csrf_token']) || !validateCSRFToken($_POST['csrf_token'])) {
+        $errmsg = "Security validation failed. Please try again.";
         $bgcolorcode = 'failed';
     } else {
-        $query8 = "select * from master_location where locationcode = '$locationcode'";
-        $exec8 = mysqli_query($GLOBALS["___mysqli_ston"], $query8) or die ("Error in Query8".mysqli_error($GLOBALS["___mysqli_ston"]));
-        $res8 = mysqli_fetch_array($exec8);
-        $locationname = $res8['locationname'];
-        $cc_name = "";
+        // Sanitize and validate inputs
+        $accountname = sanitizeInput(isset($_POST["accountname"]) ? $_POST["accountname"] : '');
+        $accountname = strtoupper($accountname);
+        $length = strlen($accountname);
         
-        if ($length <= 100) {
-            $query2 = "select * from master_accountname where (accountname = '$accountname' or id = '$id')";
-            $exec2 = mysqli_query($GLOBALS["___mysqli_ston"], $query2) or die ("Error in Query2".mysqli_error($GLOBALS["___mysqli_ston"]));
-            $res2 = mysqli_num_rows($exec2);
+        $expirydate = sanitizeInput(isset($_POST['expirydate']) ? $_POST['expirydate'] : '');
+        $recordstatus = sanitizeInput(isset($_POST['recordstatus']) ? $_POST['recordstatus'] : 'ACTIVE');
+        $address = sanitizeInput(isset($_POST['address']) ? $_POST['address'] : '');
+        $accountsmaintype = (int)(isset($_POST['accountsmaintype']) ? $_POST['accountsmaintype'] : 0);
+        $accountssub = (int)(isset($_POST['accountssub']) ? $_POST['accountssub'] : 0);
+        $paymenttype = '';
+        $subtype = '';
+        $misreport = 0;
+        
+        if($accountssub == 2) {
+            $paymenttype = (int)(isset($_POST['paymenttype']) ? $_POST['paymenttype'] : 0);
+        }
+        
+        $openingbalancecredit = (float)(isset($_POST['openingbalancecredit']) ? $_POST['openingbalancecredit'] : 0);
+        $openingbalancedebit = (float)(isset($_POST['openingbalancedebit']) ? $_POST['openingbalancedebit'] : 0);
+        
+        $is_receivable = isset($_POST['is_receivable']) ? 1 : 0;
+        
+        $id = sanitizeInput(isset($_POST['id']) ? $_POST['id'] : '');
+        $contact = sanitizeInput(isset($_POST['contact']) ? $_POST['contact'] : '');
+        $phone = sanitizeInput(isset($_POST['phone']) ? $_POST['phone'] : '');
+        $locationcode = (int)(isset($_POST['location']) ? $_POST['location'] : 0);
+        $currency = sanitizeInput(isset($_POST['currency']) ? $_POST['currency'] : 'KSH');
+        $fxrate = (float)(isset($_POST['fxrate']) ? $_POST['fxrate'] : 1.0);
+        
+        $grnbackdate = isset($_POST['grnbackdate']) ? 1 : 0;
+        
+        if(isset($_POST['iscapitation'])) {
+            $iscapitation = 1;
+            $capitationservicename = sanitizeInput(isset($_POST['capitationservicename']) ? $_POST['capitationservicename'] : '');
+            $capitationservicecode = sanitizeInput(isset($_POST['capitationservicecode']) ? $_POST['capitationservicecode'] : '');
+        } else {
+            $iscapitation = 0;
+            $capitationservicename = '';
+            $capitationservicecode = '';
+        }
+        
+        // Validation
+        if($accountsmaintype == 0 || $accountssub == 0) {
+            $errmsg = "Failed. Account Main and Account Sub must be selected.";
+            $bgcolorcode = 'failed';
+        } elseif(empty($accountname)) {
+            $errmsg = "Failed. Account name is required.";
+            $bgcolorcode = 'failed';
+        } elseif(empty($id)) {
+            $errmsg = "Failed. Account ID is required.";
+            $bgcolorcode = 'failed';
+        } elseif($length > 100) {
+            $errmsg = "Failed. Account name cannot exceed 100 characters.";
+            $bgcolorcode = 'failed';
+        } else {
+            // Use prepared statements for database queries
+            $stmt = $GLOBALS["___mysqli_ston"]->prepare("SELECT locationname FROM master_location WHERE locationcode = ?");
+            $stmt->bind_param("i", $locationcode);
+            $stmt->execute();
+            $stmt->bind_result($locationname);
+            $stmt->fetch();
+            $stmt->close();
+            $cc_name = "";
+            
+            // Check if account name or ID already exists
+            $stmt = $GLOBALS["___mysqli_ston"]->prepare("SELECT COUNT(*) as count FROM master_accountname WHERE (accountname = ? OR id = ?)");
+            $stmt->bind_param("ss", $accountname, $id);
+            $stmt->execute();
+            $stmt->bind_result($res2);
+            $stmt->fetch();
+            $stmt->close();
             
             if ($res2 == 0) {
-                if($accountssub == '2') {
+                if($accountssub == 2) {
                     $currency = "KSHS";
-                    $fxrate = '1';
-                    $query_su = "insert into master_subtype (maintype, subtype, subtype_ledger, ipaddress, recorddate, username, currency, fxrate) 
-                    values ('$paymenttype', '$accountname', '$id', '$ipaddress', '$updatedatetime', '$username', '".$currency."', '".$fxrate."')";
-                    $exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query_su) or die ("Error in query_su".mysqli_error($GLOBALS["___mysqli_ston"]));
+                    $fxrate = 1.0;
+                    $stmt = $GLOBALS["___mysqli_ston"]->prepare("INSERT INTO master_subtype (maintype, subtype, subtype_ledger, ipaddress, recorddate, username, currency, fxrate) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+                    $stmt->bind_param("issssssd", $paymenttype, $accountname, $id, $ipaddress, $updatedatetime, $username, $currency, $fxrate);
+                    $stmt->execute();
                     
-                    $query21 = "select auto_number from master_subtype where subtype_ledger='$id'";
-                    $exec21 = mysqli_query($GLOBALS["___mysqli_ston"], $query21) or die ("Error in query21".mysqli_error($GLOBALS["___mysqli_ston"]));
-                    $res21 = mysqli_fetch_array($exec21);
-                    $subtype = $res21['auto_number'];
+                    $stmt = $GLOBALS["___mysqli_ston"]->prepare("SELECT auto_number FROM master_subtype WHERE subtype_ledger = ?");
+                    $stmt->bind_param("s", $id);
+                    $stmt->execute();
+                    $stmt->bind_result($subtype);
+                    $stmt->fetch();
+                    $stmt->close();
                 }
                 
-                $query1 = "insert into master_accountname (accountname, recordstatus, paymenttype, subtype, expirydate, ipaddress, recorddate, username, address, accountsmain, accountssub, misreport, openingbalancecredit, openingbalancedebit, id, contact, locationcode, locationname, currency, fxrate, iscapitation, serviceitemcode, phone, is_receivable, cost_center, grn_backdate) 
-                values ('$accountname', '$recordstatus', '$paymenttype', '$subtype', '$expirydate', '$ipaddress', '$updatedatetime', '$username', '$address', '$accountsmaintype', '$accountssub', '$misreport', '$openingbalancecredit', '$openingbalancedebit', '$id', '$contact', '$locationcode', '$locationname', '$currency', '$fxrate', '$iscapitation', '$capitationservicecode', '$phone', '$is_receivable', '$cc_name', '$grnbackdate')";
-                $exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
-                $errmsg = "Success. New Account Name Updated.";
-                $bgcolorcode = 'success';
+                // Insert new account name using prepared statement
+                $stmt = $GLOBALS["___mysqli_ston"]->prepare("INSERT INTO master_accountname (accountname, recordstatus, paymenttype, subtype, expirydate, ipaddress, recorddate, username, address, accountsmain, accountssub, misreport, openingbalancecredit, openingbalancedebit, id, contact, locationcode, locationname, currency, fxrate, iscapitation, serviceitemcode, phone, is_receivable, cost_center, grn_backdate) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                $stmt->bind_param("ssiisssssiiiddssiisssssss", $accountname, $recordstatus, $paymenttype, $subtype, $expirydate, $ipaddress, $updatedatetime, $username, $address, $accountsmaintype, $accountssub, $misreport, $openingbalancecredit, $openingbalancedebit, $id, $contact, $locationcode, $locationname, $currency, $fxrate, $iscapitation, $capitationservicecode, $phone, $is_receivable, $cc_name, $grnbackdate);
                 
-                if($accountssub == '2') {
-                    $query22 = "select auto_number from master_accountname where id='$id'";
-                    $exec22 = mysqli_query($GLOBALS["___mysqli_ston"], $query22) or die ("Error in query21".mysqli_error($GLOBALS["___mysqli_ston"]));
-                    $res22 = mysqli_fetch_array($exec22);
-                    $ledgeranum = $res22['auto_number'];
+                if ($stmt->execute()) {
+                    $stmt->close();
+                    $errmsg = "Success. New Account Name Added Successfully.";
+                    $bgcolorcode = 'success';
                     
-                    $query1 = "update master_subtype set ledger_anum = '$ledgeranum' where auto_number = '$subtype'";
-                    $exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
+                    if($accountssub == 2) {
+                        $stmt = $GLOBALS["___mysqli_ston"]->prepare("SELECT auto_number FROM master_accountname WHERE id = ?");
+                        $stmt->bind_param("s", $id);
+                        $stmt->execute();
+                        $stmt->bind_result($ledgeranum);
+                        $stmt->fetch();
+                        $stmt->close();
+                        
+                        $stmt = $GLOBALS["___mysqli_ston"]->prepare("UPDATE master_subtype SET ledger_anum = ? WHERE auto_number = ?");
+                        $stmt->bind_param("ii", $ledgeranum, $subtype);
+                        $stmt->execute();
+                        $stmt->close();
+                    }
+                } else {
+                    $stmt->close();
+                    $errmsg = "Failed. Database error occurred.";
+                    $bgcolorcode = 'failed';
                 }
             } else {
                 $errmsg = "Failed. Account Name or ID Already Exists.";
                 $bgcolorcode = 'failed';
             }
-        } else {
-            $errmsg = "Failed. Only 100 Characters Are Allowed.";
-            $bgcolorcode = 'failed';
         }
     }
 }
 
-if (isset($_REQUEST["st"])) { $st = $_REQUEST["st"]; } else { $st = ""; }
+// Handle status changes with proper validation
+$st = isset($_GET["st"]) ? $_GET["st"] : '';
 if ($st == 'del') {
-    $delanum = $_REQUEST["anum"];
-    $query3 = "update master_accountname set recordstatus = 'DELETED' where auto_number = '$delanum'";
-    $exec3 = mysqli_query($GLOBALS["___mysqli_ston"], $query3) or die ("Error in Query3".mysqli_error($GLOBALS["___mysqli_ston"]));
+    $delanum = (int)(isset($_GET["anum"]) ? $_GET["anum"] : 0);
+    if ($delanum > 0) {
+        $stmt = $GLOBALS["___mysqli_ston"]->prepare("UPDATE master_accountname SET recordstatus = 'DELETED' WHERE auto_number = ?");
+        $stmt->bind_param("i", $delanum);
+        $stmt->execute();
+        $stmt->close();
+    }
 }
 if ($st == 'activate') {
-    $delanum = $_REQUEST["anum"];
-    $query3 = "update master_accountname set recordstatus = 'ACTIVE' where auto_number = '$delanum'";
-    $exec3 = mysqli_query($GLOBALS["___mysqli_ston"], $query3) or die ("Error in Query3".mysqli_error($GLOBALS["___mysqli_ston"]));
+    $delanum = (int)(isset($_GET["anum"]) ? $_GET["anum"] : 0);
+    if ($delanum > 0) {
+        $stmt = $GLOBALS["___mysqli_ston"]->prepare("UPDATE master_accountname SET recordstatus = 'ACTIVE' WHERE auto_number = ?");
+        $stmt->bind_param("i", $delanum);
+        $stmt->execute();
+        $stmt->close();
+    }
 }
 if ($st == 'default') {
-    $delanum = $_REQUEST["anum"];
-    $query4 = "update master_accountname set defaultstatus = '' where cstid='$custid' and cstname='$custname'";
-    $exec4 = mysqli_query($GLOBALS["___mysqli_ston"], $query4) or die ("Error in Query4".mysqli_error($GLOBALS["___mysqli_ston"]));
-    $query5 = "update master_accountname set defaultstatus = 'DEFAULT' where auto_number = '$delanum'";
-    $exec5 = mysqli_query($GLOBALS["___mysqli_ston"], $query5) or die ("Error in Query5".mysqli_error($GLOBALS["___mysqli_ston"]));
+    $delanum = (int)(isset($_GET["anum"]) ? $_GET["anum"] : 0);
+    if ($delanum > 0) {
+        $stmt = $GLOBALS["___mysqli_ston"]->prepare("UPDATE master_accountname SET defaultstatus = '' WHERE cstid = ? AND cstname = ?");
+        $stmt->bind_param("ss", $custid, $custname);
+        $stmt->execute();
+        $stmt->close();
+        
+        $stmt = $GLOBALS["___mysqli_ston"]->prepare("UPDATE master_accountname SET defaultstatus = 'DEFAULT' WHERE auto_number = ?");
+        $stmt->bind_param("i", $delanum);
+        $stmt->execute();
+        $stmt->close();
+    }
 }
 if ($st == 'removedefault') {
-    $delanum = $_REQUEST["anum"];
-    $query6 = "update master_accountname set defaultstatus = '' where auto_number = '$delanum'";
-    $exec6 = mysqli_query($GLOBALS["___mysqli_ston"], $query6) or die ("Error in Query6".mysqli_error($GLOBALS["___mysqli_ston"]));
+    $delanum = (int)(isset($_GET["anum"]) ? $_GET["anum"] : 0);
+    if ($delanum > 0) {
+        $stmt = $GLOBALS["___mysqli_ston"]->prepare("UPDATE master_accountname SET defaultstatus = '' WHERE auto_number = ?");
+        $stmt->bind_param("i", $delanum);
+        $stmt->execute();
+        $stmt->close();
+    }
 }
-if (isset($_REQUEST["svccount"])) { $svccount = $_REQUEST["svccount"]; } else { $svccount = ""; }
+
+$svccount = isset($_GET["svccount"]) ? $_GET["svccount"] : '';
 if ($svccount == 'firstentry') {
     $errmsg = "Please Add Account Name To Proceed For Billing.";
     $bgcolorcode = 'failed';
@@ -156,30 +228,48 @@ if ($svccount == 'firstentry') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Add Account Name - MedStar</title>
+    <meta name="description" content="Add and manage account names for MedStar Hospital Management System">
+    <meta name="robots" content="noindex, nofollow">
+    <title>Account Name Management - MedStar Hospital</title>
     
-    <!-- jQuery -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Preload critical resources -->
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" as="style">
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" as="style">
     
-    <!-- Modern CSS -->
+    <!-- Modern CSS Framework -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/addaccountname1-modern.css?v=<?php echo time(); ?>">
-    
-    <!-- Font Awesome for icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <!-- Date Picker Styles -->
     <link href="css/datepickerstyle.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="css/autocomplete.css">
+    
+    <!-- Modern JavaScript Libraries -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js" integrity="sha256-lSjKY4/s1UMvivJgLcXjzCpnzqbGdCw7uQt2r4jqcjQ=" crossorigin="anonymous"></script>
     
     <!-- External JavaScript -->
     <script type="text/javascript" src="js/adddate.js"></script>
     <script type="text/javascript" src="js/adddate2.js"></script>
     <script type="text/javascript" src="js/jquery.min-autocomplete.js"></script>
-    <script type="text/javascript" src="js/jquery-ui.min.js"></script>
     <script type="text/javascript" src="js/autoaccountanumsearch.js"></script>
     <script src="js/datetimepicker_css.js"></script>
-    <link rel="stylesheet" type="text/css" href="css/autocomplete.css">
+    
+    <!-- Structured Data -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "MedStar Hospital Management System",
+        "description": "Account Name Management for Hospital Billing System"
+    }
+    </script>
 </head>
 <body>
+    <!-- Skip Link for Accessibility -->
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+    
     <!-- Hospital Header -->
     <header class="hospital-header">
         <h1 class="hospital-title">🏥 MedStar Hospital Management</h1>
@@ -207,8 +297,138 @@ if ($svccount == 'firstentry') {
         <span>Add Account Name</span>
     </nav>
 
-    <!-- Main Container -->
-    <div class="main-container">
+    <!-- Mobile Menu Toggle -->
+    <button id="mobileMenuToggle" class="mobile-menu-toggle">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <!-- Main Container with Sidebar -->
+    <div class="main-container-with-sidebar">
+        <!-- Left Sidebar -->
+        <aside id="leftSidebar" class="left-sidebar">
+            <div class="sidebar-header">
+                <h3>Quick Navigation</h3>
+                <button id="sidebarToggle" class="sidebar-toggle">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <ul class="nav-list">
+                    <li class="nav-item">
+                        <a href="mainmenu1.php" class="nav-link">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="addaccountsmain.php" class="nav-link">
+                            <i class="fas fa-chart-line"></i>
+                            <span>Account Main Types</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="addaccountssub.php" class="nav-link">
+                            <i class="fas fa-chart-bar"></i>
+                            <span>Account Sub Types</span>
+                        </a>
+                    </li>
+                    <li class="nav-item active">
+                        <a href="addaccountname1.php" class="nav-link">
+                            <i class="fas fa-address-book"></i>
+                            <span>Account Names</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="accountstatement.php" class="nav-link">
+                            <i class="fas fa-file-invoice"></i>
+                            <span>Account Statement</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="accountreceivableentry.php" class="nav-link">
+                            <i class="fas fa-money-bill-wave"></i>
+                            <span>Receivables</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="accountexpense.php" class="nav-link">
+                            <i class="fas fa-credit-card"></i>
+                            <span>Expenses</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="accountincome.php" class="nav-link">
+                            <i class="fas fa-coins"></i>
+                            <span>Income</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="addbank1.php" class="nav-link">
+                            <i class="fas fa-university"></i>
+                            <span>Bank Management</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="addpatient1.php" class="nav-link">
+                            <i class="fas fa-user-plus"></i>
+                            <span>Add Patient</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="activeinpatientlist.php" class="nav-link">
+                            <i class="fas fa-bed"></i>
+                            <span>Inpatient List</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="addconsultation1.php" class="nav-link">
+                            <i class="fas fa-stethoscope"></i>
+                            <span>Consultation</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="labitem1master.php" class="nav-link">
+                            <i class="fas fa-flask"></i>
+                            <span>Lab Items</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="addradiologytemplate.php" class="nav-link">
+                            <i class="fas fa-x-ray"></i>
+                            <span>Radiology</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="addemployee1.php" class="nav-link">
+                            <i class="fas fa-users"></i>
+                            <span>Employees</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="adddoctor1.php" class="nav-link">
+                            <i class="fas fa-user-md"></i>
+                            <span>Doctors</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="addnurse1.php" class="nav-link">
+                            <i class="fas fa-user-nurse"></i>
+                            <span>Nurses</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="adddepartment1.php" class="nav-link">
+                            <i class="fas fa-building"></i>
+                            <span>Departments</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main id="main-content" class="main-content">
         <!-- Page Header -->
         <div class="page-header">
             <div class="page-header-content">
@@ -237,7 +457,10 @@ if ($svccount == 'firstentry') {
                 <h3 class="form-section-title">Add New Account</h3>
             </div>
             
-            <form name="form1" id="form1" method="post" action="addaccountname1.php" onSubmit="return Process()">
+            <form name="form1" id="form1" method="post" action="addaccountname1.php" onSubmit="return Process()" novalidate>
+                <!-- CSRF Token -->
+                <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
+                
                 <div class="form-grid">
                     <div class="form-group">
                         <label for="location" class="form-label">Select Location *</label>
@@ -582,6 +805,7 @@ if ($svccount == 'firstentry') {
                 </tbody>
             </table>
         </div>
+        </main>
     </div>
 
     <!-- Modern JavaScript -->

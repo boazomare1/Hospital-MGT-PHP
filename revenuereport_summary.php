@@ -178,45 +178,6 @@ if (isset($_REQUEST["frmflag2"])) {
 
 <link rel="stylesheet" type="text/css" href="css/autosuggest.css" />        
 
-<style type="text/css">
-
-<!--
-
-.bodytext3 {FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3b3b3c; FONT-FAMILY: Tahoma; text-decoration:none
-
-}
-
-.bodytext31 {FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3b3b3c; FONT-FAMILY: Tahoma; text-decoration:none
-
-}
-
-.bodytext311 {FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3b3b3c; FONT-FAMILY: Tahoma; text-decoration:none
-
-}
-
--->
-
-.bal
-
-{
-
-border-style:none;
-
-background:none;
-
-text-align:right;
-
-}
-
-.bali
-
-{
-
-text-align:right;
-
-}
-
-</style>
 
 </head>
 
@@ -224,37 +185,6 @@ text-align:right;
 
 <script src="js/datetimepicker_css.js"></script>
 
-<script language="javascript">
-
-function showsub(subtypeano)
-
-{
-
-if(document.getElementById(subtypeano) != null)
-
-{
-
-if(document.getElementById(subtypeano).style.display == 'none')
-
-{
-
-document.getElementById(subtypeano).style.display = '';
-
-}
-
-else
-
-{
-
-document.getElementById(subtypeano).style.display = 'none';
-
-}
-
-}
-
-}
-
-</script>
 
 
 
@@ -286,71 +216,121 @@ document.getElementById(subtypeano).style.display = 'none';
         <span>Revenue Report Summary</span>
     </nav>
 
-    <!-- Main Container -->
-    <div class="main-container">
+    <!-- Floating Menu Toggle -->
+    <div id="menuToggle" class="floating-menu-toggle">
+        <i class="fas fa-bars"></i>
+    </div>
 
-<table width="101%" border="0" cellspacing="0" cellpadding="2">
+    <!-- Main Container with Sidebar -->
+    <div class="main-container-with-sidebar">
+        <!-- Left Sidebar -->
+        <aside id="leftSidebar" class="left-sidebar">
+            <div class="sidebar-header">
+                <h3>Quick Navigation</h3>
+                <button id="sidebarToggle" class="sidebar-toggle">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <ul class="nav-list">
+                    <li class="nav-item">
+                        <a href="mainmenu1.php" class="nav-link">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="cashradiologyrefund.php" class="nav-link">
+                            <i class="fas fa-x-ray"></i>
+                            <span>Cash Radiology Refund</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="cashrefundapprovallist.php" class="nav-link">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Refund Approval List</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="chequescollected.php" class="nav-link">
+                            <i class="fas fa-money-check"></i>
+                            <span>Cheques Collected</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="claimtxnidedit.php" class="nav-link">
+                            <i class="fas fa-edit"></i>
+                            <span>Claim Transaction Edit</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="payrollprocess1.php" class="nav-link">
+                            <i class="fas fa-money-bill-wave"></i>
+                            <span>Payroll Process</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="stockreportbyitem3.php" class="nav-link">
+                            <i class="fas fa-boxes"></i>
+                            <span>Stock Report by Item</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="paymentmodecollectionsummary.php" class="nav-link">
+                            <i class="fas fa-credit-card"></i>
+                            <span>Payment Mode Collection Summary</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="paymentmodecollectionbyuser.php" class="nav-link">
+                            <i class="fas fa-users"></i>
+                            <span>Payment Mode Collection by User</span>
+                        </a>
+                    </li>
+                    <li class="nav-item active">
+                        <a href="revenuereport_summary.php" class="nav-link">
+                            <i class="fas fa-chart-line"></i>
+                            <span>Revenue Report Summary</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
 
-  <tr>
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Alert Container -->
+            <div id="alertContainer">
+                <?php include("includes/alertmessages1.php"); ?>
+            </div>
 
-    <td colspan="10" bgcolor="#ecf0f5"><?php
-include("includes/alertmessages1.php");
-?></td>
+            <!-- Page Header -->
+            <div class="page-header">
+                <div class="page-header-content">
+                    <h2>Revenue Report Summary</h2>
+                    <p>Comprehensive revenue analysis by payment type and account with detailed breakdowns.</p>
+                </div>
+                <div class="page-header-actions">
+                    <button type="button" class="btn btn-secondary" onclick="refreshPage()">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                    <button type="button" class="btn btn-outline" onclick="exportToExcel()">
+                        <i class="fas fa-download"></i> Export
+                    </button>
+                </div>
+            </div>
 
-  </tr>
+            <!-- Revenue Summary Section -->
+            <div class="revenue-summary-section">
+                <div class="revenue-summary-header">
+                    <div class="revenue-summary-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div class="revenue-summary-title">Revenue Summary Report</div>
+                </div>
 
-  <tr>
-
-    <td colspan="10" bgcolor="#ecf0f5"><?php
-include("includes/title1.php");
-?></td>
-
-  </tr>
-
-  <tr>
-
-    <td colspan="10" bgcolor="#ecf0f5"><?php
-include("includes/menu1.php");
-?></td>
-
-  </tr>
-
-  <tr>
-
-    <td colspan="10">&nbsp;</td>
-
-  </tr>
-
-  <tr>
-
-    <td width="1%">&nbsp;</td>
-
-    <td width="2%" valign="top"><?php
-?>
-
-      &nbsp;</td>
-
-    <td width="97%" valign="top"><table width="116%" border="0" cellspacing="0" cellpadding="0">
-
-      <tr>
-
-        <td width="860">
-
-        
-
-        
-
-              <form name="cbform1" method="post" action="" >
-
-        <table width="800" border="0" align="left" cellpadding="4" cellspacing="0" bordercolor="#666666" id="AutoNumber3" style="border-collapse: collapse">
-
-          <tbody>
-
-            <tr bgcolor="#011E6A">
-
-              <td colspan="4" bgcolor="#ecf0f5" class="bodytext3"><strong>Revenue Summary Report</strong></td>
-
-              </tr>
+                <form name="cbform1" method="post" action="" class="search-form">
 
             <!--<tr>
 
@@ -364,63 +344,36 @@ include("includes/menu1.php");
 
               </tr>-->
 
-              <tr>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="type" class="form-label">Patient Type</label>
+                            <select name="type" id="type" class="form-select">
+                                <option value="">All Types</option>
+                                <?php
+                                $query51 = "select * from master_paymenttype where recordstatus <> 'deleted' and paymenttype <> 'cash'";
+                                $exec51 = mysqli_query($GLOBALS["___mysqli_ston"], $query51) or die(mysqli_error($GLOBALS["___mysqli_ston"]));
+                                while ($res51 = mysqli_fetch_array($exec51)) {
+                                    $paymenttype = $res51['paymenttype'];
+                                    $manum = $res51['auto_number'];
+                                ?>
+                                <option value="<?php echo htmlspecialchars($manum); ?>" <?php if ($manum == $type) { echo "selected"; } ?>><?php echo htmlspecialchars($paymenttype); ?></option>
+                                <?php
+                                }
+                                ?>
+                            </select>
+                        </div>
+                    </div>
 
-              <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">Patient Type </td>
-
-              <td width="82%" colspan="3" align="left" valign="top"  bgcolor="#FFFFFF"><span class="bodytext3">
-
-              <select name="type" id="type">
-
-              <option value="">All Types</option>
-
-              <?php
-$query51 = "select * from master_paymenttype where recordstatus <> 'deleted' and paymenttype <> 'cash'";
-$exec51 = mysqli_query($GLOBALS["___mysqli_ston"], $query51) or die(mysqli_error($GLOBALS["___mysqli_ston"]));
-while ($res51 = mysqli_fetch_array($exec51)) {
-    $paymenttype = $res51['paymenttype'];
-    $manum       = $res51['auto_number'];
-?>
-
-              <option value="<?php
-    echo $manum;
-?>" <?php
-    if ($manum == $type) {
-        echo "selected";
-    }
-?>><?php
-    echo $paymenttype;
-?></option>
-
-              <?php
-}
-?>
-
-              </select>
-
-              </span></td>
-
-           </tr>
-
-               <tr>
-
-              <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">Search Subtype </td>
-
-              <td width="82%" colspan="3" align="left" valign="top"  bgcolor="#FFFFFF"><span class="bodytext3">
-
-              <input name="searchsuppliername1" type="text" id="searchsuppliername1" value="<?php
-echo $searchsuppliername1;
-?>" size="50" autocomplete="off">
-
-              <input name="searchsuppliername1hiddentextbox" id="searchsuppliername1hiddentextbox" type="hidden" value="">
-
-              <input name="searchsubtypeanum1" id="searchsubtypeanum1" value="<?php
-echo $searchsubtypeanum1;
-?>" type="hidden">
-
-              </span></td>
-
-           </tr>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="searchsuppliername1" class="form-label">Search Subtype</label>
+                            <div class="subtype-search-input">
+                                <input name="searchsuppliername1" type="text" id="searchsuppliername1" value="<?php echo htmlspecialchars($searchsuppliername1); ?>" class="form-input" autocomplete="off" placeholder="Type to search subtypes...">
+                                <input name="searchsuppliername1hiddentextbox" id="searchsuppliername1hiddentextbox" type="hidden" value="">
+                                <input name="searchsubtypeanum1" id="searchsubtypeanum1" value="<?php echo htmlspecialchars($searchsubtypeanum1); ?>" type="hidden">
+                            </div>
+                        </div>
+                    </div>
 
         
 
@@ -428,73 +381,57 @@ echo $searchsubtypeanum1;
 
           
 
-              <tr>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="ADate1" class="form-label">Date From</label>
+                            <div class="date-input-group">
+                                <input name="ADate1" id="ADate1" value="<?php echo htmlspecialchars($paymentreceiveddatefrom); ?>" class="form-input" readonly onKeyDown="return disableEnterKey()" />
+                                <img src="images2/cal.gif" onClick="javascript:NewCssCal('ADate1')" class="date-picker-icon" style="cursor:pointer"/>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="ADate2" class="form-label">Date To</label>
+                            <div class="date-input-group">
+                                <input name="ADate2" id="ADate2" value="<?php echo htmlspecialchars($paymentreceiveddateto); ?>" class="form-input" readonly onKeyDown="return disableEnterKey()" />
+                                <img src="images2/cal.gif" onClick="javascript:NewCssCal('ADate2')" class="date-picker-icon" style="cursor:pointer"/>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <input type="hidden" name="cbfrmflag1" value="cbfrmflag1">
+                    
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-search"></i> Search
+                        </button>
+                        <button type="reset" class="btn btn-outline">
+                            <i class="fas fa-undo"></i> Reset
+                        </button>
+                    </div>
+                </form>
+            </div>
 
-                      <td class="bodytext31" valign="center"  align="left" 
+            <!-- Results Section -->
+            <div class="results-section">
+                <div class="results-header">
+                    <div class="results-title">Revenue Report Results</div>
+                    <div class="results-actions">
+                        <button type="button" class="btn btn-outline" onclick="printReport()">
+                            <i class="fas fa-print"></i> Print
+                        </button>
+                    </div>
+                </div>
 
-                bgcolor="#FFFFFF"> Date From </td>
-
-                    <td width="30%" align="left" valign="center"  bgcolor="#FFFFFF" class="bodytext31"><input name="ADate1" id="ADate1" style="border: 1px solid #001E6A" value="<?php
-echo $paymentreceiveddatefrom;
-?>"  size="10"  readonly="readonly" onKeyDown="return disableEnterKey()" />
-
-                          <img src="images2/cal.gif" onClick="javascript:NewCssCal('ADate1')" style="cursor:pointer"/> </td>
-
-                      <td width="16%" align="left" valign="center"  bgcolor="#FFFFFF" class="bodytext31"> Date To </td>
-
-                      <td width="33%" align="left" valign="center"  bgcolor="#FFFFFF"><span class="bodytext31">
-
-                        <input name="ADate2" id="ADate2" value="<?php
-echo $paymentreceiveddateto;
-?>"  size="10"  readonly="readonly" onKeyDown="return disableEnterKey()" />
-
-                        <img src="images2/cal.gif" onClick="javascript:NewCssCal('ADate2')" style="cursor:pointer"/> </span></td>
-
-                  </tr>    
-
-            <tr>
-
-              <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3"></td>
-
-              <td colspan="3" align="left" valign="top"  bgcolor="#FFFFFF">
-
-              <input type="hidden" name="cbfrmflag1" value="cbfrmflag1">
-
-                  <input type="submit" value="Search" name="Submit" />
-
-                  <input name="resetbutton" type="reset" id="resetbutton" value="Reset" /></td>
-
-            </tr>
-
-          </tbody>
-
-        </table>
-
-        </form>        </td>
-
-      </tr>
-
-      <tr>
-
-        <td>&nbsp;</td>
-
-      </tr>
-
-       <tr>
-
-        <td><table id="AutoNumber3" style="BORDER-COLLAPSE: collapse" 
-
-            bordercolor="#666666" cellspacing="0" cellpadding="4" width="700" 
-
-            align="left" border="0">
-
-          <tbody>
-
-            <tr>
-
-              <td width="7%" bgcolor="#ecf0f5" class="bodytext31">&nbsp;</td>
-
-              <td colspan="2" bgcolor="#ecf0f5" class="bodytext31"><span class="bodytext311">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>No.</th>
+                            <th>Account</th>
+                            <th>Total Revenue</th>
+                        </tr>
+                    </thead>
+                    <tbody>
 
               <?php
 if (isset($_REQUEST["cbfrmflag1"])) {

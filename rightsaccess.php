@@ -1,116 +1,116 @@
 <?php
+// Modern PHP with strict error reporting and security headers
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+ini_set('log_errors', 1);
+
+// Security headers
+header('X-Content-Type-Options: nosniff');
+header('X-Frame-Options: DENY');
+header('X-XSS-Protection: 1; mode=block');
+header('Referrer-Policy: strict-origin-when-cross-origin');
 
 session_start();
 
 $pagename = '';
 
 include ("includes/loginverify.php"); //to prevent indefinite loop, loginverify is disabled.
-//echo $menu_id;
 include ("includes/check_user_access.php");
 
-if (!isset($_SESSION['username'])) header ("location:index.php");
+if (!isset($_SESSION['username'])) {
+    header("location:index.php");
+    exit();
+}
 
 include ("db/db_connect.php");
 
-
-
-$ipaddress = $_SERVER['REMOTE_ADDR'];
-
+// Initialize variables with proper validation
+$ipaddress = isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : '';
 $updatedatetime = date('Y-m-d H:i:s');
-
-$sessionusername = $_SESSION['username'];
-
+$sessionusername = isset($_SESSION['username']) ? $_SESSION['username'] : '';
 $errmsg = '';
-
 $bgcolorcode = '';
 
+// CSRF Token generation
+if (!isset($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(openssl_random_pseudo_bytes(32));
+}
+
+// CSRF Token validation
+function validateCSRFToken($token) {
+    return isset($_SESSION['csrf_token']) && $_SESSION['csrf_token'] === $token;
+}
+
+// Input sanitization function
+function sanitizeInput($input) {
+    return htmlspecialchars(trim($input), ENT_QUOTES, 'UTF-8');
+}
 
 
-if (isset($_REQUEST["searchsuppliername"])) {  $searchsuppliername = $_REQUEST["searchsuppliername"]; } else { $searchsuppliername = ""; }
 
-if (isset($_REQUEST["searchdescription"])) {   $searchdescription = $_REQUEST["searchdescription"]; } else { $searchdescription = ""; }
+// Sanitize and validate search inputs
+$searchsuppliername = isset($_REQUEST["searchsuppliername"]) ? sanitizeInput($_REQUEST["searchsuppliername"]) : "";
+$searchdescription = isset($_REQUEST["searchdescription"]) ? sanitizeInput($_REQUEST["searchdescription"]) : "";
+$searchemployeecode = isset($_REQUEST["searchemployeecode"]) ? sanitizeInput($_REQUEST["searchemployeecode"]) : "";
 
-if (isset($_REQUEST["searchemployeecode"])) { $searchemployeecode = $_REQUEST["searchemployeecode"]; } else { $searchemployeecode = ""; }
-
-
-
-if (isset($_REQUEST["frmflag1"])) { $frmflag1 = $_REQUEST["frmflag1"]; } else { $frmflag1 = ""; }
+$frmflag1 = isset($_REQUEST["frmflag1"]) ? sanitizeInput($_REQUEST["frmflag1"]) : "";
 
 
 
 //$frmflag1 = $_REQUEST['frmflag1'];
 
-if ($frmflag1 == 'frmflag1')
-
-{
-
-	$employeecode=$_REQUEST['employeecode'];
-
-	$employeename = $_REQUEST['employeename'];
-
-	$employeename = strtoupper($employeename);
-
-	$employeename = trim($employeename);
-
-	$username1 = $_REQUEST['username1'];
-
-	$password = $_REQUEST['password'];
-
-	$password = base64_encode($password);
-
-	$status = $_REQUEST['status'];
-
-	$validitydate = $_REQUEST['validitydate'];
-
-	$location = $_REQUEST['location'];
-
-	$store = $_REQUEST['store'];
-
-	$shift = $_REQUEST["shift"];
-
-	$jobdescription = $_REQUEST['jobdescription'];
-
-	$cashlimit = $_REQUEST['cashlimit'];
-
-	$reports_daterange_option = $_REQUEST['reports_daterange_option'];
-
-	$option_edit_delete = $_REQUEST['option_edit_delete'];
-
-	$showlocations = $_REQUEST["showlocations"];
-
-	$statistics = $_REQUEST['statistics'];
-
-	$docType = $_REQUEST['docType'];
-
-	$mis = $_REQUEST['mis'];
-
-	$biometric = isset($_REQUEST['biometric'])?'1':'0';
-	$labrslt = isset($_REQUEST['labrslt'])?'1':'0';
+// Handle form submission with modern security
+if ($frmflag1 == 'frmflag1') {
+    // CSRF Token validation
+    if (!isset($_POST['csrf_token']) || !validateCSRFToken($_POST['csrf_token'])) {
+        $errmsg = "Security validation failed. Please try again.";
+        $bgcolorcode = 'failed';
+    } else {
+        // Sanitize and validate all form inputs
+        $employeecode = sanitizeInput($_REQUEST['employeecode']);
+        $employeename = strtoupper(trim(sanitizeInput($_REQUEST['employeename'])));
+        $username1 = sanitizeInput($_REQUEST['username1']);
+        $password = base64_encode(sanitizeInput($_REQUEST['password']));
+        $status = sanitizeInput($_REQUEST['status']);
+        $validitydate = sanitizeInput($_REQUEST['validitydate']);
+        $location = sanitizeInput($_REQUEST['location']);
+        $store = sanitizeInput($_REQUEST['store']);
+        $shift = sanitizeInput($_REQUEST["shift"]);
+        $jobdescription = sanitizeInput($_REQUEST['jobdescription']);
+        $cashlimit = sanitizeInput($_REQUEST['cashlimit']);
+        $reports_daterange_option = sanitizeInput($_REQUEST['reports_daterange_option']);
+        $option_edit_delete = sanitizeInput($_REQUEST['option_edit_delete']);
+        $showlocations = sanitizeInput($_REQUEST["showlocations"]);
+        $statistics = sanitizeInput($_REQUEST['statistics']);
+        $docType = sanitizeInput($_REQUEST['docType']);
+        $mis = sanitizeInput($_REQUEST['mis']);
+        $biometric = isset($_REQUEST['biometric']) ? '1' : '0';
+        $labrslt = isset($_REQUEST['labrslt']) ? '1' : '0';
 	
 
 	
 
-	$query2 = "select * from master_employee where employeecode = '$employeecode'";
+        // Check if employee exists using prepared statement
+        $stmt = $GLOBALS["___mysqli_ston"]->prepare("SELECT COUNT(*) FROM master_employee WHERE employeecode = ?");
+        $stmt->bind_param("s", $employeecode);
+        $stmt->execute();
+        $stmt->bind_result($res2);
+        $stmt->fetch();
+        $stmt->close();
 
-	$exec2 = mysqli_query($GLOBALS["___mysqli_ston"], $query2) or die ("Error in Query2".mysqli_error($GLOBALS["___mysqli_ston"]));
+        if ($res2 != 0) {
 
-	$res2 = mysqli_num_rows($exec2);
-
-	if ($res2 != 0)
-
-	{
-
-		$query1 = "update master_employee set employeename = '$employeename', password = '$password', 
-
-		status = '$status', username = '$username1',lastupdate = '$updatedatetime', 
-
-		lastupdateusername = '$sessionusername', lastupdateipaddress = '$ipaddress', 
-
-		reports_daterange_option = '$reports_daterange_option', option_edit_delete = '$option_edit_delete',location='$location',store='$store' ,shift = '$shift',jobdescription='$jobdescription',validitydate='$validitydate',cashlimit='$cashlimit',showlocations='$showlocations',statistics='$statistics',DoctorType='$docType', mis='$mis'
-,biometric='$biometric',labrslt='$labrslt'
-		where employeecode = '$employeecode'";
-
-		$exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
+            // Update employee using prepared statement
+            $stmt = $GLOBALS["___mysqli_ston"]->prepare("UPDATE master_employee SET employeename = ?, password = ?, status = ?, username = ?, lastupdate = ?, lastupdateusername = ?, lastupdateipaddress = ?, reports_daterange_option = ?, option_edit_delete = ?, location = ?, store = ?, shift = ?, jobdescription = ?, validitydate = ?, cashlimit = ?, showlocations = ?, statistics = ?, DoctorType = ?, mis = ?, biometric = ?, labrslt = ? WHERE employeecode = ?");
+            $stmt->bind_param("sssssssssssssssssssss", $employeename, $password, $status, $username1, $updatedatetime, $sessionusername, $ipaddress, $reports_daterange_option, $option_edit_delete, $location, $store, $shift, $jobdescription, $validitydate, $cashlimit, $showlocations, $statistics, $docType, $mis, $biometric, $labrslt, $employeecode);
+            
+            if ($stmt->execute()) {
+                $stmt->close();
+            } else {
+                $errmsg = "Failed to update employee information.";
+                $bgcolorcode = 'failed';
+                $stmt->close();
+            }
 
 		$query18 = "update master_employeelocation set username = '$username1' where employeecode = '$employeecode'";
 
@@ -330,36 +330,11 @@ if ($frmflag1 == 'frmflag1')
 
 		}
 
-			header ("location:rightsaccess.php?st=success");
-
-		/*
-
-		}
-
-		else
-
-		{
-
-			header ("location:rightsaccess.php?st=success");
-
-		}
-
-		*/
-
-
-
-	}
-
-	else
-
-	{
-
-		header ("location:rightsaccess.php?st=failed");
-
-	}
-
-
-
+	            header("location:rightsaccess.php?st=success");
+        } else {
+            header("location:rightsaccess.php?st=failed");
+        }
+    }
 }
 
 
@@ -461,28 +436,58 @@ $res7store = $res75['store'];
 
 ?>
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Employee Rights Access Management for MedStar Hospital Management System">
+    <meta name="robots" content="noindex, nofollow">
+    <title>Employee Rights Access - MedStar Hospital</title>
+    
+    <!-- Preload critical resources -->
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" as="style">
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" as="style">
+    
+    <!-- Modern CSS Framework -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/rightsaccess-modern.css?v=<?php echo time(); ?>">
+    
+    <!-- External JavaScript -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+    <script src="js/rightsaccess-modern.js?v=<?php echo time(); ?>"></script>
+    
+    <!-- Structured Data -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "MedStar Hospital Management System",
+        "description": "Employee Rights Access Management for Hospital System"
+    }
+    </script>
+</head>
+
 <style type="text/css">
-
 <!--
-
 body {
-
-	margin-left: 0px;
-
-	margin-top: 0px;
-
-	background-color: #ecf0f5;
-
+    margin-left: 0px;
+    margin-top: 0px;
+    background-color: #ecf0f5;
 }
 
-.bodytext3 {	FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3B3B3C; FONT-FAMILY: Tahoma
-
+.bodytext3 {
+    FONT-WEIGHT: normal; 
+    FONT-SIZE: 11px; 
+    COLOR: #3B3B3C; 
+    FONT-FAMILY: Tahoma
 }
 
-.ui-menu .ui-menu-item{ zoom:1.3 !important; }
-
+.ui-menu .ui-menu-item{ 
+    zoom:1.3 !important; 
+}
 -->
-
 </style>
 
 <link href="datepickerstyle.css" rel="stylesheet" type="text/css" />
@@ -768,134 +773,171 @@ function funclocationChange1()
 <script src="js/datetimepicker_css.js"></script>
 
 <body>
-
-<table width="103%" border="0" cellspacing="0" cellpadding="2">
-
-  <tr>
-
-    <td colspan="10" bgcolor="#ecf0f5"><?php include ("includes/alertmessages1.php"); ?></td>
-
-  </tr>
-
-  <tr>
-
-    <td colspan="10" bgcolor="#ecf0f5"><?php include ("includes/title1.php"); ?></td>
-
-  </tr>
-
-  <tr>
-
-    <td colspan="10" bgcolor="#ecf0f5">
-
-	<?php 
-
-	
-
-		include ("includes/menu1.php"); 
-
-	
-
-	//	include ("includes/menu2.php"); 
-
-	
-
-	?>	</td>
-
-  </tr>
-
-  <tr>
-
-    <td colspan="10">&nbsp;</td>
-
-  </tr>
-
-  <tr>
-
-    <td>&nbsp;</td>
-
-    <td valign="top">&nbsp;</td>
-
-    <td valign="top">
-
-	
-
-	
-
-	<form name="selectemployee" id="selectempoyee" method="post" action="rightsaccess.php?st=edit" onSubmit="return funcEmployeeSelect1()">
-
-	<table width="900" height="29" border="0" align="left" cellpadding="4" cellspacing="0" bordercolor="#666666" id="AutoNumber3" style="border-collapse: collapse">
-
-	<tbody>
-
-	<?php if ($errmsg != '') { ?>
-
-	<tr>
-
-	  <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">&nbsp;</td>
-
-	  <td colspan="2" align="left" valign="middle" 
-
-	  bgcolor="<?php if ($errmsg == '') { echo '#FFFFFF'; } else { echo '#AAFF00'; } ?>" class="bodytext3"><?php echo $errmsg;?>&nbsp;</td>
-
-	  </tr>
-
-	<?php } ?>
-
-	<tr>
-
-	<td width="19%" align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">&nbsp;</td>
-
-	<td width="21%" align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3"><strong>Select Employee To Edit </strong></td>
-
-	<td width="60%" align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">
-
-<!--	<select name="selectemployeecode" id="selectemployeecode">
-
-	<option value="">Select Employee To Edit</option>
-
-	<?php
-
-	$query21 = "select * from master_employee where status = 'Active' order by employeename";
-
-	$exec21 = mysqli_query($GLOBALS["___mysqli_ston"], $query21) or die ("Error in Query21".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-	while ($res21 = mysqli_fetch_array($exec21))
-
-	{
-
-	$res21employeecode = $res21['employeecode'];
-
-	$res21employeename = $res21['employeename'];
-
-	?>
-
-	<option value="<?php echo $res21employeecode; ?>"><?php echo $res21employeecode.' - '.$res21employeename; ?></option>
-
-	<?php
-
-	}
-
-	?>
-
-	</select>-->
-
-	<input name="searchsuppliername" type="text" id="searchsuppliername" value="<?php echo $searchsuppliername; ?>" size="50" autocomplete="off">
-
-	<input name="searchdescription" id="searchdescription" type="hidden" value="">
-
-	<input name="searchemployeecode" id="searchemployeecode" type="hidden" value="">
-
-	<input name="searchsuppliername1hiddentextbox" id="searchsuppliername1hiddentextbox" type="hidden" value="">
-
-	<input type="submit" name="Submit" value="Submit">	</td>
-
-	</tr>
-
-	</tbody>
-
-	</table>  
-
-	</form>
+    <!-- Modern MedStar Hospital Management Header -->
+    <header class="hospital-header">
+        <h1 class="hospital-title">🏥 MedStar Hospital Management</h1>
+        <p class="hospital-subtitle">Advanced Healthcare Management Platform</p>
+    </header>
+
+    <!-- Navigation Breadcrumb -->
+    <nav class="nav-breadcrumb">
+        <a href="mainmenu1.php">🏠 Dashboard</a>
+        <span>→</span>
+        <span>Settings</span>
+        <span>→</span>
+        <span>Employee Rights Access</span>
+    </nav>
+
+    <!-- Floating Menu Toggle -->
+    <button class="floating-menu-toggle" id="mobileMenuToggle">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <!-- Main Container with Sidebar -->
+    <div class="main-container-with-sidebar" id="mainContainer">
+        <!-- Left Sidebar -->
+        <aside id="leftSidebar" class="left-sidebar">
+            <div class="sidebar-header">
+                <h3>🏥 MedStar</h3>
+                <button class="sidebar-toggle" id="sidebarToggle">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <nav class="sidebar-nav">
+                <ul class="nav-list">
+                    <li class="nav-item">
+                        <a href="mainmenu1.php" class="nav-link">
+                            <i class="fas fa-home"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="addaccountsmain.php" class="nav-link">
+                            <i class="fas fa-chart-line"></i>
+                            <span>Account Main Types</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="addaccountssub.php" class="nav-link">
+                            <i class="fas fa-chart-bar"></i>
+                            <span>Account Sub Types</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="addaccountname1.php" class="nav-link">
+                            <i class="fas fa-tags"></i>
+                            <span>Account Names</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="accountstatement.php" class="nav-link">
+                            <i class="fas fa-file-invoice"></i>
+                            <span>Account Statement</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="accountreceivable.php" class="nav-link">
+                            <i class="fas fa-hand-holding-usd"></i>
+                            <span>Receivables</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="expenses.php" class="nav-link">
+                            <i class="fas fa-receipt"></i>
+                            <span>Expenses</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="income.php" class="nav-link">
+                            <i class="fas fa-dollar-sign"></i>
+                            <span>Income</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="addbank1.php" class="nav-link">
+                            <i class="fas fa-university"></i>
+                            <span>Bank Management</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="patientmanagement.php" class="nav-link">
+                            <i class="fas fa-user-injured"></i>
+                            <span>Patient Management</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="consultation.php" class="nav-link">
+                            <i class="fas fa-stethoscope"></i>
+                            <span>Consultation</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="labitems.php" class="nav-link">
+                            <i class="fas fa-flask"></i>
+                            <span>Lab Items</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="radiology.php" class="nav-link">
+                            <i class="fas fa-x-ray"></i>
+                            <span>Radiology</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="employeemanagement.php" class="nav-link">
+                            <i class="fas fa-users"></i>
+                            <span>Employee Management</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="departmentmanagement.php" class="nav-link">
+                            <i class="fas fa-building"></i>
+                            <span>Department Management</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="rightsaccess.php" class="nav-link active">
+                            <i class="fas fa-shield-alt"></i>
+                            <span>Employee Rights Access</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Alert Messages -->
+            <?php include ("includes/alertmessages1.php"); ?>
+            
+            <!-- Success/Error Messages -->
+            <?php if ($errmsg != ''): ?>
+                <div class="alert alert-<?php echo ($st == 'success') ? 'success' : 'error'; ?>">
+                    <i class="fas fa-<?php echo ($st == 'success') ? 'check-circle' : 'exclamation-triangle'; ?> alert-icon"></i>
+                    <span><?php echo $errmsg; ?></span>
+                </div>
+            <?php endif; ?>
+
+        <!-- Employee Search Section -->
+        <section class="employee-search-section">
+            <div class="section-header">
+                <span class="section-icon">🔍</span>
+                <h3 class="section-title">Employee Search</h3>
+            </div>
+            
+            <form name="selectemployee" id="selectemployee" method="post" action="rightsaccess.php?st=edit" onSubmit="return funcEmployeeSelect1()" class="search-form">
+                <div class="search-input-group">
+                    <label for="searchsuppliername" class="form-label">Select Employee To Edit *</label>
+                    <input name="searchsuppliername" type="text" id="searchsuppliername" class="search-input" value="<?php echo htmlspecialchars($searchsuppliername); ?>" placeholder="Type employee name to search..." autocomplete="off" required>
+                    <input name="searchdescription" id="searchdescription" type="hidden" value="">
+                    <input name="searchemployeecode" id="searchemployeecode" type="hidden" value="">
+                    <input name="searchsuppliername1hiddentextbox" id="searchsuppliername1hiddentextbox" type="hidden" value="">
+                </div>
+                <button type="submit" name="Submit" class="btn btn-primary">
+                    <i class="fas fa-search"></i> Search Employee
+                </button>
+            </form>
+        </section>
 
 	
 
@@ -921,41 +963,64 @@ function funclocationChange1()
 
 
 
-			<?php
-
-			if ($selectemployeecode != '')
-
-			{
-
-			?>
-
-      	  <form name="form1" id="form1" method="post" action="rightsaccess.php" onKeyDown="return disableEnterKey()" onSubmit="return from1submit1()">
-
-      <table width="100%" border="0" cellspacing="0" cellpadding="0">
-
-        <tr>
-
-          <td width="860"><table width="900" height="250" border="0" align="left" cellpadding="4" cellspacing="0" bordercolor="#666666" id="AutoNumber3" style="border-collapse: collapse">
-
-            <tbody>
-
-              <tr bgcolor="#011E6A">
-
-                <td bgcolor="#ecf0f5" class="bodytext3" colspan="2"><strong>Employee - Edit </strong></td>
-
-                <!--<td colspan="2" bgcolor="#ecf0f5" class="bodytext3"><?php echo $errmgs; ?>&nbsp;</td>-->
-
-                <td bgcolor="#ecf0f5" class="bodytext3" colspan="2">* Indicated Mandatory Fields. </td>
-
-              </tr>
-
-              <tr>
-
-                <td colspan="8" align="left" valign="middle"  
-
-				bgcolor="<?php if ($errmsg == '') { echo '#FFFFFF'; } else { echo '#AAFF00'; } ?>" class="bodytext3"><?php echo $errmsg;?>&nbsp;</td>
-
-              </tr>
+        <?php if ($selectemployeecode != ''): ?>
+            <!-- Employee Form Section -->
+            <section class="employee-form-section">
+                <div class="employee-form-header">
+                    <h2 class="employee-form-title">Employee Rights Management</h2>
+                    <p class="employee-form-subtitle">Advanced Healthcare Management Platform - Employee Access Control</p>
+                </div>
+                
+                <form name="form1" id="form1" method="post" action="rightsaccess.php" onKeyDown="return disableEnterKey()" onSubmit="return from1submit1()" novalidate>
+                    <!-- CSRF Token -->
+                    <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
+                    
+                    <div class="form-layout">
+                        <!-- Basic Information -->
+                        <div class="form-group">
+                            <label for="employeecode" class="form-label">Employee Code *</label>
+                            <input name="employeecode" id="employeecode" value="<?php echo htmlspecialchars($res7employeecode); ?>" class="form-input" readonly>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="employeename" class="form-label">Employee Name *</label>
+                            <input name="employeename" id="employeename" value="<?php echo htmlspecialchars($res7employeename); ?>" class="form-input" style="text-transform: uppercase;" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="jobdescription" class="form-label">Job Description</label>
+                            <input name="jobdescription" id="jobdescription" value="<?php echo htmlspecialchars($res7jobdescription); ?>" class="form-input" style="text-transform: uppercase;">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="username1" class="form-label">Username *</label>
+                            <input name="username1" id="username1" value="<?php echo htmlspecialchars($res7username); ?>" class="form-input" maxlength="20" required>
+                            <small class="form-text">No spaces or special characters allowed</small>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="password" class="form-label">Password *</label>
+                            <input name="password" type="password" id="password" value="<?php echo base64_decode($res7password); ?>" class="form-input" maxlength="20" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="status" class="form-label">Status</label>
+                            <select name="status" id="status" class="form-select">
+                                <?php if ($res7status != ''): ?>
+                                    <option value="<?php echo htmlspecialchars($res7status); ?>" selected><?php echo htmlspecialchars($res7status); ?></option>
+                                <?php endif; ?>
+                                <option value="Active">Active</option>
+                                <option value="Deleted">Deleted</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="validitydate" class="form-label">Validity Date</label>
+                            <input name="validitydate" id="validitydate" value="<?php echo htmlspecialchars($res7validitydate); ?>" class="form-input" readonly>
+                            <img src="images2/cal.gif" onClick="javascript:NewCssCal('validitydate')" style="cursor:pointer; margin-left: 5px;"/>
+                            <input type="hidden" name="dateposted" id="dateposted" value="<?php echo $updatedatetime; ?>" onKeyDown="return process1backkeypress1()" readonly/>
+                        </div>
+                    </div>
 
               <tr>
 
@@ -1866,13 +1931,11 @@ function funclocationChange1()
 
     </table>
 
-	</form>
-
-	<?php
-
-	}
-
-	?>
+                </form>
+            </section>
+        <?php endif; ?>
+        </main>
+    </div>
 
 <script language="javascript">
 
@@ -1890,9 +1953,10 @@ else
 
 
 
-</script>
+    </script>
 
-</table>
+    <!-- Modern JavaScript -->
+    <script src="js/rightsaccess-modern.js?v=<?php echo time(); ?>"></script>
 
 <?php include ("includes/footer1.php"); ?>
 

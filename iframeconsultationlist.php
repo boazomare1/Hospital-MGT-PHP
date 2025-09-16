@@ -95,37 +95,6 @@ if(isset($_POST['visitcode'])){$searchvisitcode = $_POST['visitcode'];}else{$sea
 
 ?>
 
-<style type="text/css">
-
-<!--
-
-body {
-
-	margin-left: 0px;
-
-	margin-top: 0px;
-
-	background-color: #ecf0f5;
-
-}
-
-.bodytext3 {	FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3B3B3C; FONT-FAMILY: Tahoma
-
-}
-
-.number1
-
-{
-
-text-align:right;
-
-padding-left:700px;
-
-}
-
--->
-
-</style>
 
 <link href="css/datepickerstyle.css" rel="stylesheet" type="text/css" />
 
@@ -133,21 +102,6 @@ padding-left:700px;
 
 <script type="text/javascript" src="js/adddate2.js"></script>
 
-<script language="javascript">
-
-
-
-function cbcustomername1()
-
-{
-
-	document.cbform1.submit();
-
-}
-
-
-
-</script>
 
     <!-- External JavaScript -->
     <script type="text/javascript" src="js/autocomplete_customer1.js"></script>
@@ -300,8 +254,128 @@ function disableEnterKey(varPassed)
         <span>Consultation List</span>
     </nav>
 
-    <!-- Main Container -->
-    <div class="main-container">
+    <!-- Floating Menu Toggle -->
+    <div id="menuToggle" class="floating-menu-toggle">
+        <i class="fas fa-bars"></i>
+    </div>
+
+    <!-- Main Container with Sidebar -->
+    <div class="main-container-with-sidebar">
+        <!-- Left Sidebar -->
+        <aside id="leftSidebar" class="left-sidebar">
+            <div class="sidebar-header">
+                <h3>Quick Navigation</h3>
+                <button id="sidebarToggle" class="sidebar-toggle">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <ul class="nav-list">
+                    <li class="nav-item">
+                        <a href="mainmenu1.php" class="nav-link">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="cashradiologyrefund.php" class="nav-link">
+                            <i class="fas fa-x-ray"></i>
+                            <span>Cash Radiology Refund</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="cashrefundapprovallist.php" class="nav-link">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Refund Approval List</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="chequescollected.php" class="nav-link">
+                            <i class="fas fa-money-check"></i>
+                            <span>Cheques Collected</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="claimtxnidedit.php" class="nav-link">
+                            <i class="fas fa-edit"></i>
+                            <span>Claim Transaction Edit</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="payrollprocess1.php" class="nav-link">
+                            <i class="fas fa-money-bill-wave"></i>
+                            <span>Payroll Process</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="stockreportbyitem3.php" class="nav-link">
+                            <i class="fas fa-boxes"></i>
+                            <span>Stock Report by Item</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="paymentmodecollectionsummary.php" class="nav-link">
+                            <i class="fas fa-credit-card"></i>
+                            <span>Payment Mode Collection Summary</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="paymentmodecollectionbyuser.php" class="nav-link">
+                            <i class="fas fa-users"></i>
+                            <span>Payment Mode Collection by User</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="revenuereport_summary.php" class="nav-link">
+                            <i class="fas fa-chart-line"></i>
+                            <span>Revenue Report Summary</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="comparativereport.php" class="nav-link">
+                            <i class="fas fa-balance-scale"></i>
+                            <span>Comparative Report</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="payrollcomponentreport1.php" class="nav-link">
+                            <i class="fas fa-calculator"></i>
+                            <span>Payroll Component Report</span>
+                        </a>
+                    </li>
+                    <li class="nav-item active">
+                        <a href="iframeconsultationlist.php" class="nav-link">
+                            <i class="fas fa-stethoscope"></i>
+                            <span>Consultation List</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Alert Container -->
+            <div id="alertContainer">
+                <?php include("includes/alertmessages1.php"); ?>
+            </div>
+
+            <!-- Page Header -->
+            <div class="page-header">
+                <div class="page-header-content">
+                    <h2>Consultation List</h2>
+                    <p>View and manage patient consultations and published medical information.</p>
+                </div>
+                <div class="page-header-actions">
+                    <button type="button" class="btn btn-secondary" onclick="refreshPage()">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                    <button type="button" class="btn btn-outline" onclick="exportConsultationList()">
+                        <i class="fas fa-download"></i> Export
+                    </button>
+                </div>
+            </div>
 
 
 
@@ -313,35 +387,8 @@ function disableEnterKey(varPassed)
 
 			?>
 
-<table width="103%" border="0" cellspacing="0" cellpadding="2">
-
-  <tr>
-
-    <td colspan="9" bgcolor="#ecf0f5"><?php include ("includes/alertmessages1.php"); ?></td>
-
-  </tr>
-
-  <tr>
-
-    <td colspan="9" bgcolor="#ecf0f5"><?php include ("includes/title1.php"); ?></td>
-
-  </tr>
-
-  <tr>
-
-    <td colspan="9" bgcolor="#ecf0f5"><?php include ("includes/menu1.php"); ?></td>
-
-  </tr>
-
-  <tr>
-
-    <td colspan="9">:&nbsp;&nbsp;</td>
-
-  </tr>
-
-  <tr>
-
-                 <td colspan="2" class="modern-list-container">
+            <!-- Modern List Container -->
+            <div class="modern-list-container">
 
                     <!-- Consultation List Component -->
                     <div class="consultation-list-component">
@@ -354,10 +401,42 @@ function disableEnterKey(varPassed)
                         </div>
                         <div class="list-content" id="consultationListContent">
                             <!-- Consultation list will be loaded here -->
-                            <div class="loading-placeholder">
-                                <i class="fas fa-spinner fa-spin"></i>
-                                <p>Loading consultation list...</p>
+                            <?php
+                            if($res12 > 0) {
+                                $colorloopcount = 0;
+                                while($res12 = mysqli_fetch_array($exec12)) {
+                                    $colorloopcount++;
+                                    $triageanum = $res12['auto_number'];
+                                    $patientname = $res12['patientname'];
+                                    $patientcode = $res12['patientcode'];
+                                    $visitcode = $res12['visitcode'];
+                                    $consultationdate = $res12['consultationdate'];
+                                    $department = $res12['department'];
+                                    $doctor = $res12['doctor'];
+                            ?>
+                            <div class="consultation-item">
+                                <div style="font-weight: bold; color: var(--medstar-primary);"><?php echo htmlspecialchars($triageanum); ?></div>
+                                <div style="margin: 0.5rem 0; font-weight: 600;"><?php echo htmlspecialchars($patientname); ?></div>
+                                <div style="font-size: 0.9rem; color: var(--text-secondary);">
+                                    <div>Patient Code: <?php echo htmlspecialchars($patientcode); ?></div>
+                                    <div>Visit Code: <?php echo htmlspecialchars($visitcode); ?></div>
+                                    <div>Date: <?php echo htmlspecialchars($consultationdate); ?></div>
+                                    <div>Department: <?php echo htmlspecialchars($department); ?></div>
+                                    <div>Doctor: <?php echo htmlspecialchars($doctor); ?></div>
+                                </div>
                             </div>
+                            <?php
+                                }
+                            } else {
+                            ?>
+                            <div class="empty-state">
+                                <i class="fas fa-clipboard-list"></i>
+                                <h4>No Consultations Found</h4>
+                                <p>There are no pending consultations at this time.</p>
+                            </div>
+                            <?php
+                            }
+                            ?>
                         </div>
                     </div>
 
@@ -372,23 +451,16 @@ function disableEnterKey(varPassed)
                         </div>
                         <div class="list-content" id="publishedListContent">
                             <!-- Published list will be loaded here -->
-                            <div class="loading-placeholder">
-                                <i class="fas fa-spinner fa-spin"></i>
-                                <p>Loading published list...</p>
+                            <div class="empty-state">
+                                <i class="fas fa-newspaper"></i>
+                                <h4>No Published Items</h4>
+                                <p>There are no published items at this time.</p>
                             </div>
                         </div>
                     </div>
 
-                  </td>
-
-
-
-			  </tr>
-
-	
-
-  </table>
-
+            </div>
+        </main>
     </div>
 
     <!-- Modern JavaScript -->

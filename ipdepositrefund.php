@@ -112,7 +112,7 @@ include ("autocompletebuild_customeripbilling.php");
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     
     <!-- Modern CSS -->
-    <link rel="stylesheet" href="css/vat-modern.css?v=<?php echo time(); ?>">
+    <link rel="stylesheet" href="css/ipdepositrefund-modern.css?v=<?php echo time(); ?>">
     
     <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -358,8 +358,108 @@ text-align:right;
         <span>IP Deposit Refund</span>
     </nav>
 
-    <!-- Main Container -->
-    <div class="main-container">
+    <!-- Floating Menu Toggle -->
+    <div id="menuToggle" class="floating-menu-toggle">
+        <i class="fas fa-bars"></i>
+    </div>
+
+    <!-- Main Container with Sidebar -->
+    <div class="main-container-with-sidebar">
+        <!-- Left Sidebar -->
+        <aside id="leftSidebar" class="left-sidebar">
+            <div class="sidebar-header">
+                <h3>Quick Navigation</h3>
+                <button id="sidebarToggle" class="sidebar-toggle">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <ul class="nav-list">
+                    <li class="nav-item">
+                        <a href="mainmenu1.php" class="nav-link">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="labitem1master.php" class="nav-link">
+                            <i class="fas fa-flask"></i>
+                            <span>Lab Items</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="openingstockentry_master.php" class="nav-link">
+                            <i class="fas fa-boxes"></i>
+                            <span>Opening Stock</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="addward.php" class="nav-link">
+                            <i class="fas fa-bed"></i>
+                            <span>Wards</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="accountreceivable.php" class="nav-link">
+                            <i class="fas fa-money-bill-wave"></i>
+                            <span>Account Receivable</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="corporateoutstanding.php" class="nav-link">
+                            <i class="fas fa-building"></i>
+                            <span>Corporate Outstanding</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="accountstatement.php" class="nav-link">
+                            <i class="fas fa-file-invoice"></i>
+                            <span>Account Statement</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="accounts_main.php" class="nav-link">
+                            <i class="fas fa-chart-line"></i>
+                            <span>Accounts Main</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="accounts_subtype.php" class="nav-link">
+                            <i class="fas fa-layer-group"></i>
+                            <span>Accounts Sub Type</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="fixedassetacquisition.php" class="nav-link">
+                            <i class="fas fa-tools"></i>
+                            <span>Fixed Asset Acquisition</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="activeinpatientlist.php" class="nav-link">
+                            <i class="fas fa-user-injured"></i>
+                            <span>Active Inpatient List</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="activeusersreport.php" class="nav-link">
+                            <i class="fas fa-users"></i>
+                            <span>Active Users Report</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="ipdepositrefund.php" class="nav-link active">
+                            <i class="fas fa-money-bill-wave"></i>
+                            <span>IP Deposit Refund</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
         <!-- Alert Container -->
         <div id="alertContainer">
             <?php include ("includes/alertmessages1.php"); ?>
@@ -662,16 +762,20 @@ if ($cbfrmflag1 == 'cbfrmflag1')
 		  <?php
 			 }
 		  }
-		  }
            ?>
                     </tbody>
                 </table>
             </form>
         </div>
+        </main>
     </div>
 
     <!-- Modern JavaScript -->
     <script src="js/ipdepositrefund-modern.js?v=<?php echo time(); ?>"></script>
 </body>
 </html>
+<?php
+}
+}
+?>
 

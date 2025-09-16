@@ -77,10 +77,6 @@ if($location!='')
     <script src="js/jquery-ui.min.js"></script>
     <script src="jquery/jquery-1.11.3.min.js"></script>
 </head>
-<style>
-.hideClass
-{display:none;}
-</style>
 
 <script language="javascript">
 
@@ -216,13 +212,6 @@ function validcheck()
 
 }
 </script>
-<style type="text/css">
-<!--
-.bodytext31 {FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3b3b3c; FONT-FAMILY: Tahoma
-}
-
--->
-</style>
 </head>
 
 <body>
@@ -253,74 +242,156 @@ function validcheck()
         <span>Comparative Report</span>
     </nav>
 
-    <!-- Main Container -->
-    <div class="main-container">
-<table width="101%" border="0" cellspacing="0" cellpadding="2">
-  <tr>
-    <td colspan="14" bgcolor="#ecf0f5"><?php include ("includes/alertmessages1.php"); ?></td>
-  </tr>
-  <tr>
-    <td colspan="14" bgcolor="#ecf0f5"><?php include ("includes/title1.php"); ?></td>
-  </tr>
-  <tr>
-    <td colspan="14" bgcolor="#ecf0f5"><?php include ("includes/menu1.php"); ?></td>
-  </tr>
-  <tr>
-    <td colspan="14">&nbsp;</td>
-  </tr>
-  <tr>
-    <td width="2%">&nbsp;</td>
-   
-    <td colspan="5" valign="top">
- <form name="cbform1" method="post" action="comparativereport.php" onSubmit="return validcheck()" >
-          <table width="900" border="0" align="left" cellpadding="4" cellspacing="0" bordercolor="#666666" id="AutoNumber3" style="border-collapse: collapse">
-          <tbody>
-		  <!--<tr bgcolor="red">
-              <td colspan="4" bgcolor="red" class="bodytext3"><strong> PLEASE REFRESH PAGE BEFORE MAKING BILL </strong></td>
-              </tr>-->
-            <tr bgcolor="#011E6A">
-              <td colspan="5" bgcolor="#ecf0f5" class="bodytext3"><strong> Search Ledger Report </strong></td>
-              <td colspan="2" bgcolor="#ecf0f5" class="bodytext3" id="ajaxlocation"><strong> Location </strong>
-             
-                  <?php
-						
-					if ($location!='')
-						{
-						$query12 = "select locationname from master_location where locationcode='$location' order by locationname";
-						$exec12 = mysqli_query($GLOBALS["___mysqli_ston"], $query12) or die ("Error in Query12".mysqli_error($GLOBALS["___mysqli_ston"]));
-						$res12 = mysqli_fetch_array($exec12);
-						
-						echo $res1location = $res12["locationname"];
-						//echo $location;
-						}
-						else
-						{
-						$query1 = "select locationname from login_locationdetails where username='$username' and docno='$docno' group by locationname order by locationname";
-						$exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
-						$res1 = mysqli_fetch_array($exec1);
-						
-						echo $res1location = $res1["locationname"];
-						//$res1locationanum = $res1["locationcode"];
-						}
-						?>
-						
-                  
-                  </td>
+    <!-- Floating Menu Toggle -->
+    <div id="menuToggle" class="floating-menu-toggle">
+        <i class="fas fa-bars"></i>
+    </div>
+
+    <!-- Main Container with Sidebar -->
+    <div class="main-container-with-sidebar">
+        <!-- Left Sidebar -->
+        <aside id="leftSidebar" class="left-sidebar">
+            <div class="sidebar-header">
+                <h3>Quick Navigation</h3>
+                <button id="sidebarToggle" class="sidebar-toggle">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <ul class="nav-list">
+                    <li class="nav-item">
+                        <a href="mainmenu1.php" class="nav-link">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="cashradiologyrefund.php" class="nav-link">
+                            <i class="fas fa-x-ray"></i>
+                            <span>Cash Radiology Refund</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="cashrefundapprovallist.php" class="nav-link">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Refund Approval List</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="chequescollected.php" class="nav-link">
+                            <i class="fas fa-money-check"></i>
+                            <span>Cheques Collected</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="claimtxnidedit.php" class="nav-link">
+                            <i class="fas fa-edit"></i>
+                            <span>Claim Transaction Edit</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="payrollprocess1.php" class="nav-link">
+                            <i class="fas fa-money-bill-wave"></i>
+                            <span>Payroll Process</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="stockreportbyitem3.php" class="nav-link">
+                            <i class="fas fa-boxes"></i>
+                            <span>Stock Report by Item</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="paymentmodecollectionsummary.php" class="nav-link">
+                            <i class="fas fa-credit-card"></i>
+                            <span>Payment Mode Collection Summary</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="paymentmodecollectionbyuser.php" class="nav-link">
+                            <i class="fas fa-users"></i>
+                            <span>Payment Mode Collection by User</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="revenuereport_summary.php" class="nav-link">
+                            <i class="fas fa-chart-line"></i>
+                            <span>Revenue Report Summary</span>
+                        </a>
+                    </li>
+                    <li class="nav-item active">
+                        <a href="comparativereport.php" class="nav-link">
+                            <i class="fas fa-balance-scale"></i>
+                            <span>Comparative Report</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Alert Container -->
+            <div id="alertContainer">
+                <?php include("includes/alertmessages1.php"); ?>
+            </div>
+
+            <!-- Page Header -->
+            <div class="page-header">
+                <div class="page-header-content">
+                    <h2>Comparative Report</h2>
+                    <p>Generate comprehensive comparative analysis reports for ledgers and account groups.</p>
+                </div>
+                <div class="page-header-actions">
+                    <button type="button" class="btn btn-secondary" onclick="refreshPage()">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                    <button type="button" class="btn btn-outline" onclick="exportToExcel()">
+                        <i class="fas fa-download"></i> Export
+                    </button>
+                </div>
+            </div>
+            <!-- Comparative Report Section -->
+            <div class="comparative-report-section">
+                <div class="comparative-report-header">
+                    <div class="comparative-report-icon">
+                        <i class="fas fa-balance-scale"></i>
+                    </div>
+                    <div class="comparative-report-title">Search Ledger Report</div>
+                    <div class="location-display" id="ajaxlocation">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <strong>Location:</strong>
+                        <?php
+                        if ($location!='') {
+                            $query12 = "select locationname from master_location where locationcode='$location' order by locationname";
+                            $exec12 = mysqli_query($GLOBALS["___mysqli_ston"], $query12) or die ("Error in Query12".mysqli_error($GLOBALS["___mysqli_ston"]));
+                            $res12 = mysqli_fetch_array($exec12);
+                            echo $res1location = $res12["locationname"];
+                        } else {
+                            $query1 = "select locationname from login_locationdetails where username='$username' and docno='$docno' group by locationname order by locationname";
+                            $exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
+                            $res1 = mysqli_fetch_array($exec1);
+                            echo $res1location = $res1["locationname"];
+                        }
+                        ?>
+                    </div>
+                </div>
+
+                <form name="cbform1" method="post" action="comparativereport.php" onSubmit="return validcheck()" class="search-form">
      
-              </tr>
-			  
-			  <tr>
-				<td  width="80" align="left" colspan="1" valign="middle" bgcolor="#ffffff"  class="bodytext3"> &nbsp;</td>
-				<td  width="100" align="left"  valign="middle" bgcolor="#ffffff"  class="bodytext3">
-				<input type="radio" name="searchpaymenttype" id="searchpaymenttype11" value="1"> <label for="searchpaymenttype11"><strong>Ledger</strong></label>
-				</td>
-				<td align="left" colspan="2" valign="middle" bgcolor="#ffffff"  class="bodytext3">
-				<input type="radio" name="searchpaymenttype" id="searchpaymenttype12" value="2"> <label for="searchpaymenttype12"><strong>Group</strong></label>
-			  	</td>
-				<td align="left" colspan="3" valign="middle" bgcolor="#ffffff"  class="bodytext3">
-				<input type="hidden" name="searchpaymentcode" id="searchpaymentcode" value="<?php echo $searchpaymentcode; ?>">
-				</td>
-			  </tr>
+                    <div class="radio-group">
+                        <div class="radio-option">
+                            <input type="radio" name="searchpaymenttype" id="searchpaymenttype11" value="1">
+                            <label for="searchpaymenttype11"><strong>Ledger</strong></label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" name="searchpaymenttype" id="searchpaymenttype12" value="2">
+                            <label for="searchpaymenttype12"><strong>Group</strong></label>
+                        </div>
+                    </div>
+                    
+                    <input type="hidden" name="searchpaymentcode" id="searchpaymentcode" value="<?php echo htmlspecialchars($searchpaymentcode); ?>">
 			  
 			  
               <?php
@@ -346,200 +417,193 @@ function validcheck()
                 $acc_sub_name = $res_ln2['accountssub'];
               ?>
 			 
-				<tr id="ledgersearch">
-			  	<td width="80" align="left" valign="center"bgcolor="#ffffff" class="bodytext31"><strong> Ledger Name </strong></td>
-			  	<td colspan="6" align="left" valign="center"bgcolor="#ffffff" class="bodytext31">
-			  		<input type="text" name="ledgername" id="ledgername" value="<?php echo $ledger_name?>">
-			  		<input type="hidden" name="ledgerid" id="ledgerid" value="<?php echo $ledger_id;?>">
-			  	</td>
-				</tr>
+                    <div id="ledgersearch" class="form-row">
+                        <div class="form-group">
+                            <label for="ledgername" class="form-label">Ledger Name</label>
+                            <div class="ledger-search-input">
+                                <input type="text" name="ledgername" id="ledgername" value="<?php echo htmlspecialchars($ledger_name); ?>" class="form-input" placeholder="Type to search ledgers...">
+                                <input type="hidden" name="ledgerid" id="ledgerid" value="<?php echo htmlspecialchars($ledger_id); ?>">
+                            </div>
+                        </div>
+                    </div>
 				
-				<tr  id="groupsearch">
-				
-					<td width="80" align="left" valign="center"bgcolor="#ffffff" class="bodytext31"><strong>  Main Type  </strong></td>
-					<td width="" align="left" valign="top"  bgcolor="#FFFFFF"><strong>
-					<select name="accountsmaintype" id="accountsmaintype" onChange="return funcAccountsMainTypeChange1()">
-					<option value="" selected="selected">Select Type</option>
-					<?php
-					$query5 = "select * from master_accountsmain where recordstatus = '' order by id";
-					$exec5 = mysqli_query($GLOBALS["___mysqli_ston"], $query5) or die ("Error in Query5".mysqli_error($GLOBALS["___mysqli_ston"]));
-					while ($res5 = mysqli_fetch_array($exec5))
-					{
-					$res5accountsmainanum = $res5["auto_number"];
-					$res5accountsmain = $res5["accountsmain"];
-					?>
-					<option value="<?php echo $res5accountsmainanum; ?>" <?php if($accountsmaintype==$res5accountsmainanum) { echo 'selected'; } ?>><?php echo $res5accountsmain; ?></option>
-					<?php
-					}
-					?>
-					</select>
-					</strong></td>
-					<td width="80" align="left" valign="center"bgcolor="#ffffff" class="bodytext31"><strong>  Sub Type   </strong></td>
-					<td align="left" valign="top"  bgcolor="#FFFFFF"><strong>
-					<select name="accountssub" id="accountssub" >
-					<option value="">Select Sub Type</option>
-					</select>
-					</strong></td>
+                    <div id="groupsearch" class="form-row">
+                        <div class="form-group">
+                            <label for="accountsmaintype" class="form-label">Main Type</label>
+                            <select name="accountsmaintype" id="accountsmaintype" onChange="return funcAccountsMainTypeChange1()" class="form-select">
+                                <option value="" selected="selected">Select Type</option>
+                                <?php
+                                $query5 = "select * from master_accountsmain where recordstatus = '' order by id";
+                                $exec5 = mysqli_query($GLOBALS["___mysqli_ston"], $query5) or die ("Error in Query5".mysqli_error($GLOBALS["___mysqli_ston"]));
+                                while ($res5 = mysqli_fetch_array($exec5)) {
+                                    $res5accountsmainanum = $res5["auto_number"];
+                                    $res5accountsmain = $res5["accountsmain"];
+                                ?>
+                                <option value="<?php echo htmlspecialchars($res5accountsmainanum); ?>" <?php if($accountsmaintype==$res5accountsmainanum) { echo 'selected'; } ?>><?php echo htmlspecialchars($res5accountsmain); ?></option>
+                                <?php
+                                }
+                                ?>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="accountssub" class="form-label">Sub Type</label>
+                            <select name="accountssub" id="accountssub" class="form-select">
+                                <option value="">Select Sub Type</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="viewtype" class="form-label">Type</label>
+                            <select name="viewtype" id="viewtype" class="form-select">
+                                <option value="summary" <?php if($viewtype=='summary'){ echo 'selected'; } ?>>Summary</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <div class="checkbox-group">
+                                <input type="checkbox" name="skipzeroballeg" id="skipzeroballeg" value='1' <?php if($skipzeroballeg=='0') { echo 'checked'; } ?>>
+                                <label for="skipzeroballeg"><strong>Skip Zero Balance Ledgers</strong></label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="location" class="form-label">Location</label>
+                            <select name="location" id="location" class="form-select">
+                                <option value="All">All</option>
+                                <?php
+                                $query1 = "select * from master_location where status='' order by locationname";
+                                $exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
+                                $loccode=array();
+                                while ($res1 = mysqli_fetch_array($exec1)) {
+                                    $locationname = $res1["locationname"];
+                                    $locationcode = $res1["locationcode"];
+                                ?>
+                                <option value="<?php echo htmlspecialchars($locationcode); ?>" <?php if($location!='')if($location==$locationcode){echo "selected";}?>><?php echo htmlspecialchars($locationname); ?></option>
+                                <?php
+                                } 
+                                ?>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="period1" class="form-label">Period</label>
+                            <select name="period" id="period1" onChange="funchangeperiod(this.value);" class="form-select">
+                                <?php if($period != '') { ?>
+                                <option value="<?php echo htmlspecialchars($period); ?>"><?php echo ucwords($period); ?></option>
+                                <?php } else { ?>
+                                <option value="">Select Period</option>
+                                <?php } ?>
+                                <option value="monthly">Monthly</option>
+                                <option value="yearly">Yearly</option>
+                            </select>
+                        </div>
+                    </div>
 					
-					<td width="80" align="left" valign="center"bgcolor="#ffffff" class="bodytext31"><strong> Type   </strong></td>
-					<td align="left" valign="top"  bgcolor="#FFFFFF">
-					<select name="viewtype" id="viewtype" >
-					<option value="summary" <?php if($viewtype=='summary'){ echo 'selected'; } ?>>Summary</option>
-					<!--<option value="detailed" <?php if($viewtype=='detailed'){ echo 'selected'; } ?>>Detailed</option>-->
-					</select>
-					</td>
+                    <div id="monthly" class="period-option" style="display:none">
+                        <div class="month-year-selectors">
+                            <div class="form-group">
+                                <label for="searchmonth" class="form-label">From Month</label>
+                                <select name="searchmonth" id="searchmonth" class="form-select">
+                                    <option <?php if($searchmonth == '1') { ?> selected = 'selected' <?php } ?> value="1">January</option>
+                                    <option <?php if($searchmonth == '2') { ?> selected = 'selected' <?php } ?> value="2">February</option>
+                                    <option <?php if($searchmonth == '3') { ?> selected = 'selected' <?php } ?> value="3">March</option>
+                                    <option <?php if($searchmonth == '4') { ?> selected = 'selected' <?php } ?> value="4">April</option>
+                                    <option <?php if($searchmonth == '5') { ?> selected = 'selected' <?php } ?> value="5">May</option>
+                                    <option <?php if($searchmonth == '6') { ?> selected = 'selected' <?php } ?> value="6">June</option>
+                                    <option <?php if($searchmonth == '7') { ?> selected = 'selected' <?php } ?> value="7">July</option>
+                                    <option <?php if($searchmonth == '8') { ?> selected = 'selected' <?php } ?> value="8">August</option>
+                                    <option <?php if($searchmonth == '9') { ?> selected = 'selected' <?php } ?> value="9">September</option>
+                                    <option <?php if($searchmonth == '10'){ ?> selected = 'selected' <?php } ?> value="10">October</option>
+                                    <option <?php if($searchmonth == '11'){ ?> selected = 'selected' <?php } ?> value="11">November</option>
+                                    <option <?php if($searchmonth == '12'){ ?> selected = 'selected' <?php } ?> value="12">December</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="searchmonthto" class="form-label">To Month</label>
+                                <select name="searchmonthto" id="searchmonthto" class="form-select">
+                                    <option <?php if($searchmonthto == '1') { ?> selected = 'selected' <?php } ?> value="1">January</option>
+                                    <option <?php if($searchmonthto == '2') { ?> selected = 'selected' <?php } ?> value="2">February</option>
+                                    <option <?php if($searchmonthto == '3') { ?> selected = 'selected' <?php } ?> value="3">March</option>
+                                    <option <?php if($searchmonthto == '4') { ?> selected = 'selected' <?php } ?> value="4">April</option>
+                                    <option <?php if($searchmonthto == '5') { ?> selected = 'selected' <?php } ?> value="5">May</option>
+                                    <option <?php if($searchmonthto == '6') { ?> selected = 'selected' <?php } ?> value="6">June</option>
+                                    <option <?php if($searchmonthto == '7') { ?> selected = 'selected' <?php } ?> value="7">July</option>
+                                    <option <?php if($searchmonthto == '8') { ?> selected = 'selected' <?php } ?> value="8">August</option>
+                                    <option <?php if($searchmonthto == '9') { ?> selected = 'selected' <?php } ?> value="9">September</option>
+                                    <option <?php if($searchmonthto == '10'){ ?> selected = 'selected' <?php } ?> value="10">October</option>
+                                    <option <?php if($searchmonthto == '11'){ ?> selected = 'selected' <?php } ?> value="11">November</option>
+                                    <option <?php if($searchmonthto == '12'){ ?> selected = 'selected' <?php } ?> value="12">December</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
 					
-					<td width=""  align="right" valign="center" bgcolor="#FFFFFF" class="bodytext31"> <strong>Skip Zero Balance Ledgers</strong> &nbsp; &nbsp;<span class="bodytext31"> <input type="checkbox" name="skipzeroballeg"  id="skipzeroballeg" value='1' <?php if($skipzeroballeg=='0') { echo 'checked'; } ?>/></span> </td>
+                    <div id="monthly12" class="period-option" style="display:none">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="searchyear" class="form-label">Select Year</label>
+                                <select name="searchyear" id="searchyear" class="form-select">
+                                    <?php if($searchyear != ''){ ?>
+                                        <option value="<?php echo htmlspecialchars($searchyear); ?>"><?php echo htmlspecialchars($searchyear); ?></option>
+                                    <?php } ?>
+                                    <option value="">Select Year</option>
+                                    <?php $years = range(2023, strftime("2025", time())); ?>
+                                    <?php foreach($years as $year1) : ?>
+                                        <option value="<?php echo $year1; ?>"><?php echo $year1; ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
 					
-				</tr>
-			<tr>
-				<td width="10%" align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">Location</td>
-				<td colspan="6" align="left" valign="top"  bgcolor="#FFFFFF"><span class="bodytext3">
-				<select name="location" id="location">
-				<option value="All">All</option>
-				<?php
-				$query1 = "select * from master_location where status='' order by locationname";
-				$exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
-				$loccode=array();
-				while ($res1 = mysqli_fetch_array($exec1))
-				{
-				$locationname = $res1["locationname"];
-				$locationcode = $res1["locationcode"];
-				?>
-				<option value="<?php echo $locationcode; ?>" <?php if($location!='')if($location==$locationcode){echo "selected";}?>><?php echo $locationname; ?></option>
-				<?php
-				} 
-				?>
-
-				</select>
-				</span></td>
-			</tr>
-				<tr id="period">
-                      <td class="bodytext31" valign="center"  align="left" 
-                bgcolor="#FFFFFF"> Period </td>
-                      <td align="left" valign="center"  bgcolor="#FFFFFF" class="bodytext31"><select name="period" id="period1" onChange="funchangeperiod(this.value);">
-					  <?php  if($period != '') {  ?>
-					<option value="<?php echo $period; ?>"><?php echo ucwords($period); ?></option>
-					<?php  } else { ?>
-					<option value="">Select Period</option>
-					<?php } ?>
-					  <option value="monthly">Monthly</option>
-					   <option value="yearly">Yearly</option>
-					  </select> </td>
-                      <td colspan="5" align="left" valign="center"  bgcolor="#FFFFFF" class="bodytext31"> </td>
-                    </tr>
-					
-					<tr id="monthly" style="display:none">
-				
-					<td width="131" class="bodytext31" valign="center"  align="left" bgcolor="#FFFFFF">From Month </td>
-                      <td width="136" align="left" valign="center"  bgcolor="#FFFFFF" class="bodytext31">
-                        <select name="searchmonth" id="searchmonth">
-                          <option <?php if($searchmonth == '1') { ?> selected = 'selected' <?php } ?> value="1">January</option>
-                          <option <?php if($searchmonth == '2') { ?> selected = 'selected' <?php } ?> value="2">February</option>
-                          <option <?php if($searchmonth == '3') { ?> selected = 'selected' <?php } ?> value="3">March</option>
-                          <option <?php if($searchmonth == '4') { ?> selected = 'selected' <?php } ?> value="4">April</option>
-                          <option <?php if($searchmonth == '5') { ?> selected = 'selected' <?php } ?> value="5">May</option>
-                          <option <?php if($searchmonth == '6') { ?> selected = 'selected' <?php } ?> value="6">June</option>
-                          <option <?php if($searchmonth == '7') { ?> selected = 'selected' <?php } ?> value="7">July</option>
-                          <option <?php if($searchmonth == '8') { ?> selected = 'selected' <?php } ?> value="8">August</option>
-                          <option <?php if($searchmonth == '9') { ?> selected = 'selected' <?php } ?> value="9">September</option>
-                          <option <?php if($searchmonth == '10'){ ?> selected = 'selected' <?php } ?> value="10">October</option>
-                          <option <?php if($searchmonth == '11'){ ?> selected = 'selected' <?php } ?> value="11">November</option>
-                          <option <?php if($searchmonth == '12'){ ?> selected = 'selected' <?php } ?> value="12">December</option>
-                        </select>
-                      </td>		
-					  <td width="76" class="bodytext31" valign="center"  align="left" bgcolor="#FFFFFF">To Month </td>
-                      <td width="" align="left" valign="center"  bgcolor="#FFFFFF" class="bodytext31">
-                        <select name="searchmonthto" id="searchmonthto">
-                          <option <?php if($searchmonthto == '1') { ?> selected = 'selected' <?php } ?> value="1">January</option>
-                          <option <?php if($searchmonthto == '2') { ?> selected = 'selected' <?php } ?> value="2">February</option>
-                          <option <?php if($searchmonthto == '3') { ?> selected = 'selected' <?php } ?> value="3">March</option>
-                          <option <?php if($searchmonthto == '4') { ?> selected = 'selected' <?php } ?> value="4">April</option>
-                          <option <?php if($searchmonthto == '5') { ?> selected = 'selected' <?php } ?> value="5">May</option>
-                          <option <?php if($searchmonthto == '6') { ?> selected = 'selected' <?php } ?> value="6">June</option>
-                          <option <?php if($searchmonthto == '7') { ?> selected = 'selected' <?php } ?> value="7">July</option>
-                          <option <?php if($searchmonthto == '8') { ?> selected = 'selected' <?php } ?> value="8">August</option>
-                          <option <?php if($searchmonthto == '9') { ?> selected = 'selected' <?php } ?> value="9">September</option>
-                          <option <?php if($searchmonthto == '10'){ ?> selected = 'selected' <?php } ?> value="10">October</option>
-                          <option <?php if($searchmonthto == '11'){ ?> selected = 'selected' <?php } ?> value="11">November</option>
-                          <option <?php if($searchmonthto == '12'){ ?> selected = 'selected' <?php } ?> value="12">December</option>
-                        </select>
-                      </td>
-					  <td colspan="3" align="left" valign="center"  bgcolor="#ffffff"></td>
-					</tr>
-					
-					<tr id="monthly12" style="display:none">
-                      <td  width="131" class="bodytext31" valign="center"  align="left"  bgcolor="#FFFFFF">Select Year </td>
-                  <?php $years = range(2023, strftime("2025", time())); ?>
-                      <td colspan="3" align="left" valign="center"  bgcolor="#FFFFFF" class="bodytext31">
-                        <select name="searchyear" id="searchyear">
-                          <?php if($searchyear != ''){ ?>
-                              <option value="<?php echo $searchyear; ?>"><?php echo $searchyear; ?></option>
-                          <?php } ?>
-                          <option value="">Select Year</option>
-                          <?php foreach($years as $year1) : ?>
-                              <option value="<?php echo $year1; ?>"><?php echo $year1; ?></option>
-                          <?php endforeach; ?>
-                        </select>
-                      </td>
-						<td colspan="3" align="left" valign="center"  bgcolor="#ffffff"></td>
-                  </tr>
-					
-					<tr id="yearly" style="display:none">
-					<td width="136" align="left" bgcolor="#FFFFFF" class="bodytext3">From Year</td>
-                    <td width="131" align="left" bgcolor="#FFFFFF" class="bodytext3">				
-					<select name="fromyear" id="fromyear">
-                          <?php if($fromyear != ''){ ?>
-                              <option value="<?php echo $fromyear; ?>"><?php echo $fromyear; ?></option>
-                          <?php } ?>
-                          <option value="">Select Year</option>
-                          <?php foreach($years as $year1) : ?>
-                              <option value="<?php echo $year1; ?>"><?php echo $year1; ?></option>
-                          <?php endforeach; ?>
-                        </select>				
-					</td>
-					<td width="76" align="left" bgcolor="#FFFFFF" class="bodytext3">To Year</td>
-					<td width="" align="left" bgcolor="#FFFFFF" class="bodytext3">					
-					<select name="toyear" id="toyear">
-                          <?php if($toyear != ''){ ?>
-                              <option value="<?php echo $toyear; ?>"><?php echo $toyear; ?></option>
-                          <?php } ?>
-                          <option value="">Select Year</option>
-                          <?php foreach($years as $year1) : ?>
-                              <option value="<?php echo $year1; ?>"><?php echo $year1; ?></option>
-                          <?php endforeach; ?>
-                        </select>							
-					</td>
-					<td colspan="3" align="left" valign="center"  bgcolor="#ffffff"></td>
-                    </tr>
+                    <div id="yearly" class="period-option" style="display:none">
+                        <div class="month-year-selectors">
+                            <div class="form-group">
+                                <label for="fromyear" class="form-label">From Year</label>
+                                <select name="fromyear" id="fromyear" class="form-select">
+                                    <?php if($fromyear != ''){ ?>
+                                        <option value="<?php echo htmlspecialchars($fromyear); ?>"><?php echo htmlspecialchars($fromyear); ?></option>
+                                    <?php } ?>
+                                    <option value="">Select Year</option>
+                                    <?php foreach($years as $year1) : ?>
+                                        <option value="<?php echo $year1; ?>"><?php echo $year1; ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="toyear" class="form-label">To Year</label>
+                                <select name="toyear" id="toyear" class="form-select">
+                                    <?php if($toyear != ''){ ?>
+                                        <option value="<?php echo htmlspecialchars($toyear); ?>"><?php echo htmlspecialchars($toyear); ?></option>
+                                    <?php } ?>
+                                    <option value="">Select Year</option>
+                                    <?php foreach($years as $year1) : ?>
+                                        <option value="<?php echo $year1; ?>"><?php echo $year1; ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
 			
-			        <tr id="dates range" style="display:none">
-	            <td width="70" align="left" valign="center" bgcolor="#ffffff" class="bodytext31"><strong>Date From</strong></td>
-	            <td width="150" align="left" valign="center"  bgcolor="#ffffff" class="bodytext31">
-	            	<input name="ADate1" id="ADate1" value="<?php if($fromdate != ''){ echo $fromdate; }else{ $todaydate; } ?>" size="10" readonly="readonly" onKeyDown="return disableEnterKey()" />
-				    <img src="images2/cal.gif" onClick="javascript:NewCssCal('ADate1')" style="cursor:pointer"/>
-				</td>
-	            <td width="50" align="left" valign="center"  bgcolor="#FFFFFF" class="style1">
-	            	<span class="bodytext31"><strong>Date To</strong></span>
-	            </td>
-		        <td width="150" align="left" valign="center"  bgcolor="#ffffff">
-		        	<span class="bodytext31">
-		                <input name="ADate2" id="ADate2" value="<?php if($todate != ''){ echo $todate; }else{ $todaydate; } ?>"  size="10"  readonly="readonly" onKeyDown="return disableEnterKey()" />
-					    <img src="images2/cal.gif" onClick="javascript:NewCssCal('ADate2')" style="cursor:pointer"/>
-				    </span>
-				</td>
-				<td colspan="3" align="left" valign="center"  bgcolor="#ffffff"></td>
-				</tr>
-				<tr>
-				<td  align="left" valign="right"  bgcolor="#ffffff"></td>
-				<td colspan="6" align="left" valign="right"  bgcolor="#ffffff">
-		        	<span class="bodytext31">
-		                <input type="hidden" name="cbfrmflag1" value="cbfrmflag1">
-	                    <input class="btn" type="submit" value="Search" name="Submit" style="margin-right:75px;" />&nbsp;
-						<input class="btn" name="download" type="submit" id="download" value="Excel Download" />
-				    </span>
-				</td>
-	          </tr>
+                    <input type="hidden" name="cbfrmflag1" value="cbfrmflag1">
+                    
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-search"></i> Search
+                        </button>
+                        <button type="submit" name="download" class="btn btn-success">
+                            <i class="fas fa-download"></i> Excel Download
+                        </button>
+                    </div>
+                </form>
+            </div>
 			  <?php if(isset($_POST['download'])){ } else{ $download="aaa";} ?>
 	          <tr>
 	          	<!--<td colspan="" align="left" valign="right"  bgcolor="#ffffff">&nbsp;<td>-->

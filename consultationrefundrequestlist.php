@@ -1,36 +1,20 @@
 <?php
-
 session_start();
-
 include ("includes/loginverify.php");
-
 include ("db/db_connect.php");
-//echo $menu_id;
 include ("includes/check_user_access.php");
 
-
 $ipaddress = $_SERVER['REMOTE_ADDR'];
-
 $updatedatetime = date('Y-m-d H:i:s');
-
 $username = $_SESSION['username'];
-
 $companyanum = $_SESSION['companyanum'];
-
 $companyname = $_SESSION['companyname'];
 
 $transactiondatefrom = date('Y-m-d', strtotime('-1 month'));
-
 $transactiondateto = date('Y-m-d');
 
-
-if (isset($_REQUEST["st"])) { $st = $_REQUEST["st"]; } else { $st = ""; }
-
-//$st = $_REQUEST['st'];
-
-if (isset($_REQUEST["billautonumber"])) { $billautonumber = $_REQUEST["billautonumber"]; } else { $billautonumber = ""; }
-
-//$st = $_REQUEST['st'];
+$st = isset($_REQUEST["st"]) ? $_REQUEST["st"] : "";
+$billautonumber = isset($_REQUEST["billautonumber"]) ? $_REQUEST["billautonumber"] : "";
 
 
 
@@ -86,22 +70,35 @@ header('location:consultationrefundrequestlist.php');
 
 ?>
 
-<!-- Modern CSS -->
-<link href="css/consultationrefundrequestlist-modern.css?v=<?php echo time(); ?>" rel="stylesheet" type="text/css" />
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consultation Refund Request List - MedStar</title>
+    
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
+<!-- Modern CSS -->
+    <link rel="stylesheet" href="css/consultationrefundrequestlist-modern.css?v=<?php echo time(); ?>">
+
+
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <!-- Date Picker CSS -->
 <link href="css/datepickerstyle.css" rel="stylesheet" type="text/css" />
 
+    
+    <!-- Auto-suggest CSS -->
+    <link rel="stylesheet" type="text/css" href="css/autosuggest.css" />
+
+    <!-- External JavaScript -->
 <script type="text/javascript" src="js/adddate.js"></script>
 <script type="text/javascript" src="js/adddate2.js"></script>
-<!-- Modern JavaScript -->
-<script type="text/javascript" src="js/consultationrefundrequestlist-modern.js?v=<?php echo time(); ?>"></script>
-
-<!-- Form submission function moved to external JS -->
-
 <script src="js/datetimepicker_css.js"></script>
-
 <script type="text/javascript" src="js/autocomplete_customer1.js"></script>
-
 <script type="text/javascript" src="js/autosuggest3.js"></script>
 
 <script type="text/javascript">
@@ -135,453 +132,299 @@ header('location:consultationrefundrequestlist.php');
 
 
 <body>
-
-<?php $querynw1 = "select * from master_visitentry where itemrefund='refund' and overallpayment='completed' order by consultationdate desc";// and (billingdatetime between '$triagedatefrom' and '$triagedateto')";//
-
-			$execnw1 = mysqli_query($GLOBALS["___mysqli_ston"], $querynw1) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-			$resnw1=mysqli_num_rows($execnw1);
-
-?>
-
-<table width="100%" border="0" cellspacing="0" cellpadding="2">
-
-  <tr>
-
-    <td colspan="9" bgcolor="#ecf0f5"><?php include ("includes/alertmessages1.php"); ?></td>
-
-  </tr>
-
-  <tr>
-
-    <td colspan="9" bgcolor="#ecf0f5"><?php include ("includes/title1.php"); ?></td>
-
-  </tr>
-
-  <tr>
-
-    <td colspan="9" bgcolor="#ecf0f5"><?php include ("includes/menu1.php"); ?></td>
-
-  </tr>
-
-  <tr>
-
-    <td colspan="9">&nbsp;</td>
-
-  </tr>
-
-  <tr>
-
-    <td width="1%">&nbsp;</td>
-
-    <td width="99%" valign="top"><table width="116%" border="0" cellspacing="0" cellpadding="0">
-
-      <tr>
-
-        <td><table id="AutoNumber3" style="BORDER-COLLAPSE: collapse" 
-
-            bordercolor="#666666" cellspacing="0" cellpadding="4" width="900" 
-
-            align="left" border="0">
-
-          <tbody>
-
-       	<tr>
-
-			<td width="860">
-
-		
-
-		
-
-              <form name="cbform1" method="post" action="consultationrefundrequestlist.php">
-
-		<table width="800" border="0" align="left" cellpadding="4" cellspacing="0" bordercolor="#666666" id="AutoNumber3" style="border-collapse: collapse">
-
-          <tbody>
-
-            <tr bgcolor="#011E6A">
-
-              <td colspan="4" bgcolor="#ecf0f5" class="bodytext3"><strong>Consultation Refund Request </strong></td>
-
-              </tr>
-
-          
-
-            <tr>
-
-              <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">Patient Name</td>
-
-              <td width="82%" colspan="3" align="left" valign="top"  bgcolor="#FFFFFF"><span class="bodytext3">
-
-                <input name="patient" type="text" id="patient" value="" size="50" autocomplete="off">
-
-              </span></td>
-
-              </tr>
-
-			    <tr>
-
-              <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">Patientcode</td>
-
-              <td width="82%" colspan="3" align="left" valign="top"  bgcolor="#FFFFFF"><span class="bodytext3">
-
-                <input name="patientcode" type="text" id="patient" value="" size="50" autocomplete="off">
-
-              </span></td>
-
-              </tr>
-
-			    <tr>
-
-              <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">Visitcode</td>
-
-              <td width="82%" colspan="3" align="left" valign="top"  bgcolor="#FFFFFF"><span class="bodytext3">
-
-                <input name="visitcode" type="text" id="patient" value="" size="50" autocomplete="off">
-
-              </span></td>
-
-              </tr>
-              
-			   <tr>
-
-
-              <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">Bill No.</td>
-
-
-              <td width="82%" colspan="3" align="left" valign="top"  bgcolor="#FFFFFF"><span class="bodytext3">
-
-
-                <input name="billno" type="text" id="billno" value="" size="50" autocomplete="off">
-
-
-              </span></td>
-
-
-              </tr>
-
-			      
-
-            <tr>
-
-          <td width="76" align="left" valign="center"  
-
-                bgcolor="#ffffff" class="bodytext31"><strong> Bill Date From </strong></td>
-
-          <td width="123" align="left" valign="center"  bgcolor="#ffffff" class="bodytext31"><input name="ADate1" id="ADate1" value="<?php echo $transactiondateto; ?>"  size="10"  readonly="readonly" onKeyDown="return disableEnterKey()" />
-
-			<img src="images2/cal.gif" onClick="javascript:NewCssCal('ADate1')" style="cursor:pointer"/>			</td>
-
-          <td width="51" align="left" valign="center"  bgcolor="#FFFFFF" class="style1"><span class="bodytext31"><strong> Date To </strong></span></td>
-
-          <td width="129" align="left" valign="center"  bgcolor="#ffffff"><span class="bodytext31">
-
-            <input name="ADate2" id="ADate2" value="<?php echo $transactiondateto; ?>"  size="10"  readonly="readonly" onKeyDown="return disableEnterKey()" />
-
-			<img src="images2/cal.gif" onClick="javascript:NewCssCal('ADate2')" style="cursor:pointer"/>
-
-		  </span></td>
-
-          </tr>
-
-           
-
-            <tr>
-
-              <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3"></td>
-
-              <td colspan="3" align="left" valign="top"  bgcolor="#FFFFFF">
-
+    <!-- Hospital Header -->
+    <header class="hospital-header">
+        <h1 class="hospital-title">🏥 MedStar Hospital Management</h1>
+        <p class="hospital-subtitle">Consultation Refund Request Management</p>
+    </header>
+
+    <!-- User Information Bar -->
+    <div class="user-info-bar">
+        <div class="user-welcome">
+            <span class="welcome-text">Welcome, <strong><?php echo htmlspecialchars($username); ?></strong></span>
+            <span class="location-info">📍 Company: <?php echo htmlspecialchars($companyname); ?></span>
+        </div>
+        <div class="user-actions">
+            <a href="mainmenu1.php" class="btn btn-outline">🏠 Main Menu</a>
+            <a href="logout.php" class="btn btn-outline">🚪 Logout</a>
+        </div>
+    </div>
+
+    <!-- Navigation Breadcrumb -->
+    <nav class="nav-breadcrumb">
+        <a href="mainmenu1.php">🏠 Home</a>
+        <span>→</span>
+        <span>Consultation Refund Request List</span>
+    </nav>
+
+    <!-- Floating Menu Toggle -->
+    <div id="menuToggle" class="floating-menu-toggle">
+        <i class="fas fa-bars"></i>
+    </div>
+
+    <!-- Main Container with Sidebar -->
+    <div class="main-container-with-sidebar">
+        <!-- Left Sidebar -->
+        <aside id="leftSidebar" class="left-sidebar">
+            <div class="sidebar-header">
+                <h3>Quick Navigation</h3>
+                <button id="sidebarToggle" class="sidebar-toggle">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <ul class="nav-list">
+                    <li class="nav-item">
+                        <a href="mainmenu1.php" class="nav-link">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="consultationrefundrequestlist.php" class="nav-link active">
+                            <i class="fas fa-undo"></i>
+                            <span>Refund Request List</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="consultationrefundlist.php" class="nav-link">
+                            <i class="fas fa-list"></i>
+                            <span>Consultation Refund List</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="cashradiologyrefund.php" class="nav-link">
+                            <i class="fas fa-x-ray"></i>
+                            <span>Cash Radiology Refund</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="cashrefundapprovallist.php" class="nav-link">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Refund Approval List</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="chequescollected.php" class="nav-link">
+                            <i class="fas fa-money-check"></i>
+                            <span>Cheques Collected</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="claimtxnidedit.php" class="nav-link">
+                            <i class="fas fa-edit"></i>
+                            <span>Claim Transaction Edit</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="payrollprocess1.php" class="nav-link">
+                            <i class="fas fa-money-bill-wave"></i>
+                            <span>Payroll Process</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="stockreportbyitem3.php" class="nav-link">
+                            <i class="fas fa-boxes"></i>
+                            <span>Stock Report by Item</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Alert Container -->
+            <div id="alertContainer">
+                <?php include ("includes/alertmessages1.php"); ?>
+            </div>
+
+            <!-- Page Header -->
+            <div class="page-header">
+                <div class="page-header-content">
+                    <h2>Consultation Refund Request List</h2>
+                    <p>Manage and process consultation refund requests for patients.</p>
+                </div>
+                <div class="page-header-actions">
+                    <button type="button" class="btn btn-secondary" onclick="refreshPage()">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                    <button type="button" class="btn btn-outline" onclick="exportToExcel()">
+                        <i class="fas fa-download"></i> Export
+                    </button>
+                </div>
+            </div>
+
+            <!-- Search Form Section -->
+            <div class="search-form-section">
+                <div class="search-form-header">
+                    <i class="fas fa-search search-form-icon"></i>
+                    <h3 class="search-form-title">Search Consultation Refund Requests</h3>
+                </div>
+                
+                <form name="cbform1" method="post" action="consultationrefundrequestlist.php" class="search-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="patient" class="form-label">Patient Name</label>
+                            <input name="patient" type="text" id="patient" class="form-input" value="" autocomplete="off" placeholder="Enter patient name">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="patientcode" class="form-label">Patient Code</label>
+                            <input name="patientcode" type="text" id="patientcode" class="form-input" value="" autocomplete="off" placeholder="Enter patient code">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="visitcode" class="form-label">Visit Code</label>
+                            <input name="visitcode" type="text" id="visitcode" class="form-input" value="" autocomplete="off" placeholder="Enter visit code">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="billno" class="form-label">Bill Number</label>
+                            <input name="billno" type="text" id="billno" class="form-input" value="" autocomplete="off" placeholder="Enter bill number">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="ADate1" class="form-label">Date From</label>
+                            <div class="date-input-group">
+                                <input name="ADate1" id="ADate1" value="<?php echo $transactiondatefrom; ?>" class="form-input" readonly onKeyDown="return disableEnterKey()" />
+                                <img src="images2/cal.gif" onClick="javascript:NewCssCal('ADate1')" class="date-picker-icon" style="cursor:pointer"/>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="ADate2" class="form-label">Date To</label>
+                            <div class="date-input-group">
+                                <input name="ADate2" id="ADate2" value="<?php echo $transactiondateto; ?>" class="form-input" readonly onKeyDown="return disableEnterKey()" />
+                                <img src="images2/cal.gif" onClick="javascript:NewCssCal('ADate2')" class="date-picker-icon" style="cursor:pointer"/>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
 			  <input type="hidden" name="cbfrmflag1" value="cbfrmflag1">
+                        <button type="submit" class="btn btn-primary" name="Submit">
+                            <i class="fas fa-search"></i> Search
+                        </button>
+                        <button name="resetbutton" type="reset" id="resetbutton" class="btn btn-secondary">
+                            <i class="fas fa-undo"></i> Reset
+                        </button>
+                    </div>
+                </form>
+            </div>
 
-                  <input  type="submit" value="Search" name="Submit" />
+            <!-- Data Table Section -->
+            <div class="data-table-section">
+                <div class="data-table-header">
+                    <i class="fas fa-list data-table-icon"></i>
+                    <h3 class="data-table-title">Consultation Refund Request List</h3>
+                </div>
 
-                  <input name="resetbutton" type="reset" id="resetbutton"  value="Reset" /></td>
-
-            </tr>
-
-          </tbody>
-
-        </table>
-
-		</form>		</td>
-
-			</tr>
-
-            <tr>
-
-			<td>
-
+                <div class="data-table-content">
 			<?php
+                    $colorloopcount = 0;
+                    $sno = 0;
 
-	$colorloopcount=0;
+                    if (isset($_REQUEST["cbfrmflag1"])) { 
+                        $cbfrmflag1 = $_REQUEST["cbfrmflag1"]; 
+                    } else { 
+                        $cbfrmflag1 = ""; 
+                    }
 
-	$sno=0;
+                    if ($cbfrmflag1 == 'cbfrmflag1') {
+                        $searchpatient = $_POST['patient'];
+                        $searchpatientcode = $_POST['patientcode'];
+                        $searchvisitcode = $_POST['visitcode'];
+                        $fromdate = $_POST['ADate1'];
+                        $todate = $_POST['ADate2'];
+                        $searchbillno = $_POST['billno'];
+                    ?>
 
-if (isset($_REQUEST["cbfrmflag1"])) { $cbfrmflag1 = $_REQUEST["cbfrmflag1"]; } else { $cbfrmflag1 = ""; }
-
-//$cbfrmflag1 = $_POST['cbfrmflag1'];
-
-if ($cbfrmflag1 == 'cbfrmflag1')
-
-{
-
-
-
-	$searchpatient = $_POST['patient'];
-
-	$searchpatientcode=$_POST['patientcode'];
-
-	
-
-	$searchvisitcode=$_POST['visitcode'];
-
-	$fromdate=$_POST['ADate1'];
-
-	$todate=$_POST['ADate2'];
-
-    $searchbillno=$_POST['billno'];
-
-	
-
-	
-
-	?>
-
-	<table id="AutoNumber3" style="BORDER-COLLAPSE: collapse" 
-
-            bordercolor="#666666" cellspacing="0" cellpadding="4" width="1100" 
-
-            align="left" border="0">
-
-          <tbody>
-
-             <tr>
-
-			 <td colspan="11" bgcolor="#ecf0f5" class="bodytext31"><div align="left"><strong>Consultation Refund</strong></div></td>
-
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>No.</th>
+                                <th>Bill Date</th>
+                                <th>Bill No.</th>
+                                <th>Patient Code</th>
+                                <th>Visit Code</th>
+                                <th>Patient</th>
+                                <th>Bill Amount</th>
+                                <th>Remarks</th>
+                                <th>Action</th>
 			 </tr>
-
-            <tr>
-
-              <td class="bodytext31" valign="center"  align="left" 
-
-                bgcolor="#ffffff"><div align="center"><strong>No.</strong></div></td>
-
-				 <td width="13%"  align="left" valign="center" 
-
-                bgcolor="#ffffff" class="bodytext31"><div align="center"><strong>Bill Date </strong></div></td>
-
-               <td width="13%"  align="left" valign="center" 
-
-
-                bgcolor="#ffffff" class="bodytext31"><div align="center"><strong>Bill No. </strong></div></td>
-
-				<td width="13%"  align="left" valign="center" 
-
-                bgcolor="#ffffff" class="bodytext31"><div align="center"><strong>Patient Code  </strong></div></td>
-
-				<td width="13%"  align="left" valign="center" 
-
-                bgcolor="#ffffff" class="bodytext31"><div align="center"><strong>Visit Code  </strong></div></td>
-
-              <td width="20%"  align="left" valign="center" 
-
-                bgcolor="#ffffff" class="bodytext31"><div align="center"><strong> Patient </strong></div></td>
-
-                	
-
-				<td width="20%"  align="left" valign="center" 
-
-                bgcolor="#ffffff" class="bodytext31"><div align="center"><strong> Bill Amt</strong></div></td>	
-
-                <td width="25%"  align="left" valign="center" 
-
-                bgcolor="#ffffff" class="bodytext31"><div align="center"><strong> Remarks</strong></div></td>
-
-              <td width="11%"  align="left" valign="center" 
-
-                bgcolor="#ffffff" class="bodytext31"><strong>Action</strong></td>
-
-              </tr>
+                        </thead>
+                        <tbody>
 
 			<?php
-
 			$colorloopcount = '';
-
 			$sno = '';
 
-			
-
-			//$query76 = "select * from master_visitentry where paymentstatus='completed' and consultationrefund='torefund' and doctorfeesstatus = '' and patientcode like '%$searchpatientcode%' and visitcode like '%$searchvisitcode%' and patientfullname like '%$searchpatient%' and consultationdate between '$fromdate' and '$todate' group by visitcode order by consultationdate desc";
-
-              $query76 = "select * from master_billing where  patientcode like '%$searchpatientcode%' and visitcode like '%$searchvisitcode%' and patientfullname like '%$searchpatient%' and billnumber like '%$searchbillno%' and billingdatetime between '$fromdate' and '$todate' and refund_status=''  group by visitcode,billnumber order by billingdatetime desc";
+                        $query76 = "select * from master_billing where patientcode like '%$searchpatientcode%' and visitcode like '%$searchvisitcode%' and patientfullname like '%$searchpatient%' and billnumber like '%$searchbillno%' and billingdatetime between '$fromdate' and '$todate' and refund_status='' group by visitcode,billnumber order by billingdatetime desc";
 
 			$exec76 = mysqli_query($GLOBALS["___mysqli_ston"], $query76) or die(mysqli_error($GLOBALS["___mysqli_ston"]));
 
-			while($res76 = mysqli_fetch_array($exec76))
-
-			{
-
+                        while($res76 = mysqli_fetch_array($exec76)) {
 			$patientcode = $res76['patientcode'];
-
-			$patientvisitcode=$res76['visitcode'];
-
-			$consultationdate=$res76['billingdatetime'];
-
-				$patientname=$res76['patientfullname'];
-
-				//$accountname=$res76['accountfullname'];
-
-				//$billtype = $res76['billtype'];
-				//$departmentname = $res76['departmentname'];
+                            $patientvisitcode = $res76['visitcode'];
+                            $consultationdate = $res76['billingdatetime'];
+                            $patientname = $res76['patientfullname'];
 				$consultationfees = $res76['patientbillamount'];
-				//$res76username = $res76['username'];
 				$billnumber = $res76['billnumber'];
 
-				
-
-			//$query8 = "select * from billing_paylater where patientcode = '$patientcode' and visitcode = '$patientvisitcode'";	
-
-			//$exec8 = mysql_query($query8) or die ("Error in Query8".mysql_error());
-
-			//$rows8 = mysql_num_rows($exec8);
-
-			if(true)
-
-			{
-
+                            if(true) {
 			$colorloopcount = $colorloopcount + 1;
-
 			$showcolor = ($colorloopcount & 1); 
 
-			if ($showcolor == 0)
-
-			{
-
-				//echo "if";
-
+                                if ($showcolor == 0) {
 				$colorcode = 'bgcolor="#CBDBFA"';
-
-			}
-
-			else
-
-			{
-
-				//echo "else";
-
+                                } else {
 				$colorcode = 'bgcolor="#ecf0f5"';
-
 			} 
-
 			?>
-
 			<tr <?php echo $colorcode; ?>>
-
-              <td class="bodytext31" valign="center"  align="left"><div align="center"><?php echo $sno = $sno + 1; ?></div></td>
-
-			   <td class="bodytext31" valign="center"  align="left">
-
-			    <div align="center"><?php echo $consultationdate; ?></div></td>
-               <td class="bodytext31" valign="center"  align="left">
-
-
-			    <div align="center"><?php echo $billnumber; ?></div></td>
-
-				<td class="bodytext31" valign="center"  align="left">
-
-			    <div align="center"><?php echo $patientcode; ?></div></td>
-
-				<td class="bodytext31" valign="center"  align="left">
-
-			    <div align="center"><?php echo $patientvisitcode; ?></div></td>
-
-              <td class="bodytext31" valign="center"  align="left">
-
-			  <div class="bodytext31" align="center"><?php echo $patientname; ?></div></td>
-
-              
-				  <td class="bodytext31" valign="center"  align="left"><div align="center"><?php echo number_format($consultationfees,2); ?></div></td>
-
-              <td class="bodytext31" valign="center"  align="left">
-
-			    <div align="center">
-
-				<textarea id="remark<?= $sno?>" name="remark<?= $sno?>" cols="18" rows="2" class="remarks-textarea" placeholder="Enter refund remarks..."></textarea>
-
-				</div></td>
-
-             
-
-             <td class="bodytext31" valign="center"  align="left"><a href="#" onClick="return putRequest('<?= $billnumber ?>','<?= $patientvisitcode ?>','<?= $sno ?>');" class="action-link process"><strong>Process</strong></a>			  </td>
-
+                                <td><?php echo $sno = $sno + 1; ?></td>
+                                <td><?php echo $consultationdate; ?></td>
+                                <td>
+                                    <span class="bill-number-badge"><?php echo $billnumber; ?></span>
+                                </td>
+                                <td>
+                                    <span class="patient-code-badge"><?php echo $patientcode; ?></span>
+                                </td>
+                                <td>
+                                    <span class="visit-code-badge"><?php echo $patientvisitcode; ?></span>
+                                </td>
+                                <td><?php echo htmlspecialchars($patientname); ?></td>
+                                <td><?php echo number_format($consultationfees, 2); ?></td>
+                                <td>
+                                    <textarea id="remark<?= $sno?>" name="remark<?= $sno?>" class="remarks-textarea" placeholder="Enter refund remarks..."></textarea>
+                                </td>
+                                <td class="action-cell">
+                                    <a href="#" onClick="return putRequest('<?= $billnumber ?>','<?= $patientvisitcode ?>','<?= $sno ?>');" class="action-btn refund" title="Process Refund Request">
+                                        <i class="fas fa-undo"></i> Process
+                                    </a>
+                                </td>
               </tr>
-
 			<?php
-
-			}
-
-			}
-
-			?>
+                            }
+                        }
+                        ?>
 
             
 
 			
 
-            <tr>
-
-              <td class="bodytext31" valign="center"  align="left" 
-
-                bgcolor="#ecf0f5">&nbsp;</td>
-
-              <td class="bodytext31" valign="center"  align="left" 
-
-                bgcolor="#ecf0f5">&nbsp;</td>
-
-              <td class="bodytext31" valign="center"  align="left" 
-
-                bgcolor="#ecf0f5">&nbsp;</td>
-
-              <td class="bodytext31" valign="center"  align="left" 
-
-                bgcolor="#ecf0f5">&nbsp;</td>
-
-              <td class="bodytext31" valign="center"  align="left" 
-
-                bgcolor="#ecf0f5">&nbsp;</td>
-
-              <td class="bodytext31" valign="center"  align="left" 
-
-                bgcolor="#ecf0f5">&nbsp;</td>
-
-              <td class="bodytext31" valign="center"  align="left" 
-
-                bgcolor="#ecf0f5">&nbsp;</td>
-
-             <td class="bodytext31" valign="center"  align="left" 
-
-                bgcolor="#ecf0f5">&nbsp;</td>   
-				<td class="bodytext31" valign="center"  align="left" 
-
-                bgcolor="#ecf0f5">&nbsp;</td>       
-				<td class="bodytext31" valign="center"  align="left" 
-
-                bgcolor="#ecf0f5">&nbsp;</td>
-
-				
-
-              </tr>
 
 			    </tbody>
-
         </table>
 
 		<?php
-
-}
+                    }
 
 
 
@@ -589,28 +432,14 @@ if ($cbfrmflag1 == 'cbfrmflag1')
 
 ?>	
 
-		</td>
+                </div>
+            </div>
+        </main>
+    </div>
 
-		</tr>
-
-          </tbody>
-
-        </table></td>
-
-      </tr>
-
-    </table>
-
-</table>
-
-
-
-<!-- Refund processing function moved to external JS -->
-
-<?php include ("includes/footer1.php"); ?>
-
+    <!-- Modern JavaScript -->
+    <script src="js/consultationrefundrequestlist-modern.js?v=<?php echo time(); ?>"></script>
 </body>
-
 </html>
 
 

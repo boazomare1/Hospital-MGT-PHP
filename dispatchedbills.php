@@ -3,6 +3,7 @@ session_start();
 include ("includes/loginverify.php");
 include ("db/db_connect.php");
 
+// Initialize variables
 $ipaddress = $_SERVER['REMOTE_ADDR'];
 $updatedatetime = date('Y-m-d');
 $updatetime = date('Y-m-d H:i:s');
@@ -15,6 +16,7 @@ $paymentreceiveddateto = date('Y-m-d');
 $transactiondatefrom = date('Y-m-d', strtotime('-1 day'));
 $transactiondateto = date('Y-m-d');
 
+// Initialize form variables
 $errmsg = "";
 $banum = "1";
 $supplieranum = "";
@@ -25,38 +27,26 @@ $openingbalance = "0.00";
 $searchsuppliername = "";
 $cbsuppliername = "";
 $snocount = "";
-$colorloopcount="";
- $total = "0.00";
+$colorloopcount = "";
+$total = "0.00";
 
-		if (isset($_REQUEST["searchaccoutname"])) { $searchaccoutname = $_REQUEST["searchaccoutname"]; } else { $searchaccoutname = ""; }
-		if (isset($_REQUEST["searchaccoutnameanum"])) { $searchaccoutnameanum = $_REQUEST["searchaccoutnameanum"]; } else { $searchaccoutnameanum = ""; }
- 
-//		//$visitcode = $REQUEST['visitcode'.$key];
-//		$billno = $_REQUEST['billno'.$key];
-//		$billdate = $_REQUEST['billdate'.$key];
-//		$amount = $_REQUEST['amount'.$key];
-//		$accountname = $_REQUEST['accountname'.$key];
-//		//$completed = $REQUEST['comcheck'.$key];
+// Handle form parameters with modern isset() checks
+$searchaccoutname = isset($_REQUEST["searchaccoutname"]) ? $_REQUEST["searchaccoutname"] : "";
+$searchaccoutnameanum = isset($_REQUEST["searchaccoutnameanum"]) ? $_REQUEST["searchaccoutnameanum"] : "";
 
- 
- 
-//This include updatation takes too long to load for hunge items database.
-//include ("autocompletebuild_accounts.php");
- $location=isset($_REQUEST['location'])?$_REQUEST['location']:'';
- $locationcode1=isset($_REQUEST['location'])?$_REQUEST['location']:'';
+// Handle location parameters
+$location = isset($_REQUEST['location']) ? $_REQUEST['location'] : '';
+$locationcode1 = isset($_REQUEST['location']) ? $_REQUEST['location'] : '';
  	$query12 = "select locationname from master_location where locationcode='$location' order by locationname";
 						$exec12 = mysqli_query($GLOBALS["___mysqli_ston"], $query12) or die ("Error in Query12".mysqli_error($GLOBALS["___mysqli_ston"]));
 						$res12 = mysqli_fetch_array($exec12);
 						
 						 $locationname1 = $res12["locationname"];
 
-if (isset($_REQUEST["canum"])) { $getcanum = $_REQUEST["canum"]; } else { $getcanum = ""; }
-//$getcanum = $_GET['canum'];
+// Handle additional form parameters
+$getcanum = isset($_REQUEST["canum"]) ? $_REQUEST["canum"] : "";
 
-
-
-if ($getcanum != '')
-{
+if ($getcanum != '') {
 	$query4 = "select * from master_supplier where auto_number = '$getcanum'";
 	$exec4 = mysqli_query($GLOBALS["___mysqli_ston"], $query4) or die ("Error in Query4".mysqli_error($GLOBALS["___mysqli_ston"]));
 	$res4 = mysqli_fetch_array($exec4);
@@ -64,18 +54,14 @@ if ($getcanum != '')
 	$suppliername = $res4['suppliername'];
 }
 
-if (isset($_REQUEST["searchsuppliername1"])) { $searchsuppliername = $_REQUEST["searchsuppliername1"]; } else { $searchsuppliername = ""; }
-if (isset($_REQUEST["searchsubtypeanum1"])) { $searchsubtypeanum1 = $_REQUEST["searchsubtypeanum1"]; } else { $searchsubtypeanum1 = ""; }
-if (isset($_REQUEST["cbfrmflag1"])) { $cbfrmflag1 = $_REQUEST["cbfrmflag1"]; } else { $cbfrmflag1 = ""; }
-if (isset($_REQUEST["frmflag2"])) { $frmflag2 = $_REQUEST["frmflag2"]; } else { $frmflag2 = ""; }
+$searchsuppliername = isset($_REQUEST["searchsuppliername1"]) ? $_REQUEST["searchsuppliername1"] : "";
+$searchsubtypeanum1 = isset($_REQUEST["searchsubtypeanum1"]) ? $_REQUEST["searchsubtypeanum1"] : "";
+$cbfrmflag1 = isset($_REQUEST["cbfrmflag1"]) ? $_REQUEST["cbfrmflag1"] : "";
+$frmflag2 = isset($_REQUEST["frmflag2"]) ? $_REQUEST["frmflag2"] : "";
 
-
-if (isset($_REQUEST["ADate1"])) { $ADate1 = $_REQUEST["ADate1"]; } else { $ADate1 = $transactiondatefrom; }
-//$paymenttype = $_REQUEST['paymenttype'];
-//echo $ADate1;
-if (isset($_REQUEST["ADate2"])) { $ADate2 = $_REQUEST["ADate2"]; } else { $ADate2 = $transactiondateto; }
-//$billstatus = $_REQUEST['billstatus'];
-//echo $ADate2;
+// Handle date parameters
+$ADate1 = isset($_REQUEST["ADate1"]) ? $_REQUEST["ADate1"] : $transactiondatefrom;
+$ADate2 = isset($_REQUEST["ADate2"]) ? $_REQUEST["ADate2"] : $transactiondateto;
 
 
 
@@ -105,33 +91,160 @@ window.open("print_deliveryreportsubtype_xl.php?printno=<?php echo $printno; ?>"
 }
 ?>
 
-<style type="text/css">
-th {
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dispatched Bills - MedStar Hospital Management</title>
+    
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <!-- Modern CSS -->
+    <link rel="stylesheet" href="css/vat-modern.css?v=<?php echo time(); ?>">
+    
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- Additional CSS -->
+    <link href="css/datepickerstyle.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="css/autosuggest.css" />
+    
+    <style>
+        th {
             background-color: #ffffff;
             position: sticky;
             top: 0;
             z-index: 1;
-        }
+        }
+        .bodytext31:hover { font-size:14px; }
+        .bal {
+            border-style:none;
+            background:none;
+            text-align:right;
+        }
+        .bali {
+            text-align:right;
+        }
+        .ui-menu .ui-menu-item{ zoom:1 !important; }
+    </style>
+</head>
+<body>
+    <!-- Hospital Header -->
+    <header class="hospital-header">
+        <h1 class="hospital-title">🏥 MedStar Hospital Management</h1>
+        <p class="hospital-subtitle">Advanced Healthcare Management Platform</p>
+    </header>
 
-<!--
-body {
-	margin-left: 0px;
-	margin-top: 0px;
-	background-color: #ecf0f5;
-}
-.bodytext3 {	FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3B3B3C; FONT-FAMILY: Tahoma;}
--->
-</style>
-<link href="css/datepickerstyle.css" rel="stylesheet" type="text/css" />
-<link href="autocomplete.css" rel="stylesheet">
+    <!-- User Information Bar -->
+    <div class="user-info-bar">
+        <div class="user-welcome">
+            <span class="welcome-text">Welcome, <strong><?php echo htmlspecialchars($username); ?></strong></span>
+            <span class="location-info">📍 Company: <?php echo htmlspecialchars($companyname); ?></span>
+        </div>
+        <div class="user-actions">
+            <a href="mainmenu1.php" class="btn btn-outline">🏠 Main Menu</a>
+            <a href="logout.php" class="btn btn-outline">🚪 Logout</a>
+        </div>
+    </div>
 
-<script src="js/jquery.min-autocomplete.js"></script>
-<script src="js/jquery-ui.min.js"></script>
-<script src="js/datetimepicker_css.js"></script>
+    <!-- Navigation Breadcrumb -->
+    <nav class="nav-breadcrumb">
+        <a href="mainmenu1.php">🏠 Home</a>
+        <span>→</span>
+        <span>Reports</span>
+        <span>→</span>
+        <span>Dispatched Bills</span>
+    </nav>
 
+    <!-- Floating Menu Toggle -->
+    <div id="menuToggle" class="floating-menu-toggle">
+        <i class="fas fa-bars"></i>
+    </div>
 
-<script type="text/javascript" src="js/adddate.js"></script>
-<script type="text/javascript" src="js/adddate2.js"></script>
+    <!-- Main Container with Sidebar -->
+    <div class="main-container-with-sidebar">
+        <!-- Left Sidebar -->
+        <aside id="leftSidebar" class="left-sidebar">
+            <div class="sidebar-header">
+                <h3>Quick Navigation</h3>
+                <button id="sidebarToggle" class="sidebar-toggle">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <ul class="nav-list">
+                    <li class="nav-item">
+                        <a href="mainmenu1.php" class="nav-link">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="billing.php" class="nav-link">
+                            <i class="fas fa-receipt"></i>
+                            <span>Billing</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="dispatch.php" class="nav-link">
+                            <i class="fas fa-truck"></i>
+                            <span>Dispatch</span>
+                        </a>
+                    </li>
+                    <li class="nav-item active">
+                        <a href="dispatchedbills.php" class="nav-link">
+                            <i class="fas fa-file-invoice"></i>
+                            <span>Dispatched Bills</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="reports.php" class="nav-link">
+                            <i class="fas fa-chart-bar"></i>
+                            <span>Reports</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="finance.php" class="nav-link">
+                            <i class="fas fa-calculator"></i>
+                            <span>Finance</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Alert Container -->
+            <div id="alertContainer">
+                <?php include ("includes/alertmessages1.php"); ?>
+            </div>
+
+            <!-- Page Header -->
+            <div class="page-header">
+                <div class="page-header-content">
+                    <h2>Dispatched Bills</h2>
+                    <p>View and manage all dispatched bills with comprehensive tracking and reporting capabilities.</p>
+                </div>
+                <div class="page-header-actions">
+                    <button type="button" class="btn btn-secondary" onclick="refreshPage()">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                    <button type="button" class="btn btn-outline" onclick="exportToExcel()">
+                        <i class="fas fa-download"></i> Export
+                    </button>
+                    <button type="button" class="btn btn-outline" onclick="printReport()">
+                        <i class="fas fa-print"></i> Print
+                    </button>
+                </div>
+            </div>
+
+    <script type="text/javascript" src="js/adddate.js"></script>
+    <script type="text/javascript" src="js/adddate2.js"></script>
+    <script src="js/datetimepicker_css.js"></script>
 
 <script type="text/javascript">
 function clickcheck(cat,val)
@@ -258,143 +371,72 @@ text-align:right;
 
 
 
-<body>
-<div align="center" class="imgloader" id="imgloader" style="display:none;">
-	<div align="center" class="imgloader" id="imgloader1" style="display:;">
-	    <p style="text-align:center;" id='claim_msg'></p>
-		<p style="text-align:center;"><strong>Processing <br><br> Please be patient...</strong></p>
-		<img src="images/ajaxloader.gif">
-	</div>
-</div>
-<table width="101%" border="0" cellspacing="0" cellpadding="2">
-  <tr>
-    <td colspan="10" bgcolor="#ecf0f5"><?php include ("includes/alertmessages1.php"); ?></td>
-  </tr>
-  <tr>
-    <td colspan="10" bgcolor="#ecf0f5"><?php include ("includes/title1.php"); ?></td>
-  </tr>
-  <tr>
-    <td colspan="10" bgcolor="#ecf0f5"><?php include ("includes/menu1.php"); ?></td>
-  </tr>
-  <tr>
-    <td colspan="10">&nbsp;</td>
-  </tr>
-  <tr>
-    <td width="1%">&nbsp;</td>
-    <td width="2%" valign="top"><?php //include ("includes/menu4.php"); ?>
-      &nbsp;</td>
-    <td  valign="top"><table width="100%" border="0" cellspacing="0" cellpadding="0">
-      <tr>
-        <td width="">
-        <form name="cbform1" method="post" action="" >
-		<table width="600" border="0" align="left" cellpadding="4" cellspacing="0" bordercolor="#666666" id="AutoNumber3" style="border-collapse: collapse">
-          <tbody>
-            <tr bgcolor="#011E6A">
-              <td colspan="2" bgcolor="#ecf0f5" class="bodytext3"><strong>Dispatched Bills</strong></td>
-              <td colspan="2" align="right" bgcolor="#ecf0f5" class="bodytext3" id="ajaxlocation"><strong> Location </strong>
-             
-            
-                  <?php
-						
-						if ($location!='')
-						{
-						$query12 = "select locationname from master_location where locationcode='$location' order by locationname";
-						$exec12 = mysqli_query($GLOBALS["___mysqli_ston"], $query12) or die ("Error in Query12".mysqli_error($GLOBALS["___mysqli_ston"]));
-						$res12 = mysqli_fetch_array($exec12);
-						
-						echo $res1location = $res12["locationname"];
-						//echo $location;
-						}
-						else
-						{
-						$query1 = "select locationname from login_locationdetails where username='$username' and docno='$docno' group by locationname order by locationname";
-						$exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
-						$res1 = mysqli_fetch_array($exec1);
-						
-						echo $res1location = $res1["locationname"];
-						//$res1locationanum = $res1["locationcode"];
-						}
-						
-						
+            <!-- Loading Overlay -->
+            <div class="loading-overlay" id="imgloader" style="display:none;">
+                <div class="loading-content">
+                    <div class="loading-spinner"></div>
+                    <p id='claim_msg'></p>
+                    <p><strong>Processing</strong></p>
+                    <p>Please be patient...</p>
+                </div>
+            </div>
 
-						?>
-						
-						
-                  
-                  </td> 
-              </tr>
-            <!--<tr>
-              <td colspan="4" align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">
-			  <input name="printreceipt1" type="reset" id="printreceipt1" onClick="return funcPrintReceipt1()" style="border: 1px solid #001E6A" value="Print Receipt - Previous Payment Entry" /> 
-                *To Print Other Receipts Please Go To Menu:	Reports	-&gt; Payments Given 
-				</td>
-              </tr>-->
-            <!--<tr>
-              <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">Search Subtype</td>
-              <td width="82%" colspan="3" align="left" valign="top"  bgcolor="#FFFFFF"><span class="bodytext3">
-                <span class="bodytext32">
-                <input name="searchsuppliername1" type="text" id="searchsuppliername1" value="<?php echo $searchsuppliername; ?>" size="50" autocomplete="off">
-                </span>
-                <input name="searchsuppliername1hiddentextbox" id="searchsuppliername1hiddentextbox" type="hidden" value="">
-			  <input name="searchsubtypeanum1" id="searchsubtypeanum1" value="<?php echo $searchsubtypeanum1; ?>" type="hidden">
-              </span></td>
-           </tr> -->
-
-			  <tr>
-                      <td class="bodytext31" valign="center"  align="left" 
-                bgcolor="#FFFFFF"> Date From </td>
-                      <td  align="left" valign="center"  bgcolor="#FFFFFF" class="bodytext31"><input name="ADate1" id="ADate1" value="<?php echo $ADate1; ?>"  size="10"  readonly="readonly" onKeyDown="return disableEnterKey()" />
-                          <img src="images2/cal.gif" onClick="javascript:NewCssCal('ADate1')" style="cursor:pointer"/> </td>
-                      <td  align="left" valign="center"  bgcolor="#FFFFFF" class="bodytext31"> Date To </td>
-                      <td align="left" valign="center"  bgcolor="#FFFFFF"><span class="bodytext31">
-                        <input name="ADate2" id="ADate2" value="<?php echo $ADate2; ?>"  size="10"  readonly="readonly" onKeyDown="return disableEnterKey()" />
-                        <img src="images2/cal.gif" onClick="javascript:NewCssCal('ADate2')" style="cursor:pointer"/> </span></td>
-                    </tr>
-						<tr>
-  			  <td  align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">Location</td>
-              <td  align="left" valign="top"  bgcolor="#FFFFFF"><span class="bodytext3">
-			 
-				 <select name="location" id="location" onChange="ajaxlocationfunction(this.value);">
-						<option value="">ALL</option>
-						
-						<?php
-						
-						$query1 = "select * from master_employeelocation where username='$username' group by locationname order by locationname asc";
-						$exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
-						while ($res1 = mysqli_fetch_array($exec1))
-						{
-						$res1location = $res1["locationname"];
-						$res1locationanum = $res1["locationcode"];
-						?>
-						<option value="<?php echo $res1locationanum; ?>" <?php if($location!='')if($location==$res1locationanum){echo "selected";}?>><?php echo $res1location; ?></option>
-						<?php
-						}
-						?>
-                      </select>
-					 
-              </span></td>
-			   <td  align="left" colspan="2" valign="middle"  bgcolor="#FFFFFF" class="bodytext3"></td>
-			  </tr>
-			<!--<tr>
-              <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3"></td>
-              <td width="82%" colspan="3" align="left" valign="top"  bgcolor="#FFFFFF"><span class="bodytext3">
-                <span class="bodytext32">
-                <input type='radio' value='1' id='types' name='types' checked> <strong>PDF </strong>&nbsp;&nbsp;
-				<input type='radio' value='2' id='types' name='types' > <strong>Excel </strong>
-              </span></td>
-           </tr>-->	
-            <tr>
-              <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3"><input type="hidden" name="searchsuppliercode" onBlur="return suppliercodesearch1()" onKeyDown="return suppliercodesearch2()" id="searchsuppliercode" style="text-transform:uppercase" value="<?php echo $searchsuppliercode; ?>" size="20" /></td>
-              <td colspan="3" align="left" valign="top"  bgcolor="#FFFFFF">
-			  <input type="hidden" name="cbfrmflag1" value="cbfrmflag1">
-                  <input  type="submit"  value="Search" name="Submit" />
-                  <input name="resetbutton" type="reset" id="resetbutton" value="Reset" /></td>
-            </tr>
-			  </tbody>
-        </table>
-	   </td>
-      </tr>
-	  <tr><td  align="left" colspan="4" valign="middle"  >&nbsp;</td></tr>
+            <!-- Search Form -->
+            <form name="cbform1" method="post" action="" class="search-form">
+                <div class="form-section">
+                    <div class="form-section-header">
+                        <i class="fas fa-search form-section-icon"></i>
+                        <h3 class="form-section-title">Search Dispatched Bills</h3>
+                    </div>
+                    
+                    <div class="form-section-form">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="ADate1" class="form-label">Date From</label>
+                                <input name="ADate1" id="ADate1" value="<?php echo $ADate1; ?>" class="form-input" size="10" readonly="readonly" onKeyDown="return disableEnterKey()" />
+                                <i class="fas fa-calendar-alt" onClick="javascript:NewCssCal('ADate1')" style="cursor:pointer; margin-left: 5px;"></i>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="ADate2" class="form-label">Date To</label>
+                                <input name="ADate2" id="ADate2" value="<?php echo $ADate2; ?>" class="form-input" size="10" readonly="readonly" onKeyDown="return disableEnterKey()" />
+                                <i class="fas fa-calendar-alt" onClick="javascript:NewCssCal('ADate2')" style="cursor:pointer; margin-left: 5px;"></i>
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="location" class="form-label">Location</label>
+                                <select name="location" id="location" class="form-input" onChange="ajaxlocationfunction(this.value);">
+                                    <option value="">ALL</option>
+                                    <?php
+                                    $query1 = "select * from master_employeelocation where username='$username' group by locationname order by locationname asc";
+                                    $exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
+                                    while ($res1 = mysqli_fetch_array($exec1)) {
+                                        $res1location = $res1["locationname"];
+                                        $res1locationanum = $res1["locationcode"];
+                                    ?>
+                                        <option value="<?php echo $res1locationanum; ?>" <?php if($location!='')if($location==$res1locationanum){echo "selected";}?>><?php echo $res1location; ?></option>
+                                    <?php } ?>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <input type="hidden" name="cbfrmflag1" value="cbfrmflag1">
+                                <button type="submit" class="btn btn-primary" name="Submit">
+                                    <i class="fas fa-search"></i> Search
+                                </button>
+                                <button name="resetbutton" type="reset" id="resetbutton" class="btn btn-secondary">
+                                    <i class="fas fa-undo"></i> Reset
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+            <!-- Results Section -->
 			<?php
 				if (isset($_REQUEST["cbfrmflag1"])) { $cbfrmflag1 = $_REQUEST["cbfrmflag1"]; } else { $cbfrmflag1 = ""; }
 				//$cbfrmflag1 = $_REQUEST['cbfrmflag1'];
@@ -408,29 +450,34 @@ text-align:right;
 				$query24 = "select * from completed_billingpaylater where date(updatedate) between '$ADate1' and '$ADate2' $locationcodenew order by updatedate desc";
 			?>
 
-			<tr>
-               <td colspan="4" >
-			     <table id="AutoNumber3" style="BORDER-COLLAPSE: collapse" 
-						 bordercolor="#666666" cellspacing="0" cellpadding="4" width="1032" 
-						 align="left" border="0">
-                         <tr>
-						<td colspan="12" align="right" valign="center" 
-                bgcolor="#ecf0f5" class="bodytext31"><div align="right"><a target="_blank" href="print_dispatchedbills.php?cbfrmflag1=cbfrmflag1&ADate1=<?php echo $ADate1; ?>&&ADate2=<?php echo $ADate2; ?>&&locationcode=<?php echo $locationcode1; ?>"><img src="images/excel-xls-icon.png" width="30" height="30"></a></div></td>
-                </tr>
-						 <tr>
-						  <th align="left" valign="center" bgcolor="#ffffff" class="bodytext31" width="5%"><strong>Sno</strong></th>
-						  <th align="left" valign="center" bgcolor="#ffffff" class="bodytext31"  width="5%"><strong>Batch</strong></th>
-						  <th align="left" valign="center" bgcolor="#ffffff" class="bodytext31"  width="12%"><strong>Bill No</strong></th>
-						  <th align="left" valign="center" bgcolor="#ffffff" class="bodytext31"  width="10%"><strong>Bill Date</strong></th>
-						  <th align="left" valign="center" bgcolor="#ffffff" class="bodytext31"  width="25%"><strong>Patient Name</strong></th>
-						  <th align="left" valign="center" bgcolor="#ffffff" class="bodytext31"  width="10%"><strong>Patient Code</strong></th>
-						  <!--<th align="left" valign="center" bgcolor="#ffffff" class="bodytext31"  width="10%"><strong>Visit Code</strong></th>-->
-						  <th align="left" valign="center" bgcolor="#ffffff" class="bodytext31"  width="15%"><strong>Subtype</strong></th>
-						  <th align="left" valign="center" bgcolor="#ffffff" class="bodytext31"  width="15%"><strong>Account</strong></th>
-						  <th align="left" valign="center" bgcolor="#ffffff" class="bodytext31"  width="10%"><strong>Bill Amt.</strong></th>
-						  <th align="left" valign="center" bgcolor="#ffffff" class="bodytext31"  width="15%"><strong>Dispatched By</strong></th>
-						  <th align="left" valign="center" bgcolor="#ffffff" class="bodytext31"  width="25%"><strong>Dispatched Date</strong></th>
-						</tr>
+            <!-- Data Table Section -->
+            <div class="data-table-section">
+                <div class="data-table-header">
+                    <h3 class="data-table-title">Dispatched Bills Results</h3>
+                    <div class="data-table-actions">
+                        <a target="_blank" href="print_dispatchedbills.php?cbfrmflag1=cbfrmflag1&ADate1=<?php echo $ADate1; ?>&&ADate2=<?php echo $ADate2; ?>&&locationcode=<?php echo $locationcode1; ?>" class="btn btn-outline">
+                            <i class="fas fa-file-excel"></i> Export to Excel
+                        </a>
+                    </div>
+                </div>
+                
+                <table class="data-table">
+                    <thead class="table-header">
+                        <tr>
+                            <th class="table-header-cell">Sno</th>
+                            <th class="table-header-cell">Batch</th>
+                            <th class="table-header-cell">Bill No</th>
+                            <th class="table-header-cell">Bill Date</th>
+                            <th class="table-header-cell">Patient Name</th>
+                            <th class="table-header-cell">Patient Code</th>
+                            <th class="table-header-cell">Subtype</th>
+                            <th class="table-header-cell">Account</th>
+                            <th class="table-header-cell text-right">Bill Amount</th>
+                            <th class="table-header-cell">Dispatched By</th>
+                            <th class="table-header-cell">Dispatched Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
                         
 						<?php
 						
@@ -465,41 +512,134 @@ text-align:right;
 						}
 
                         ?>
-						<tr <?php echo $colorcode; ?>>
-			            <td class="bodytext31" valign="center"  align="left"><?php echo $colorloopcount; ?></td>
-						<td class="bodytext31" valign="center"  align="left"><?php echo $res24['printno']; ?></td>
-						<td class="bodytext31" valign="center"  align="left"><?php echo $res24['billno']; ?></td>
-						<td class="bodytext31" valign="center"  align="left"><?php echo $res24['billdate']; ?></td>
-						<td class="bodytext31" valign="center"  align="left"><?php echo $res24['patientname']; ?></td>
-						<td class="bodytext31" valign="center"  align="left"><?php echo $res24['patientcode']; ?></td>
-						<!--<td class="bodytext31" valign="center"  align="left"><?php echo $res24['visitcode']; ?></td>-->
-						<td class="bodytext31" valign="center"  align="left"><?php echo $res24['subtype']; ?></td>
-						<td class="bodytext31" valign="center"  align="left"><?php echo $scheme_name; ?></td>
-						<td class="bodytext31" valign="center"  align="right"><?php echo number_format($res24['totalamount'],2,'.',','); ?></td>
-						<td class="bodytext31" valign="center"  align="left"><?php echo $res24['username']; ?></td>
-						<td class="bodytext31" valign="center"  align="left"><?php echo $res24['updatedate']; ?></td>
-
-                       </tr>
+                        <tr class="<?php echo ($colorloopcount % 2 == 0) ? 'table-row-even' : 'table-row-odd'; ?>">
+                            <td class="table-cell"><?php echo $colorloopcount; ?></td>
+                            <td class="table-cell"><?php echo $res24['printno']; ?></td>
+                            <td class="table-cell"><?php echo $res24['billno']; ?></td>
+                            <td class="table-cell"><?php echo $res24['billdate']; ?></td>
+                            <td class="table-cell"><?php echo $res24['patientname']; ?></td>
+                            <td class="table-cell"><?php echo $res24['patientcode']; ?></td>
+                            <td class="table-cell"><?php echo $res24['subtype']; ?></td>
+                            <td class="table-cell"><?php echo $scheme_name; ?></td>
+                            <td class="table-cell text-right"><?php echo number_format($res24['totalamount'],2,'.',','); ?></td>
+                            <td class="table-cell"><?php echo $res24['username']; ?></td>
+                            <td class="table-cell"><?php echo $res24['updatedate']; ?></td>
+                        </tr>
 					   <?php } ?>
 
 
-                 </table>
-			   
-			   </td>
-			</tr>
+                    </tbody>
+                </table>
+            </div>
+            <?php } ?>
+        </main>
+    </div>
 
-			<?php } ?>
-        
-		</form>		
-      <tr>
-        <td>&nbsp;</td>
-      </tr>
-       
-	  
-    </table>
-	</td>
-	</tr>
-</table>
-<?php include ("includes/footer1.php"); ?>
+    <!-- Modern JavaScript Functions -->
+    <script>
+        // Sidebar toggle functionality
+        function toggleSidebar() {
+            const sidebar = document.getElementById('leftSidebar');
+            const toggle = document.querySelector('.sidebar-toggle i');
+            
+            sidebar.classList.toggle('collapsed');
+            toggle.classList.toggle('fa-chevron-left');
+            toggle.classList.toggle('fa-chevron-right');
+        }
+
+        // Page refresh function
+        function refreshPage() {
+            window.location.reload();
+        }
+
+        // Export to Excel function
+        function exportToExcel() {
+            // Add export functionality here
+            alert('Export functionality will be implemented');
+        }
+
+        // Print report function
+        function printReport() {
+            window.print();
+        }
+
+        // Initialize sidebar toggle on menu button click
+        document.getElementById('menuToggle').addEventListener('click', function() {
+            const sidebar = document.getElementById('leftSidebar');
+            sidebar.classList.toggle('show');
+        });
+
+        // Close sidebar when clicking outside
+        document.addEventListener('click', function(event) {
+            const sidebar = document.getElementById('leftSidebar');
+            const menuToggle = document.getElementById('menuToggle');
+            
+            if (!sidebar.contains(event.target) && !menuToggle.contains(event.target)) {
+                sidebar.classList.remove('show');
+            }
+        });
+    </script>
+
+    <!-- JavaScript for functionality -->
+    <script type="text/javascript">
+        function clickcheck(cat,val) {
+            if(cat=='com') {
+                document.getElementById("misscheck"+val).checked=false;
+                document.getElementById("incomcheck"+val).checked=false;
+            } else if(cat=='incom') {
+                document.getElementById("comcheck"+val).checked=false;
+                document.getElementById("misscheck"+val).checked=false;
+            } else {
+                document.getElementById("comcheck"+val).checked=false;
+                document.getElementById("incomcheck"+val).checked=false;
+            }
+        }
+
+        function ajaxlocationfunction(val) { 
+            if (window.XMLHttpRequest) {
+                xmlhttp = new XMLHttpRequest();
+            } else {
+                xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
+            }
+            xmlhttp.onreadystatechange = function() {
+                if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+                    document.getElementById("ajaxlocation").innerHTML = xmlhttp.responseText;
+                }
+            }
+            xmlhttp.open("GET", "ajax/ajaxgetlocationname.php?loccode=" + val, true);
+            xmlhttp.send();
+        }
+
+        window.onload = function () {
+            // Initialize any required functionality
+        }
+
+        function funcAccount1() {
+            if((document.getElementById("searchsuppliername").value == "")||(document.getElementById("searchsuppliername").value == " ")) {
+                alert('Please Select Account Name');
+                return false;
+            }
+        }
+
+        function calprint() {
+            if((document.getElementById("searchsubtypeanum1").value == "")) {
+                alert('Please Select Sub Type.');
+                document.getElementById("searchsuppliername1").focus();
+                return false;
+            }
+
+            if(document.querySelector('input[name="types"]:checked').value==1) {
+                window.open("print_deliverysubpdf2.php?subtype="+document.getElementById("searchsubtypeanum1").value+"&ADate1="+document.getElementById("ADate1").value+'&ADate2='+document.getElementById("ADate2").value+'',"_blank");
+            } else {
+                window.open("print_deliverysubpdf2xl.php?subtype="+document.getElementById("searchsubtypeanum1").value+"&ADate1="+document.getElementById("ADate1").value+'&ADate2='+document.getElementById("ADate2").value+'',"_blank");
+            }
+            return false;
+        }
+
+        function cbsuppliername1() {
+            document.cbform1.submit();
+        }
+    </script>
+
 </body>
 </html>

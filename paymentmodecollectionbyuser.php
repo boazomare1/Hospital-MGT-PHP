@@ -218,13 +218,6 @@ if (isset($_REQUEST["cbbillnumber"])) { $cbbillnumber = $_REQUEST["cbbillnumber"
 
 
 
-function cbcustomername1()
-
-{
-
-	document.cbform1.submit();
-
-}
 
 
 
@@ -256,17 +249,6 @@ window.onload = function ()
 
 <link rel="stylesheet" type="text/css" href="css/autosuggest.css" />        
 
-<style type="text/css">
-
-<!--
-
-.bodytext31 {FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3b3b3c; FONT-FAMILY: Tahoma
-
-}
-
--->
-
-</style>
 
 </head>
 
@@ -304,166 +286,168 @@ window.onload = function ()
         <span>Payment Mode Collection by User</span>
     </nav>
 
-    <!-- Main Container -->
-    <div class="main-container">
+    <!-- Floating Menu Toggle -->
+    <div id="menuToggle" class="floating-menu-toggle">
+        <i class="fas fa-bars"></i>
+    </div>
 
-<table width="1901" border="0" cellspacing="0" cellpadding="2">
-
-  <tr>
-
-    <td colspan="9" bgcolor="#ecf0f5"><?php include ("includes/alertmessages1.php"); ?></td>
-
-  </tr>
-
-  <tr>
-
-    <td colspan="9" bgcolor="#ecf0f5"><?php include ("includes/title1.php"); ?></td>
-
-  </tr>
-
-  <tr>
-
-    <td colspan="9" bgcolor="#ecf0f5"><?php include ("includes/menu1.php"); ?></td>
-
-  </tr>
-
-  <tr>
-
-    <td colspan="9">&nbsp;</td>
-
-  </tr>
-
-  <tr>
-
-    <td width="1%">&nbsp;</td>
-
-    <td width="99%" valign="top"><table width="100%" border="0" cellspacing="0" cellpadding="0">
-
-      <tr>
-
-        <td width="1134">
-
-		
-
-		
-
-       <form name="cbform1" method="post" action="paymentmodecollectionbyuser.php">
-
-		<table width="660" border="0" align="left" cellpadding="4" cellspacing="0" bordercolor="#666666" id="AutoNumber3" style="border-collapse: collapse">
-
-          <tbody>
-
-            <tr bgcolor="#011E6A">
-
-              <td colspan="2" bgcolor="#ecf0f5" class="bodytext3"><strong>Collection Summary By User </strong></td>
-
-              <!--<td colspan="2" bgcolor="#ecf0f5" class="bodytext3"><?php echo $errmgs; ?>&nbsp;</td>-->
-
-              <td colspan="2" align="right" bgcolor="#ecf0f5" class="bodytext3" id="ajaxlocation"><strong> Location </strong>
-
-             
-
+    <!-- Main Container with Sidebar -->
+    <div class="main-container-with-sidebar">
+        <!-- Left Sidebar -->
+        <aside id="leftSidebar" class="left-sidebar">
+            <div class="sidebar-header">
+                <h3>Quick Navigation</h3>
+                <button id="sidebarToggle" class="sidebar-toggle">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+            </div>
             
+            <nav class="sidebar-nav">
+                <ul class="nav-list">
+                    <li class="nav-item">
+                        <a href="mainmenu1.php" class="nav-link">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="cashradiologyrefund.php" class="nav-link">
+                            <i class="fas fa-x-ray"></i>
+                            <span>Cash Radiology Refund</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="cashrefundapprovallist.php" class="nav-link">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Refund Approval List</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="chequescollected.php" class="nav-link">
+                            <i class="fas fa-money-check"></i>
+                            <span>Cheques Collected</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="claimtxnidedit.php" class="nav-link">
+                            <i class="fas fa-edit"></i>
+                            <span>Claim Transaction Edit</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="payrollprocess1.php" class="nav-link">
+                            <i class="fas fa-money-bill-wave"></i>
+                            <span>Payroll Process</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="stockreportbyitem3.php" class="nav-link">
+                            <i class="fas fa-boxes"></i>
+                            <span>Stock Report by Item</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="paymentmodecollectionsummary.php" class="nav-link">
+                            <i class="fas fa-credit-card"></i>
+                            <span>Payment Mode Collection Summary</span>
+                        </a>
+                    </li>
+                    <li class="nav-item active">
+                        <a href="paymentmodecollectionbyuser.php" class="nav-link">
+                            <i class="fas fa-users"></i>
+                            <span>Payment Mode Collection by User</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
 
-                  <?php
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Alert Container -->
+            <div id="alertContainer">
+                <?php include ("includes/alertmessages1.php"); ?>
+            </div>
 
-						
+            <!-- Page Header -->
+            <div class="page-header">
+                <div class="page-header-content">
+                    <h2>Payment Mode Collection by User</h2>
+                    <p>View comprehensive payment collection summaries by user and payment mode.</p>
+                </div>
+                <div class="page-header-actions">
+                    <button type="button" class="btn btn-secondary" onclick="refreshPage()">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                    <button type="button" class="btn btn-outline" onclick="exportToExcel()">
+                        <i class="fas fa-download"></i> Export
+                    </button>
+                </div>
+            </div>
 
-						if ($location!='')
+            <!-- Collection Summary Section -->
+            <div class="collection-summary-section">
+                <div class="collection-summary-header">
+                    <div class="collection-summary-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="collection-summary-title">Collection Summary By User</div>
+                    <div class="location-display" id="ajaxlocation">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <?php
+                        if ($location!='')
+                        {
+                            $query12 = "select locationname from master_location where locationcode='$location' order by locationname";
+                            $exec12 = mysqli_query($GLOBALS["___mysqli_ston"], $query12) or die ("Error in Query12".mysqli_error($GLOBALS["___mysqli_ston"]));
+                            $res12 = mysqli_fetch_array($exec12);
+                            echo htmlspecialchars($res1location = $res12["locationname"]);
+                        }
+                        else
+                        {
+                            $query1 = "select locationname from login_locationdetails where username='$username' and docno='$docno' group by locationname order by locationname";
+                            $exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
+                            $res1 = mysqli_fetch_array($exec1);
+                            echo htmlspecialchars($res1location = $res1["locationname"]);
+                        }
+                        ?>
+                    </div>
+                </div>
 
-						{
-
-						$query12 = "select locationname from master_location where locationcode='$location' order by locationname";
-
-						$exec12 = mysqli_query($GLOBALS["___mysqli_ston"], $query12) or die ("Error in Query12".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-						$res12 = mysqli_fetch_array($exec12);
-
-						
-
-						echo $res1location = $res12["locationname"];
-
-						//echo $location;
-
-						}
-
-						else
-
-						{
-
-						$query1 = "select locationname from login_locationdetails where username='$username' and docno='$docno' group by locationname order by locationname";
-
-						$exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-						$res1 = mysqli_fetch_array($exec1);
-
-						
-
-						echo $res1location = $res1["locationname"];
-
-						//$res1locationanum = $res1["locationcode"];
-
-						}
-
-						?>
-
-						
-
-						
-
-                  
-
-                  </td> 
-
-            </tr>
+                <form name="cbform1" method="post" action="paymentmodecollectionbyuser.php" class="search-form">
 
 			
 
-            <tr>
-
-              <td width="150" align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">Search User </td>
-
-              <td colspan="3" align="left" valign="top"  bgcolor="#FFFFFF">
-
-                <input name="cbcustomername" type="text" id="cbcustomername" value="<?php echo $cbcustomername; ?>" size="50" autocomplete="off">
-
-                       <input name="searchdescription" id="searchdescription" type="hidden" value="">
-
-	<input name="searchemployeecode" id="searchemployeecode" type="hidden" value="<?= $triageuser; ?>">
-
-	<input name="searchsuppliername1hiddentextbox" id="searchsuppliername1hiddentextbox" type="hidden" value="">
-
- 
-
-               </td>
-
-              </tr>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="cbcustomername" class="form-label">Search User</label>
+                            <div class="user-search-input">
+                                <input name="cbcustomername" type="text" id="cbcustomername" value="<?php echo htmlspecialchars($cbcustomername); ?>" class="form-input" autocomplete="off" placeholder="Type to search users...">
+                                <input name="searchdescription" id="searchdescription" type="hidden" value="">
+                                <input name="searchemployeecode" id="searchemployeecode" type="hidden" value="<?= $triageuser; ?>">
+                                <input name="searchsuppliername1hiddentextbox" id="searchsuppliername1hiddentextbox" type="hidden" value="">
+                            </div>
+                        </div>
+                    </div>
 
            
 
-           <tr>
-
-              <td class="bodytext31" valign="center"  align="left" 
-
-                bgcolor="#FFFFFF"> Date From </td>
-
-              <td width="173" align="left" valign="center"  bgcolor="#FFFFFF" class="bodytext31">
-
-			  <input name="ADate1" id="ADate1"  value="<?php echo $transactiondatefrom; ?>"  size="10"  readonly="readonly" onKeyDown="return disableEnterKey()" />
-
-				<img src="images2/cal.gif" onClick="javascript:NewCssCal('ADate1')" style="cursor:pointer"/>				</td>
-
-              <td width="132" align="left" valign="center"  bgcolor="#FFFFFF" class="bodytext31"> Date To </td>
-
-              <td width="173" align="left" valign="center"  bgcolor="#FFFFFF"><span class="bodytext31">
-
-                <input name="ADate2" id="ADate2" style="border: 1px solid #001E6A" value="<?php echo $transactiondateto; ?>"  size="10"  readonly="readonly" onKeyDown="return disableEnterKey()" />
-
-				<img src="images2/cal.gif" onClick="javascript:NewCssCal('ADate2')" style="cursor:pointer"/>
-
-			  </span></td>
-
-            </tr>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="ADate1" class="form-label">Date From</label>
+                            <div class="date-input-group">
+                                <input name="ADate1" id="ADate1" value="<?php echo htmlspecialchars($transactiondatefrom); ?>" class="form-input" readonly onKeyDown="return disableEnterKey()" />
+                                <img src="images2/cal.gif" onClick="javascript:NewCssCal('ADate1')" class="date-picker-icon" style="cursor:pointer"/>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="ADate2" class="form-label">Date To</label>
+                            <div class="date-input-group">
+                                <input name="ADate2" id="ADate2" value="<?php echo htmlspecialchars($transactiondateto); ?>" class="form-input" readonly onKeyDown="return disableEnterKey()" />
+                                <img src="images2/cal.gif" onClick="javascript:NewCssCal('ADate2')" class="date-picker-icon" style="cursor:pointer"/>
+                            </div>
+                        </div>
+                    </div>
 
 			<tr>
 

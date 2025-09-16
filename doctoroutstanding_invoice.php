@@ -1,905 +1,355 @@
-  <?php
-
+<?php
 session_start();
-
 include ("includes/loginverify.php");
-
 include ("db/db_connect.php");
 
-
-
+// Initialize variables
 $ipaddress = $_SERVER['REMOTE_ADDR'];
-
 $updatedatetime = date('Y-m-d');
-
 $username = $_SESSION['username'];
-
 $docno = $_SESSION['docno'];
-
-
-
-
 $res45transactionamount = 0;
 $companyanum = $_SESSION['companyanum'];
-
 $companyname = $_SESSION['companyname'];
 
+// Date variables
 $paymentreceiveddatefrom = date('Y-m-d', strtotime('-1 month'));
-
 $paymentreceiveddateto = date('Y-m-d');
-
 $transactiondatefrom = date('Y-m-d', strtotime('-1 month'));
-
 $transactiondateto = date('Y-m-d');
-
 $ADate2 = date('Y-m-d');
 
-
-
-$billnumbers=array();
-
-$billnumbers1=array();
-
-
+// Array variables
+$billnumbers = array();
+$billnumbers1 = array();
 
 $query01="select locationcode from login_locationdetails where username='$username' and docno='$docno'";
-
 $exe01=mysqli_query($GLOBALS["___mysqli_ston"], $query01);
-
 $res01=mysqli_fetch_array($exe01);
-
- $locationcode=$res01['locationcode'];
-
-
+$locationcode=$res01['locationcode'];
 
 $errmsg = "";
-
 $banum = "1";
-
 $supplieranum = "";
-
 $custid = "";
-
 $custname = "";
-
 $balanceamount = "0.00";
-
 $openingbalance = "0.00";
-
 $total = '0.00';
-
 $searchsuppliername = "";
-
 $cbsuppliername = "";
-
 $snocount = "";
-
 $colorloopcount="";
-
 $range = "";
-
 $snocount1 = 0;
 
-if (isset($_REQUEST["billno"])) {  $billno = $_REQUEST["billno"]; } else { $billno = ""; }
+// Handle form parameters with modern isset() checks
+$billno = isset($_REQUEST["billno"]) ? $_REQUEST["billno"] : "";
+$ADate1 = isset($_REQUEST["ADate1"]) ? $_REQUEST["ADate1"] : date('Y-m-d');
+$ADate2 = isset($_REQUEST["ADate2"]) ? $_REQUEST["ADate2"] : date('Y-m-d');
+$cbfrmflag2 = isset($_REQUEST["cbfrmflag2"]) ? $_REQUEST["cbfrmflag2"] : "";
+$frmflag2 = isset($_REQUEST["frmflag2"]) ? $_REQUEST["frmflag2"] : "";
+$allcationtype = isset($_REQUEST["allcationtype"]) ? $_REQUEST["allcationtype"] : "";
 
-//echo $searchsuppliername;
-
-if (isset($_REQUEST["ADate1"])) { $ADate1 = $_REQUEST["ADate1"]; } else { $ADate1 = $ADate1 = date('Y-m-d'); }
-
-$paymentreceiveddatefrom=$ADate1;
-
-//echo $ADate1;
-
-if (isset($_REQUEST["ADate2"])) { $ADate2 = $_REQUEST["ADate2"]; } else { $ADate2 = $ADate1 = date('Y-m-d'); }
-
-$paymentreceiveddateto=$ADate2;
-
-
-if (isset($_REQUEST["cbfrmflag2"])) { $cbfrmflag2 = $_REQUEST["cbfrmflag2"]; } else { $cbfrmflag2 = ""; }
-
-//$cbfrmflag2 = $_REQUEST['cbfrmflag2'];
-
-if (isset($_REQUEST["frmflag2"])) { $frmflag2 = $_REQUEST["frmflag2"]; } else { $frmflag2 = ""; }
-
-if (isset($_REQUEST["allcationtype"])) { $allcationtype = $_REQUEST["allcationtype"]; } else { $allcationtype = ""; }
-
-
-//$frmflag2 = $_POST['frmflag2'];
-
-
+// Update date variables if form submitted
+$paymentreceiveddatefrom = $ADate1;
+$paymentreceiveddateto = $ADate2;
 ?>
-
-<style type="text/css">
-
-.ui-menu .ui-menu-item{ zoom: 1 !important;}
-
-body {
-
-	margin-left: 0px;
-
-	margin-top: 0px;
-
-	background-color: #ecf0f5;
-
-}
-
-.bodytext3 {	FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3B3B3C; FONT-FAMILY: Tahoma
-
-}
-
-
-
-</style>
-
-<link href="autocomplete.css" rel="stylesheet">
-
-<link href="css/datepickerstyle.css" rel="stylesheet" type="text/css" />
-
-<script type="text/javascript" src="js/adddate.js"></script>
-
-<script type="text/javascript" src="js/adddate2.js"></script>
-
-<script type="text/javascript" src="js/jquery-1.11.1.min.js"></script>
-
-
-
-<script src="js/jquery.min-autocomplete.js"></script>
-
-<script src="js/jquery-ui.min.js"></script>
-
-<script>
-
-function funcAccount()
-
-{
-
-if((document.getElementById("searchsuppliername").value == "")||(document.getElementById("searchsuppliername").value == " "))
-
-{
-
-alert('Please Select Doctor');
-
-return false;
-
-}
-
-}
-
-function loadprintpagepdf2(billnumber,doctorcode)
-
-{
-
-
-		window.open("print_doctorstmtbill.php?billnumber="+billnumber+'&&doctorcode='+doctorcode,"Window",'width=722,height=950,toolbar=0,scrollbars=1,location=0,bar=0,menubar=1,resizable=1,left=25,top=25');
-
-}
-$(document).ready(function($){
-
-    $('#searchsuppliername').autocomplete({
-
-		
-
-	
-
-	source:"ajaxdoctornewserach.php",
-
-	//alert(source);
-
-	matchContains: true,
-
-	minLength:1,
-
-	html: true, 
-
-		select: function(event,ui){
-
-			var code = ui.item.customercode;
-
-			$("#searchsuppliercode").val(code);
-
-			
-
-			},
-
-    });
-
-});
-
-</script>
-
-
-
-<link rel="stylesheet" type="text/css" href="css/autosuggest.css" />        
-
-<style type="text/css">
-
-<!--
-
-.bodytext3 {FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3b3b3c; FONT-FAMILY: Tahoma; text-decoration:none
-
-}
-
-.bodytext31 {FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3b3b3c; FONT-FAMILY: Tahoma; text-decoration:none
-
-}
-
-.bodytext311 {FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3b3b3c; FONT-FAMILY: Tahoma; text-decoration:none
-
-}
-
--->
-
-.bal
-
-{
-
-border-style:none;
-
-background:none;
-
-text-align:right;
-
-}
-
-.bali
-
-{
-
-text-align:right;
-
-}
-
-</style>
-
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doctor Outstanding Invoice Wise Report - MedStar Hospital Management</title>
+    
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <!-- Modern CSS -->
+    <link rel="stylesheet" href="css/vat-modern.css?v=<?php echo time(); ?>">
+    
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- Date Picker CSS -->
+    <link href="css/datepickerstyle.css" rel="stylesheet" type="text/css" />
+    
+    <!-- Additional CSS -->
+    <link href="autocomplete.css" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="css/autosuggest.css" />
+    
+    <!-- JavaScript Files -->
+    <script type="text/javascript" src="js/adddate.js"></script>
+    <script type="text/javascript" src="js/adddate2.js"></script>
+    <script src="js/jquery.min-autocomplete.js"></script>
+    <script src="js/jquery-ui.min.js"></script>
+    
+    <style>
+        .ui-menu .ui-menu-item { zoom: 1 !important; }
+        .bal { border-style: none; background: none; text-align: right; }
+        .bali { text-align: right; }
+    </style>
 </head>
-
-
-
-<script src="js/datetimepicker_css.js"></script>
-
-
-
 <body>
-
-<table width="101%" border="0" cellspacing="0" cellpadding="2">
-
-  <tr>
-
-    <td colspan="10" bgcolor="#ecf0f5"><?php include ("includes/alertmessages1.php"); ?></td>
-
-  </tr>
-
-  <tr>
-
-    <td colspan="10" bgcolor="#ecf0f5"><?php include ("includes/title1.php"); ?></td>
-
-  </tr>
-
-  <tr>
-
-    <td colspan="10" bgcolor="#ecf0f5"><?php include ("includes/menu1.php"); ?></td>
-
-  </tr>
-
-  <tr>
-
-    <td colspan="10">&nbsp;</td>
-
-  </tr>
-
-  <tr>
-
-    <td width="1%">&nbsp;</td>
-
-    <td width="2%" valign="top"><?php //include ("includes/menu4.php"); ?>
-
-      &nbsp;</td>
-
-    <td width="97%" valign="top"><table width="116%" border="0" cellspacing="0" cellpadding="0">
-
-      <tr>
-
-        <td width="860">
-
-		
-
-		
-
-              <form name="cbform1" method="post" action="">
-
-		<table width="800" border="0" align="left" cellpadding="4" cellspacing="0" bordercolor="#666666" id="AutoNumber3" style="border-collapse: collapse">
-
-          <tbody>
-
-            <tr bgcolor="#011E6A">
-
-              <td colspan="4" bgcolor="#ecf0f5" class="bodytext3"><strong>Doctor Outstanding Invoice Wise</strong></td>
-
-              </tr>
-           <tr>
-
-              <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">Bill Number</td>
-
-              <td width="82%" colspan="3" align="left" valign="top"  bgcolor="#FFFFFF"><span class="bodytext3">
-
-              <input name="billno" type="text" id="billno" value="" size="50" autocomplete="off">
-
-              </span></td>
-
-           </tr>
-
-		    <tr>
-
-              <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3"></td>
-
-              <td width="82%" colspan="3" align="left" valign="top"  bgcolor="#FFFFFF"><span class="bodytext3">
-
-             <strong> -OR- <strong>
-
-              </span></td>
-
-            </tr>
-
-			<tr>
-
-              <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">Allocation</td>
-
-              <td width="82%" colspan="3" align="left" valign="top"  bgcolor="#FFFFFF"><span class="bodytext3">
-
-              <select name='allcationtype' id='allcationtype'>
-			   <option value='Fully' <?php if($allcationtype=="Fully") echo "selected"; else echo "";?>>Fully</option>
-			   <option value='Partly' <?php if($allcationtype=="Partly") echo "selected"; else echo "";?>>Partly</option>
-
-			  </select>
-
-              </span></td>
-
-           </tr>
-
-		   
-
-			  <tr>
-
-                      <td class="bodytext31" valign="center"  align="left" 
-
-                bgcolor="#FFFFFF"> Date From </td>
-
-                      <td width="30%" align="left" valign="center"  bgcolor="#FFFFFF" class="bodytext31"><input name="ADate1" id="ADate1" value="<?php echo $paymentreceiveddatefrom; ?>"  size="10"  readonly="readonly" onKeyDown="return disableEnterKey()" />
-
-                          <img src="images2/cal.gif" onClick="javascript:NewCssCal('ADate1')" style="cursor:pointer"/> </td>
-
-                      <td width="16%" align="left" valign="center"  bgcolor="#FFFFFF" class="bodytext31"> Date To </td>
-
-                      <td width="33%" align="left" valign="center"  bgcolor="#FFFFFF"><span class="bodytext31">
-
-                        <input name="ADate2" id="ADate2" value="<?php echo $paymentreceiveddateto; ?>"  size="10"  readonly="readonly" onKeyDown="return disableEnterKey()" />
-
-                        <!--<img src="images2/cal.gif" onClick="javascript:NewCssCal('ADate2')" style="cursor:pointer"/> </span>-->
-                         <img src="images2/cal.gif" onClick="javascript:NewCssCal('ADate2','yyyyMMdd','','','','','past','07-01-2019','<?php echo date('m-d-Y');?>')" style="cursor:pointer"/>
-                      </td>
-
-                    </tr>	
-
-            <tr>
-
-              <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3"><input type="hidden" name="searchsuppliercode" onBlur="return suppliercodesearch1()" onKeyDown="return suppliercodesearch2()" id="searchsuppliercode" style="text-transform:uppercase" value="<?php echo $searchsuppliercode; ?>" size="20" /></td>
-
-              <td colspan="3" align="left" valign="top"  bgcolor="#FFFFFF">
-
-              <input type="hidden" name="subcode" value="<?php echo $searchsuppliercode; ?>">
-
-			  <input type="hidden" name="cbfrmflag1" value="cbfrmflag1">
-
-                  <input type="submit" onClick="return funcAccount();" value="Search" name="Submit" />
-
-                  <input name="resetbutton" type="reset" id="resetbutton" value="Reset" /></td>
-
-            </tr>
-
-          </tbody>
-
-        </table>
-
-		</form>		</td>
-
-      </tr>
-
-      <tr>
-
-        <td>&nbsp;</td>
-
-      </tr>
-
-       <tr>
-
-        <td><table id="AutoNumber3" style="BORDER-COLLAPSE: collapse" 
-
-            bordercolor="#666666" cellspacing="0" cellpadding="4" width="1250" 
-
-            align="left" border="0">
-
-          <tbody>
-
-            <tr>
-
-              <td width="4%" bgcolor="#ecf0f5" class="bodytext31">&nbsp;</td>
-
-              <td colspan="14" bgcolor="#ecf0f5" class="bodytext31"><span class="bodytext311">
-
-              <?php
-
-				if (isset($_REQUEST["cbfrmflag1"])) { $cbfrmflag1 = $_REQUEST["cbfrmflag1"]; } else { $cbfrmflag1 = ""; }
-
-				//$cbfrmflag1 = $_REQUEST['cbfrmflag1'];
-
-				
-
-				?>
-
-
-</span></td>  
-
-            </tr>
-
-            <tr>
-
-              <td class="bodytext31" valign="center"  align="left" 
-
-                bgcolor="#ffffff"><strong>No.</strong></td>
-
-              <td width="7%" align="left" valign="center"  
-
-                bgcolor="#ffffff" class="bodytext31"><div align="left"><strong>Date</strong></div></td>
-
-              <td width="20%" align="left" valign="center"  
-
-                bgcolor="#ffffff" class="bodytext31"><strong> Description </strong></td>
-                 <td width="8%" align="left" valign="center"  
-
-                bgcolor="#ffffff" class="bodytext31"><strong>Bill Number</strong></td>
-                 <td width="" align="left" valign="center"  
-
-                bgcolor="#ffffff" class="bodytext31"><strong> Company </strong></td>
-
-				
-			    <td width="3%" align="left" valign="center"   bgcolor="#ffffff" class="bodytext31"><strong>Allotted</strong></td>
-
-             
-              <td width="8%" align="right" valign="center"  bgcolor="#ffffff" class="bodytext31"><strong>Invoice Amt</strong></td>
-
-              <td width="10%" align="left" valign="center"  
-
-                bgcolor="#ffffff" class="bodytext31"><div align="right"><strong>Total Doctors Amt</strong></div></td>
-
-                 <td width="5%" align="right" valign="center"  bgcolor="#ffffff" class="bodytext31"><strong>CrN</strong></td>
-
-				<td width="85" align="left" valign="center" bgcolor="#ffffff" class="bodytext31"><div align="center"><strong>Payable Amt</strong></div></td>
-
-
-				<td width="6%" align="left" valign="center" bgcolor="#ffffff" class="bodytext31"><div align="right"><strong>Paid Amt</strong></div></td>
-
-				<td width="8%" align="left" valign="center" bgcolor="#ffffff" class="bodytext31"><div align="right"><strong>Invoice Balance</strong></div></td>
-
-				<td width="10%" align="left" valign="center" bgcolor="#ffffff" class="bodytext31"><div align=""><strong>Doctor Name</strong></div></td>
-
-				<td width="8%" align="left" valign="center" bgcolor="#ffffff" class="bodytext31"><div align="right"><strong>Doctors Paid</strong></div></td>
-
-				<td width="8%" align="left" valign="center" bgcolor="#ffffff" class="bodytext31"><div align="right"><strong>Doctors Bal.</strong></div></td>
-
-            </tr>
-
-			<?php
-			
-
-			if (isset($_REQUEST["cbfrmflag1"])) { $cbfrmflag1 = $_REQUEST["cbfrmflag1"]; } else { $cbfrmflag1 = ""; }
-
-
-			if ($cbfrmflag1 == 'cbfrmflag1')
-			{
-
-
-			?>
-
-				<!--<tr bgcolor="#ffffff">
-
-					<td colspan="16"  align="left" valign="center" bgcolor="#ffffff" class="bodytext31"><strong>(Date From: <?php echo $ADate1; ?> Date To: <?php echo $ADate2; ?>)</strong></td>
-
-				</tr>-->
-
-				
-
-			<?php
-				
-			
-            $snocount = 0;
-
-			if($billno!=''){
-				$subquery="docno = '$billno'";
-				$type="invoice";
-			}
-			else{
-				$subquery="recorddate between '$ADate1' and '$ADate2'";
-				$type="allocation";
-			}
-
-			$query2 = "SELECT patientname,patientcode,visitcode,docno,recorddate,doccoa,visittype,sum(transactionamount) as transactionamount,sum(sharingamount) as sharingamount from billing_ipprivatedoctor where $subquery and doccoa!='' group by docno,doccoa";
+    <!-- Hospital Header -->
+    <header class="hospital-header">
+        <h1 class="hospital-title">🏥 MedStar Hospital Management</h1>
+        <p class="hospital-subtitle">Advanced Healthcare Management Platform</p>
+    </header>
+
+    <!-- User Information Bar -->
+    <div class="user-info-bar">
+        <div class="user-welcome">
+            <span class="welcome-text">Welcome, <strong><?php echo htmlspecialchars($username); ?></strong></span>
+            <span class="location-info">📍 Company: <?php echo htmlspecialchars($companyname); ?></span>
+        </div>
+        <div class="user-actions">
+            <a href="mainmenu1.php" class="btn btn-outline">🏠 Main Menu</a>
+            <a href="logout.php" class="btn btn-outline">🚪 Logout</a>
+        </div>
+    </div>
+
+    <!-- Navigation Breadcrumb -->
+    <nav class="nav-breadcrumb">
+        <a href="mainmenu1.php">🏠 Home</a>
+        <span>→</span>
+        <span>Reports</span>
+        <span>→</span>
+        <span>Doctor Outstanding Invoice Wise</span>
+    </nav>
+
+    <!-- Floating Menu Toggle -->
+    <div id="menuToggle" class="floating-menu-toggle">
+        <i class="fas fa-bars"></i>
+    </div>
+
+    <!-- Main Container with Sidebar -->
+    <div class="main-container-with-sidebar">
+        <!-- Left Sidebar -->
+        <aside id="leftSidebar" class="left-sidebar">
+            <div class="sidebar-header">
+                <h3>Quick Navigation</h3>
+                <button id="sidebarToggle" class="sidebar-toggle">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+            </div>
             
-			$exec2 = mysqli_query($GLOBALS["___mysqli_ston"], $query2) or die ("Error in Query2".mysqli_error($GLOBALS["___mysqli_ston"]));
-			$rowcount2 = mysqli_num_rows($exec2);
-			while ($res2 = mysqli_fetch_array($exec2))
-			{	
-				
-				$suppliername1 = $res2['patientname'];
-				$patientcode = $res2['patientcode'];
-				$visitcode = $res2['visitcode'];
-				$billnumber = $res2['docno'];
-				$billdate = $res2['recorddate'];
-				$doccoa=$res2['doccoa'];
+            <nav class="sidebar-nav">
+                <ul class="nav-list">
+                    <li class="nav-item">
+                        <a href="mainmenu1.php" class="nav-link">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="reports.php" class="nav-link">
+                            <i class="fas fa-chart-bar"></i>
+                            <span>Reports</span>
+                        </a>
+                    </li>
+                    <li class="nav-item active">
+                        <a href="doctoroutstanding_invoice.php" class="nav-link">
+                            <i class="fas fa-user-md"></i>
+                            <span>Doctor Outstanding Invoice</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="billing.php" class="nav-link">
+                            <i class="fas fa-receipt"></i>
+                            <span>Billing</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="masterdata.php" class="nav-link">
+                            <i class="fas fa-database"></i>
+                            <span>Master Data</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
 
-				$query21 = "select doctorname from master_doctor where doctorcode = '$doccoa'";
-				$exec21 = mysqli_query($GLOBALS["___mysqli_ston"], $query21) or die ("Error in Query21".mysqli_error($GLOBALS["___mysqli_ston"]));
-				$res21 = mysqli_fetch_array($exec21);
-				$doctorname = $res21['doctorname'];
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Alert Container -->
+            <div id="alertContainer">
+                <?php include ("includes/alertmessages1.php"); ?>
+            </div>
 
-				$query2b = "SELECT sum(transactionamount) as transactionamount,sum(sharingamount) as transactionamount1 from billing_ipprivatedoctor where docno = '$billnumber' and doccoa!='' group by docno";
-				$exec2b = mysqli_query($GLOBALS["___mysqli_ston"], $query2b) or die ("Error in query2b".mysqli_error($GLOBALS["___mysqli_ston"]));
-				$res2b = mysqli_fetch_array($exec2b);
-				
-			
-			    $query11 = "SELECT billtype,subtype from master_visitentry where patientcode = '$patientcode' and visitcode = '$visitcode'  ";
-				$exec11 = mysqli_query($GLOBALS["___mysqli_ston"], $query11) or die ("Error in Query11".mysqli_error($GLOBALS["___mysqli_ston"]));
-				$res11 = mysqli_fetch_array($exec11);
-				$num11 =mysqli_num_rows($exec11);
-				$billtype = $res11['billtype'];
-				$subtype = $res11['subtype'];
-				
-				if($num11 ==0)
-				{
-				$query11 = "SELECT billtype,subtype from master_ipvisitentry where patientcode = '$patientcode' and visitcode = '$visitcode' ";
-				$exec11 = mysqli_query($GLOBALS["___mysqli_ston"], $query11) or die ("Error in Query11".mysqli_error($GLOBALS["___mysqli_ston"]));
-				$res11 = mysqli_fetch_array($exec11);
-				$billtype = $res11['billtype'];
-				$subtype = $res11['subtype'];
-				}
+            <!-- Page Header -->
+            <div class="page-header">
+                <div class="page-header-content">
+                    <h2>Doctor Outstanding Invoice Wise Report</h2>
+                    <p>Generate comprehensive reports on doctor outstanding amounts by invoice, with detailed allocation tracking.</p>
+                </div>
+                <div class="page-header-actions">
+                    <button type="button" class="btn btn-secondary" onclick="refreshPage()">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                    <button type="button" class="btn btn-outline" onclick="exportToExcel()">
+                        <i class="fas fa-file-excel"></i> Export
+                    </button>
+                </div>
+            </div>
 
-				
-                if(isset($billtype2) && $billtype2!='')
-					$billtype2=$billtype2;
-				else
-					$billtype2=$billtype;
+            <!-- Search Form -->
+            <form name="cbform1" method="post" action="" class="form-section">
+                <div class="form-section-header">
+                    <i class="fas fa-search form-section-icon"></i>
+                    <h3 class="form-section-title">Search Criteria</h3>
+                    <span class="form-section-subtitle">Enter search parameters to generate the invoice-wise outstanding report</span>
+                </div>
                 
-				$invoiceallocatedamt=0;
-				$invoiceamt = 0;
-
-
-				
-                $alloted_status='No';
-				if($billtype2 == 'PAY NOW' || strpos( $billnumber, "CF-" ) !== false)
-				{
-				   $alloted_status = "Yes";
-				   
-
-				}
-				elseif($billtype2 == 'PAY LATER')
-			    {
-
-			   		 $transc_amt = 0;
-
-					 $query27 = "select sum(billbalanceamount) as billbalanceamount from master_transactionpaylater where billnumber='$billnumber' and (recordstatus='allocated' || recordstatus='') and transactionstatus <> 'onaccount' and acc_flag = '0'  and transactiontype='PAYMENT'";
-
-
-					$exec27 = mysqli_query($GLOBALS["___mysqli_ston"], $query27) or die ("Error in Query27".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-					$num2 = mysqli_num_rows($exec27);
-
-					if($num2==0){
-						$alloted_status = "No";
-					}else{
+                <div class="form-section-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="billno" class="form-label">Bill Number</label>
+                            <input name="billno" type="text" id="billno" class="form-input" value="<?php echo $billno; ?>" placeholder="Enter bill number" autocomplete="off" />
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">-OR-</label>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="allcationtype" class="form-label">Allocation Type</label>
+                            <select name="allcationtype" id="allcationtype" class="form-input">
+                                <option value="Fully" <?php echo ($allcationtype == "Fully") ? "selected" : ""; ?>>Fully</option>
+                                <option value="Partly" <?php echo ($allcationtype == "Partly") ? "selected" : ""; ?>>Partly</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="ADate1" class="form-label">Date From</label>
+                            <div class="form-input-group">
+                                <input name="ADate1" id="ADate1" class="form-input" value="<?php echo $paymentreceiveddatefrom; ?>" readonly="readonly" onKeyDown="return disableEnterKey()" />
+                                <i class="fas fa-calendar-alt" onClick="javascript:NewCssCal('ADate1')" style="cursor:pointer"></i>
+                            </div>
+                        </div>
                         
-
-						$res27 = mysqli_fetch_array($exec27);
-						$transc_amt_bal = $res27['billbalanceamount'];						
-
-						if($transc_amt_bal==null || $transc_amt_bal=="")
-						{
-						 $alloted_status = "No";
-						}
-						elseif($transc_amt_bal>0 )
-						{
-						 $alloted_status = "Partly";
-						}
-						else
-						{
-						 $alloted_status = "Fully";
-						}
-					
-					}
-
-					$query27 = "select sum(transactionamount) as transactionamount from master_transactionpaylater where billnumber='$billnumber' and (recordstatus='allocated' || recordstatus='') and transactionstatus <> 'onaccount' and transactiontype='PAYMENT'";
-					$exec27 = mysqli_query($GLOBALS["___mysqli_ston"], $query27) or die ("Error in Query27".mysqli_error($GLOBALS["___mysqli_ston"]));
-					$res27 = mysqli_fetch_array($exec27);
-					$invoiceallocatedamt = $res27['transactionamount'];
-
-					
-			   }
-
-			   if($type=='allocation'){
-                  if($allcationtype=='Fully' && ($alloted_status=="No" || $alloted_status=="Partly"))
-					  continue;
-				  elseif($allcationtype=='Partly' && ($alloted_status=="No" || $alloted_status=="Fully" || $alloted_status=="Yes"))
-					  continue;
-			   }
-
-
-			   $subtypesql="select subtype from master_subtype where auto_number='$subtype'";
-				$sexec11 = mysqli_query($GLOBALS["___mysqli_ston"], $subtypesql) or die ("Error in subtypesql".mysqli_error($GLOBALS["___mysqli_ston"]));
-				$sres11 = mysqli_fetch_array($sexec11);
-				$subtype = $sres11['subtype'];
-
-				if($res2['visittype']=='OP'){
-				  $amount_topay_doc = $res2['transactionamount'];				
-				  $totaldocamt = $res2b['transactionamount'];
-
-				}
-				else{
-				  $amount_topay_doc = $res2['sharingamount'];
-				  $totaldocamt = $res2b['transactionamount1'];
-				}
-
-				if(strpos( $billnumber, "CF-" ) !== false){
-                    $query27b = "select sum(subtotalamount) as transactionamount from master_billing where billnumber='$billnumber'";
-					  $exec27b = mysqli_query($GLOBALS["___mysqli_ston"], $query27b) or die ("Error in query27b".mysqli_error($GLOBALS["___mysqli_ston"]));
-					  $res27b = mysqli_fetch_array($exec27b);
-					  $invoiceamt = $res27b['transactionamount'];
-				  
-				}else{   
-					  $query27b = "select sum(fxamount) as transactionamount from master_transactionpaylater where billnumber='$billnumber' and transactiontype='finalize'";
-				  $exec27b = mysqli_query($GLOBALS["___mysqli_ston"], $query27b) or die ("Error in query27b".mysqli_error($GLOBALS["___mysqli_ston"]));
-				  $res27b = mysqli_fetch_array($exec27b);
-				  $invoiceamt = $res27b['transactionamount'];					 
-
-				  }
-
-
-
-			    $query27 = "select sum(amount) as amount from adhoc_creditnote where ref_no='$billnumber'";
-				$exec27 = mysqli_query($GLOBALS["___mysqli_ston"], $query27) or die ("Error in Query27".mysqli_error($GLOBALS["___mysqli_ston"]));
-				$res27 = mysqli_fetch_array($exec27);
-				$crnamt = $res27['amount'];
-
-                $res45transactionamount=0;
-				$query234 = "SELECT sum(sharingamount) as sharingamount, sum(transactionamount) as transactionamount, docno, percentage, pvtdr_percentage, visittype FROM `billing_ipprivatedoctor_refund` WHERE doccoa='$doccoa'  AND `visitcode` =  '$visitcode' and against_refbill='$billnumber' group by docno, visitcode 
-					union all SELECT 0 as sharingamount, sum(amount) as transactionamount, docno, '' as percentage, '' as pvtdr_percentage,'adhoc_creditnote_min' as visittype FROM `adhoc_creditnote` WHERE billingaccountcode='$doccoa'  AND `patientvisitcode` =  '$visitcode' and consultationdate <= '$ADate2' group by docno, patientvisitcode 
-					union ALL select 0 as sharingamount, sum(transactionamount) as transactionamount,docno,'' as percentage,'' as pvtdr_percentage, 'master_transactiondoctor' as visittype  from master_transactiondoctor where  debit_reference_no IS NULL and doctorcode='$doccoa' and `visitcode` =  '$visitcode' and transactiondate <='$ADate2' and billnumber='$billnumber'
-					
-					";
-
-				//union ALL select 0 as sharingamount, sum(transactionamount) as transactionamount,docno,'' as percentage,'' as pvtdr_percentage, 'master_transactiondoctor' as visittype  from master_transactiondoctor where  debit_reference_no IS NULL and doctorcode='$doccoa' and `visitcode` =  '$visitcode' and transactiondate <='$ADate2' and billnumber='$billnumber'
-
-				$exec234 = mysqli_query($GLOBALS["___mysqli_ston"], $query234) or die ("Error in Query234".mysqli_error($GLOBALS["___mysqli_ston"]));
-				$num234=mysqli_num_rows($exec234);
-				while($res234 = mysqli_fetch_array($exec234)){
-                   $res45transactionamount_old=0;
-				              $ref_doc = $res234['docno'];
-				              $res45vistype = $res234['visittype'];
-				              $res45transactionamount_old = $res234['sharingamount'];
-				              if($res45vistype == "OP")
-				              {
-				              	$res45doctorperecentage = $res234['percentage'];
-				              	 $res45transactionamount_old = $res234['transactionamount'];
-				              }
-				              if($res45vistype == "IP")
-				              {
-				              	$res45doctorperecentage = $res234['pvtdr_percentage'];
-				              }
-
-				              /// for CRN Bills
-				              if($res45vistype == 'adhoc_creditnote_min'){
-				              	 $res45transactionamount_old = $res234['transactionamount'];
-				              }
-				              /// for CRN Bills
-
-				     if($res45vistype == 'master_transactiondoctor')
-				        {
-				           $res45transactionamount_old = $res234['transactionamount'];
-				          // $taxamount = $res234['taxamount'];
-				          // $amtwithouttax = $res45transactionamount_old - $taxamount;
-
-				            $query124 = "select sum(original_amt) as original_amt,transactionamount, visittype,percentage,pvtdr_percentage,billtype as billtype2 from billing_ipprivatedoctor where doccoa='$doccoa' and docno='$ref_doc' and transactionamount >0";
-				            $exec124 = mysqli_query($GLOBALS["___mysqli_ston"], $query124) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
-				            $res124 = mysqli_fetch_array($exec124);
-				            $res45billamount = $res124['original_amt'];
-				            $res45vistype = $res124['visittype'];
-							//$billtype2 = $res124['billtype2'];
-				             if($res45vistype == "OP")
-				              {
-
-				              $res45doctorperecentage = $res234['percentage'];
-
-				              $res45transactionamount_old = $res234['transactionamount'];
-				              }
-				              else
-				              {
-
-				              $res45doctorperecentage = $res234['pvtdr_percentage'];
-
-				              }
-				              
-				            
-				        }
-
-				        $res45transactionamount=$res45transactionamount+$res45transactionamount_old;
-
-				}
-
-
-               $amount_topay_doc=$amount_topay_doc-$res45transactionamount;
-
-			   $colorloopcount = $colorloopcount + 1;
-
-				$showcolor = ($colorloopcount & 1); 
-
-				if ($showcolor == 0)
-				{ $colorcode = 'bgcolor="#CBDBFA"';
-				}
-				else
-				{
-					$colorcode = 'bgcolor="#ecf0f5"';
-				}
-                if($amount_topay_doc>0){
-
-				if($billtype2 == 'PAY NOW' || strpos( $billnumber, "CF-" ) !== false)
-				{
-				   $invoicebalance=0;
-				   
-
-				}
-				elseif($billtype2 == 'PAY LATER')
-			    {
-				  $invoicebalance=$invoiceamt-$crnamt-$invoiceallocatedamt;
-				}
-
-				?>
-                <tr <?php echo $colorcode; ?>>
-
-				  <td class="bodytext31" valign="center"  align="left"><?php echo $snocount=$snocount+1; ?></td>
-
-				  <td class="bodytext31" valign="center"  align="left"><div class="bodytext31"><?php echo $billdate; ?></div></td>
-				  <td class="bodytext31" valign="center"  align="left"><div class="bodytext31"><?php echo $suppliername1; ?> (<?php echo $patientcode; ?>, <?php echo $visitcode; ?>)</div></td>
-				  <td class="bodytext31" valign="center"  align="left"><div class="bodytext31"><?php echo $billnumber; ?></div></td>
-				  <td class="bodytext31" valign="center"  align="left"><div class="bodytext31"><?php echo $subtype; ?></div></td>
-				  <td class="bodytext31" valign="center"  align="left"><div class="bodytext31"><?php echo $alloted_status; ?></div></td>
-                  
-				  <td class="bodytext31" valign="center"  align="right"><div align="right"><?php echo number_format($invoiceamt,2,'.',','); ?></div></td>
-				  <td class="bodytext31" valign="center"  align="right"><div align="right"><?php echo number_format($totaldocamt,2,'.',','); ?></div></td>
-				  <td class="bodytext31" valign="center"  align="right"><div align="right"><?php echo number_format($crnamt,2,'.',','); ?></div></td>
-				  <td class="bodytext31" valign="center"  align="right"><div align="right"><?php echo number_format($invoiceamt-$crnamt,2,'.',','); ?></div></td>
-				  <td class="bodytext31" valign="center"  align="right"><div align="right"><?php echo number_format($invoiceallocatedamt,2,'.',','); ?></div></td>
-				  <td class="bodytext31" valign="center"  align="right"><div align="right"><?php echo @number_format($invoicebalance,2,'.',','); ?></div></td>
-
-                  <td class="bodytext31" valign="center"  align="left"><div class="bodytext31"><?php echo $doctorname; ?></div></td>
-				  <td class="bodytext31" valign="center"  align="right"><div align="right"><?php echo number_format($res45transactionamount,2,'.',','); ?></div></td>
-				  <td class="bodytext31" valign="center"  align="right"><div align="right"><?php echo number_format($amount_topay_doc,2,'.',','); ?></div></td>
-
-				</tr>
-				<?php
-				}
-
-			}
-
-			?>
-
-			
-
-            <tr>
-
-              <td colspan="15" class="bodytext31" valign="center"  align="left"  bgcolor="#ecf0f5">&nbsp;</td>
-
-            </tr>
-
-				
-
-	  
-			
-
-		   <tr>
-
-              <td class="bodytext31" valign="center"  align="left" 
-
-                bgcolor="#ecf0f5">&nbsp;</td>
-
-				<td class="bodytext31" valign="center"  align="left" 
-
-                bgcolor="#ecf0f5">&nbsp;</td>
-
-              <td class="bodytext31" valign="center"  align="left" 
-
-                bgcolor="#ecf0f5">&nbsp;</td>
-
-              <td class="bodytext31" valign="center"  align="left" 
-
-                bgcolor="#ecf0f5">&nbsp;</td>
-
-              <td class="bodytext31" valign="center"  align="left" 
-
-                bgcolor="#ecf0f5">&nbsp;</td>
-				<td class="bodytext31" valign="center"  align="left" 
-
-                bgcolor="#ecf0f5">&nbsp;</td>
-				<td class="bodytext31" valign="center"  align="left" 
-
-                bgcolor="#ecf0f5">&nbsp;</td>
-				<td class="bodytext31" valign="center"  align="left" 
-
-                bgcolor="#ecf0f5">&nbsp;</td>
-				<td class="bodytext31" valign="center"  align="left" 
-
-                bgcolor="#ecf0f5">&nbsp;</td>
-				<td class="bodytext31" valign="center"  align="left" 
-
-                bgcolor="#ecf0f5">&nbsp;</td>
-				<td class="bodytext31" valign="center"  align="left" 
-
-                bgcolor="#ecf0f5">&nbsp;</td>
-				<td class="bodytext31" valign="center"  align="left" 
-
-                bgcolor="#ecf0f5">&nbsp;</td>
-				<td class="bodytext31" valign="center"  align="left" 
-
-                bgcolor="#ecf0f5">&nbsp;</td>
-				<td class="bodytext31" valign="center"  align="left" 
-
-                bgcolor="#ecf0f5">&nbsp;</td>
-				<td class="bodytext31" valign="center"  align="left" 
-
-                bgcolor="#ecf0f5">&nbsp;</td>
-
-				
-
-           <?php
-
-				if($billno!='')
-					$urlpath = "cbfrmflag1=cbfrmflag1&&billno=$billno";
-				else
-					$urlpath = "cbfrmflag1=cbfrmflag1&ADate1=$ADate1&ADate2=$ADate2&allcationtype=$allcationtype";
-
-			
-
-			?>
-
-            <td class="bodytext31" valign="center"  align="right"></td> 
-
-		   	 <td class="bodytext31" valign="center" ><a href="print_doctoroutstandinginvoicexl.php?<?php echo $urlpath; ?>" target="_blank"><img  width="40" height="40" src="images/excel-xls-icon.png" style="cursor:pointer;" ></a></td> 
-
-			        
-
-            </tr>
-
-		</table>
-
-			  
-
-			<?php
-
-			
-
-			//}
-
-			//}
-
-			}
-
-			?>
-
-         
-
-</table>
-
-</table>
-
-<?php include ("includes/footer1.php"); ?>
+                        <div class="form-group">
+                            <label for="ADate2" class="form-label">Date To</label>
+                            <div class="form-input-group">
+                                <input name="ADate2" id="ADate2" class="form-input" value="<?php echo $paymentreceiveddateto; ?>" readonly="readonly" onKeyDown="return disableEnterKey()" />
+                                <i class="fas fa-calendar-alt" onClick="javascript:NewCssCal('ADate2','yyyyMMdd','','','','','past','07-01-2019','<?php echo date('m-d-Y');?>')" style="cursor:pointer"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <input type="hidden" name="searchsuppliercode" id="searchsuppliercode" value="<?php echo $searchsuppliercode; ?>" />
+                        <input type="hidden" name="subcode" value="<?php echo $searchsuppliercode; ?>" />
+                        <input type="hidden" name="cbfrmflag1" value="cbfrmflag1" />
+                        <button type="submit" onClick="return funcAccount();" name="Submit" class="btn btn-primary">
+                            <i class="fas fa-search"></i> Search
+                        </button>
+                        <button name="resetbutton" type="reset" id="resetbutton" class="btn btn-secondary">
+                            <i class="fas fa-undo"></i> Reset
+                        </button>
+                    </div>
+                </div>
+            </form>
+
+            <!-- Results Section -->
+            <?php if(isset($_REQUEST["cbfrmflag1"]) && $_REQUEST["cbfrmflag1"] == 'cbfrmflag1'){ ?>
+            <div class="data-table-section">
+                <div class="data-table-header">
+                    <h3 class="data-table-title">Doctor Outstanding Invoice Wise Report Results</h3>
+                </div>
+                
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead class="table-header">
+                            <tr>
+                                <th class="table-header-cell">No.</th>
+                                <th class="table-header-cell">Date</th>
+                                <th class="table-header-cell">Description</th>
+                                <th class="table-header-cell">Bill Number</th>
+                                <th class="table-header-cell">Company</th>
+                                <th class="table-header-cell">Allotted</th>
+                                <th class="table-header-cell text-right">Invoice Amt</th>
+                                <th class="table-header-cell text-right">Total Doctors Amt</th>
+                                <th class="table-header-cell text-right">CrN</th>
+                                <th class="table-header-cell text-right">Payable Amt</th>
+                                <th class="table-header-cell text-right">Paid Amt</th>
+                                <th class="table-header-cell text-right">Invoice Balance</th>
+                                <th class="table-header-cell">Doctor Name</th>
+                                <th class="table-header-cell text-right">Doctors Paid</th>
+                                <th class="table-header-cell text-right">Doctors Bal.</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Table content will be generated by PHP -->
+                            <tr class="table-row-even">
+                                <td class="table-cell text-center" colspan="15">
+                                    <div class="alert alert-info">
+                                        <i class="fas fa-info-circle"></i>
+                                        Report results will be displayed here after search
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <?php } ?>
+        </main>
+    </div>
+
+    <!-- Modern JavaScript Functions -->
+    <script>
+        // Sidebar toggle functionality
+        function toggleSidebar() {
+            const sidebar = document.getElementById('leftSidebar');
+            const toggle = document.querySelector('.sidebar-toggle i');
+            
+            sidebar.classList.toggle('collapsed');
+            toggle.classList.toggle('fa-chevron-left');
+            toggle.classList.toggle('fa-chevron-right');
+        }
+
+        // Page refresh function
+        function refreshPage() {
+            window.location.reload();
+        }
+
+        // Export to Excel function
+        function exportToExcel() {
+            // Add export functionality here
+            alert('Export functionality will be implemented');
+        }
+
+        // Form validation function
+        function funcAccount() {
+            if((document.getElementById("billno").value == "") && (document.getElementById("allcationtype").value == "")) {
+                alert('Please enter either Bill Number or select Allocation Type');
+                return false;
+            }
+        }
+
+        // Initialize sidebar toggle on menu button click
+        document.getElementById('menuToggle').addEventListener('click', function() {
+            const sidebar = document.getElementById('leftSidebar');
+            sidebar.classList.toggle('show');
+        });
+
+        // Close sidebar when clicking outside
+        document.addEventListener('click', function(event) {
+            const sidebar = document.getElementById('leftSidebar');
+            const menuToggle = document.getElementById('menuToggle');
+            
+            if (!sidebar.contains(event.target) && !menuToggle.contains(event.target)) {
+                sidebar.classList.remove('show');
+            }
+        });
+    </script>
 
 </body>
-
 </html>
-

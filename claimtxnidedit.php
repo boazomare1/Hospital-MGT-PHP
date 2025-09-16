@@ -49,28 +49,8 @@ if (isset($_REQUEST["searchbillnumber"])) { $searchbillnumber = $_REQUEST["searc
 <script type="text/javascript" src="js/autocomplete_users.js"></script>
     <script type="text/javascript" src="js/autosuggestusers.js"></script>
 </head>
-		});
-		return false;
-	})	
-	
-})
-function valid()
-{
-	if(document.getElementById('searchbillnumber').value =='')
-	{
-		alert("Please Enter Bill No.");
-		return false;
-	}
-	
-}
-</script>
-<link rel="stylesheet" type="text/css" href="css/autosuggest.css" />        
-<style type="text/css">
-<!--
-.bodytext31 {FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3b3b3c; FONT-FAMILY: Tahoma
-}
--->
-</style>
+    <!-- Autocomplete CSS -->
+    <link rel="stylesheet" type="text/css" href="css/autosuggest.css" />
 </head>
 <script src="js/datetimepicker_css.js"></script>
 <body>
@@ -96,211 +76,239 @@ function valid()
     <nav class="nav-breadcrumb">
         <a href="mainmenu1.php">🏠 Home</a>
         <span>→</span>
-        <span>Claims Management</span>
-        <span>→</span>
-        <span>Transaction Edit</span>
+        <span>Claim Transaction Edit</span>
     </nav>
 
-    <!-- Main Container -->
-    <div class="main-container">
-<table width="1901" border="0" cellspacing="0" cellpadding="2">
-  <tr>
-    <td colspan="9" bgcolor="#ecf0f5"><?php include ("includes/alertmessages1.php"); ?></td>
-  </tr>
-  <tr>
-    <td colspan="9" bgcolor="#ecf0f5"><?php include ("includes/title1.php"); ?></td>
-  </tr>
-  <tr>
-    <td colspan="9" bgcolor="#ecf0f5"><?php include ("includes/menu1.php"); ?></td>
-  </tr>
-  <tr>
-    <td colspan="9">&nbsp;</td>
-  </tr>
-  <tr>
-    <td width="1%">&nbsp;</td>
-    <td width="99%" valign="top"><table width="100%" border="0" cellspacing="0" cellpadding="0">
-      <tr>
-        <td width="1134">
-		
-		
-              <form name="cbform1" method="post" action="claimtxnidedit.php" onSubmit="return valid();">
-		<table width="791" border="0" align="left" cellpadding="4" cellspacing="0" bordercolor="#666666" id="AutoNumber3" style="border-collapse: collapse">
-          <tbody>
-            <tr bgcolor="#011E6A">
-              <td colspan="2" bgcolor="#ecf0f5" class="bodytext3"><strong>Transaction No. Edit </strong></td>
-              <!--<td colspan="2" bgcolor="#ecf0f5" class="bodytext3"><?php echo $errmgs; ?>&nbsp;</td>-->
-           <td colspan="2" align="right" bgcolor="#ecf0f5" class="bodytext3" id="ajaxlocation"><strong> Location </strong>
-             
-                  <?php
-						
-						if ($location!='')
-						{
-						$query12 = "select locationname from master_location where locationcode='$location' order by locationname";
-						$exec12 = mysqli_query($GLOBALS["___mysqli_ston"], $query12) or die ("Error in Query12".mysqli_error($GLOBALS["___mysqli_ston"]));
-						$res12 = mysqli_fetch_array($exec12);
-						
-						echo $res1location = $res12["locationname"];
-						//echo $location;
-						}
-						else
-						{
-						$query1 = "select locationname from login_locationdetails where username='$username' and docno='$docno' group by locationname order by locationname";
-						$exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
-						$res1 = mysqli_fetch_array($exec1);
-						
-						echo $res1location = $res1["locationname"];
-						//$res1locationanum = $res1["locationcode"];
-						}
-						?>
-                  </td> 
-            </tr>
-            <tr>
-              <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">Search Bill No </td>
-              <td colspan="3" align="left" valign="top"  bgcolor="#FFFFFF">
-                <input type="hidden" name="cbcustomername" id="cbcustomername" value="" size="50" autocomplete="off">
-				<input  name="searchbillnumber" type="text" value="<?php echo $searchbillnumber; ?>" id="searchbillnumber"  size="50" autocomplete="off">
-               </td>
-              </tr>
-			<tr>
-			  <td width="10%" align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">Location</td>
-              <td width="30%" align="left" valign="top"  bgcolor="#FFFFFF"><span class="bodytext3">			 
-				 <select name="location" id="location" onChange="ajaxlocationfunction(this.value);">
-                    <?php						
-						$query1 = "select * from login_locationdetails where username='$username' and docno='$docno' order by locationname";
-						$exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
-						$loccode=array();
-						while ($res1 = mysqli_fetch_array($exec1))
-						{
-						$locationname = $res1["locationname"];
-						$locationcode = $res1["locationcode"];					
-						?>
-						 <option value="<?php echo $locationcode; ?>" <?php if($location!='')if($location==$locationcode){echo "selected";}?>><?php echo $locationname; ?></option>
-						<?php
-						} 
-						?>
-                      </select>					 
-              </span></td>
-			   <td width="10%" align="left" colspan="2" valign="middle"  bgcolor="#FFFFFF" class="bodytext3"></td>
-			  </tr>
-            <tr>
-              <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">&nbsp;</td>
-              <td colspan="3" align="left" valign="top"  bgcolor="#FFFFFF"><input type="hidden" name="cbfrmflag1" value="cbfrmflag1">
-                  <input  type="submit" value="Search" name="Submit" />
-                  <input name="resetbutton" type="reset" id="resetbutton" value="Reset" /></td>
-            </tr>
-          </tbody>
-        </table>
-		</form>		</td>
-      </tr>
-      <tr>
-        <td>&nbsp;</td>
-      </tr>
-      <tr>
-        <td><table id="AutoNumber3" style="BORDER-COLLAPSE: collapse" bordercolor="#666666" cellspacing="0" cellpadding="4" width="45%" align="left" border="0">
-          <tbody>
-            <tr>
-              <td width="7%" bgcolor="#ecf0f5" class="bodytext31">&nbsp;</td>
-              <td colspan="9" bgcolor="#ecf0f5" class="bodytext31">
-               </tr>
-			<?php
-			if (isset($_REQUEST["cbfrmflag1"])) { $cbfrmflag1 = $_REQUEST["cbfrmflag1"]; } else { $cbfrmflag1 = ""; }
-			//$cbfrmflag1 = $_REQUEST['cbfrmflag1'];
-			if ($cbfrmflag1 == 'cbfrmflag1')
-			{
-			?>
-			<tr bgcolor="#9999FF">
-				<td colspan="10"  align="left" valign="center" bgcolor="#ecf0f5" class="bodytext31"><strong></strong></td>
-            </tr>
-				
-				
-			<tr>
-			<td class="bodytext31" valign="center"  align="left" bgcolor="#ffffff"><strong>No.</strong></td>
-			<td width="" align="right" valign="center"  bgcolor="#ffffff" class="bodytext31"><strong>Bill Date </strong></td>
-			<td width="" align="right" valign="center"  bgcolor="#ffffff" class="bodytext31"><strong>Bill No </strong></td>
-			<td width="" align="right" valign="center"  bgcolor="#ffffff" class="bodytext31"><strong> Patient Name </strong></td>
-			<td width="" align="right" valign="center"  bgcolor="#ffffff" class="bodytext31"><strong>Patient Code</strong></td><!-- Card -->
-			<td  width=""  align="right" valign="center" bgcolor="#ffffff" class="bodytext31"><strong>Visit Code</strong></td>
-			<td  width=""  align="center" valign="center" bgcolor="#ffffff" class="bodytext31"><strong>PreAuthCode</strong></td>
-			<td  width=""  align="center" valign="center" bgcolor="#ffffff" class="bodytext31"><strong>Action</strong></td>
-			<td  width=""  align="center" valign="center" bgcolor="#ffffff" class="bodytext31"></td>
-			<td bgcolor="#ffffff" >&nbsp;</td>
-			</tr>
-			<?php 
-			$colorloopcount ='';
-			$sno  ='';
-			$query40 = "select * from billing_paylater where billno like '%$searchbillnumber%' AND locationcode='$location'   ";
-			$exec40 = mysqli_query($GLOBALS["___mysqli_ston"], $query40) or die ("Error in Query40".mysqli_error($GLOBALS["___mysqli_ston"]));
-	        while($res40 = mysqli_fetch_array($exec40))
-			{
-			$res40billnumber = $res40['billno'];
-			$res40auto_number = $res40['auto_number'];
-			$res40transactiondate = $res40['billdate'];
-			$res40patientname = $res40['patientname'];
-			$res40patientcode = $res40['patientcode'];
-			$res40visitcode = $res40['visitcode'];
-			$res40preauthcode = $res40['preauthcode'];
-			
-			$colorloopcount = $colorloopcount + 1;
-			$showcolor = ($colorloopcount & 1); 
-			if ($showcolor == 0)
-			{
-				//echo "if";
-				$colorcode = 'bgcolor="#CBDBFA"';
-			}
-			else
-			{
-				//echo "else";
-				$colorcode = 'bgcolor="#ecf0f5"';
-			}
-			$sno = $sno + 1;
-			?>
-			<tr <?php echo $colorcode; ?> id="<?php echo $sno; ?>">
-			<td class="bodytext31" valign="center"  align="left"><?php echo $sno; ?></td>
-			<td class="bodytext31" valign="center"  align="right"><div class="bodytext31"><?php echo $res40transactiondate; ?></div></td>
-			<td class="bodytext31" valign="center"  align="right"><div class="bodytext31"><?php echo $res40billnumber; ?></div></td>
-			<td class="bodytext31" valign="center"  align="right"><div class="bodytext31"><?php echo $res40patientname; ?></div></td>
-			<td class="bodytext31" valign="center"  align="right"><div class="bodytext31"><?php echo $res40patientcode; ?></div></td>
-			<td class="bodytext31" valign="center"  align="right"><div class="bodytext31"><?php echo $res40visitcode; ?></div></td>
-			<td class="bodytext31 expirydatetdstatic" valign="center"  align="center"><div class="mptxnno" id="caredittxno_<?php echo $sno;?>"><?php echo $res40preauthcode; ?></div></td>
-			<td  style="display:none;" class="txnno1" width="123" align="left" valign="center"   class="bodytext31">
-			<div bgcolor="#ffffff"><input class="mptxnno1" id="mptxnno_<?php  echo $sno;?>" name="mptxnno[]" style="border: 1px solid #001E6A" value=""  size="10"   onKeyDown="return disableEnterKey()" /> </div>
-			</td>
-			<td align="left" valign="center"  class="bodytext31 expirydatetdstatic"><div class="bodytext31">
-			<div align="center" ><a class="edititem" id="<?php echo $sno; ?>" href="" style="padding-right: 10px;">Edit</a> </div>   </div></td>
-			<td align="left" valign="center"   class="bodytext31"><div class="bodytext31"> <div align="center">
-			<a style="display:none;" class="saveitem" id="s_<?php echo $sno; ?>" href="" >Update</a>
-			</div>  </div></td>
-			<td></td>
-			<input type="hidden" name="autono[]" id="autono_<?php echo $sno;?>" value="<?php echo $res40auto_number ?>" />
-			<input type="hidden" name="billno[]" id="billno_<?php echo $sno;?>" value="<?php echo $res40billnumber ?>" />
-			<input type="hidden" name="tablename[]" id="tablename_<?php echo $sno;?>" value="<?php echo 'billing_paylater' ?>" /
-			</tr>
-			<?php
-			 }
-			 }
-			 
-			
-			?>
+    <!-- Floating Menu Toggle -->
+    <div id="menuToggle" class="floating-menu-toggle">
+        <i class="fas fa-bars"></i>
+    </div>
+
+    <!-- Main Container with Sidebar -->
+    <div class="main-container-with-sidebar">
+        <!-- Left Sidebar -->
+        <aside id="leftSidebar" class="left-sidebar">
+            <div class="sidebar-header">
+                <h3>Quick Navigation</h3>
+                <button id="sidebarToggle" class="sidebar-toggle">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+            </div>
             
-			
-			  <tr>
-			    <td colspan="3" class="bodytext31" valign="center"  align="right">&nbsp;</td>
-			    </tr>
-			  
-			  <tr>
-	    <td colspan="3" class="bodytext31" valign="center"  align="right"></td>
-		<td class="bodytext31" valign="center"  align="right"></td>
-		<td class="bodytext31" valign="center"  align="right">&nbsp;</td>
-		<td class="bodytext31" valign="center"  align="right">&nbsp;</td>
-		<td colspan="4" class="bodytext31" valign="center"  align="right">&nbsp;</td>
- 		
-	  </tr>	 
-		
-          </tbody>
-        </table></td>
-      </tr>
-    </table>
-  </table>
+            <nav class="sidebar-nav">
+                <ul class="nav-list">
+                    <li class="nav-item">
+                        <a href="mainmenu1.php" class="nav-link">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="cashradiologyrefund.php" class="nav-link">
+                            <i class="fas fa-x-ray"></i>
+                            <span>Cash Radiology Refund</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="cashrefundapprovallist.php" class="nav-link">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Refund Approval List</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="chequescollected.php" class="nav-link">
+                            <i class="fas fa-money-check"></i>
+                            <span>Cheques Collected</span>
+                        </a>
+                    </li>
+                    <li class="nav-item active">
+                        <a href="claimtxnidedit.php" class="nav-link">
+                            <i class="fas fa-edit"></i>
+                            <span>Claim Transaction Edit</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="accountreceivableentrylist.php" class="nav-link">
+                            <i class="fas fa-receipt"></i>
+                            <span>Account Receivable</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+        <!-- Alert Container -->
+        <div id="alertContainer">
+            <?php include ("includes/alertmessages1.php"); ?>
+        </div>
+
+        <!-- Page Header -->
+        <div class="page-header">
+            <div class="page-header-content">
+                <h2>Claim Transaction Edit</h2>
+                <p>Edit Pre-Auth codes for claim transactions and billing records.</p>
+            </div>
+            <div class="page-header-actions">
+                <button type="button" class="btn btn-secondary" onclick="refreshPage()">
+                    <i class="fas fa-sync-alt"></i> Refresh
+                </button>
+                <button type="button" class="btn btn-outline" onclick="exportToExcel()">
+                    <i class="fas fa-download"></i> Export
+                </button>
+            </div>
+        </div>
+
+        <!-- Search Form Section -->
+        <div class="search-form-section">
+            <div class="search-form-header">
+                <i class="fas fa-search search-form-icon"></i>
+                <h3 class="search-form-title">Search Claim Transactions</h3>
+            </div>
+            
+            <form name="cbform1" method="post" action="claimtxnidedit.php" onSubmit="return valid();" class="search-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="searchbillnumber" class="form-label">Search Bill Number</label>
+                        <input type="hidden" name="cbcustomername" id="cbcustomername" value="">
+                        <input name="searchbillnumber" type="text" value="<?php echo htmlspecialchars($searchbillnumber); ?>" 
+                               id="searchbillnumber" class="form-input" placeholder="Enter bill number" autocomplete="off">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="location" class="form-label">Location</label>
+                        <select name="location" id="location" class="form-input" onChange="ajaxlocationfunction(this.value);">
+                            <?php
+                            $query1 = "select * from login_locationdetails where username='$username' and docno='$docno' order by locationname";
+                            $exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
+                            while ($res1 = mysqli_fetch_array($exec1)) {
+                                $locationname = $res1["locationname"];
+                                $locationcode = $res1["locationcode"];
+                                $selected = ($location != '' && $location == $locationcode) ? 'selected' : '';
+                                ?>
+                                <option value="<?php echo $locationcode; ?>" <?php echo $selected; ?>><?php echo htmlspecialchars($locationname); ?></option>
+                                <?php
+                            }
+                            ?>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <input type="hidden" name="cbfrmflag1" value="cbfrmflag1">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-search"></i> Search
+                    </button>
+                    <button type="button" class="btn btn-secondary" onclick="resetForm()">
+                        <i class="fas fa-undo"></i> Reset
+                    </button>
+                </div>
+            </form>
+        </div>
+        <!-- Results Section -->
+        <?php
+        if (isset($_REQUEST["cbfrmflag1"])) { 
+            $cbfrmflag1 = $_REQUEST["cbfrmflag1"]; 
+        } else { 
+            $cbfrmflag1 = ""; 
+        }
+        
+        if ($cbfrmflag1 == 'cbfrmflag1') {
+        ?>
+        
+        <div class="results-table-section">
+            <div class="results-table-header">
+                <i class="fas fa-list results-table-icon"></i>
+                <h3 class="results-table-title">Claim Transactions</h3>
+            </div>
+
+            <div class="table-container">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>No.</th>
+                            <th>Bill Date</th>
+                            <th>Bill No</th>
+                            <th>Patient Name</th>
+                            <th>Patient Code</th>
+                            <th>Visit Code</th>
+                            <th>Pre-Auth Code</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php 
+                        $colorloopcount = '';
+                        $sno = '';
+                        $query40 = "select * from billing_paylater where billno like '%$searchbillnumber%' AND locationcode='$location'";
+                        $exec40 = mysqli_query($GLOBALS["___mysqli_ston"], $query40) or die ("Error in Query40".mysqli_error($GLOBALS["___mysqli_ston"]));
+                        
+                        while($res40 = mysqli_fetch_array($exec40)) {
+                            $res40billnumber = $res40['billno'];
+                            $res40auto_number = $res40['auto_number'];
+                            $res40transactiondate = $res40['billdate'];
+                            $res40patientname = $res40['patientname'];
+                            $res40patientcode = $res40['patientcode'];
+                            $res40visitcode = $res40['visitcode'];
+                            $res40preauthcode = $res40['preauthcode'];
+                            
+                            $colorloopcount = $colorloopcount + 1;
+                            $showcolor = ($colorloopcount & 1); 
+                            $sno = $sno + 1;
+                        ?>
+
+                        <tr class="<?php echo $showcolor == 0 ? 'even-row' : 'odd-row'; ?>" id="<?php echo $sno; ?>">
+                            <td><?php echo $sno; ?></td>
+                            <td>
+                                <span class="date-badge"><?php echo date('d/m/Y', strtotime($res40transactiondate)); ?></span>
+                            </td>
+                            <td>
+                                <span class="bill-number"><?php echo htmlspecialchars($res40billnumber); ?></span>
+                            </td>
+                            <td>
+                                <span class="patient-name"><?php echo htmlspecialchars($res40patientname); ?></span>
+                            </td>
+                            <td>
+                                <span class="patient-code"><?php echo htmlspecialchars($res40patientcode); ?></span>
+                            </td>
+                            <td>
+                                <span class="visit-code"><?php echo htmlspecialchars($res40visitcode); ?></span>
+                            </td>
+                            <td>
+                                <div class="mptxnno" id="caredittxno_<?php echo $sno;?>">
+                                    <span class="pre-auth-code"><?php echo htmlspecialchars($res40preauthcode); ?></span>
+                                </div>
+                                <div style="display:none;" class="txnno1">
+                                    <input class="mptxnno1 editable-field" id="mptxnno_<?php echo $sno;?>" 
+                                           name="mptxnno[]" value="" size="10" onKeyDown="return disableEnterKey()" />
+                                </div>
+                            </td>
+                            <td>
+                                <div class="action-buttons">
+                                    <a class="action-btn edit edititem" id="<?php echo $sno; ?>" href="" title="Edit Pre-Auth Code">
+                                        <i class="fas fa-edit"></i> Edit
+                                    </a>
+                                    <a style="display:none;" class="action-btn save saveitem" id="s_<?php echo $sno; ?>" href="" title="Save Changes">
+                                        <i class="fas fa-save"></i> Update
+                                    </a>
+                                </div>
+                            </td>
+                            <input type="hidden" name="autono[]" id="autono_<?php echo $sno;?>" value="<?php echo $res40auto_number ?>" />
+                            <input type="hidden" name="billno[]" id="billno_<?php echo $sno;?>" value="<?php echo $res40billnumber ?>" />
+                            <input type="hidden" name="tablename[]" id="tablename_<?php echo $sno;?>" value="billing_paylater" />
+                        </tr>
+
+                        <?php
+                        }
+                        }
+                        ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        </main>
     </div>
 
     <!-- Modern JavaScript -->

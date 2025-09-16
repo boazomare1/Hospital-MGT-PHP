@@ -1,26 +1,16 @@
 <?php
-
 session_start();
-
 include ("includes/loginverify.php");
-
 include ("db/db_connect.php");
 
-
-
 $ipaddress = $_SERVER['REMOTE_ADDR'];
-
 $updatedatetime = date('Y-m-d H:i:s');
-$updatedate= date('Y-m-d');
-
+$updatedate = date('Y-m-d');
 $username = $_SESSION['username'];
-
 $companyanum = $_SESSION['companyanum'];
-
 $companyname = $_SESSION['companyname'];
 
 $errmsg = '';
-
 $bgcolorcode = '';
 
 $docno = $_SESSION['docno'];
@@ -28,17 +18,12 @@ $query = "select * from login_locationdetails where username='$username' and doc
 $exec = mysqli_query($GLOBALS["___mysqli_ston"], $query) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
 $res = mysqli_fetch_array($exec);
 
-	
-	 $locationname1  = $res["locationname"];
-	  $locationcode123 = $res["locationcode"];
-	  $locationcode = $res["locationcode"];
-	 $res12locationanum = $res["auto_number"];
+$locationname1 = $res["locationname"];
+$locationcode123 = $res["locationcode"];
+$locationcode = $res["locationcode"];
+$res12locationanum = $res["auto_number"];
 
-
-
-if (isset($_REQUEST["frmflag1"])) { $frmflag1 = $_REQUEST["frmflag1"]; } else { $frmflag1 = ""; }
-
-//$frmflag1 = $_REQUEST['frmflag1'];
+$frmflag1 = isset($_REQUEST["frmflag1"]) ? $_REQUEST["frmflag1"] : "";
 
 
 
@@ -319,197 +304,226 @@ if ($upload == 'failed')
 
 ?>
 
-<!-- Modern CSS -->
-<link href="css/consultationtype_upload-modern.css?v=<?php echo time(); ?>" rel="stylesheet" type="text/css" />
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consultation Type Upload - MedStar</title>
+    
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <!-- Modern CSS -->
+    <link rel="stylesheet" href="css/consultationtype_upload-modern.css?v=<?php echo time(); ?>">
+    
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
-<link href="datepickerstyle.css" rel="stylesheet" type="text/css" />
-
-<!-- Modern JavaScript -->
-<script type="text/javascript" src="js/consultationtype_upload-modern.js?v=<?php echo time(); ?>"></script>
-
-<!-- Additional styles moved to external CSS -->
-
+    <!-- Date Picker CSS -->
+    <link href="datepickerstyle.css" rel="stylesheet" type="text/css" />
 </head>
 
-<!-- File validation function moved to external JS -->
-
 <body>
-
-<header>
-  <?php include ("includes/alertmessages1.php"); ?>
-  <?php include ("includes/title1.php"); ?>
-  <?php include ("includes/menu1.php"); ?>
-</header>
-
-<main class="main-container">
-<table width="101%" border="0" cellspacing="0" cellpadding="2">
-
-  <tr>
-
-    <td colspan="10" class="alert-container"><?php include ("includes/alertmessages1.php"); ?></td>
-
-  </tr>
-
-  <tr>
-
-    <td colspan="10" class="title-container"><?php include ("includes/title1.php"); ?></td>
-
-  </tr>
-
-  <tr>
-
-    <td colspan="10" class="menu-container"><?php include ("includes/menu1.php"); ?></td>
-
-  </tr>
-
-  <tr>
-
-    <td colspan="10">&nbsp;</td>
-
-  </tr>
-
-  <tr>
-
-    <td width="1%">&nbsp;</td>
-
-    <td width="2%" valign="top"><?php //include ("includes/menu4.php"); ?>
-
-      &nbsp;</td>
-
-    <td width="97%" valign="top"><table width="100%" border="0" cellspacing="0" cellpadding="0">
-
-      <tr>
-
-        <td width="860"><table width="100%" border="0" cellspacing="0" cellpadding="0" class="tablebackgroundcolor1">
-
-            <tr>
-
-              <td>
-              	<form  method="post" enctype="multipart/form-data" name="form1" id="form1" onSubmit="return dataimport1verify()" class="upload-form">
-
-                  <table width="800" border="0" align="center" cellpadding="4" cellspacing="0" bordercolor="#666666" id="AutoNumber3" style="border-collapse: collapse">
-
-                    <tbody>
-
-                      <tr bgcolor="#011E6A">
-
-                        <td colspan="2" bgcolor="#ecf0f5" class="bodytext3"><strong>Consultation Type Upload :  </strong></td>
-
-                      </tr>
-
-                      <tr>
-
-                        <td colspan="2" align="left" valign="middle"   bgcolor="<?php if ($bgcolorcode == '') { echo '#FFFFFF'; } else if ($bgcolorcode == 'success') { echo '#FFBF00'; } else if ($bgcolorcode == 'failed') { echo '#AAFF00'; } ?>" class="bodytext3"><div align="left"><?php echo $errmsg; ?></div></td>
-
-                      </tr>
-
-                      <!-- <tr>
-
-                        <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">&nbsp;</td>
-
-                        <td align="left" valign="top"  bgcolor="#FFFFFF"><span class="bodytext3"><strong>Please Note: </strong></span></td>
-
-                      </tr>
-
-                      <tr>
-
-                        <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">&nbsp;</td>
-
-                        <td align="left" valign="top"  bgcolor="#FFFFFF"><span class="bodytext3"><strong>Only TAB Delimited Files Are Accepted. </strong></span></td>
-
-                      </tr>
-
-                      <tr>
-
-                        <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">&nbsp;</td>
-
-                        <td align="left" valign="top"  bgcolor="#FFFFFF"><span class="bodytext3"><strong>Please Do Not Try To Import Any Other File Format. </strong></span></td>
-
-                      </tr> -->
-
-                      <tr>
-                        <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">&nbsp;</td>
-                        <td align="left" valign="top"  bgcolor="#FFFFFF">
-						<span class="bodytext3"><strong>Download The Sample File Here.</strong></span></td>
-                      </tr>
-
-                      <tr>
-                        <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">&nbsp;</td>
-                        <td align="left" valign="top"  bgcolor="#FFFFFF"><span class="bodytext3">
-                          <a href="sample_excels/consultation_type_sub_update.xls" class="bodytext3"><span class="bodytext3" style="color: red; text-decoration: underline;"><strong>Click Here for Sample Excel File...</strong></span></a></td>
-                      </tr>
-                      <tr>
-                      	<td colspan="2" align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">&nbsp;</td>
-                      </tr>
-
-                     
-                      <tr>
-
-                        <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">Select File To Import Data: </td>
-
-                        <td align="left" valign="top"  bgcolor="#FFFFFF">
-
-						<input name="upload_file" id="upload_file" type="file" size="50" style="border: 1px solid #001E6A"></td>
-
-                      </tr>
-
-                      <tr>
-
-                        <td width="36%" align="left" valign="top"  bgcolor="#FFFFFF" class="bodytext3">&nbsp;</td>
-
-                        <td width="64%" align="left" valign="top"  bgcolor="#FFFFFF">
-
-						<input type="hidden" name="frmflag" value="addnew" />
-
-                            <input type="hidden" name="frmflag1" value="frmflag1" />
-
-                          <input type="submit" name="Submit" value="Proceed To Data Import" style="border: 1px solid #001E6A" />                        </td>
-
-                      </tr>
-
-                      <tr>
-
-                        <td align="middle" colspan="2" >&nbsp;</td>
-
-                      </tr>
-
-                    </tbody>
-
-                  </table>
-
-				  </form>
-
-                </td>
-
-            </tr>
-
-            <tr>
-
-              <td>&nbsp;</td>
-
-            </tr>
-
-        </table></td>
-
-      </tr>
-
-      <tr>
-
-        <td>&nbsp;</td>
-
-      </tr>
-
-    </table>
-
-  </table>
-
-<footer>
-  <?php include ("includes/footer1.php"); ?>
-</footer>
-</main>
-
+    <!-- Hospital Header -->
+    <header class="hospital-header">
+        <h1 class="hospital-title">🏥 MedStar Hospital Management</h1>
+        <p class="hospital-subtitle">Consultation Type Upload System</p>
+    </header>
+
+    <!-- User Information Bar -->
+    <div class="user-info-bar">
+        <div class="user-welcome">
+            <span class="welcome-text">Welcome, <strong><?php echo htmlspecialchars($username); ?></strong></span>
+            <span class="location-info">📍 Location: <?php echo htmlspecialchars($locationname1); ?> | Company: <?php echo htmlspecialchars($companyname); ?></span>
+        </div>
+        <div class="user-actions">
+            <a href="mainmenu1.php" class="btn btn-outline">🏠 Main Menu</a>
+            <a href="logout.php" class="btn btn-outline">🚪 Logout</a>
+        </div>
+    </div>
+
+    <!-- Navigation Breadcrumb -->
+    <nav class="nav-breadcrumb">
+        <a href="mainmenu1.php">🏠 Home</a>
+        <span>→</span>
+        <span>Consultation Type Upload</span>
+    </nav>
+
+    <!-- Floating Menu Toggle -->
+    <div id="menuToggle" class="floating-menu-toggle">
+        <i class="fas fa-bars"></i>
+    </div>
+
+    <!-- Main Container with Sidebar -->
+    <div class="main-container-with-sidebar">
+        <!-- Left Sidebar -->
+        <aside id="leftSidebar" class="left-sidebar">
+            <div class="sidebar-header">
+                <h3>Quick Navigation</h3>
+                <button id="sidebarToggle" class="sidebar-toggle">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <ul class="nav-list">
+                    <li class="nav-item">
+                        <a href="mainmenu1.php" class="nav-link">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="consultationtype_upload.php" class="nav-link active">
+                            <i class="fas fa-upload"></i>
+                            <span>Upload Consultation Types</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="addconsultationtemplate.php" class="nav-link">
+                            <i class="fas fa-plus-circle"></i>
+                            <span>Add Template</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="consultationrefundrequestlist.php" class="nav-link">
+                            <i class="fas fa-undo"></i>
+                            <span>Refund Request List</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="consultationrefundlist.php" class="nav-link">
+                            <i class="fas fa-list"></i>
+                            <span>Consultation Refund List</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="cashradiologyrefund.php" class="nav-link">
+                            <i class="fas fa-x-ray"></i>
+                            <span>Cash Radiology Refund</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="cashrefundapprovallist.php" class="nav-link">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Refund Approval List</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="chequescollected.php" class="nav-link">
+                            <i class="fas fa-money-check"></i>
+                            <span>Cheques Collected</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="claimtxnidedit.php" class="nav-link">
+                            <i class="fas fa-edit"></i>
+                            <span>Claim Transaction Edit</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="payrollprocess1.php" class="nav-link">
+                            <i class="fas fa-money-bill-wave"></i>
+                            <span>Payroll Process</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="stockreportbyitem3.php" class="nav-link">
+                            <i class="fas fa-boxes"></i>
+                            <span>Stock Report by Item</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Alert Container -->
+            <div id="alertContainer">
+                <?php include ("includes/alertmessages1.php"); ?>
+            </div>
+
+            <!-- Page Header -->
+            <div class="page-header">
+                <div class="page-header-content">
+                    <h2>Consultation Type Upload</h2>
+                    <p>Upload Excel files to import consultation types and doctor information into the system.</p>
+                </div>
+                <div class="page-header-actions">
+                    <button type="button" class="btn btn-secondary" onclick="refreshPage()">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                    <button type="button" class="btn btn-outline" onclick="downloadSampleFile()">
+                        <i class="fas fa-download"></i> Sample File
+                    </button>
+                </div>
+            </div>
+
+            <!-- Upload Form Section -->
+            <div class="upload-form-section">
+                <div class="upload-form-header">
+                    <i class="fas fa-file-upload upload-form-icon"></i>
+                    <h3 class="upload-form-title">File Upload</h3>
+                </div>
+                
+                <form method="post" enctype="multipart/form-data" name="form1" id="form1" onSubmit="return dataimport1verify()" class="upload-form-container">
+
+                    <!-- Sample File Section -->
+                    <div class="sample-file-section">
+                        <div class="sample-file-header">
+                            <i class="fas fa-download sample-file-icon"></i>
+                            <h4 class="sample-file-title">Sample File</h4>
+                        </div>
+                        <p class="sample-file-description">
+                            Download the sample Excel file to understand the required format for uploading consultation types.
+                        </p>
+                        <a href="sample_excels/consultation_type_sub_update.xls" class="sample-file-link" target="_blank">
+                            <i class="fas fa-file-excel"></i>
+                            Download Sample Excel File
+                        </a>
+                    </div>
+
+                    <!-- File Upload Area -->
+                    <div class="file-upload-area">
+                        <i class="fas fa-cloud-upload-alt file-upload-icon"></i>
+                        <div class="file-upload-text">Drag & Drop your Excel file here</div>
+                        <div class="file-upload-subtext">or click to browse</div>
+                        <label for="upload_file" class="file-input-label">
+                            <i class="fas fa-upload"></i>
+                            Choose File
+                        </label>
+                        <input name="upload_file" id="upload_file" type="file" accept=".xls,.xlsx,.csv" class="file-input">
+                    </div>
+
+                    <!-- Progress Bar -->
+                    <div id="progressContainer" class="progress-container">
+                        <div class="progress-bar">
+                            <div id="progressFill" class="progress-fill"></div>
+                        </div>
+                        <div id="progressText" class="progress-text">Ready to upload...</div>
+                    </div>
+
+                    <!-- Form Actions -->
+                    <div class="form-actions">
+                        <input type="hidden" name="frmflag" value="addnew" />
+                        <input type="hidden" name="frmflag1" value="frmflag1" />
+                        <button type="submit" name="Submit" class="btn btn-primary">
+                            <i class="fas fa-upload"></i> Proceed To Data Import
+                        </button>
+                        <button type="button" class="btn btn-secondary" onclick="clearForm()">
+                            <i class="fas fa-undo"></i> Clear Form
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modern JavaScript -->
+    <script src="js/consultationtype_upload-modern.js?v=<?php echo time(); ?>"></script>
 </body>
-
 </html>
 
 

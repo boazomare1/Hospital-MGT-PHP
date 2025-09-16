@@ -123,9 +123,6 @@ if ($getcanum != '')
 
 
 
-
-
-
 if (isset($_REQUEST["cbfrmflag2"])) { $cbfrmflag2 = $_REQUEST["cbfrmflag2"]; } else { $cbfrmflag2 = ""; }
 
 //$cbfrmflag2 = $_REQUEST['cbfrmflag2'];
@@ -244,10 +241,6 @@ if ($st == '2')
 
 }
 
-
-
-
-
 ?>
 
 <!DOCTYPE html>
@@ -261,7 +254,7 @@ if ($st == '2')
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     
     <!-- Modern CSS -->
-    <link rel="stylesheet" href="css/vat-modern.css?v=<?php echo time(); ?>">
+    <link rel="stylesheet" href="css/debitnotelist-modern.css?v=<?php echo time(); ?>">
     
     <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -273,13 +266,7 @@ if ($st == '2')
     <script type="text/javascript" src="js/adddate.js"></script>
     <script type="text/javascript" src="js/adddate2.js"></script>
 
-
-
 <script language="javascript">
-
-
-
-
 
 function ajaxlocationfunction(val)
 
@@ -325,10 +312,6 @@ if (window.XMLHttpRequest)
 
 //ajax to get location which is selected ends here
 
-
-
-
-
 function cbsuppliername1()
 
 {
@@ -336,8 +319,6 @@ function cbsuppliername1()
 	document.cbform1.submit();
 
 }
-
-
 
 function funcOnLoadBodyFunctionCall()
 
@@ -353,19 +334,9 @@ function funcOnLoadBodyFunctionCall()
 
 }
 
-
-
-
-
-
-
 </script>
 
 <script type="text/javascript">
-
-
-
-
 
 function disableEnterKey(varPassed)
 
@@ -405,8 +376,6 @@ function disableEnterKey(varPassed)
 
 	}
 
-
-
 	if(key == 13) // if enter key press
 
 	{
@@ -427,10 +396,6 @@ function disableEnterKey(varPassed)
 
 }
 
-
-
-
-
 function process1backkeypress1()
 
 {
@@ -450,8 +415,6 @@ function process1backkeypress1()
 	}
 
 }
-
-
 
 function disableEnterKey()
 
@@ -509,8 +472,6 @@ function disableEnterKey()
 
 	}
 
-
-
 }
 
 function validchecking()
@@ -541,8 +502,6 @@ return false;
 
 }
 
-
-
 function funcPrintReceipt1()
 
 {
@@ -553,11 +512,7 @@ function funcPrintReceipt1()
 
 }
 
-
-
 </script>
-
-
 
 <link rel="stylesheet" type="text/css" href="css/autosuggest.css" />      
 
@@ -613,8 +568,6 @@ $(document).ready(function(e) {
 
 });
 
-
-
 $(document).ready(function(e) {
 
    
@@ -652,8 +605,6 @@ $(document).ready(function(e) {
 		
 
 });
-
-
 
 // debit//
 
@@ -701,13 +652,6 @@ text-align:right;
 
 </head>
 
-
-
-
-
-
-
-</head>
 <body onLoad="return funcOnLoadBodyFunctionCall()">
     <!-- Hospital Header -->
     <header class="hospital-header">
@@ -815,932 +759,205 @@ text-align:right;
                 </div>
             </div>
 
-    <td width="1%">&nbsp;</td>
-
-    <td width="2%" valign="top"><?php //include ("includes/menu4.php"); ?>
-
-      &nbsp;</td>
-
-    <td width="97%" valign="top"><table width="116%" border="0" cellspacing="0" cellpadding="0">
-
-      <tr>
-
-        <td width="860">
-
-		
-
-		
-
-              <form name="cbform1" method="post" action="debitnotelist.php" onSubmit="return validchecking()">
-
-		<table width="800" border="0" align="left" cellpadding="4" cellspacing="0" bordercolor="#666666" id="AutoNumber3" style="border-collapse: collapse">
-
-          <tbody>
-
-            <tr bgcolor="#011E6A">
-
-              <td colspan="2" bgcolor="#ecf0f5" class="bodytext3"><strong>Debit Note List </strong></td>
-
-               <td colspan="3" align="right" bgcolor="#ecf0f5" class="bodytext3" id="ajaxlocation"><strong> Location </strong>
-
-             
-
-            
-
-                  <?php
-
-						
-
-						if ($location!='')
-
-						{
-
-						$query12 = "select locationname from master_location where locationcode='$location' order by locationname";
-
-						$exec12 = mysqli_query($GLOBALS["___mysqli_ston"], $query12) or die ("Error in Query12".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-						$res12 = mysqli_fetch_array($exec12);
-
-						
-
-						echo $res1location = $res12["locationname"];
-
-						//echo $location;
-
-						}
-
-						else
-
-						{
-
-						$query1 = "select locationname from login_locationdetails where username='$username' and docno='$docno' group by locationname order by locationname";
-
-						$exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-						$res1 = mysqli_fetch_array($exec1);
-
-						
-
-						echo $res1location = $res1["locationname"];
-
-						//$res1locationanum = $res1["locationcode"];
-
-						}
-
-						?>
-
-						
-
-						
-
-                  
-
-                  </td> 
-
-              </tr>
-
-          <tr>
-
-              <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">Location</td>
-
-              <td colspan="4" align="left" valign="top"  bgcolor="#FFFFFF"><span class="bodytext3">
-
-               <select name="location" id="location" onChange=" ajaxlocationfunction(this.value);"  style="border: 1px solid #001E6A;">
-
-                  <?php
-
-						
-
-						$query1 = "select * from login_locationdetails where username='$username' and docno='$docno' group by locationname order by locationname";
-
-						$exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-						while ($res1 = mysqli_fetch_array($exec1))
-
-						{
-
-						$res1location = $res1["locationname"];
-
-						$res1locationanum = $res1["locationcode"];
-
-						?>
-
-						<option value="<?php echo $res1locationanum; ?>" <?php if($location!='')if($location==$res1locationanum){echo "selected";}?>><?php echo $res1location; ?></option>
-
-						<?php
-
-						}
-
-						?>
-
-                  </select>
-
-              </span></td>
-
-              </tr>
-
-           <tr>
-
-				  <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">Patient Search </td>
-
-				  <td colspan="4" align="left" valign="middle"  bgcolor="#FFFFFF">
-
-				  <input name="customer" id="customer" style="border: 1px solid #001E6A;" size="60" autocomplete="off">
-
-				  <input name="customercode" id="customercode" value="" type="hidden">
-
-				<input type="hidden" name="recordstatus" id="recordstatus">
-
-				  <input type="hidden" name="billnumbercode" id="billnumbercode" value="<?php echo $billnumbercode; ?>" readonly style="border: 1px solid #001E6A;"></td>
-
-				
-
-             
-
-              
-
-            </tr>
-
-             <tr style="display:none">
-
-				  <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">Account Search </td>
-
-				  <td colspan="4" align="left" valign="middle"  bgcolor="#FFFFFF">
-
-				 <input type="text" name="accountname" id="accountname" value="" size="60" style="border: 1px solid #001E6A;">
-
-                 <input type="hidden" name="accountid" id="accountid" style="border: 1px solid #001E6A;" size="60" autocomplete="off"/></td>
-
-            </tr>
-
-            <tr>
-
-            <td colspan="1" bgcolor="#FFFFFF">&nbsp;</td>
-
-            <td colspan="3"  align="left" valign="top"  bgcolor="#FFFFFF"><input type="hidden" name="cbfrmflag1" value="cbfrmflag1">
-
-                  <input  style="border: 1px solid #001E6A" type="submit" value="Search" name="Submit" />
-
-            </td>
-
-            </tr>
-
-			    
-
-             </tbody>
-
-        </table>
-
-		</form>		</td>
-
-      </tr>
-
-      <tr>
-
-        <td>&nbsp;</td>
-
-      </tr>
-
-      <tr>
-
-        <td>&nbsp;</td>
-
-      </tr>
-
-      
-
-	  <form name="form1" id="form1" method="post" action="debitnotelist.php">	
-
-	  <tr>
-
-        <td>
-
-	
-
-		
-
-<?php
-
-	$colorloopcount=0;
-
-	$sno=0;
-
-if (isset($_REQUEST["cbfrmflag1"])) { $cbfrmflag1 = $_REQUEST["cbfrmflag1"]; } else { $cbfrmflag1 = ""; }
-
-//$cbfrmflag1 = $_POST['cbfrmflag1'];
-
-if ($cbfrmflag1 == 'cbfrmflag1')
-
-{
-
-
-
-	$searchpatient = $_POST['customer'];
-
-	$accountnm=$_REQUEST['accountname'];
-
-	$acctid=$_REQUEST['accountid'];
-
-	
-
-	
-
-		
-
-?>
-
-		<table id="AutoNumber3" style="BORDER-COLLAPSE: collapse" 
-
-            bordercolor="#666666" cellspacing="0" cellpadding="4" width="1150" 
-
-            align="left" border="0">
-
-          <tbody>
-
-             
-
-            <tr>
-
-              <td width="5%" class="bodytext31" valign="center"  align="left" 
-
-                bgcolor="#ffffff"><div align="center"><strong>No.</strong></div></td>
-
-					 <td width="8%" class="bodytext31" valign="center"  align="left" 
-
-                bgcolor="#ffffff"><div align="center"><strong>Bill No</strong></div></td>
-
-			
-
-					 <td width="20%" class="bodytext31" valign="center"  align="left" 
-
-                bgcolor="#ffffff"><div align="center"><strong>Patient Name</strong></div></td>
-
-				 <td width="8%" class="bodytext31" valign="center"  align="left" 
-
-                bgcolor="#ffffff"><div align="center"><strong>Reg No</strong></div></td>
-
-				  <td width="8%" class="bodytext31" valign="center"  align="left" 
-
-                bgcolor="#ffffff"><div align="center"><strong>Visit Date</strong></div></td>
-
-				 <td width="8%" class="bodytext31" valign="center"  align="left" 
-
-                bgcolor="#ffffff"><div align="center"><strong>Visit Code</strong></div></td>
-
-				
-
-				 <td width="16%"  align="left" valign="center" 
-
-                bgcolor="#ffffff" class="bodytext31"><div align="center"><strong>Account</strong></div></td>
-
-			
-
-					 <td width="8%"  align="left" valign="center" 
-
-                bgcolor="#ffffff" class="bodytext31"><div align="center"><strong>Action</strong></div></td>
-
-			
-
-              </tr>
-
-           <?php
-
-		  if($accountnm !="")
-
-		  {
-
-			  header("location:debitbill.php?accountid=$acctid");
-
-		  }
-
-		  else
-
-		  {
-
-		  if($searchpatient != '')
-
-		  { 
-
-            $query34 = "select * from master_ipvisitentry where locationcode = '".$locationcode."' AND patientfullname like '%$searchpatient%' or patientcode like '%$searchpatient%' or visitcode like '%$searchpatient%' or finalbillno like '%$searchpatient%'";
-
-		   $exec34 = mysqli_query($GLOBALS["___mysqli_ston"], $query34) or die(mysqli_error($GLOBALS["___mysqli_ston"]));
-
-		   while($res34 = mysqli_fetch_array($exec34))
-
-		   {
-
-		   $patientname = $res34['patientfullname'];
-
-		   $patientcode = $res34['patientcode'];
-
-		   $visitcode = $res34['visitcode'];
-
-		   $date = $res34['consultationdate'];
-
-		   $accountname = $res34['accountfullname'];
-
-		    $paymentstatus=$res34['paymentstatus'];
-
-		   
-
-		   $query33 = "select * from billing_ip where patientcode='$patientcode' and visitcode='$visitcode'";
-
-	$exec33 = mysqli_query($GLOBALS["___mysqli_ston"], $query33) or die(mysqli_error($GLOBALS["___mysqli_ston"]));
-
-	$num33 = mysqli_num_rows($exec33);
-
-	if($num33 != 0)
-
-	{
-
-	$res33 = mysqli_fetch_array($exec33);
-
-	$billno = $res33['billno'];
-
-	}
-
-	else
-
-	{
-
-	$query39 = "select * from billing_ipcreditapproved where patientcode='$patientcode' and visitcode='$visitcode'";
-
-	$exec39 = mysqli_query($GLOBALS["___mysqli_ston"], $query39) or die(mysqli_error($GLOBALS["___mysqli_ston"]));
-
-	$res39= mysqli_fetch_array($exec39);
-
-	$billno = $res39['billno'];
-
-	}
-
-		if($paymentstatus == 'completed')
-
-		{
-
-	       $colorloopcount = $colorloopcount + 1;
-
-			$showcolor = ($colorloopcount & 1); 
-
-			if ($showcolor == 0)
-
-			{
-
-				//echo "if";
-
-				$colorcode = 'bgcolor="#CBDBFA"';
-
-			}
-
-			else
-
-			{
-
-				//echo "else";
-
-				$colorcode = 'bgcolor="#ecf0f5"';
-
-			}
-
-			?>
-
-			
-
-          <tr <?php echo $colorcode; ?>>
-
-              <td class="bodytext31" valign="center"  align="left"><div align="center"><?php echo $sno = $sno + 1; ?></div></td>
-
-		<td class="bodytext31" valign="center"  align="left"><div align="center"><?php echo $billno; ?></div></td>
-
-			  <td class="bodytext31" valign="center"  align="left">
-
-			    <div align="center"><?php echo $patientname; ?></div></td>
-
-				
-
-				  <td class="bodytext31" valign="center"  align="left">
-
-			    <div align="center"><?php echo $patientcode; ?></div></td>
-
-					  <td class="bodytext31" valign="center"  align="left"><div align="center"><?php echo $date; ?></div></td>
-
-				  <td class="bodytext31" valign="center"  align="left">
-
-			    <div align="center"><?php echo $visitcode; ?></div></td>
-
-						  <td class="bodytext31" valign="center"  align="left">
-
-			    <div align="center"><?php echo $accountname; ?></div></td>
-
-				<td class="bodytext31" valign="center"  align="center"><a href="adhocdebitnote.php?billno=<?=$billno;?>&&patientcode=<?php echo $patientcode; ?>&&visitcode=<?php echo $visitcode; ?>">Process</a></td>
-
-			
-
-			
-
-			
-
-              </tr>
-
-		  <?php
-
-		  }
-
-		  }		   
-
-          
-
-		  }else
-
-		  {
-
-		 $query34 = "select * from master_ipvisitentry where locationcode = '".$locationcode."' AND paymentstatus = 'completed'";
-
-		   $exec34 = mysqli_query($GLOBALS["___mysqli_ston"], $query34) or die(mysqli_error($GLOBALS["___mysqli_ston"]));
-
-		  $num34 = mysqli_num_rows($exec34);
-
-		   while($res34 = mysqli_fetch_array($exec34))
-
-		   {
-
-		   $patientname = $res34['patientfullname'];
-
-		   $patientcode = $res34['patientcode'];
-
-		   $visitcode = $res34['visitcode'];
-
-		   $date = $res34['consultationdate'];
-
-		   $accountname = $res34['accountfullname'];
-
-		   
-
-		   $query33 = "select * from billing_ip where patientcode='$patientcode' and visitcode='$visitcode'";
-
-	$exec33 = mysqli_query($GLOBALS["___mysqli_ston"], $query33) or die(mysqli_error($GLOBALS["___mysqli_ston"]));
-
-	$num33 = mysqli_num_rows($exec33);
-
-	if($num33 != 0)
-
-	{
-
-	$res33 = mysqli_fetch_array($exec33);
-
-	$billno = $res33['billno'];
-
-	}
-
-	else
-
-	{
-
-	$query39= "select * from billing_ipcreditapproved where patientcode='$patientcode' and visitcode='$visitcode'";
-
-	$exec39 = mysqli_query($GLOBALS["___mysqli_ston"], $query39) or die(mysqli_error($GLOBALS["___mysqli_ston"]));
-
-	$res39 = mysqli_fetch_array($exec39);
-
-	$billno = $res39['billno'];
-
-	}
-
-		
-
-	       $colorloopcount = $colorloopcount + 1;
-
-			$showcolor = ($colorloopcount & 1); 
-
-			if ($showcolor == 0)
-
-			{
-
-				//echo "if";
-
-				$colorcode = 'bgcolor="#CBDBFA"';
-
-			}
-
-			else
-
-			{
-
-				//echo "else";
-
-				$colorcode = 'bgcolor="#ecf0f5"';
-
-			}
-
-			?>
-
-			
-
-          <tr <?php echo $colorcode; ?>>
-
-              <td class="bodytext31" valign="center"  align="left"><div align="center"><?php echo $sno = $sno + 1; ?></div></td>
-
-		<td class="bodytext31" valign="center"  align="left"><div align="center"><?php echo $billno; ?></div></td>
-
-			  <td class="bodytext31" valign="center"  align="left">
-
-			    <div align="center"><?php echo $patientname; ?></div></td>
-
-				
-
-				  <td class="bodytext31" valign="center"  align="left">
-
-			    <div align="center"><?php echo $patientcode; ?></div></td>
-
-					  <td class="bodytext31" valign="center"  align="left"><div align="center"><?php echo $date; ?></div></td>
-
-				  <td class="bodytext31" valign="center"  align="left">
-
-			    <div align="center"><?php echo $visitcode; ?></div></td>
-
-					  <td class="bodytext31" valign="center"  align="left">
-
-			    <div align="center"><?php echo $accountname; ?></div></td>
-
-				<td class="bodytext31" valign="center"  align="center"><a href="adhocdebitnote.php?billno=<?=$billno;?>&&patientcode=<?php echo $patientcode; ?>&&visitcode=<?php echo $visitcode; ?>">Process</a></td>
-
-			
-
-			
-
-			
-
-              </tr>
-
-		  <?php
-
-		 
-
-		  }
-
-		  }
-
-		  
-
-		  if($searchpatient != '')
-
-		  { 
-
-           $query34 = "select * from master_visitentry where locationcode = '".$locationcode."' AND patientfullname like '%$searchpatient%' or patientcode like '%$searchpatient%' or visitcode like '%$searchpatient%'";
-
-		   $exec34 = mysqli_query($GLOBALS["___mysqli_ston"], $query34) or die(mysqli_error($GLOBALS["___mysqli_ston"]));
-
-		   while($res34 = mysqli_fetch_array($exec34))
-
-		   {
-
-		   $patientname = $res34['patientfullname'];
-
-		   $patientcode = $res34['patientcode'];
-
-		   $visitcode = $res34['visitcode'];
-
-		   $date = $res34['consultationdate'];
-
-		   $accountname = $res34['accountfullname'];
-
-		   $paymentstatus=$res34['paymentstatus'];
-
-		   
-
-		   $query33 = "select * from billing_paylater where patientcode='$patientcode' and visitcode='$visitcode'";
-
-	$exec33 = mysqli_query($GLOBALS["___mysqli_ston"], $query33) or die(mysqli_error($GLOBALS["___mysqli_ston"]));
-
-	$num33 = mysqli_num_rows($exec33);
-
-	if($num33 != 0)
-
-	{
-
-	$res33 = mysqli_fetch_array($exec33);
-
-	$billno = $res33['billno'];
-
-	}
-
-	else
-
-	{
-
-	$query39 = "select * from billing_paynow where patientcode='$patientcode' and visitcode='$visitcode'";
-
-	$exec39 = mysqli_query($GLOBALS["___mysqli_ston"], $query39) or die(mysqli_error($GLOBALS["___mysqli_ston"]));
-
-	$res39= mysqli_fetch_array($exec39);
-
-	$billno = $res39['billno'];
-
-	}
-
-		if(($paymentstatus == 'completed') && ($num33 != 0))
-
-		{
-
-	       $colorloopcount = $colorloopcount + 1;
-
-			$showcolor = ($colorloopcount & 1); 
-
-			if ($showcolor == 0)
-
-			{
-
-				//echo "if";
-
-				$colorcode = 'bgcolor="#CBDBFA"';
-
-			}
-
-			else
-
-			{
-
-				//echo "else";
-
-				$colorcode = 'bgcolor="#ecf0f5"';
-
-			}
-
-			?>
-
-			
-
-          <tr <?php echo $colorcode; ?>>
-
-              <td class="bodytext31" valign="center"  align="left"><div align="center"><?php echo $sno = $sno + 1; ?></div></td>
-
-		<td class="bodytext31" valign="center"  align="left"><div align="center"><?php echo $billno; ?></div></td>
-
-			  <td class="bodytext31" valign="center"  align="left">
-
-			    <div align="center"><?php echo $patientname; ?></div></td>
-
-				
-
-				  <td class="bodytext31" valign="center"  align="left">
-
-			    <div align="center"><?php echo $patientcode; ?></div></td>
-
-					  <td class="bodytext31" valign="center"  align="left"><div align="center"><?php echo $date; ?></div></td>
-
-				  <td class="bodytext31" valign="center"  align="left">
-
-			    <div align="center"><?php echo $visitcode; ?></div></td>
-
-						  <td class="bodytext31" valign="center"  align="left">
-
-			    <div align="center"><?php echo $accountname; ?></div></td>
-
-				<td class="bodytext31" valign="center"  align="center"><a href="adhocdebitnote.php?billno=<?=$billno;?>&&patientcode=<?php echo $patientcode; ?>&&visitcode=<?php echo $visitcode; ?>">Process</a></td>
-
-			
-
-			
-
-			
-
-              </tr>
-
-		  <?php
-
-		  }
-
-		  }		   
-
-        
-
-		  }else
-
-		  {
-
-		 $query34 = "select * from master_visitentry where locationcode = '".$locationcode."' AND paymentstatus = 'completed'";
-
-		   $exec34 = mysqli_query($GLOBALS["___mysqli_ston"], $query34) or die(mysqli_error($GLOBALS["___mysqli_ston"]));
-
-		  $num34 = mysqli_num_rows($exec34);
-
-		   while($res34 = mysqli_fetch_array($exec34))
-
-		   {
-
-		   $patientname = $res34['patientfullname'];
-
-		   $patientcode = $res34['patientcode'];
-
-		   $visitcode = $res34['visitcode'];
-
-		   $date = $res34['consultationdate'];
-
-		   $accountname = $res34['accountfullname'];
-
-		   
-
-		   $query33 = "select * from billing_paylater where patientcode='$patientcode' and visitcode='$visitcode'";
-
-	$exec33 = mysqli_query($GLOBALS["___mysqli_ston"], $query33) or die(mysqli_error($GLOBALS["___mysqli_ston"]));
-
-	$num33 = mysqli_num_rows($exec33);
-
-	if($num33 != 0)
-
-	{
-
-	$res33 = mysqli_fetch_array($exec33);
-
-	$billno = $res33['billno'];
-
-	}
-
-	else
-
-	{
-
-	$query39= "select * from billing_paynow where patientcode='$patientcode' and visitcode='$visitcode'";
-
-	$exec39 = mysqli_query($GLOBALS["___mysqli_ston"], $query39) or die(mysqli_error($GLOBALS["___mysqli_ston"]));
-
-	$res39 = mysqli_fetch_array($exec39);
-
-	$billno = $res39['billno'];
-
-	}
-	if($num33 != 0){
-
-		
-
-	       $colorloopcount = $colorloopcount + 1;
-
-			$showcolor = ($colorloopcount & 1); 
-
-			if ($showcolor == 0)
-
-			{
-
-				//echo "if";
-
-				$colorcode = 'bgcolor="#CBDBFA"';
-
-			}
-
-			else
-
-			{
-
-				//echo "else";
-
-				$colorcode = 'bgcolor="#ecf0f5"';
-
-			}
-
-			?>
-
-			
-
-          <tr <?php echo $colorcode; ?>>
-
-              <td class="bodytext31" valign="center"  align="left"><div align="center"><?php echo $sno = $sno + 1; ?></div></td>
-
-		<td class="bodytext31" valign="center"  align="left"><div align="center"><?php echo $billno; ?></div></td>
-
-			  <td class="bodytext31" valign="center"  align="left">
-
-			    <div align="center"><?php echo $patientname; ?></div></td>
-
-				
-
-				  <td class="bodytext31" valign="center"  align="left">
-
-			    <div align="center"><?php echo $patientcode; ?></div></td>
-
-					  <td class="bodytext31" valign="center"  align="left"><div align="center"><?php echo $date; ?></div></td>
-
-				  <td class="bodytext31" valign="center"  align="left">
-
-			    <div align="center"><?php echo $visitcode; ?></div></td>
-
-					  <td class="bodytext31" valign="center"  align="left">
-
-			    <div align="center"><?php echo $accountname; ?></div></td>
-
-				<td class="bodytext31" valign="center"  align="center"><a href="adhocdebitnote.php?billno=<?=$billno;?>&&patientcode=<?php echo $patientcode; ?>&&visitcode=<?php echo $visitcode; ?>">Process</a></td>
-
-			
-
-			
-
-			
-
-              </tr>
-
-		  <?php
-		} // num>0
-		 
-
-		  }
-
-		  }
-
-		  
-
-		  }
-
-           ?>
-
-            <tr>
-
-              <td class="bodytext311" valign="center" bordercolor="#f3f3f3" align="left" 
-
-                bgcolor="#ecf0f5">&nbsp;</td>
-
-				<td class="bodytext311" valign="center" bordercolor="#f3f3f3" align="left" 
-
-                bgcolor="#ecf0f5">&nbsp;</td>
-
-			
-
-				<td class="bodytext311" valign="center" bordercolor="#f3f3f3" align="left" 
-
-                bgcolor="#ecf0f5">&nbsp;</td>
-
-             	<td class="bodytext311" valign="center" bordercolor="#f3f3f3" align="left" 
-
-                bgcolor="#ecf0f5">&nbsp;</td>
-
-            
-
-            		   <td class="bodytext311" valign="center" bordercolor="#f3f3f3" align="left" 
-
-                bgcolor="#ecf0f5">&nbsp;</td>
-
-				   <td class="bodytext311" valign="center" bordercolor="#f3f3f3" align="left" 
-
-                bgcolor="#ecf0f5">&nbsp;</td>
-
-				   <td class="bodytext311" valign="center" bordercolor="#f3f3f3" align="left" 
-
-                bgcolor="#ecf0f5">&nbsp;</td>
-
-            	   <td class="bodytext311" valign="center" bordercolor="#f3f3f3" align="left" 
-
-                bgcolor="#ecf0f5">&nbsp;</td>
-
-            
-
-      
-
-			</tr>
-
-			
-
-          </tbody>
-
-        </table>
-
-<?php
-
-}
-
-
-
-
-
-?>	
-
-		</td>
-
-      </tr>
-
-      <tr>
-
-        <td>&nbsp;</td>
-
-      </tr>
-
-      <tr>
-
-        <td>&nbsp;</td>
-
-      </tr>
-
-      <tr>
-
-        <td>&nbsp;</td>
-
-      </tr>
-
-	  
-
-	  </form>
-
-    </table>
-
-  </table>
-
+            <!-- Search Form -->
+            <div class="search-form">
+                <form name="cbform1" method="post" action="debitnotelist.php" onSubmit="return validchecking()">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="location" class="form-label">Location</label>
+                            <select name="location" id="location" onChange="ajaxlocationfunction(this.value);" class="form-control">
+                                <?php
+                                $query1 = "select * from login_locationdetails where username='$username' and docno='$docno' group by locationname order by locationname";
+                                $exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
+                                while ($res1 = mysqli_fetch_array($exec1)) {
+                                    $res1location = $res1["locationname"];
+                                    $res1locationanum = $res1["locationcode"];
+                                    ?>
+                                    <option value="<?php echo $res1locationanum; ?>" <?php if($location!='')if($location==$res1locationanum){echo "selected";}?>><?php echo $res1location; ?></option>
+                                    <?php
+                                }
+                                ?>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="customer" class="form-label">Patient Search</label>
+                            <input name="customer" id="customer" class="form-control" placeholder="Search by patient name, code, or visit code" autocomplete="off">
+                            <input name="customercode" id="customercode" value="" type="hidden">
+                            <input type="hidden" name="recordstatus" id="recordstatus">
+                            <input type="hidden" name="billnumbercode" id="billnumbercode" value="<?php echo $billnumbercode; ?>">
+                        </div>
+                    </div>
+                    
+                    <div class="form-row" style="display:none">
+                        <div class="form-group">
+                            <label for="accountname" class="form-label">Account Search</label>
+                            <input type="text" name="accountname" id="accountname" value="" class="form-control">
+                            <input type="hidden" name="accountid" id="accountid" autocomplete="off"/>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <input type="hidden" name="cbfrmflag1" value="cbfrmflag1">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-search"></i> Search
+                            </button>
+                            <button type="reset" class="btn btn-outline" id="resetbutton">
+                                <i class="fas fa-undo"></i> Reset
+                            </button>
+                        </div>
+                    </div>
+                </form>
             </div>
+
+            <!-- Results Section -->
+            <?php if (isset($_REQUEST["cbfrmflag1"])) { ?>
+            <div class="export-actions">
+                <button type="button" class="btn btn-success" onclick="exportToExcel()">
+                    <i class="fas fa-file-excel"></i> Export to Excel
+                </button>
+            </div>
+
+            <div class="data-table-container">
+                <table class="data-table" id="AutoNumber3">
+                    <thead>
+                        <tr>
+                            <th>No.</th>
+                            <th>Bill No</th>
+                            <th>Patient Name</th>
+                            <th>Reg No</th>
+                            <th>Visit Date</th>
+                            <th>Visit Code</th>
+                            <th>Account</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php
+                        $colorloopcount = 0;
+                        $sno = 0;
+                        
+                        if ($cbfrmflag1 == 'cbfrmflag1') {
+                            $searchpatient = $_POST['customer'];
+                            $accountnm = $_REQUEST['accountname'];
+                            $acctid = $_REQUEST['accountid'];
+                            
+                            if ($accountnm != "") {
+                                header("location:debitbill.php?accountid=$acctid");
+                            } else {
+                                // Process IP visit entries
+                                if ($searchpatient != '') {
+                                    $query34 = "select * from master_ipvisitentry where locationcode = '".$locationcode."' AND patientfullname like '%$searchpatient%' or patientcode like '%$searchpatient%' or visitcode like '%$searchpatient%' or finalbillno like '%$searchpatient%'";
+                                } else {
+                                    $query34 = "select * from master_ipvisitentry where locationcode = '".$locationcode."' AND paymentstatus = 'completed'";
+                                }
+                                
+                                $exec34 = mysqli_query($GLOBALS["___mysqli_ston"], $query34) or die(mysqli_error($GLOBALS["___mysqli_ston"]));
+                                
+                                while ($res34 = mysqli_fetch_array($exec34)) {
+                                    $patientname = $res34['patientfullname'];
+                                    $patientcode = $res34['patientcode'];
+                                    $visitcode = $res34['visitcode'];
+                                    $date = $res34['consultationdate'];
+                                    $accountname = $res34['accountfullname'];
+                                    $paymentstatus = $res34['paymentstatus'];
+                                    
+                                    // Get bill number
+                                    $query33 = "select * from billing_ip where patientcode='$patientcode' and visitcode='$visitcode'";
+                                    $exec33 = mysqli_query($GLOBALS["___mysqli_ston"], $query33) or die(mysqli_error($GLOBALS["___mysqli_ston"]));
+                                    $num33 = mysqli_num_rows($exec33);
+                                    
+                                    if ($num33 != 0) {
+                                        $res33 = mysqli_fetch_array($exec33);
+                                        $billno = $res33['billno'];
+                                    } else {
+                                        $query39 = "select * from billing_ipcreditapproved where patientcode='$patientcode' and visitcode='$visitcode'";
+                                        $exec39 = mysqli_query($GLOBALS["___mysqli_ston"], $query39) or die(mysqli_error($GLOBALS["___mysqli_ston"]));
+                                        $res39 = mysqli_fetch_array($exec39);
+                                        $billno = $res39['billno'];
+                                    }
+                                    
+                                    if ($paymentstatus == 'completed') {
+                                        $colorloopcount++;
+                                        $showcolor = ($colorloopcount & 1);
+                                        $colorcode = $showcolor == 0 ? 'bgcolor="#CBDBFA"' : 'bgcolor="#ecf0f5"';
+                                        ?>
+                                        <tr <?php echo $colorcode; ?>>
+                                            <td><?php echo ++$sno; ?></td>
+                                            <td><?php echo $billno; ?></td>
+                                            <td><?php echo $patientname; ?></td>
+                                            <td><?php echo $patientcode; ?></td>
+                                            <td><?php echo $date; ?></td>
+                                            <td><?php echo $visitcode; ?></td>
+                                            <td><?php echo $accountname; ?></td>
+                                            <td>
+                                                <a href="adhocdebitnote.php?billno=<?=$billno;?>&&patientcode=<?php echo $patientcode; ?>&&visitcode=<?php echo $visitcode; ?>" class="action-link">Process</a>
+                                            </td>
+                                        </tr>
+                                        <?php
+                                    }
+                                }
+                                
+                                // Process regular visit entries
+                                if ($searchpatient != '') {
+                                    $query34 = "select * from master_visitentry where locationcode = '".$locationcode."' AND patientfullname like '%$searchpatient%' or patientcode like '%$searchpatient%' or visitcode like '%$searchpatient%'";
+                                } else {
+                                    $query34 = "select * from master_visitentry where locationcode = '".$locationcode."' AND paymentstatus = 'completed'";
+                                }
+                                
+                                $exec34 = mysqli_query($GLOBALS["___mysqli_ston"], $query34) or die(mysqli_error($GLOBALS["___mysqli_ston"]));
+                                
+                                while ($res34 = mysqli_fetch_array($exec34)) {
+                                    $patientname = $res34['patientfullname'];
+                                    $patientcode = $res34['patientcode'];
+                                    $visitcode = $res34['visitcode'];
+                                    $date = $res34['consultationdate'];
+                                    $accountname = $res34['accountfullname'];
+                                    $paymentstatus = $res34['paymentstatus'];
+                                    
+                                    // Get bill number
+                                    $query33 = "select * from billing_paylater where patientcode='$patientcode' and visitcode='$visitcode'";
+                                    $exec33 = mysqli_query($GLOBALS["___mysqli_ston"], $query33) or die(mysqli_error($GLOBALS["___mysqli_ston"]));
+                                    $num33 = mysqli_num_rows($exec33);
+                                    
+                                    if ($num33 != 0) {
+                                        $res33 = mysqli_fetch_array($exec33);
+                                        $billno = $res33['billno'];
+                                    } else {
+                                        $query39 = "select * from billing_paynow where patientcode='$patientcode' and visitcode='$visitcode'";
+                                        $exec39 = mysqli_query($GLOBALS["___mysqli_ston"], $query39) or die(mysqli_error($GLOBALS["___mysqli_ston"]));
+                                        $res39 = mysqli_fetch_array($exec39);
+                                        $billno = $res39['billno'];
+                                    }
+                                    
+                                    if (($paymentstatus == 'completed') && ($num33 != 0)) {
+                                        $colorloopcount++;
+                                        $showcolor = ($colorloopcount & 1);
+                                        $colorcode = $showcolor == 0 ? 'bgcolor="#CBDBFA"' : 'bgcolor="#ecf0f5"';
+                                        ?>
+                                        <tr <?php echo $colorcode; ?>>
+                                            <td><?php echo ++$sno; ?></td>
+                                            <td><?php echo $billno; ?></td>
+                                            <td><?php echo $patientname; ?></td>
+                                            <td><?php echo $patientcode; ?></td>
+                                            <td><?php echo $date; ?></td>
+                                            <td><?php echo $visitcode; ?></td>
+                                            <td><?php echo $accountname; ?></td>
+                                            <td>
+                                                <a href="adhocdebitnote.php?billno=<?=$billno;?>&&patientcode=<?php echo $patientcode; ?>&&visitcode=<?php echo $visitcode; ?>" class="action-link">Process</a>
+                                            </td>
+                                        </tr>
+                                        <?php
+                                    }
+                                }
+                            }
+                        }
+                        ?>
+                    </tbody>
+                </table>
+            </div>
+            <?php } ?>
         </main>
     </div>
 
@@ -1748,6 +965,3 @@ if ($cbfrmflag1 == 'cbfrmflag1')
     <script src="js/debitnotelist-modern.js?v=<?php echo time(); ?>"></script>
 </body>
 </html>
-
-
-

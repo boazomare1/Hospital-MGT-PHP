@@ -126,59 +126,34 @@ if (isset($_REQUEST["cbfrmflag2"])) { $cbfrmflag2 = $_REQUEST["cbfrmflag2"]; } e
 if (isset($_REQUEST["frmflag2"])) { $frmflag2 = $_REQUEST["frmflag2"]; } else { $frmflag2 = ""; }
 //$frmflag2 = $_POST['frmflag2'];
 ?>
-<style type="text/css">
-th {
-            background-color: #ffffff;
-            position: sticky;
-            top: 0;
-            z-index: 1;
-        }
-.bodytext31:hover { font-size:14px; }
-<!--
-body {
-	margin-left: 0px;
-	margin-top: 0px;
-	background-color: #ecf0f5;
-}
-.bodytext3 {	FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3B3B3C; FONT-FAMILY: Tahoma
-}
--->
-</style>
-<!--<link href="css/datepickerstyle.css" rel="stylesheet" type="text/css" />-->
-<!--<script type="text/javascript" src="js/adddate.js"></script>-->
-<!--<script type="text/javascript" src="js/adddate2.js"></script>-->
-<script type="text/javascript" src="js/autocomplete_subtype.js"></script>
-<script type="text/javascript" src="js/autosuggestsubtype.js"></script>
-<script type="text/javascript">
-window.onload = function () 
-{
-	var oTextbox = new AutoSuggestControl1(document.getElementById("searchsuppliername1"), new StateSuggestions1());
-	//var oTextbox = new AutoSuggestControl(document.getElementById("searchsuppliername"), new StateSuggestions());        
-}
-</script>
-<link rel="stylesheet" type="text/css" href="css/autosuggest.css" />        
-<style type="text/css">
-<!--
-.bodytext3 {FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3b3b3c; FONT-FAMILY: Tahoma; text-decoration:none
-}
-.bodytext31 {FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3b3b3c; FONT-FAMILY: Tahoma; text-decoration:none
-}
-.bodytext311 {FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3b3b3c; FONT-FAMILY: Tahoma; text-decoration:none
-}
--->
-.bal
-{
-border-style:none;
-background:none;
-text-align:right;
-}
-.bali
-{
-text-align:right;
-}
-</style>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Full Debtor Analysis Detailed Subtype - MedStar</title>
+    
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <!-- Modern CSS -->
+    <link rel="stylesheet" href="css/fulldebtoranalysisdetailed_subtype-modern.css?v=<?php echo time(); ?>">
+    
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- Date Picker Scripts -->
+    <script type="text/javascript" src="js/autocomplete_subtype.js"></script>
+    <script type="text/javascript" src="js/autosuggestsubtype.js"></script>
+    <script src="js/datetimepicker_css.js"></script>
+    <link rel="stylesheet" type="text/css" href="css/autosuggest.css" />
+    
+    <script type="text/javascript">
+    window.onload = function () {
+        var oTextbox = new AutoSuggestControl1(document.getElementById("searchsuppliername1"), new StateSuggestions1());
+    }
+    </script>
 </head>
-<script src="js/datetimepicker_css.js"></script>
 <script language="javascript">
 function checkfun()
 {
@@ -220,182 +195,243 @@ accLines[i].style.display = 'none';
 }
 </script>
 <body>
-<table width="101%" border="0" cellspacing="0" cellpadding="2">
-  <tr>
-    <td colspan="10" bgcolor="#ecf0f5"><?php include ("includes/alertmessages1.php"); ?></td>
-  </tr>
-  <tr>
-    <td colspan="10" bgcolor="#ecf0f5"><?php include ("includes/title1.php"); ?></td>
-  </tr>
-  <tr>
-    <td colspan="10" bgcolor="#ecf0f5"><?php include ("includes/menu1.php"); ?></td>
-  </tr>
-  <tr>
-    <td colspan="10">&nbsp;</td>
-  </tr>
-  <tr>
-    <td width="1%">&nbsp;</td>
-    <td width="2%" valign="top"><?php //include ("includes/menu4.php"); ?>
-      &nbsp;</td>
-    <td width="97%" valign="top"><table width="116%" border="0" cellspacing="0" cellpadding="0">
+    <!-- Hospital Header -->
+    <header class="hospital-header">
+        <h1 class="hospital-title">🏥 MedStar Hospital Management</h1>
+        <p class="hospital-subtitle">Advanced Healthcare Management Platform</p>
+    </header>
+
+    <!-- User Information Bar -->
+    <div class="user-info-bar">
+        <div class="user-welcome">
+            <span class="welcome-text">Welcome, <strong><?php echo htmlspecialchars($username); ?></strong></span>
+            <span class="location-info">📍 Company: <?php echo htmlspecialchars($companyname); ?></span>
+        </div>
+        <div class="user-actions">
+            <a href="mainmenu1.php" class="btn btn-outline">🏠 Main Menu</a>
+            <a href="logout.php" class="btn btn-outline">🚪 Logout</a>
+        </div>
+    </div>
+
+    <!-- Navigation Breadcrumb -->
+    <nav class="nav-breadcrumb">
+        <a href="mainmenu1.php">🏠 Home</a>
+        <span>→</span>
+        <a href="debtorsales.php">Debtor Sales</a>
+        <span>→</span>
+        <span>Full Debtor Analysis Detailed Subtype</span>
+    </nav>
+
+    <!-- Floating Menu Toggle -->
+    <div id="menuToggle" class="floating-menu-toggle">
+        <i class="fas fa-bars"></i>
+    </div>
+
+    <!-- Main Container with Sidebar -->
+    <div class="main-container-with-sidebar">
+        <!-- Left Sidebar -->
+        <aside id="leftSidebar" class="left-sidebar">
+            <div class="sidebar-header">
+                <h3>Quick Navigation</h3>
+                <button id="sidebarToggle" class="sidebar-toggle">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <ul class="nav-list">
+                    <li class="nav-item">
+                        <a href="mainmenu1.php" class="nav-link">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="debtorsales.php" class="nav-link">
+                            <i class="fas fa-chart-line"></i>
+                            <span>Debtor Sales</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="debtorsreport.php" class="nav-link">
+                            <i class="fas fa-chart-bar"></i>
+                            <span>Debtors Report</span>
+                        </a>
+                    </li>
+                    <li class="nav-item active">
+                        <a href="fulldebtoranalysisdetailed_subtype.php" class="nav-link">
+                            <i class="fas fa-search"></i>
+                            <span>Full Debtor Analysis</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="debitnotelist.php" class="nav-link">
+                            <i class="fas fa-file-invoice"></i>
+                            <span>Debit Note List</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Alert Container -->
+            <div id="alertContainer">
+                <?php include ("includes/alertmessages1.php"); ?>
+            </div>
+
+            <!-- Page Header -->
+            <div class="page-header">
+                <div class="page-header-content">
+                    <h2>Full Debtor Analysis Detailed Subtype</h2>
+                    <p>Comprehensive analysis of debtor accounts with age-wise breakdown and detailed transaction history.</p>
+                </div>
+                <div class="page-header-actions">
+                    <button type="button" class="btn btn-secondary" onclick="refreshPage()">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                    <button type="button" class="btn btn-outline" onclick="exportToExcel()">
+                        <i class="fas fa-download"></i> Export
+                    </button>
+                </div>
+            </div><table width="116%" border="0" cellspacing="0" cellpadding="0">
       <tr>
         <td width="860">
 		
 		
-              <form name="cbform1" method="post" action="" >
-		<table width="800" border="0" align="left" cellpadding="4" cellspacing="0" bordercolor="#666666" id="AutoNumber3" style="border-collapse: collapse">
-          <tbody>
-            <tr bgcolor="#011E6A">
-              <td colspan="4" bgcolor="#ecf0f5" class="bodytext3"><strong>Full Debtor Analysis Detailed</strong></td>
-              </tr>
-            <!--<tr>
-              <td colspan="4" align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">
-			  <input name="printreceipt1" type="reset" id="printreceipt1" onClick="return funcPrintReceipt1()" style="border: 1px solid #001E6A" value="Print Receipt - Previous Payment Entry" /> 
-                *To Print Other Receipts Please Go To Menu:	Reports	-&gt; Payments Given 
-				</td>
-              </tr>-->
-			  <tr>
-              <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">Type </td>
-              <td width="82%" colspan="3" align="left" valign="top"  bgcolor="#FFFFFF"><span class="bodytext3">
-              <select name="type" id="type">
-			  <option value="">Select</option>
-			  <?php
-			  $query51 = "select * from master_paymenttype where recordstatus <> 'deleted' and paymenttype!='CASH'";
-			  $exec51 = mysqli_query($GLOBALS["___mysqli_ston"], $query51) or die(mysqli_error($GLOBALS["___mysqli_ston"]));
-			  while($res51 = mysqli_fetch_array($exec51))
-			  {
-			  $paymenttype = $res51['paymenttype'];
-			  $manum = $res51['auto_number'];
-			  ?>
-			  <option value="<?php echo $manum; ?>" <?php if($manum == $type){ echo "selected"; }?>><?php echo $paymenttype; ?></option>
-			  <?php
-			  }
-			  ?>
-			  </select>
-			  </span></td>
-           </tr>
-			   <tr>
-              <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">Search Subtype </td>
-              <td width="82%" colspan="3" align="left" valign="top"  bgcolor="#FFFFFF"><span class="bodytext3">
-              <input name="searchsuppliername1" type="text" id="searchsuppliername1" value="<?php echo $searchsuppliername1; ?>" size="50" autocomplete="off">
-              <input name="searchsuppliername1hiddentextbox" id="searchsuppliername1hiddentextbox" type="hidden" value="">
-			  <input name="searchsubtypeanum1" id="searchsubtypeanum1" value="<?php echo $searchsubtypeanum1; ?>" type="hidden">
-			  </span></td>
-           </tr>
-		 
-            
-		   
-			  <tr>
-                      <td class="bodytext31" valign="center"  align="left" 
-                bgcolor="#FFFFFF"> Date From </td>
-                    <td width="30%" align="left" valign="center"  bgcolor="#FFFFFF" class="bodytext31"><input name="ADate1" id="ADate1" style="border: 1px solid #001E6A" value="<?php echo $paymentreceiveddatefrom; ?>"  size="10"  readonly="readonly" onKeyDown="return disableEnterKey()" />
-                          <img src="images2/cal.gif" onClick="javascript:NewCssCal('ADate1')" style="cursor:pointer"/> </td>
-                      <td width="16%" align="left" valign="center"  bgcolor="#FFFFFF" class="bodytext31"> Date To </td>
-                      <td width="33%" align="left" valign="center"  bgcolor="#FFFFFF"><span class="bodytext31">
-                        <input name="ADate2" id="ADate2" value="<?php echo $paymentreceiveddateto; ?>"  size="10"  readonly="readonly" onKeyDown="return disableEnterKey()" />
-                        <img src="images2/cal.gif" onClick="javascript:NewCssCal('ADate2')" style="cursor:pointer"/> </span></td>
-                  </tr>	
-				  
-				  <tr>
+            <!-- Search Form -->
+            <div class="search-form">
+                <h3>Search Criteria</h3>
+                <form name="cbform1" method="post" action="">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="type" class="form-label">Payment Type</label>
+                            <select name="type" id="type" class="form-control">
+                                <option value="">Select Payment Type</option>
+                                <?php
+                                $query51 = "select * from master_paymenttype where recordstatus <> 'deleted' and paymenttype!='CASH'";
+                                $exec51 = mysqli_query($GLOBALS["___mysqli_ston"], $query51) or die(mysqli_error($GLOBALS["___mysqli_ston"]));
+                                while($res51 = mysqli_fetch_array($exec51)) {
+                                    $paymenttype = $res51['paymenttype'];
+                                    $manum = $res51['auto_number'];
+                                    ?>
+                                    <option value="<?php echo $manum; ?>" <?php if($manum == $type){ echo "selected"; }?>><?php echo $paymenttype; ?></option>
+                                    <?php
+                                }
+                                ?>
+                            </select>
+                        </div>
 
-              <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">Location</td>
+                        <div class="form-group">
+                            <label for="searchsuppliername1" class="form-label">Search Subtype</label>
+                            <input name="searchsuppliername1" type="text" id="searchsuppliername1" value="<?php echo $searchsuppliername1; ?>" class="form-control" autocomplete="off" placeholder="Search by subtype name">
+                            <input name="searchsuppliername1hiddentextbox" id="searchsuppliername1hiddentextbox" type="hidden" value="">
+                            <input name="searchsubtypeanum1" id="searchsubtypeanum1" value="<?php echo $searchsubtypeanum1; ?>" type="hidden">
+                        </div>
+                    </div>
 
-              <td width="82%" colspan="3" align="left" valign="top"  bgcolor="#FFFFFF">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="ADate1" class="form-label">Date From</label>
+                            <div class="date-picker-group">
+                                <input name="ADate1" id="ADate1" class="form-control" value="<?php echo $paymentreceiveddatefrom; ?>" readonly="readonly" onKeyDown="return disableEnterKey()" />
+                                <i class="fas fa-calendar-alt date-picker-icon" onClick="javascript:NewCssCal('ADate1')"></i>
+                            </div>
+                        </div>
 
-              <select name="locationcode" id="$locationcode">
-			  <option value="All">All</option>
+                        <div class="form-group">
+                            <label for="ADate2" class="form-label">Date To</label>
+                            <div class="date-picker-group">
+                                <input name="ADate2" id="ADate2" value="<?php echo $paymentreceiveddateto; ?>" class="form-control" readonly="readonly" onKeyDown="return disableEnterKey()" />
+                                <i class="fas fa-calendar-alt date-picker-icon" onClick="javascript:NewCssCal('ADate2')"></i>
+                            </div>
+                        </div>
+                    </div>
 
-                <?php
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="locationcode" class="form-label">Location</label>
+                            <select name="locationcode" id="locationcode" class="form-control">
+                                <option value="All">All Locations</option>
+                                <?php
+                                $query20 = "select * FROM master_location";
+                                $exec20 = mysqli_query($GLOBALS["___mysqli_ston"], $query20) or die ("Error in Query20". mysqli_error($GLOBALS["___mysqli_ston"]));
+                                while ($res20 = mysqli_fetch_array($exec20)){
+                                    ?>
+                                    <option value="<?php echo $res20['locationcode'];?>" <?php if($locationcode==$res20['locationcode']){ echo  'selected'; } ?>><?php echo $res20['locationname'];?></option>
+                                    <?php
+                                }
+                                ?>
+                            </select>
+                        </div>
+                    </div>
 
-                  $query20 = "select * FROM master_location";
-
-                  $exec20 = mysqli_query($GLOBALS["___mysqli_ston"], $query20) or die ("Error in Query20". mysqli_error($GLOBALS["___mysqli_ston"]));
-
-                  while ($res20 = mysqli_fetch_array($exec20)){
-				?>
-                    <option value="<?php echo $res20['locationcode'];?>" <?php if($locationcode==$res20['locationcode']){ echo  'selected'; } ?>><?php echo $res20['locationname'];?> </option>;
-				<?php
-                  }
-
-                ?>
-
-                </select></td>
-
-           </tr>
-            <tr>
-              <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3"></td>
-              <td colspan="3" align="left" valign="top"  bgcolor="#FFFFFF">
-			  <input type="hidden" name="cbfrmflag1" value="cbfrmflag1">
-                  <input type="submit" value="Search" name="Submit" onClick="return checkfun();"/>
-                  <input name="resetbutton" type="reset" id="resetbutton" value="Reset" /></td>
-            </tr>
-          </tbody>
-        </table>
-		</form>		</td>
+                    <div class="form-actions">
+                        <input type="hidden" name="cbfrmflag1" value="cbfrmflag1">
+                        <button type="submit" name="Submit" class="btn btn-primary" onClick="return checkfun();">
+                            <i class="fas fa-search"></i> Search
+                        </button>
+                        <button type="reset" class="btn btn-outline" id="resetbutton">
+                            <i class="fas fa-undo"></i> Reset
+                        </button>
+                    </div>
+                </form>
+            </div>		</td>
       </tr>
       <tr>
         <td>&nbsp;</td>
       </tr>
        <tr>
-        <td><table id="AutoNumber3" style="BORDER-COLLAPSE: collapse" 
-            bordercolor="#666666" cellspacing="0" cellpadding="4" width="100%" 
-            align="left" border="0">
-          <tbody>
-            <tr>
-              <td width="" bgcolor="#ecf0f5" class="bodytext31">&nbsp;</td>
-              <td colspan="14" bgcolor="#ecf0f5" class="bodytext31"><span class="bodytext311">
-              <?php
-				if (isset($_REQUEST["cbfrmflag1"])) { $cbfrmflag1 = $_REQUEST["cbfrmflag1"]; } else { $cbfrmflag1 = ""; }
-				//$cbfrmflag1 = $_REQUEST['cbfrmflag1'];
-				if ($cbfrmflag1 == 'cbfrmflag1')
-				{
-					if (isset($_REQUEST["cbcustomername"])) { $cbcustomername = $_REQUEST["cbcustomername"]; } else { $cbcustomername = ""; }
-					//$cbbillnumber = $_REQUEST['cbbillnumber'];
-					if (isset($_REQUEST["customername"])) { $customername = $_REQUEST["customername"]; } else { $customername = ""; }
-					//$cbbillstatus = $_REQUEST['cbbillstatus'];
-					
-					if (isset($_REQUEST["cbbillnumber"])) { $cbbillnumber = $_REQUEST["cbbillnumber"]; } else { $cbbillnumber = ""; }
-					//$cbbillnumber = $_REQUEST['cbbillnumber'];
-					if (isset($_REQUEST["cbbillstatus"])) { $cbbillstatus = $_REQUEST["cbbillstatus"]; } else { $cbbillstatus = ""; }
-					//$cbbillstatus = $_REQUEST['cbbillstatus'];
-					
-					//$transactiondatefrom = $_REQUEST['ADate1'];
-					//$transactiondateto = $_REQUEST['ADate2'];
-					
-					//$paymenttype = $_REQUEST['paymenttype'];
-					//$billstatus = $_REQUEST['billstatus'];
-					
-					$urlpath = "ADate1=$transactiondatefrom&&ADate2=$transactiondateto&&username=$username&&companyanum=$companyanum";//&&companyname=$companyname";
-				}
-				else
-				{
-					$urlpath = "ADate1=$transactiondatefrom&&ADate2=$transactiondateto&&username=$username&&companyanum=$companyanum";//&&companyname=$companyname";
-				}
-				?>
- 				
-              <!--<input  value="Print Report" onClick="javascript:printbillreport1()" name="resetbutton2" type="submit" id="resetbutton2"  style="border: 1px solid #001E6A" />
-&nbsp;				<input  value="Export Excel" onClick="javascript:printbillreport2()" name="resetbutton22" type="button" id="resetbutton22"  style="border: 1px solid #001E6A" />-->
-</span></td>  
-            </tr>
-            <tr>
-              <th width="2%" class="bodytext31" valign="center"  align="left" bgcolor="#ffffff"><strong>No.</strong></th>
-              <th width="" align="left" valign="center"  bgcolor="#ffffff" class="bodytext31"><div align="left"><strong>Account</strong></div></th>
-				<th width="" align="left" valign="center"  bgcolor="#ffffff" class="bodytext31"><div align="left"><strong>Location</strong></div></th>
-				<th width="" align="left" valign="center"  bgcolor="#ffffff" class="bodytext31"><div align="left"><strong>Disp. Date</strong></div></th>
-				<th width="" align="left" valign="center"  bgcolor="#ffffff" class="bodytext31"><div align="left"><strong>Disp.ID</strong></div></th>
-				<th width="" align="left" valign="center"  bgcolor="#ffffff" class="bodytext31"><div align="left"><strong>Patient Name</strong></div></th>
-                <th width="" align="left" valign="center"  bgcolor="#ffffff" class="bodytext31"><div align="left"><strong>Visit Code</strong></div></th>
-                <th width="" align="left" valign="center"  bgcolor="#ffffff" class="bodytext31"><div align="left"><strong>Member No</strong></div></th>
-				<th width="" align="left" valign="center"  bgcolor="#ffffff" class="bodytext31"><div align="left"><strong>Pre Auth Code</strong></div></th>
-				 <th width="" align="left" valign="center"  bgcolor="#ffffff" class="bodytext31"><div align="left"><strong>Date</strong></div></th>
-              <th width="" align="right" valign="center"  bgcolor="#ffffff" class="bodytext31"><strong> Total Amount </strong></th>
-              <th width="" align="right" valign="center"  bgcolor="#ffffff" class="bodytext31"><strong> 30 days </strong></th>
-              <th width="" align="left" valign="center"  bgcolor="#ffffff" class="bodytext31"><div align="right"><strong>60 days </strong></div></th>
-				<th width="" align="left" valign="center"  bgcolor="#ffffff" class="bodytext31"><div align="right"><strong>90 days</strong></div></th>
-				<th width="" align="left" valign="center"  bgcolor="#ffffff" class="bodytext31"><div align="right"><strong>120 days</strong></div></th>
-              <th width="" align="left" valign="center"  bgcolor="#ffffff" class="bodytext31"><div align="right"><strong>180 days </strong></div></th>
-				<th width="" align="left" valign="center"  bgcolor="#ffffff" class="bodytext31"><div align="right"><strong>180+ days </strong></div></th>
-            </tr>
+            <!-- Results Section -->
+            <?php if (isset($_REQUEST["cbfrmflag1"])) { 
+                if (isset($_REQUEST["cbfrmflag1"])) { $cbfrmflag1 = $_REQUEST["cbfrmflag1"]; } else { $cbfrmflag1 = ""; }
+                if ($cbfrmflag1 == 'cbfrmflag1') {
+                    if (isset($_REQUEST["cbcustomername"])) { $cbcustomername = $_REQUEST["cbcustomername"]; } else { $cbcustomername = ""; }
+                    if (isset($_REQUEST["customername"])) { $customername = $_REQUEST["customername"]; } else { $customername = ""; }
+                    if (isset($_REQUEST["cbbillnumber"])) { $cbbillnumber = $_REQUEST["cbbillnumber"]; } else { $cbbillnumber = ""; }
+                    if (isset($_REQUEST["cbbillstatus"])) { $cbbillstatus = $_REQUEST["cbbillstatus"]; } else { $cbbillstatus = ""; }
+                    $urlpath = "ADate1=$transactiondatefrom&&ADate2=$transactiondateto&&username=$username&&companyanum=$companyanum";
+                } else {
+                    $urlpath = "ADate1=$transactiondatefrom&&ADate2=$transactiondateto&&username=$username&&companyanum=$companyanum";
+                }
+            ?>
+            <div class="export-actions">
+                <a href="fulldebtoranalysisstatement.php?<?php echo $urlpath; ?>" target="_blank" class="export-btn">
+                    <i class="fas fa-file-excel"></i> Statement Excel
+                </a>
+                <a href="fulldebtoranalysisstatementpdf.php?<?php echo $urlpath; ?>" target="_blank" class="export-btn">
+                    <i class="fas fa-file-pdf"></i> Statement PDF
+                </a>
+                <a href="fulldebtoranalysisdetailed_listing.php?<?php echo $urlpath; ?>" target="_blank" class="export-btn">
+                    <i class="fas fa-list"></i> Debtors Listing
+                </a>
+            </div>
+
+            <div class="data-table-container">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>No.</th>
+                            <th>Account</th>
+                            <th>Location</th>
+                            <th>Disp. Date</th>
+                            <th>Disp.ID</th>
+                            <th>Patient Name</th>
+                            <th>Visit Code</th>
+                            <th>Member No</th>
+                            <th>Pre Auth Code</th>
+                            <th>Date</th>
+                            <th>Total Amount</th>
+                            <th>30 days</th>
+                            <th>60 days</th>
+                            <th>90 days</th>
+                            <th>120 days</th>
+                            <th>180 days</th>
+                            <th>180+ days</th>
+                        </tr>
+                    </thead>
+                    <tbody>
 			
 			<?php
 			$selectedType ='';
@@ -1428,8 +1464,13 @@ $grandtotalamount2401 = $grandtotalamount2401+$totalamount2401+$optotalamountgre
         </table></td>
       </tr>
 	  
-    </table>
-</table>
+                    </tbody>
+                </table>
+            </div>
+            <?php } ?>
+        </main>
+    </div>
+
     <!-- Modern JavaScript -->
     <script src="js/fulldebtoranalysisdetailed_subtype-modern.js?v=<?php echo time(); ?>"></script>
 </body>

@@ -1,55 +1,74 @@
 <?php
+// Modern PHP with strict error reporting and security headers
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+ini_set('log_errors', 1);
+
+// Security headers
+header('X-Content-Type-Options: nosniff');
+header('X-Frame-Options: DENY');
+header('X-XSS-Protection: 1; mode=block');
+header('Referrer-Policy: strict-origin-when-cross-origin');
 
 session_start();
-
 include ("includes/loginverify.php");
-
 include ("db/db_connect.php");
-
-//echo $menu_id;
 include ("includes/check_user_access.php");
 
-$ipaddress = $_SERVER['REMOTE_ADDR'];
-
+// Initialize variables with proper validation
+$ipaddress = isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : '';
 $updatedatetime = date('Y-m-d');
-
- $username = $_SESSION['username'];
-
-$companyanum = $_SESSION['companyanum'];
-
-$companyname = $_SESSION['companyname'];
-
-$docno = $_SESSION['docno'];
-
+$username = isset($_SESSION['username']) ? $_SESSION['username'] : '';
+$companyanum = isset($_SESSION['companyanum']) ? $_SESSION['companyanum'] : '';
+$companyname = isset($_SESSION['companyname']) ? $_SESSION['companyname'] : '';
+$docno = isset($_SESSION['docno']) ? $_SESSION['docno'] : '';
 $updatetime = date('H:i:s');
-
 $updatedate = date('Y-m-d H:i:s');
-
 $colorloopcount = "";
 
-$query1 = "select locationcode from login_locationdetails where username='$username' and docno='$docno' group by locationname order by locationname";
-$exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
-$res1 = mysqli_fetch_array($exec1);
-$res1location = $res1["locationcode"];	
+// CSRF Token generation
+if (!isset($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(openssl_random_pseudo_bytes(32));
+}
+
+// CSRF Token validation
+function validateCSRFToken($token) {
+    return isset($_SESSION['csrf_token']) && $_SESSION['csrf_token'] === $token;
+}
+
+// Input sanitization function
+function sanitizeInput($input) {
+    return htmlspecialchars(trim($input), ENT_QUOTES, 'UTF-8');
+}
+
+// Get user's default location using prepared statement
+$stmt = $GLOBALS["___mysqli_ston"]->prepare("SELECT locationcode FROM login_locationdetails WHERE username = ? AND docno = ? GROUP BY locationname ORDER BY locationname LIMIT 1");
+$stmt->bind_param("ss", $username, $docno);
+$stmt->execute();
+$stmt->bind_result($res1location);
+$stmt->fetch();
+$stmt->close();
+
+$locationcode = isset($_REQUEST['location']) ? sanitizeInput($_REQUEST['location']) : '';
+
+// Get location name using prepared statement
+if (!empty($locationcode)) {
+    $stmt = $GLOBALS["___mysqli_ston"]->prepare("SELECT locationname FROM master_location WHERE locationcode = ?");
+    $stmt->bind_param("s", $locationcode);
+    $stmt->execute();
+    $stmt->bind_result($location);
+    $stmt->fetch();
+    $stmt->close();
+} else {
+    $location = '';
+}
 
 
- $locationcode=isset($_REQUEST['location'])?$_REQUEST['location']:'';
 
- 
+// Get employee details using prepared statement
+$stmt = $GLOBALS["___mysqli_ston"]->prepare("SELECT location, store FROM master_employee WHERE username = ?");
 
- $query233 = "select * from master_location where locationcode='$locationcode'";
-
-$exec233 = mysqli_query($GLOBALS["___mysqli_ston"], $query233) or die(mysqli_error($GLOBALS["___mysqli_ston"]));
-
-$res233 = mysqli_fetch_array($exec233);
-
-$location = $res233['locationname'];
-
-
-
- $query23 = "select * from master_employee where username='$username'";
-
-$exec23 = mysqli_query($GLOBALS["___mysqli_ston"], $query23) or die(mysqli_error($GLOBALS["___mysqli_ston"]));
+$stmt->bind_param("s", $username);
 
 $res23 = mysqli_fetch_array($exec23);
 
@@ -181,62 +200,56 @@ else
 }
 
 ?>
-<script src="js/jquery-1.11.1.min.js"></script>
-<script>
-
-
-
-//ajax function to get store for corrosponding location
-
-function storefunction(loc)
-
-{
-
-	var username=document.getElementById("username").value;
-
-	
-
-var xmlhttp;
-
-
-
-if (window.XMLHttpRequest)
-
-  {// code for IE7+, Firefox, Chrome, Opera, Safari
-
-  xmlhttp=new XMLHttpRequest();
-
-  }
-
-else
-
-  {// code for IE6, IE5
-
-  xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
-
-  }
-
-xmlhttp.onreadystatechange=function()
-
-  {
-
-  if (xmlhttp.readyState==4 && xmlhttp.status==200)
-
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Opening Stock Entry Management for MedStar Hospital Management System">
+    <meta name="robots" content="noindex, nofollow">
+    <title>Opening Stock Entry - MedStar Hospital</title>
+    
+    <!-- Preload critical resources -->
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" as="style">
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" as="style">
+    
+    <!-- Modern CSS Framework -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/openingstock-modern.css?v=<?php echo time(); ?>">
+    
+    <!-- External JavaScript -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+    <script src="js/openingstock-modern.js?v=<?php echo time(); ?>"></script>
+    
+    <!-- Structured Data -->
+    <script type="application/ld+json">
     {
-
-    document.getElementById("store").innerHTML=xmlhttp.responseText;
-
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "MedStar Hospital Management System",
+        "description": "Opening Stock Entry Management for Hospital Inventory System"
     }
+    </script>
+</head>
 
-  }
-
-xmlhttp.open("GET","ajax/ajaxstore.php?loc="+loc+"&username="+username,true);
-
-xmlhttp.send();
-
-
-
-	}
+<script>
+// Modern AJAX function to get store for corresponding location
+function storefunction(loc) {
+    const username = document.getElementById("username")?.value || '';
+    
+    fetch(`ajax/ajaxstore.php?loc=${loc}&username=${username}`)
+        .then(response => response.text())
+        .then(data => {
+            const storeSelect = document.getElementById("store");
+            if (storeSelect) {
+                storeSelect.innerHTML = data;
+            }
+        })
+        .catch(error => {
+            console.error('Error loading stores:', error);
+        });
+}
 
 
 
@@ -463,7 +476,7 @@ text-align:right;
     <!-- Modern MedStar Hospital Management Header -->
     <header class="hospital-header">
         <h1 class="hospital-title">🏥 MedStar Hospital Management</h1>
-        <p class="hospital-subtitle">Opening Stock Entry Management System</p>
+        <p class="hospital-subtitle">Advanced Healthcare Management Platform</p>
     </header>
 
     <!-- Navigation Breadcrumb -->
@@ -544,7 +557,10 @@ text-align:right;
                     <h3 class="section-title">Opening Stock Initiation</h3>
                 </div>
 
-                <form name="cbform1" method="post" action="openingstockentry_master.php" onSubmit="return validcheck()">
+                <form name="cbform1" method="post" action="openingstockentry_master.php" onSubmit="return validcheck()" novalidate>
+                    <!-- CSRF Token -->
+                    <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
+                    
                     <div class="form-grid">
                         <div class="form-group">
                             <label for="location" class="form-label">Location *</label>
@@ -557,12 +573,12 @@ text-align:right;
                                     $reslocation = $res["locationname"];
                                     $reslocationanum = $res["locationcode"];
                                 ?>
-                                    <option value="<?php echo $reslocationanum; ?>" <?php if($location!='')if($location==$reslocationanum){echo "selected";}?>><?php echo $reslocation; ?></option>
+                                    <option value="<?php echo htmlspecialchars($reslocationanum); ?>" <?php if($location!='')if($location==$reslocationanum){echo "selected";}?>><?php echo htmlspecialchars($reslocation); ?></option>
                                 <?php } ?>
                             </select>
-                            <input type="hidden" name="locationnamenew" value="<?php echo $locationname; ?>">
-                            <input type="hidden" name="locationcodenew" value="<?php echo $res1locationanum; ?>">
-                            <input type="hidden" name="username" id="username" value="<?php echo $username; ?>">
+                            <input type="hidden" name="locationnamenew" value="<?php echo htmlspecialchars($locationname); ?>">
+                            <input type="hidden" name="locationcodenew" value="<?php echo htmlspecialchars($res1locationanum); ?>">
+                            <input type="hidden" name="username" id="username" value="<?php echo htmlspecialchars($username); ?>">
                         </div>
 
                         <div class="form-group">

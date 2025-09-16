@@ -1,1109 +1,627 @@
 <?php
-
 session_start();
-
 include ("includes/loginverify.php");
-
 include ("db/db_connect.php");
 
-
-
 $ipaddress = $_SERVER['REMOTE_ADDR'];
-
 $updatedatetime = date('Y-m-d');
-
 $username = $_SESSION['username'];
-
 $companyanum = $_SESSION['companyanum'];
-
 $companyname = $_SESSION['companyname'];
-
 $transactiondatefrom = date('Y-m-d', strtotime('-1 month'));
-
 $transactiondateto = date('Y-m-d');
-
 $sno = 0;
-
 $colorloopcount = '';
-
 $totalcost = 0.00;
-
 $docno = $_SESSION['docno'];
+
+// Get location options
+$query = "SELECT * FROM login_locationdetails WHERE username='$username' AND docno='$docno' ORDER BY locationname";
+$exec = mysqli_query($GLOBALS["___mysqli_ston"], $query) or die("Error in Query1: " . mysqli_error($GLOBALS["___mysqli_ston"]));
+
+// Initialize variables
+$totalSales = 0;
+$totalCOGS = 0;
+$totalRevenue = 0;
+$totalItems = 0;
+$stockData = [];
+
+// Process form submission
+if (isset($_REQUEST["frmflag1"])) { 
+    $frmflag1 = $_REQUEST["frmflag1"]; 
+} else { 
+    $frmflag1 = ""; 
+}
+
+if (isset($_REQUEST["ADate1"])) { 
+    $fromdate = $_REQUEST["ADate1"]; 
+} else { 
+    $fromdate = $transactiondatefrom; 
+}
+
+if (isset($_REQUEST["ADate2"])) { 
+    $todate = $_REQUEST["ADate2"]; 
+} else { 
+    $todate = $transactiondateto; 
+}
+
+if (isset($_REQUEST["store"])) { 
+    $store = $_REQUEST["store"]; 
+} else { 
+    $store = ""; 
+}
+
+if (isset($_REQUEST["locationcode"])) { 
+    $locationcode = $_REQUEST["locationcode"]; 
+} else { 
+    $locationcode = ""; 
+}
+
+if (isset($_REQUEST["searchitemcode"])) { 
+    $searchitemcode = $_REQUEST["searchitemcode"]; 
+} else { 
+    $searchitemcode = ""; 
+}
+
+if (isset($_REQUEST["categoryname"])) { 
+    $categoryname = $_REQUEST["categoryname"]; 
+} else { 
+    $categoryname = ""; 
+}
+
+// Process report generation
+if ($frmflag1 == 'frmflag1') {
+    $totalSales = 0;
+    $totalCOGS = 0;
+    $totalRevenue = 0;
+    $totalItems = 0;
+    
+    if (trim($searchitemcode) != '') {
+        // Search for specific item
+        $query1 = "SELECT entrydocno, itemname, itemcode, transaction_date, transaction_quantity, fifo_code 
+                   FROM transaction_stock 
+                   WHERE transaction_date BETWEEN '$fromdate' AND '$todate' 
+                   AND itemcode = '$searchitemcode' 
+                   AND locationcode = '$locationcode' 
+                   AND storecode = '$store' 
+                   GROUP BY itemcode";
+        
+        $exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die("Error in Query1: " . mysqli_error($GLOBALS["___mysqli_ston"]));
+        
+        while ($res1 = mysqli_fetch_array($exec1)) {
+            $itemcode = $res1['itemcode'];
+            $itemname = $res1['itemname'];
+            
+            // Get item pricing
+            $query2 = "SELECT purchaseprice, rateperunit FROM master_medicine WHERE itemcode = '$itemcode'";
+            $exec2 = mysqli_query($GLOBALS["___mysqli_ston"], $query2) or die("Error in Query2: " . mysqli_error($GLOBALS["___mysqli_ston"]));
+            $res2 = mysqli_fetch_array($exec2);
+            
+            $costPrice = $res2['purchaseprice'];
+            $salesPrice = $res2['rateperunit'];
+            
+            // Get sales quantity
+            $query3 = "SELECT SUM(transaction_quantity) as qty 
+                       FROM transaction_stock 
+                       WHERE itemcode = '$itemcode' 
+                       AND description IN ('IP Direct Sales', 'Sales') 
+                       AND transaction_date BETWEEN '$fromdate' AND '$todate' 
+                       AND storecode = '$store' 
+                       AND locationcode = '$locationcode'";
+            
+            $exec3 = mysqli_query($GLOBALS["___mysqli_ston"], $query3) or die("Error in Query3: " . mysqli_error($GLOBALS["___mysqli_ston"]));
+            $res3 = mysqli_fetch_array($exec3);
+            $salesQty = $res3['qty'] ?: 0;
+            
+            // Calculate COGS and Revenue
+            $cogs = $salesQty * $costPrice;
+            $revenue = $salesQty * $salesPrice;
+            
+            // Get current stock
+            $query7 = "SELECT SUM(transaction_quantity) as qty 
+                       FROM transaction_stock 
+                       WHERE itemcode = '$itemcode' 
+                       AND batch_stockstatus = '1' 
+                       AND storecode = '$store' 
+                       AND locationcode = '$locationcode'";
+            
+            $exec7 = mysqli_query($GLOBALS["___mysqli_ston"], $query7) or die("Error in Query7: " . mysqli_error($GLOBALS["___mysqli_ston"]));
+            $res7 = mysqli_fetch_array($exec7);
+            $currentQty = $res7['qty'] ?: 0;
+            
+            $stockData[] = [
+                'itemcode' => $itemcode,
+                'itemname' => $itemname,
+                'costprice' => $costPrice,
+                'salesprice' => $salesPrice,
+                'currentqty' => $currentQty,
+                'salesqty' => $salesQty,
+                'cogs' => $cogs,
+                'revenue' => $revenue
+            ];
+            
+            $totalSales += $salesQty;
+            $totalCOGS += $cogs;
+            $totalRevenue += $revenue;
+            $totalItems++;
+        }
+    } else {
+        // Search by category
+        if (trim($categoryname) != '') {
+            $query10 = "SELECT itemcode, purchaseprice, rateperunit 
+                        FROM master_medicine 
+                        WHERE categoryname LIKE '%$categoryname%' 
+                        AND status <> 'DELETED' 
+                        GROUP BY itemcode";
+        } else {
+            $query10 = "SELECT itemcode, purchaseprice, rateperunit 
+                        FROM master_medicine 
+                        WHERE itemcode = '$searchitemcode' 
+                        AND categoryname LIKE '%$categoryname%' 
+                        AND status <> 'DELETED' 
+                        GROUP BY itemcode";
+        }
+        
+        $exec10 = mysqli_query($GLOBALS["___mysqli_ston"], $query10) or die("Error in Query10: " . mysqli_error($GLOBALS["___mysqli_ston"]));
+        
+        while ($res10 = mysqli_fetch_array($exec10)) {
+            $itemcode = $res10['itemcode'];
+            $costPrice = $res10['purchaseprice'];
+            $salesPrice = $res10['rateperunit'];
+            
+            // Get item name
+            $query1 = "SELECT entrydocno, itemname, itemcode, transaction_date, transaction_quantity, fifo_code 
+                       FROM transaction_stock 
+                       WHERE transaction_date BETWEEN '$fromdate' AND '$todate' 
+                       AND itemcode = '$itemcode' 
+                       AND storecode = '$store' 
+                       AND locationcode = '$locationcode' 
+                       GROUP BY itemcode";
+            
+            $exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die("Error in Query1: " . mysqli_error($GLOBALS["___mysqli_ston"]));
+            
+            if (mysqli_num_rows($exec1) > 0) {
+                $res1 = mysqli_fetch_array($exec1);
+                $itemname = $res1['itemname'];
+                
+                // Get sales quantity
+                $query3 = "SELECT SUM(transaction_quantity) as qty 
+                           FROM transaction_stock 
+                           WHERE itemcode = '$itemcode' 
+                           AND description IN ('IP Direct Sales', 'Sales') 
+                           AND transaction_date BETWEEN '$fromdate' AND '$todate' 
+                           AND storecode = '$store' 
+                           AND locationcode = '$locationcode'";
+                
+                $exec3 = mysqli_query($GLOBALS["___mysqli_ston"], $query3) or die("Error in Query3: " . mysqli_error($GLOBALS["___mysqli_ston"]));
+                $res3 = mysqli_fetch_array($exec3);
+                $salesQty = $res3['qty'] ?: 0;
+                
+                // Calculate COGS and Revenue
+                $cogs = $salesQty * $costPrice;
+                $revenue = $salesQty * $salesPrice;
+                
+                // Get current stock
+                $query7 = "SELECT SUM(transaction_quantity) as qty 
+                           FROM transaction_stock 
+                           WHERE itemcode = '$itemcode' 
+                           AND batch_stockstatus = '1' 
+                           AND storecode = '$store' 
+                           AND locationcode = '$locationcode'";
+                
+                $exec7 = mysqli_query($GLOBALS["___mysqli_ston"], $query7) or die("Error in Query7: " . mysqli_error($GLOBALS["___mysqli_ston"]));
+                $res7 = mysqli_fetch_array($exec7);
+                $currentQty = $res7['qty'] ?: 0;
+                
+                $stockData[] = [
+                    'itemcode' => $itemcode,
+                    'itemname' => $itemname,
+                    'costprice' => $costPrice,
+                    'salesprice' => $salesPrice,
+                    'currentqty' => $currentQty,
+                    'salesqty' => $salesQty,
+                    'cogs' => $cogs,
+                    'revenue' => $revenue
+                ];
+                
+                $totalSales += $salesQty;
+                $totalCOGS += $cogs;
+                $totalRevenue += $revenue;
+                $totalItems++;
+            }
+        }
+    }
+}
+
+// Get store options for selected location
+$storeOptions = [];
+if ($locationcode) {
+    $query5 = "SELECT ms.auto_number, ms.storecode, ms.store 
+               FROM master_employeelocation as me 
+               LEFT JOIN master_store as ms ON me.storecode = ms.auto_number 
+               WHERE me.locationcode = '$locationcode' 
+               AND me.username = '$username'";
+    
+    $exec5 = mysqli_query($GLOBALS["___mysqli_ston"], $query5) or die("Error in Query5: " . mysqli_error($GLOBALS["___mysqli_ston"]));
+    
+    while ($res5 = mysqli_fetch_array($exec5)) {
+        $storeOptions[] = [
+            'value' => $res5['auto_number'],
+            'text' => $res5['store']
+        ];
+    }
+}
+
+// Get category options
+$query42 = "SELECT * FROM master_medicine WHERE status = '' GROUP BY categoryname ORDER BY categoryname";
+$exec42 = mysqli_query($GLOBALS["___mysqli_ston"], $query42) or die("Error in Query42: " . mysqli_error($GLOBALS["___mysqli_ston"]));
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Revenue Current Stock Report</title>
-<!-- Modern CSS -->
-<link href="css/revenuecurrentstock-modern.css?v=<?php echo time(); ?>" rel="stylesheet" type="text/css" />
-<link href="css/three.css" rel="stylesheet" type="text/css">
-<!-- Modern JavaScript -->
-<script type="text/javascript" src="js/revenuecurrentstock-modern.js?v=<?php echo time(); ?>"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Revenue Current Stock Report - MedStar</title>
+    
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <!-- Modern CSS -->
+    <link rel="stylesheet" href="css/revenuecurrentstock-modern.css?v=<?php echo time(); ?>">
+    
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- Date Picker CSS -->
+    <link href="css/datepickerstyle.css" rel="stylesheet" type="text/css" />
+    
+    <!-- Date Picker Scripts -->
+    <script type="text/javascript" src="js/adddate.js"></script>
+    <script type="text/javascript" src="js/adddate2.js"></script>
+    <script src="js/datetimepicker_css.js"></script>
+    
+    <!-- Autocomplete CSS -->
+    <link rel="stylesheet" type="text/css" href="css/autosuggest.css" />
 </head>
-
 <body>
-
-<header>
-  <?php include ("includes/alertmessages1.php"); ?>
-  <?php include ("includes/title1.php"); ?>
-  <?php include ("includes/menu1.php"); ?>
-</header>
-
-<main class="main-container">
-<?php
-
-$query = "select * from login_locationdetails where username='$username' and docno='$docno' order by locationname";
-
-$exec = mysqli_query($GLOBALS["___mysqli_ston"], $query) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-$res = mysqli_fetch_array($exec);
-
-	
-
-	 $locationname  = $res["locationname"];
-
-	 $locationcode = $res["locationcode"];
-
-	 $res12locationanum = $res["auto_number"];
-
-	 
-
-  $locationcode=isset($_REQUEST['location'])?$_REQUEST['location']:'';
-
-  $location=isset($_REQUEST['location'])?$_REQUEST['location']:'';
-
-//To populate the autocompetelist_services1.js
-
-//include ("autocompletebuild_item1pharmacy.php");
-
-
-
-$transactiondatefrom = date('Y-m-d', strtotime('-1 week'));
-
-$transactiondateto = date('Y-m-d');
-
-	
-
-if (isset($_REQUEST["ADate1"])) { $ADate1 = $_REQUEST["ADate1"]; } else { $ADate1 = ""; }
-
-if (isset($_REQUEST["ADate2"])) { $ADate2 = $_REQUEST["ADate2"]; } else { $ADate2 = ""; }
-
-if (isset($_REQUEST["docnumber"])) { $docnumber = $_REQUEST["docnumber"]; } else { $docnumber = ""; }
-
-if (isset($_REQUEST["ADate1"])) { $fromdate = $_REQUEST["ADate1"]; } else { $fromdate = ""; }
-
-if (isset($_REQUEST["ADate2"])) { $todate = $_REQUEST["ADate2"]; } else { $todate = ""; }
-
-if (isset($_REQUEST["store"])) { $store1 = $_REQUEST["store"]; } else { $store = ""; }
-
-if (isset($_REQUEST["location"])) { $location1 = $_REQUEST["location"]; } else { $location1 = ""; }
-
-if (isset($_REQUEST["searchitemcode"])) { $searchitemcode = $_REQUEST["searchitemcode"]; } else { $searchitemcode = ""; }
-
-//$itemcode = $_REQUEST['itemcode'];
-
-if (isset($_REQUEST["servicename"])) { $servicename = $_REQUEST["servicename"]; } else { $servicename = ""; }
-
-//$servicename = $_REQUEST['servicename'];
-
-
-
-//if ($servicename == '') $servicename = 'ALL';
-
-
-
-if (isset($_REQUEST["itemname"])) { $searchitemname = $_REQUEST["itemname"]; } else { $searchitemname = ""; }
-
-if (isset($_REQUEST["store"])) { $store = $_REQUEST["store"]; } else { $store = ""; }
-
-
-
-?>
-
-<style type="text/css">
-
-<!--
-
-body {
-
-	margin-left: 0px;
-
-	margin-top: 0px;
-
-	background-color: #ecf0f5;
-
-}
-
-.bodytext3 {	FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3B3B3C; FONT-FAMILY: Tahoma
-
-}
-
--->
-
-</style>
-
-
-
-<style type="text/css">
-
-<!--
-
-.bodytext3 {FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3b3b3c; FONT-FAMILY: Tahoma; text-decoration:none
-
-}
-
-.bodytext31 {FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3b3b3c; FONT-FAMILY: Tahoma; text-decoration:none
-
-}
-
-.bodytext311 {FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3b3b3c; FONT-FAMILY: Tahoma; text-decoration:none
-
-}
-
--->
-
-.bal
-
-{
-
-border-style:none;
-
-background:none;
-
-text-align:right;
-
-}
-
-.number
-
-{
-
-padding-left:900px;
-
-text-align:right;
-
-font-weight:bold;
-
-}
-
-.bali
-
-{
-
-text-align:right;
-
-}
-
-.style2 {FONT-WEIGHT: bold; FONT-SIZE: 11px; COLOR: #3b3b3c; FONT-FAMILY: Tahoma; text-decoration: none; }
-
-</style>
-
-</head>
-
-<script>
-
-function storefunction(loc)
-
-{
-
-	var username=document.getElementById("username").value;
-
-	
-
-var xmlhttp;
-
-
-
-if (window.XMLHttpRequest)
-
-  {// code for IE7+, Firefox, Chrome, Opera, Safari
-
-  xmlhttp=new XMLHttpRequest();
-
-  }
-
-else
-
-  {// code for IE6, IE5
-
-  xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
-
-  }
-
-xmlhttp.onreadystatechange=function()
-
-  {
-
-  if (xmlhttp.readyState==4 && xmlhttp.status==200)
-
-    {
-
-    document.getElementById("store").innerHTML=xmlhttp.responseText;
-
-    }
-
-  }
-
-xmlhttp.open("GET","ajax/ajaxstore.php?loc="+loc+"&username="+username,true);
-
-xmlhttp.send();
-
-
-
-	}
-
-function Locationcheck()
-
-{
-
-if(document.getElementById("location").value == '')
-
-{
-
-alert("Please Select Location");
-
-document.getElementById("location").focus();
-
-return false;
-
-}
-
-if(document.getElementById("store").value == '')
-
-{
-
-alert("Please Select Store");
-
-document.getElementById("store").focus();
-
-return false;
-
-}
-
-}	
-
-</script>
-
-<link rel="stylesheet" type="text/css" href="css/autosuggest.css" />        
-
-<?php include ("js/dropdownlist1scripting1stock1.php"); ?>
-
-<script type="text/javascript" src="js/disablebackenterkey.js"></script>
-
-<script type="text/javascript" src="js/autosuggest1itemstock2.js"></script>
-
-<script type="text/javascript" src="js/autocomplete_item1pharmacy4.js"></script>
-
-<script src="js/datetimepicker_css.js"></script>
-
-
-
-<body  onLoad="return funcCustomerDropDownSearch1();">
-
-<table width="101%" border="0" cellspacing="0" cellpadding="2">
-
-  <tr>
-
-    <td colspan="10" ><?php include ("includes/alertmessages1.php"); ?></td>
-
-  </tr>
-
-  <tr>
-
-    <td colspan="10" ><?php include ("includes/title1.php"); ?></td>
-
-  </tr>
-
-  <tr>
-
-    <td colspan="10" ><?php include ("includes/menu1.php"); ?></td>
-
-  </tr>
-
-  <tr>
-
-    <td colspan="10">&nbsp;</td>
-
-  </tr>
-
-  <tr>
-
-    <td width="1%" rowspan="3">&nbsp;</td>
-
-    <td width="2%" rowspan="3" valign="top"><?php //include ("includes/menu4.php"); ?>
-
-      &nbsp;</td>
-
-    <td valign="top"><table width="98%" border="0" cellspacing="0" cellpadding="0">
-
-      <tr>
-
-        <td>
-
-		
-
-		
-
-			<form name="stockinward" action="revenuecurrentstock.php" method="post" onKeyDown="return disableEnterKey()" onSubmit="return Locationcheck()">
-
-	<table id="AutoNumber3" style="BORDER-COLLAPSE: collapse" 
-
-            bordercolor="#666666" cellspacing="0" cellpadding="4" width="800" 
-
-            align="left" border="0">
-
-      <tbody id="foo">
-
-        <tr>
-
-          <td colspan="5"  class="bodytext31"><strong>Revenue Current Stock</strong></td>
-
-          </tr>
-
-        <tr>
-
-          
-
-
-
-       
-
-         <tr>
-
-              <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3"><strong>Location</strong></td>
-
-              <td  bgcolor="#FFFFFF" class="bodytext3"  colspan="3" ><select name="location" id="location" style="border: 1px solid #001E6A;" onChange="storefunction(this.value)">
-
-              <option value="">-Select Location-</option>
-
-                  <?php
-
-						
-
-						$query = "select * from login_locationdetails where username='$username' and docno='$docno' group by locationname order by locationname";
-
-						$exec = mysqli_query($GLOBALS["___mysqli_ston"], $query) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-						while ($res = mysqli_fetch_array($exec))
-
-						{
-
-						$reslocation = $res["locationname"];
-
-						$reslocationanum = $res["locationcode"];
-
-						?>
-
-						<option value="<?php echo $reslocationanum; ?>" <?php if($location!='')if($location==$reslocationanum){echo "selected";}?>><?php echo $reslocation; ?></option>
-
-						<?php 
-
-						}
-
-						?>
-
-                  </select></td>
-
-                   
-
-                  <input type="hidden" name="locationnamenew" value="<?php echo $locationname; ?>">
-
-                <input type="hidden" name="locationcodenew" value="<?php echo $res1locationanum; ?>">
-
-                <input type="hidden" name="username" id="username" value="<?php echo $username; ?>">
-
-             
-
-              </tr>
-
-		<tr>
-
-		  <td width="104" align="left" valign="center"   class="bodytext31"><strong>Store</strong> </td>
-
-          <td width="680" colspan="4" align="left" valign="center"   class="bodytext31">
-
-		  <?php  $loc=isset($_REQUEST['location'])?$_REQUEST['location']:'';
-
- 				 $username=isset($_REQUEST['username'])?$_REQUEST['username']:'';
-
- 				 $frmflag1=isset($_REQUEST['frmflag1'])?$_REQUEST['frmflag1']:'';
-
-				 $store=isset($_REQUEST['store'])?$_REQUEST['store']:'';?>  
-
-                 <select name="store" id="store">
-
-		   <option value="">-Select Store-</option>
-
-           <?php if ($frmflag1 == 'frmflag1')
-
-{$loc=isset($_REQUEST['location'])?$_REQUEST['location']:'';
-
-$username=isset($_REQUEST['username'])?$_REQUEST['username']:'';
-
-$query5 = "select ms.auto_number,ms.storecode,ms.store from master_employeelocation as me LEFT JOIN master_store as ms ON me.storecode=ms.auto_number where me.locationcode = '".$loc."' AND me.username= '".$username."'";
-
-				$exec5 = mysqli_query($GLOBALS["___mysqli_ston"], $query5) or die ("Error in Query5".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-				while ($res5 = mysqli_fetch_array($exec5))
-
-				{
-
-				$res5anum = $res5["storecode"];
-
-				$res5name = $res5["store"];
-
-				//$res5department = $res5["department"];
-
-?>
-
-<option value="<?php echo $res5anum;?>" <?php if($store==$res5anum){echo 'selected';}?>><?php echo $res5name;?></option>
-
-<?php }}?>
-
-		  </select>
-
-		  </td>
-
-		  </tr>
-
-           <tr>
-
-          <td align="left" valign="center"  
-
- class="bodytext31"><strong>Category</strong></td>
-
-          <td colspan="4" align="left" valign="center"   class="bodytext31"><select name="categoryname" id="categoryname">
-
-            <?php
-
-			$categoryname = $_REQUEST['categoryname'];
-
-			if ($categoryname != '')
-
-			{
-
-			?>
-
-            <option value="<?php echo $categoryname; ?>" selected="selected"><?php echo $categoryname; ?></option>
-
-            <option value="">Show All Category</option>
-
-            <?php
-
-			}
-
-			else
-
-			{
-
-			?>
-
-            <option selected="selected" value="">Show All Category</option>
-
-            <?php
-
-			}
-
-			?>
-
-            <?php
-
-			$query42 = "select * from master_medicine where status = '' group by categoryname order by categoryname";
-
-			$exec42 = mysqli_query($GLOBALS["___mysqli_ston"], $query42) or die ("Error in Query42".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-				while ($res42 = mysqli_fetch_array($exec42))
-
-			{
-
-			$categoryname = $res42['categoryname'];
-
-			?>
-
-            <option value="<?php echo $categoryname; ?>"><?php echo $categoryname; ?></option>
-
-            <?php
-
-			}
-
-			?>
-
-          </select></td>
-
-        </tr>
-
-        <tr>
-
-          <td align="left" valign="center"  
-
- class="bodytext31"><strong>Search</strong></td>
-
-          <td colspan="4" align="left" valign="center"   class="bodytext31"><input name="itemname" type="text" id="itemname" value="<?php echo $searchitemname; ?>" style="border: 1px solid #001E6A; text-align:left" size="50" autocomplete="off">
-
-		  <input type="hidden" name="searchitem1hiddentextbox" id="searchitem1hiddentextbox">
-
-		  <input type="hidden" name="searchitemcode" id="searchitemcode">
-
-            <input name="searchbutton12" type="submit" id="searchbutton12" style="border: 1px solid #001E6A" value="Search Item Name" /></td>
-
-        </tr>
-
-        <tr>
-
-          <td width="155" align="left" valign="center"  
-
- class="bodytext31"><strong> Date From </strong></td>
-
-          <td width="246" align="left" valign="center"   class="bodytext31"><input name="ADate1" id="ADate1" value="<?php echo $transactiondatefrom; ?>"  size="10"  readonly="readonly" onKeyDown="return disableEnterKey()" />
-
-			<img src="images2/cal.gif" onClick="javascript:NewCssCal('ADate1')" style="cursor:pointer"/>			</td>
-
-          <td width="106" align="left" valign="center"  bgcolor="#FFFFFF" class="style1"><span class="bodytext31"><strong> Date To </strong></span></td>
-
-          <td width="256" align="left" valign="center"  ><span class="bodytext31">
-
-            <input name="ADate2" id="ADate2" value="<?php echo $transactiondateto; ?>"  size="10"  readonly="readonly" onKeyDown="return disableEnterKey()" />
-
-			<img src="images2/cal.gif" onClick="javascript:NewCssCal('ADate2')" style="cursor:pointer"/>
-
-		  </span></td>
-
-          </tr>
-
-        <tr>
-
-          <td width="104" align="left" valign="center"  
-
- class="bodytext31"><strong></strong></td>
-
-          <td width="680" colspan="4" align="left" valign="center"   class="bodytext31">
-
-		            
-
-		  <input type="hidden" name="cbfrmflag1" value="cbfrmflag1">
-
-            <input  style="border: 1px solid #001E6A" type="submit" value="Search" name="Submit" />
-
-            <input name="resetbutton" type="reset" id="resetbutton"  style="border: 1px solid #001E6A" value="Reset" /></td>
-
-			<input type="hidden" name="frmflag1" value="frmflag1" id="frmflag1">
-
-          </tr>
-
-		  
-
-        <tr>
-
-          <td class="bodytext31" valign="center"  align="left" ><input type="hidden" name="itemcode2" id="itemcode2" style="border: 1px solid #001E6A; text-align:left" onKeyDown="return disableEnterKey()" value="<?php echo $itemcode; ?>" size="10" readonly /></td>
-
-          <td colspan="4" align="left" valign="center"   class="bodytext31">&nbsp;		  </td>
-
-          </tr>
-
-      </tbody>
-
-    </table>
-
-    </form>		</td>
-
-      </tr>
-
-      <tr>
-
-        <td>&nbsp;</td>
-
-      </tr>
-
-      
-
-  <tr>
-
-   
-
-    <td width="97%" valign="top"><table width="116%" border="0" cellspacing="0" cellpadding="0">
-
-      
-
-	  <tr>
-
-        <td width="860">
-
-	<form name="form1" id="form1" method="post" action="revenuecurrentstock.php">
-
-	  <table id="AutoNumber3" style="BORDER-COLLAPSE: collapse" 
-
-            bordercolor="#666666" cellspacing="0" cellpadding="4" width="889" 
-
-            align="left" border="0">
-
-          <tbody>
-
-             <tr>
-
-			 <td colspan="9"  class="bodytext31" align="left" valign="middle"><strong>Revenue Current Stock</strong></td>
-
-			 </tr>
-
-			  <tr>
-
-			    <td width="41" class="bodytext31" valign="center"  align="left" 
-
->&nbsp;</td>
-
-				  <td width="41" class="bodytext31" valign="center"  align="left" 
-
-><strong>S.No.</strong></td>
-
-				  				  <td width="233"  align="left" valign="center" 
-
- class="style2">Item</td>
-
-				  				  <td width="142"  align="right" valign="center" 
-
- class="style2">Cost Price </td>
-
-                    <td width="142"  align="right" valign="center" 
-
- class="style2">Sales Price </td>
-
-				  	<td width="120"  align="right" valign="center" 
-
- class="style2">Current Qty</td>
-
-                    <td width="120"  align="right" valign="center" 
-
- class="style2">Sales Qty</td>
-
-                    <td width="120"  align="right" valign="center" 
-
- class="style2">COGS</td>
-
-				  				  <td width="216"  align="right" valign="center" 
-
- class="bodytext31"><strong>Revenue </strong></td>
-
-				  	<td rowspan="2" class="bodytext31" valign="center"  align="right">
-
-                   <?php  if (isset($_REQUEST["categoryname"])) { $categoryname = $_REQUEST["categoryname"]; } else { $categoryname = ""; }?> 
-
-                 <a target="_blank"  href="print_revenuecurrentstock.php?ADate1=<?php echo $fromdate; ?>&&ADate2=<?php echo $todate; ?>&&searchitemcode=<?php echo $searchitemcode; ?>&&store=<?php echo $store1; ?>&&location=<?php echo $locationcode; ?>&&categoryname=<?php echo $categoryname;?>"> <img src="images/pdfdownload.jpg" width="30" height="30"></a></td>	
-
-                  </tr>					
-
-           <?php
-
-		   if (isset($_REQUEST["categoryname"])) { $categoryname = $_REQUEST["categoryname"]; } else { $categoryname = ""; }
-
-			if (isset($_REQUEST["store"])) { $store = $_REQUEST["store"]; } else { $store = ""; }
-
-			//$categoryname = $_REQUEST['categoryname'];
-
-			if (isset($_REQUEST["frmflag1"])) { $frmflag1 = $_REQUEST["frmflag1"]; } else { $frmflag1 = ""; }
-
-			if (isset($_REQUEST["ADate2"])) { $todate = $_REQUEST["ADate2"]; } else { $todate = ""; }
-
-			if (isset($_REQUEST["ADate1"])) { $fromdate = $_REQUEST["ADate1"]; } else { $fromdate = ""; }
-
-			
-
-			//$frmflag1 = $_REQUEST['frmflag1'];
-
-			if ($frmflag1 == 'frmflag1')
-
-			{
-
-		   $totalsales=0;
-
-		   $totalcogs=0;
-
-		   $totalrevenue=0;
-
-		   if(trim($searchitemcode)!='')
-
-		   {
-
-			$query1 = "select entrydocno,itemname,itemcode,transaction_date,transaction_quantity,fifo_code from transaction_stock where  transaction_date between '$fromdate' and '$todate' and itemcode ='$searchitemcode' and locationcode='$locationcode' and storecode='$store' group by itemcode";
-
-			$exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-			$num1=mysqli_num_rows($exec1);
-
-			
-
-			while($res1 = mysqli_fetch_array($exec1))
-
-			{
-
-				$res1billnumber =$res1['entrydocno'];
-
-				$res1itemname =$res1['itemname'];
-
-				$res1itemcode =$res1['itemcode'];
-
-				$res1transactiondate =$res1['transaction_date'];
-
-				$res1expirydate ='';
-
-				$res1quantity =$res1['transaction_quantity'];
-
-				$res1fifo_code =$res1['fifo_code'];
-
-				$res1rateperunit ='0';
-
-				$res1totalrate ='0';
-
-				
-
-				
-
-				$query2 = "select purchaseprice,rateperunit from master_medicine where itemcode='$res1itemcode'";
-
-				$exec2 = mysqli_query($GLOBALS["___mysqli_ston"], $query2) or die ("Error in Query2".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-				$num2=mysqli_num_rows($exec2);		
-
-				$res2 = mysqli_fetch_array($exec2);
-
-				$res1rateperunit =$res2['purchaseprice'];
-
-				$res1sells =$res2['rateperunit'];
-
-				$totalcost = $totalcost + $res1rateperunit;
-
-				$totalsales = $totalsales + $res1sells;
-
-				$colorloopcount = $colorloopcount + 1;
-
-				
-
-				$query3 = "select sum(transaction_quantity) as qty from transaction_stock where itemcode='$res1itemcode' and description in ('IP Direct Sales','Sales') and transaction_date between '$fromdate' and '$todate' and storecode='$store' and locationcode='$locationcode'";
-
-				$exec3 = mysqli_query($GLOBALS["___mysqli_ston"], $query3) or die ("Error in Query3".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-				$num3 = mysqli_num_rows($exec3);		
-
-				$res3 = mysqli_fetch_array($exec3);
-
-				$res3qty =$res3['qty'];
-
-				$cogs = $res3qty*$res1sells;
-
-				$totalcogs=$totalcogs+$cogs;
-
-				$query7 = "select sum(transaction_quantity) as qty from transaction_stock where itemcode='$res1itemcode' and batch_stockstatus='1' and storecode='$store' and locationcode='$locationcode'";
-
-				$exec7 = mysqli_query($GLOBALS["___mysqli_ston"], $query7) or die ("Error in Query7".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-				$num7 = mysqli_num_rows($exec7);		
-
-				$res7 = mysqli_fetch_array($exec7);
-
-				$res7qty =$res7['qty'];
-
-				$revenue = ($res3qty*$res1sells) - ($res3qty*$res1rateperunit);
-
-				$totalrevenue=$totalrevenue+$revenue;
-
-				
-
-				
-
-				$showcolor = ($colorloopcount & 1); 
-
-				if ($showcolor == 0)
-
-				{
-
-					//echo "if";
-
-					$colorcode = 'bgcolor="#CBDBFA"';
-
-				}
-
-				else
-
-				{
-
-					//echo "else";
-
-					$colorcode = '';
-
-				}
-
-			 ?>
-
-				<tr <?php echo $colorcode; ?>>
-
-				  <td width="41" align="left" valign="center" class="bodytext31">&nbsp;</td>
-
-					<td width="41" align="left" valign="center" class="bodytext31"><?php echo $sno= $sno + 1; ?></td>
-
-					<td width="233"  align="left" valign="center" class="bodytext31"><?php echo $res1itemname; ?></td>
-
-					<td width="142"  align="right" valign="center" class="bodytext31"><?php echo number_format($res1rateperunit,2,'.',','); ?></td>
-
-					<td width="142"  align="right" valign="center" class="bodytext31"><?php echo number_format($res1sells,2,'.',','); ?></td>
-
-					<td width="120"  align="right" valign="center" class="bodytext31"><?php echo intval($res7qty); ?></td>
-
-					<td width="120"  align="right" valign="center" class="bodytext31"><?php echo intval($res3qty); ?></td>
-
-					<td width="142"  align="right" valign="center" class="bodytext31"><?php echo number_format($cogs,2,'.',','); ?></td>
-
-					<td width="216"  align="right" valign="center" class="bodytext31"><?php echo number_format($revenue,2,'.',','); ?></td>
-
-					<td width="40"  align="right" valign="center" class="bodytext31">&nbsp;</td>
-
-					</tr>	
-
-	      <?php }
-
-		   }
-
-		   else
-
-		   {
-
-			if($searchitemcode=='')
-
-			{
-
-			   $query10 = "select itemcode,purchaseprice,rateperunit from master_medicine where categoryname like '%$categoryname%' and status <> 'DELETED' group by itemcode";// and companyanum = '$companyanum'";// and cstid='$custid' and cstname='$custname'";
-
-			}
-
-			else
-
-			{
-
-				$query10 = "select itemcode,purchaseprice,rateperunit from master_medicine where itemcode = '$searchitemcode' and categoryname like '%$categoryname%' and status <> 'DELETED' group by itemcode";
-
-			}
-
-			$exec10 = mysqli_query($GLOBALS["___mysqli_ston"], $query10) or die ("Error in Query10".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-			$num10 = mysqli_num_rows($exec10);
-
-			while ($res10 = mysqli_fetch_array($exec10))
-
-			{
-
-				$itemcode =$res10['itemcode'];
-
-				$res1rateperunit =$res10['purchaseprice'];
-
-				$res1sells =$res10['rateperunit'];
-
-				$query1 = "select entrydocno,itemname,itemcode,transaction_date,transaction_quantity,fifo_code from transaction_stock where  transaction_date between '$fromdate' and '$todate' and itemcode ='$itemcode' and storecode='$store' and locationcode='$locationcode' group by itemcode";
-
-				$exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-				$num1=mysqli_num_rows($exec1);
-
-				
-
-				while($res1 = mysqli_fetch_array($exec1))
-
-				{
-
-					$res1billnumber =$res1['entrydocno'];
-
-					$res1itemname =$res1['itemname'];
-
-					$res1itemcode =$res1['itemcode'];
-
-					$res1transactiondate =$res1['transaction_date'];
-
-					$res1expirydate ='';
-
-					$res1quantity =$res1['transaction_quantity'];
-
-					$res1fifo_code =$res1['fifo_code'];
-
-					//$res1rateperunit ='0';
-
-					$res1totalrate ='0';
-
-					
-
-					
-
-					$totalcost = $totalcost + $res1rateperunit;
-
-					$totalsales = $totalsales + $res1sells;
-
-					$colorloopcount = $colorloopcount + 1;
-
-					
-
-					$query3 = "select sum(transaction_quantity) as qty from transaction_stock where itemcode='$res1itemcode' and description in ('IP Direct Sales','Sales') and transaction_date between '$fromdate' and '$todate' and storecode='$store' and locationcode='$locationcode'";
-
-					$exec3 = mysqli_query($GLOBALS["___mysqli_ston"], $query3) or die ("Error in Query3".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-					$num3 = mysqli_num_rows($exec3);		
-
-					$res3 = mysqli_fetch_array($exec3);
-
-					$res3qty =$res3['qty'];
-
-					$cogs = $res3qty*$res1rateperunit;
-
-					$totalcogs=$totalcogs+$cogs;
-
-					$query7 = "select sum(transaction_quantity) as qty from transaction_stock where itemcode='$res1itemcode' and batch_stockstatus='1' and storecode='$store' and locationcode='$locationcode'";
-
-					$exec7 = mysqli_query($GLOBALS["___mysqli_ston"], $query7) or die ("Error in Query7".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-					$num7 = mysqli_num_rows($exec7);		
-
-					$res7 = mysqli_fetch_array($exec7);
-
-					$res7qty =$res7['qty'];
-
-					$revenue = $res3qty*$res1sells;
-
-					$totalrevenue=$totalrevenue+$revenue;
-
-					$showcolor = ($colorloopcount & 1); 
-
-					if ($showcolor == 0)
-
-					{
-
-						//echo "if";
-
-						$colorcode = 'bgcolor="#CBDBFA"';
-
-					}
-
-					else
-
-					{
-
-						//echo "else";
-
-						$colorcode = '';
-
-					}
-
-			 ?>
-
-				<tr <?php echo $colorcode; ?>>
-
-					  <td width="41" align="left" valign="center" class="bodytext31">&nbsp;</td>
-
-						<td width="41" align="left" valign="center" class="bodytext31"><?php echo $sno= $sno + 1; ?></td>
-
-						<td width="233"  align="left" valign="center" class="bodytext31"><?php echo $res1itemname; ?></td>
-
-						<td width="142"  align="right" valign="center" class="bodytext31"><?php echo number_format($res1rateperunit,2,'.',','); ?></td>
-
-						<td width="142"  align="right" valign="center" class="bodytext31"><?php echo number_format($res1sells,2,'.',','); ?></td>
-
-						<td width="120"  align="right" valign="center" class="bodytext31"><?php echo intval($res7qty); ?></td>
-
-						<td width="120"  align="right" valign="center" class="bodytext31"><?php echo intval($res3qty); ?></td>
-
-						<td width="142"  align="right" valign="center" class="bodytext31"><?php echo number_format($cogs,2,'.',','); ?></td>
-
-						<td width="216"  align="right" valign="center" class="bodytext31"><?php echo number_format($revenue,2,'.',','); ?></td>
-
-						<td width="40"  align="right" valign="center" class="bodytext31">&nbsp;</td>
-
-						</tr>	
-
-			  <?php }
-
-				}
-
-		   }
-
-			?>		
-
-		
-
-			 <tr>
-
-			   <td class="bodytext31" valign="center" bordercolor="#f3f3f3" align="left" 
-
->&nbsp;</td>
-
-			<td class="bodytext31" valign="center" bordercolor="#f3f3f3" align="left" 
-
->&nbsp;</td>
-
-			<td  valign="center" bordercolor="#f3f3f3" 
-
- class="bodytext31" align="right"><strong>Total</strong></td>
-
-			<td  valign="center" bordercolor="#f3f3f3" 
-
- class="bodytext31" align="right"><?php echo number_format($totalcost,2,'.',','); ?></td>
-
-			<td align="right" valign="center" bordercolor="#f3f3f3" 
-
- class="bodytext31"><?php echo number_format($totalsales,2,'.',','); ?></td>
-
-			<td align="left" valign="center" bordercolor="#f3f3f3" 
-
- class="bodytext31">&nbsp;</td>
-
-			<td align="left" valign="center" bordercolor="#f3f3f3" 
-
- class="bodytext31">&nbsp;</td>
-
-                <td align="right" valign="center" bordercolor="#f3f3f3" 
-
- class="bodytext31"><?php echo number_format($totalcogs,2,'.',','); ?></td>
-
-                <td align="right" valign="center" bordercolor="#f3f3f3" 
-
- class="bodytext31"><?php echo number_format($totalrevenue,2,'.',','); ?></td>
-
-		    </tr>
-
-            <?php }?>		
-
-          </tbody>
-
-        </table>
-
-<tr>
-
-        <td>&nbsp;</td>
-
-      </tr>
-
-      <tr>
-
-        <td>&nbsp;</td>
-
-      </tr>
-
-      <tr>
-
-        <td>&nbsp;</td>
-
-      </tr>
-
-	  
-
-	  </form>
-
-    </table>
-
-  </table>
-
-<footer>
-  <?php include ("includes/footer1.php"); ?>
-</footer>
-</main>
-
+    <!-- Hospital Header -->
+    <header class="hospital-header">
+        <h1 class="hospital-title">🏥 MedStar Hospital Management</h1>
+        <p class="hospital-subtitle">Advanced Healthcare Management Platform</p>
+    </header>
+
+    <!-- User Information Bar -->
+    <div class="user-info-bar">
+        <div class="user-welcome">
+            <span class="welcome-text">Welcome, <strong><?php echo htmlspecialchars($username); ?></strong></span>
+            <span class="location-info">📍 Company: <?php echo htmlspecialchars($companyname); ?></span>
+        </div>
+        <div class="user-actions">
+            <a href="mainmenu1.php" class="btn btn-outline">🏠 Main Menu</a>
+            <a href="logout.php" class="btn btn-outline">🚪 Logout</a>
+        </div>
+    </div>
+
+    <!-- Navigation Breadcrumb -->
+    <nav class="nav-breadcrumb">
+        <a href="mainmenu1.php">🏠 Home</a>
+        <span>→</span>
+        <span>Revenue Current Stock Report</span>
+    </nav>
+
+    <!-- Floating Menu Toggle -->
+    <div id="menuToggle" class="floating-menu-toggle">
+        <i class="fas fa-bars"></i>
+    </div>
+
+    <!-- Main Container with Sidebar -->
+    <div class="main-container-with-sidebar">
+        <!-- Left Sidebar -->
+        <aside id="leftSidebar" class="left-sidebar">
+            <div class="sidebar-header">
+                <h3>Quick Navigation</h3>
+                <button id="sidebarToggle" class="sidebar-toggle">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <ul class="nav-list">
+                    <li class="nav-item">
+                        <a href="mainmenu1.php" class="nav-link">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="stockinward1.php" class="nav-link">
+                            <i class="fas fa-arrow-down"></i>
+                            <span>Stock Inward</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="stockoutward1.php" class="nav-link">
+                            <i class="fas fa-arrow-up"></i>
+                            <span>Stock Outward</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="currentstock1.php" class="nav-link">
+                            <i class="fas fa-boxes"></i>
+                            <span>Current Stock</span>
+                        </a>
+                    </li>
+                    <li class="nav-item active">
+                        <a href="revenuecurrentstock.php" class="nav-link">
+                            <i class="fas fa-chart-line"></i>
+                            <span>Revenue Stock Report</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="reports1.php" class="nav-link">
+                            <i class="fas fa-chart-bar"></i>
+                            <span>Reports</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Alert Container -->
+            <div id="alertContainer">
+                <?php include ("includes/alertmessages1.php"); ?>
+            </div>
+
+            <!-- Page Header -->
+            <div class="page-header">
+                <div class="page-header-content">
+                    <h2>Revenue Current Stock Report</h2>
+                    <p>Generate comprehensive revenue and stock analysis reports for your inventory management.</p>
+                </div>
+                <div class="page-header-actions">
+                    <button type="button" class="btn btn-secondary" onclick="refreshPage()">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                    <button type="button" class="btn btn-outline" onclick="exportReport()">
+                        <i class="fas fa-download"></i> Export
+                    </button>
+                    <button type="button" class="btn btn-outline" onclick="downloadPDF()">
+                        <i class="fas fa-file-pdf"></i> PDF
+                    </button>
+                </div>
+            </div>
+
+            <!-- Summary Cards -->
+            <?php if ($frmflag1 == 'frmflag1'): ?>
+            <div class="summary-cards">
+                <div class="summary-card">
+                    <div class="summary-card-icon total-sales">
+                        <i class="fas fa-shopping-cart"></i>
+                    </div>
+                    <div class="summary-card-number"><?php echo number_format($totalSales, 0); ?></div>
+                    <div class="summary-card-label">Total Sales Qty</div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-card-icon total-cogs">
+                        <i class="fas fa-dollar-sign"></i>
+                    </div>
+                    <div class="summary-card-number">₹<?php echo number_format($totalCOGS, 2); ?></div>
+                    <div class="summary-card-label">Total COGS</div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-card-icon total-revenue">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div class="summary-card-number">₹<?php echo number_format($totalRevenue, 2); ?></div>
+                    <div class="summary-card-label">Total Revenue</div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-card-icon total-items">
+                        <i class="fas fa-boxes"></i>
+                    </div>
+                    <div class="summary-card-number"><?php echo $totalItems; ?></div>
+                    <div class="summary-card-label">Total Items</div>
+                </div>
+            </div>
+            <?php endif; ?>
+
+            <!-- Search Form Section -->
+            <div class="search-section">
+                <div class="search-header">
+                    <i class="fas fa-search search-icon"></i>
+                    <h3 class="search-title">Generate Revenue Stock Report</h3>
+                </div>
+                
+                <form id="searchForm" name="form1" method="post" action="revenuecurrentstock.php" class="search-form">
+                    <div class="form-group">
+                        <label class="form-label">Location</label>
+                        <select name="locationcode" id="location" class="form-select" required>
+                            <option value="">Select Location</option>
+                            <?php
+                            if ($exec) {
+                                while ($locationRow = mysqli_fetch_array($exec)) {
+                                    $selected = ($locationcode == $locationRow['locationcode']) ? 'selected' : '';
+                                    echo "<option value='" . htmlspecialchars($locationRow['locationcode']) . "' $selected>" . htmlspecialchars($locationRow['locationname']) . "</option>";
+                                }
+                            }
+                            ?>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Store</label>
+                        <select name="store" id="store" class="form-select" required>
+                            <option value="">Select Store</option>
+                            <?php
+                            foreach ($storeOptions as $storeOption) {
+                                $selected = ($store == $storeOption['value']) ? 'selected' : '';
+                                echo "<option value='" . htmlspecialchars($storeOption['value']) . "' $selected>" . htmlspecialchars($storeOption['text']) . "</option>";
+                            }
+                            ?>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">From Date</label>
+                        <input type="date" name="ADate1" id="dateFrom" class="form-input" 
+                               value="<?php echo $fromdate; ?>" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">To Date</label>
+                        <input type="date" name="ADate2" id="dateTo" class="form-input" 
+                               value="<?php echo $todate; ?>" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Item Code (Optional)</label>
+                        <input type="text" name="searchitemcode" id="searchitemcode" class="form-input" 
+                               value="<?php echo htmlspecialchars($searchitemcode); ?>" 
+                               placeholder="Enter specific item code">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Category (Optional)</label>
+                        <select name="categoryname" id="category" class="form-select">
+                            <option value="">All Categories</option>
+                            <?php
+                            if ($exec42) {
+                                while ($categoryRow = mysqli_fetch_array($exec42)) {
+                                    $selected = ($categoryname == $categoryRow['categoryname']) ? 'selected' : '';
+                                    echo "<option value='" . htmlspecialchars($categoryRow['categoryname']) . "' $selected>" . htmlspecialchars($categoryRow['categoryname']) . "</option>";
+                                }
+                            }
+                            ?>
+                        </select>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-chart-line"></i> Generate Report
+                        </button>
+                        <button type="button" class="btn btn-secondary" onclick="resetForm()">
+                            <i class="fas fa-undo"></i> Reset
+                        </button>
+                    </div>
+
+                    <input type="hidden" name="frmflag1" value="frmflag1" />
+                </form>
+            </div>
+
+            <!-- Stock Report Section -->
+            <?php if ($frmflag1 == 'frmflag1'): ?>
+            <div class="stock-report-section">
+                <div class="stock-report-header">
+                    <div class="stock-report-title">
+                        <i class="fas fa-chart-line"></i>
+                        Revenue Current Stock Report
+                        <span class="results-count"><?php echo $totalItems; ?></span>
+                    </div>
+                    <div class="stock-report-actions">
+                        <input type="text" id="tableSearch" placeholder="Search items..." class="form-input" style="width: 200px;">
+                    </div>
+                </div>
+
+                <div class="data-table-container">
+                    <table id="dataTable" class="data-table">
+                        <thead>
+                            <tr>
+                                <th data-sortable="true" data-column="sno">S.No.</th>
+                                <th data-sortable="true" data-column="item">Item</th>
+                                <th data-sortable="true" data-column="costprice">Cost Price</th>
+                                <th data-sortable="true" data-column="salesprice">Sales Price</th>
+                                <th data-sortable="true" data-column="currentqty">Current Qty</th>
+                                <th data-sortable="true" data-column="salesqty">Sales Qty</th>
+                                <th data-sortable="true" data-column="cogs">COGS</th>
+                                <th data-sortable="true" data-column="revenue">Revenue</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php
+                            if (!empty($stockData)) {
+                                $counter = 1;
+                                foreach ($stockData as $item) {
+                                    ?>
+                                    <tr>
+                                        <td data-column="sno"><?php echo $counter++; ?></td>
+                                        <td data-column="item">
+                                            <div class="item-name"><?php echo htmlspecialchars($item['itemname']); ?></div>
+                                            <div class="item-code"><?php echo htmlspecialchars($item['itemcode']); ?></div>
+                                        </td>
+                                        <td data-column="costprice">
+                                            <span class="price cost">₹<?php echo number_format($item['costprice'], 2); ?></span>
+                                        </td>
+                                        <td data-column="salesprice">
+                                            <span class="price sales">₹<?php echo number_format($item['salesprice'], 2); ?></span>
+                                        </td>
+                                        <td data-column="currentqty">
+                                            <span class="quantity current"><?php echo number_format($item['currentqty'], 0); ?></span>
+                                        </td>
+                                        <td data-column="salesqty">
+                                            <span class="quantity sales"><?php echo number_format($item['salesqty'], 0); ?></span>
+                                        </td>
+                                        <td data-column="cogs">
+                                            <span class="price cogs">₹<?php echo number_format($item['cogs'], 2); ?></span>
+                                        </td>
+                                        <td data-column="revenue">
+                                            <span class="price revenue">₹<?php echo number_format($item['revenue'], 2); ?></span>
+                                        </td>
+                                    </tr>
+                                    <?php
+                                }
+                                
+                                // Summary row
+                                ?>
+                                <tr class="summary-row">
+                                    <td colspan="2" class="summary-label">TOTAL</td>
+                                    <td class="summary-value">-</td>
+                                    <td class="summary-value">-</td>
+                                    <td class="summary-value"><?php echo number_format(array_sum(array_column($stockData, 'currentqty')), 0); ?></td>
+                                    <td class="summary-value"><?php echo number_format($totalSales, 0); ?></td>
+                                    <td class="summary-value">₹<?php echo number_format($totalCOGS, 2); ?></td>
+                                    <td class="summary-value">₹<?php echo number_format($totalRevenue, 2); ?></td>
+                                </tr>
+                                <?php
+                            } else {
+                                ?>
+                                <tr>
+                                    <td colspan="8" class="no-data">
+                                        <div class="no-data-icon">
+                                            <i class="fas fa-chart-line"></i>
+                                        </div>
+                                        <h3>No Stock Data Found</h3>
+                                        <p>No stock data found for the selected criteria. Try adjusting your search parameters.</p>
+                                    </td>
+                                </tr>
+                                <?php
+                            }
+                            ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <?php endif; ?>
+        </main>
+    </div>
+
+    <!-- Modern JavaScript -->
+    <script src="js/revenuecurrentstock-modern.js?v=<?php echo time(); ?>"></script>
+    
+    <!-- Legacy JavaScript Functions -->
+    <script type="text/javascript">
+        function disableEnterKey() {
+            if (event.keyCode == 8) {
+                event.keyCode = 0; 
+                return event.keyCode;
+                return false;
+            }
+        }
+
+        function Locationcheck() {
+            return true;
+        }
+    </script>
 </body>
-
 </html>
-
-
-

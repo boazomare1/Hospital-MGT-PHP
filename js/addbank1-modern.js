@@ -1,13 +1,15 @@
-// Add Bank Modern JavaScript
-// Handles sidebar, form validation, and responsive functionality
+// Bank Master Modern JavaScript
+// Handles sidebar, form validation, search, and responsive functionality
 
 document.addEventListener('DOMContentLoaded', function() {
     initializeSidebar();
     initializeMenuToggle();
     initializeFormValidation();
+    initializeSearch();
     initializeResponsiveDesign();
     initializeTouchSupport();
     initializeFormEnhancements();
+    initializeDeleteConfirmations();
 });
 
 // Sidebar Management
@@ -66,9 +68,56 @@ function initializeMenuToggle() {
     }
 }
 
+// Search Functionality
+function initializeSearch() {
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            searchBanks(this.value);
+        });
+    }
+}
+
+function searchBanks(searchTerm) {
+    const tableBody = document.getElementById('bankTableBody');
+    if (!tableBody) return;
+    
+    const rows = tableBody.querySelectorAll('tr');
+    const term = searchTerm.toLowerCase();
+    
+    rows.forEach(row => {
+        const text = row.textContent.toLowerCase();
+        if (text.includes(term)) {
+            row.style.display = '';
+        } else {
+            row.style.display = 'none';
+        }
+    });
+}
+
+function clearSearch() {
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) {
+        searchInput.value = '';
+        searchBanks('');
+    }
+}
+
+// Delete Confirmations
+function initializeDeleteConfirmations() {
+    // This will be handled by the confirmDelete function called from HTML
+}
+
+function confirmDelete(bankName, autoNumber) {
+    if (confirm(`Are you sure you want to delete the bank "${bankName}"?`)) {
+        window.location.href = `addbank1.php?st=del&anum=${autoNumber}`;
+    }
+    return false;
+}
+
 // Form Validation
 function initializeFormValidation() {
-    const bankForm = document.querySelector('.bank-form');
+    const bankForm = document.querySelector('.add-form');
     
     if (bankForm) {
         bankForm.addEventListener('submit', function(e) {
@@ -362,8 +411,8 @@ function exportToExcel() {
     showAlert('Export functionality will be implemented here.', 'info');
 }
 
-function clearForm() {
-    const bankForm = document.querySelector('.bank-form');
+function resetForm() {
+    const bankForm = document.querySelector('.add-form');
     if (bankForm) {
         bankForm.reset();
         
@@ -373,22 +422,18 @@ function clearForm() {
             clearFieldValidation(input);
         });
         
-        showAlert('Form cleared successfully.', 'success');
+        showAlert('Form reset successfully.', 'success');
     }
 }
 
 // Global functions for legacy compatibility
-function confirmDelete(bankName) {
-    return confirm(`Are you sure you want to delete the bank "${bankName}"?`);
-}
-
 function banksearch(varCallFrom) {
     var varCallFrom = varCallFrom;
     window.open("popup_bankandcashaccount.php?callfrom="+varCallFrom,"Window2",'toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=1,width=750,height=350,left=100,top=100');
 }
 
 function from1submit1() {
-    const bankForm = document.querySelector('.bank-form');
+    const bankForm = document.querySelector('.add-form');
     if (bankForm) {
         return validateBankForm();
     }

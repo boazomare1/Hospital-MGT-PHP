@@ -1,44 +1,27 @@
-  <?php
-
+<?php
 session_start();
-
 include ("includes/loginverify.php");
-
 include ("db/db_connect.php");
 
-
-
+// Initialize variables
 $ipaddress = $_SERVER['REMOTE_ADDR'];
-
 $updatedatetime = date('Y-m-d');
-
 $username = $_SESSION['username'];
-
 $docno = $_SESSION['docno'];
-
-
-
-
 $res45transactionamount = 0;
 $companyanum = $_SESSION['companyanum'];
-
 $companyname = $_SESSION['companyname'];
 
+// Date variables
 $paymentreceiveddatefrom = date('Y-m-d', strtotime('-1 month'));
-
 $paymentreceiveddateto = date('Y-m-d');
-
 $transactiondatefrom = date('Y-m-d', strtotime('-1 month'));
-
 $transactiondateto = date('Y-m-d');
-
 $ADate2 = date('Y-m-d');
 
-
-
-$billnumbers=array();
-
-$billnumbers1=array();
+// Array variables
+$billnumbers = array();
+$billnumbers1 = array();
 
 
 
@@ -86,88 +69,161 @@ $snocount1 = 0;
 
 
 
-if (isset($_REQUEST["searchsuppliername"])) { $searchsuppliername = $_REQUEST["searchsuppliername"]; } else { $searchsuppliername = ""; }
+// Handle form parameters with modern isset() checks
+$searchsuppliername = isset($_REQUEST["searchsuppliername"]) ? $_REQUEST["searchsuppliername"] : "";
+$searchsuppliercode = isset($_REQUEST["searchsuppliercode"]) ? $_REQUEST["searchsuppliercode"] : "";
+$ADate1 = isset($_REQUEST["ADate1"]) ? $_REQUEST["ADate1"] : date('Y-m-d');
+$ADate2 = isset($_REQUEST["ADate2"]) ? $_REQUEST["ADate2"] : date('Y-m-d');
+$range = isset($_REQUEST["range"]) ? $_REQUEST["range"] : "";
+$amount = isset($_REQUEST["amount"]) ? $_REQUEST["amount"] : "";
+$cbfrmflag2 = isset($_REQUEST["cbfrmflag2"]) ? $_REQUEST["cbfrmflag2"] : "";
+$frmflag2 = isset($_REQUEST["frmflag2"]) ? $_REQUEST["frmflag2"] : "";
 
-if (isset($_REQUEST["searchsuppliercode"])) {  $searchsuppliercode = $_REQUEST["searchsuppliercode"]; } else { $searchsuppliercode = ""; }
-
-//echo $searchsuppliername;
-
-if (isset($_REQUEST["ADate1"])) { $ADate1 = $_REQUEST["ADate1"]; } else { $ADate1 = $ADate1 = date('Y-m-d'); }
-
-$paymentreceiveddatefrom=$ADate1;
-
-//echo $ADate1;
-
-if (isset($_REQUEST["ADate2"])) { $ADate2 = $_REQUEST["ADate2"]; } else { $ADate2 = $ADate1 = date('Y-m-d'); }
-
-$paymentreceiveddateto=$ADate2;
-
-//echo $ADate2;
-
-if (isset($_REQUEST["range"])) { $range = $_REQUEST["range"]; } else { $range = ""; }
-
-//echo $range;
-
-if (isset($_REQUEST["amount"])) { $amount = $_REQUEST["amount"]; } else { $amount = ""; }
-
-//echo $amount;
-
-if (isset($_REQUEST["cbfrmflag2"])) { $cbfrmflag2 = $_REQUEST["cbfrmflag2"]; } else { $cbfrmflag2 = ""; }
-
-//$cbfrmflag2 = $_REQUEST['cbfrmflag2'];
-
-if (isset($_REQUEST["frmflag2"])) { $frmflag2 = $_REQUEST["frmflag2"]; } else { $frmflag2 = ""; }
-
-//$frmflag2 = $_POST['frmflag2'];
+// Update date variables if form submitted
+$paymentreceiveddatefrom = $ADate1;
+$paymentreceiveddateto = $ADate2;
 
 
 
 ?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doctor Outstanding Report - MedStar Hospital Management</title>
+    
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <!-- Modern CSS -->
+    <link rel="stylesheet" href="css/vat-modern.css?v=<?php echo time(); ?>">
+    
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- Date Picker CSS -->
+    <link href="css/datepickerstyle.css" rel="stylesheet" type="text/css" />
+    
+    <!-- Additional CSS -->
+    <link href="autocomplete.css" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="css/autosuggest.css" />
+    
+    <!-- JavaScript Files -->
+    <script type="text/javascript" src="js/adddate.js"></script>
+    <script type="text/javascript" src="js/adddate2.js"></script>
+    <script src="js/jquery.min-autocomplete.js"></script>
+    <script src="js/jquery-ui.min.js"></script>
+    
+    <style>
+        th { background-color: #ffffff; position: sticky; top: 0; z-index: 1; }
+        .ui-menu .ui-menu-item { zoom: 1 !important; }
+        .bal { border-style: none; background: none; text-align: right; }
+        .bali { text-align: right; }
+    </style>
+</head>
+<body>
+    <!-- Hospital Header -->
+    <header class="hospital-header">
+        <h1 class="hospital-title">🏥 MedStar Hospital Management</h1>
+        <p class="hospital-subtitle">Advanced Healthcare Management Platform</p>
+    </header>
 
-<style type="text/css">
-th {
-            background-color: #ffffff;
-            position: sticky;
-            top: 0;
-            z-index: 1;
-        }
+    <!-- User Information Bar -->
+    <div class="user-info-bar">
+        <div class="user-welcome">
+            <span class="welcome-text">Welcome, <strong><?php echo htmlspecialchars($username); ?></strong></span>
+            <span class="location-info">📍 Company: <?php echo htmlspecialchars($companyname); ?></span>
+        </div>
+        <div class="user-actions">
+            <a href="mainmenu1.php" class="btn btn-outline">🏠 Main Menu</a>
+            <a href="logout.php" class="btn btn-outline">🚪 Logout</a>
+        </div>
+    </div>
 
+    <!-- Navigation Breadcrumb -->
+    <nav class="nav-breadcrumb">
+        <a href="mainmenu1.php">🏠 Home</a>
+        <span>→</span>
+        <span>Reports</span>
+        <span>→</span>
+        <span>Doctor Outstanding Report</span>
+    </nav>
 
-.ui-menu .ui-menu-item{ zoom: 1 !important;}
+    <!-- Floating Menu Toggle -->
+    <div id="menuToggle" class="floating-menu-toggle">
+        <i class="fas fa-bars"></i>
+    </div>
 
-body {
+    <!-- Main Container with Sidebar -->
+    <div class="main-container-with-sidebar">
+        <!-- Left Sidebar -->
+        <aside id="leftSidebar" class="left-sidebar">
+            <div class="sidebar-header">
+                <h3>Quick Navigation</h3>
+                <button id="sidebarToggle" class="sidebar-toggle">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <ul class="nav-list">
+                    <li class="nav-item">
+                        <a href="mainmenu1.php" class="nav-link">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="reports.php" class="nav-link">
+                            <i class="fas fa-chart-bar"></i>
+                            <span>Reports</span>
+                        </a>
+                    </li>
+                    <li class="nav-item active">
+                        <a href="doctoroutstanding.php" class="nav-link">
+                            <i class="fas fa-user-md"></i>
+                            <span>Doctor Outstanding</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="billing.php" class="nav-link">
+                            <i class="fas fa-receipt"></i>
+                            <span>Billing</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="masterdata.php" class="nav-link">
+                            <i class="fas fa-database"></i>
+                            <span>Master Data</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
 
-	margin-left: 0px;
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Alert Container -->
+            <div id="alertContainer">
+                <?php include ("includes/alertmessages1.php"); ?>
+            </div>
 
-	margin-top: 0px;
-
-	background-color: #ecf0f5;
-
-}
-
-.bodytext3 {	FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3B3B3C; FONT-FAMILY: Tahoma
-
-}
-
-
-
-</style>
-
-<link href="autocomplete.css" rel="stylesheet">
-
-<link href="css/datepickerstyle.css" rel="stylesheet" type="text/css" />
-
-<script type="text/javascript" src="js/adddate.js"></script>
-
-<script type="text/javascript" src="js/adddate2.js"></script>
-
-<script type="text/javascript" src="js/jquery-1.11.1.min.js"></script>
-
-
-
-<script src="js/jquery.min-autocomplete.js"></script>
-
-<script src="js/jquery-ui.min.js"></script>
+            <!-- Page Header -->
+            <div class="page-header">
+                <div class="page-header-content">
+                    <h2>Doctor Outstanding Report</h2>
+                    <p>Generate comprehensive reports on doctor outstanding amounts, payments, and aging analysis.</p>
+                </div>
+                <div class="page-header-actions">
+                    <button type="button" class="btn btn-secondary" onclick="refreshPage()">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                    <button type="button" class="btn btn-outline" onclick="exportToExcel()">
+                        <i class="fas fa-file-excel"></i> Export
+                    </button>
+                </div>
+            </div>
 
 <script>
 
@@ -283,155 +339,81 @@ text-align:right;
 
 <body>
 
-<table width="101%" border="0" cellspacing="0" cellpadding="2">
-
-  <tr>
-
-    <td colspan="10" bgcolor="#ecf0f5"><?php include ("includes/alertmessages1.php"); ?></td>
-
-  </tr>
-
-  <tr>
-
-    <td colspan="10" bgcolor="#ecf0f5"><?php include ("includes/title1.php"); ?></td>
-
-  </tr>
-
-  <tr>
-
-    <td colspan="10" bgcolor="#ecf0f5"><?php include ("includes/menu1.php"); ?></td>
-
-  </tr>
-
-  <tr>
-
-    <td colspan="10">&nbsp;</td>
-
-  </tr>
-
-  <tr>
-
-    <td width="1%">&nbsp;</td>
-
-    <td width="2%" valign="top"><?php //include ("includes/menu4.php"); ?>
-
-      &nbsp;</td>
-
-    <td width="97%" valign="top"><table width="116%" border="0" cellspacing="0" cellpadding="0">
-
-      <tr>
-
-        <td width="860">
-
-		
-
-		
-
-              <form name="cbform1" method="post" action="doctoroutstanding.php">
-
-		<table width="800" border="0" align="left" cellpadding="4" cellspacing="0" bordercolor="#666666" id="AutoNumber3" style="border-collapse: collapse">
-
-          <tbody>
-
-            <tr bgcolor="#011E6A">
-
-              <td colspan="4" bgcolor="#ecf0f5" class="bodytext3"><strong>Doctor Outstanding</strong></td>
-
-              </tr>
-
-            <!--<tr>
-
-              <td colspan="4" align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">
-
-			  <input name="printreceipt1" type="reset" id="printreceipt1" onClick="return funcPrintReceipt1()" style="border: 1px solid #001E6A" value="Print Receipt - Previous Payment Entry" /> 
-
-                *To Print Other Receipts Please Go To Menu:	Reports	-&gt; Payments Given 
-
-				</td>
-
-              </tr>-->
-
-            <tr>
-
-              <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">Search Doctor </td>
-
-              <td width="82%" colspan="3" align="left" valign="top"  bgcolor="#FFFFFF"><span class="bodytext3">
-
-              <input name="searchsuppliername" type="text" id="searchsuppliername" value="<?php echo $searchsuppliername; ?>" size="50" autocomplete="off">
-
-              </span></td>
-
-           </tr>
-
-		   
-
-			  <tr>
-
-                      <td class="bodytext31" valign="center"  align="left" 
-
-                bgcolor="#FFFFFF"> Date From </td>
-
-                      <td width="30%" align="left" valign="center"  bgcolor="#FFFFFF" class="bodytext31"><input name="ADate1" id="ADate1" value="<?php echo $paymentreceiveddatefrom; ?>"  size="10"  readonly="readonly" onKeyDown="return disableEnterKey()" />
-
-                          <img src="images2/cal.gif" onClick="javascript:NewCssCal('ADate1')" style="cursor:pointer"/> </td>
-
-                      <td width="16%" align="left" valign="center"  bgcolor="#FFFFFF" class="bodytext31"> Date To </td>
-
-                      <td width="33%" align="left" valign="center"  bgcolor="#FFFFFF"><span class="bodytext31">
-
-                        <input name="ADate2" id="ADate2" value="<?php echo $paymentreceiveddateto; ?>"  size="10"  readonly="readonly" onKeyDown="return disableEnterKey()" />
-
-                        <!--<img src="images2/cal.gif" onClick="javascript:NewCssCal('ADate2')" style="cursor:pointer"/> </span>-->
-                         <img src="images2/cal.gif" onClick="javascript:NewCssCal('ADate2','yyyyMMdd','','','','','past','07-01-2019','<?php echo date('m-d-Y');?>')" style="cursor:pointer"/>
-                      </td>
-
-                    </tr>	
-
-            <tr>
-
-              <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3"><input type="hidden" name="searchsuppliercode" onBlur="return suppliercodesearch1()" onKeyDown="return suppliercodesearch2()" id="searchsuppliercode" style="text-transform:uppercase" value="<?php echo $searchsuppliercode; ?>" size="20" /></td>
-
-              <td colspan="3" align="left" valign="top"  bgcolor="#FFFFFF">
-
-              <input type="hidden" name="subcode" value="<?php echo $searchsuppliercode; ?>">
-
-			  <input type="hidden" name="cbfrmflag1" value="cbfrmflag1">
-
-                  <input type="submit" onClick="return funcAccount();" value="Search" name="Submit" />
-
-                  <input name="resetbutton" type="reset" id="resetbutton" value="Reset" /></td>
-
-            </tr>
-
-          </tbody>
-
-        </table>
-
-		</form>		</td>
-
-      </tr>
-
-      <tr>
-
-        <td>&nbsp;</td>
-
-      </tr>
-
-       <tr>
-
-        <td><table id="AutoNumber3" style="BORDER-COLLAPSE: collapse" 
-
-            bordercolor="#666666" cellspacing="0" cellpadding="4" width="1200" 
-
-            align="left" border="0">
-
-          <tbody>
-
-            <tr>
-
-              <td width="4%" bgcolor="#ecf0f5" class="bodytext31">&nbsp;</td>
-
-              <td colspan="16" bgcolor="#ecf0f5" class="bodytext31"><span class="bodytext311">
+            <!-- Search Form -->
+            <form name="cbform1" method="post" action="doctoroutstanding.php" class="form-section">
+                <div class="form-section-header">
+                    <i class="fas fa-search form-section-icon"></i>
+                    <h3 class="form-section-title">Search Criteria</h3>
+                    <span class="form-section-subtitle">Enter search parameters to generate the outstanding report</span>
+                </div>
+                
+                <div class="form-section-form">
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="searchsuppliername" class="form-label">Search Doctor</label>
+                            <input name="searchsuppliername" type="text" id="searchsuppliername" class="form-input" value="<?php echo $searchsuppliername; ?>" placeholder="Search for doctor" autocomplete="off" />
+                            <input type="hidden" name="searchsuppliercode" id="searchsuppliercode" value="<?php echo $searchsuppliercode; ?>" />
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="ADate1" class="form-label">Date From</label>
+                            <div class="form-input-group">
+                                <input name="ADate1" id="ADate1" class="form-input" value="<?php echo $paymentreceiveddatefrom; ?>" readonly="readonly" onKeyDown="return disableEnterKey()" />
+                                <i class="fas fa-calendar-alt" onClick="javascript:NewCssCal('ADate1')" style="cursor:pointer"></i>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="ADate2" class="form-label">Date To</label>
+                            <div class="form-input-group">
+                                <input name="ADate2" id="ADate2" class="form-input" value="<?php echo $paymentreceiveddateto; ?>" readonly="readonly" onKeyDown="return disableEnterKey()" />
+                                <i class="fas fa-calendar-alt" onClick="javascript:NewCssCal('ADate2','yyyyMMdd','','','','','past','07-01-2019','<?php echo date('m-d-Y');?>')" style="cursor:pointer"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <input type="hidden" name="subcode" value="<?php echo $searchsuppliercode; ?>" />
+                        <input type="hidden" name="cbfrmflag1" value="cbfrmflag1" />
+                        <button type="submit" onClick="return funcAccount();" name="Submit" class="btn btn-primary">
+                            <i class="fas fa-search"></i> Search
+                        </button>
+                        <button name="resetbutton" type="reset" id="resetbutton" class="btn btn-secondary">
+                            <i class="fas fa-undo"></i> Reset
+                        </button>
+                    </div>
+                </div>
+            </form>
+
+            <!-- Results Section -->
+            <?php if(isset($_REQUEST["cbfrmflag1"]) && $_REQUEST["cbfrmflag1"] == 'cbfrmflag1'){ ?>
+            <div class="data-table-section">
+                <div class="data-table-header">
+                    <h3 class="data-table-title">Doctor Outstanding Report Results</h3>
+                </div>
+                
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead class="table-header">
+                            <tr>
+                                <th class="table-header-cell">No.</th>
+                                <th class="table-header-cell">Date</th>
+                                <th class="table-header-cell">Description</th>
+                                <th class="table-header-cell">Bill Number</th>
+                                <th class="table-header-cell">Bill Type</th>
+                                <th class="table-header-cell">Company</th>
+                                <th class="table-header-cell">Allotted</th>
+                                <th class="table-header-cell text-right">Debit</th>
+                                <th class="table-header-cell text-right">Credit</th>
+                                <th class="table-header-cell text-right">Outstanding</th>
+                                <th class="table-header-cell text-center">Days</th>
+                                <th class="table-header-cell text-right">Current Balance</th>
+                            </tr>
+                        </thead>
+                        <tbody>
 
               <?php
 
@@ -1940,137 +1922,101 @@ text-align:right;
 			// if(1) {
 				?>
 
-				<tr <?php echo $colorcode; ?>>
-
-				  <td class="bodytext31" valign="center"  align="left"><?php echo $snocount; ?></td>
-
-				   <td class="bodytext31" valign="center"  align="left">
-
-					<div class="bodytext31"><?php echo $billdate; ?></div></td>
-
-				  <td class="bodytext31" valign="center"  align="left">
-
-					<div class="bodytext31"><?php $haystack21 = $billnumber;
-						$needle21   = "ADP";
-						if( strpos( $haystack21, $needle21 ) !== false) {
-							echo "Payment (".$res2['particulars12']." )";
-						}else{
-					?>
-						<?php echo $name; ?> (<?php echo $patientcode; ?>, <?php echo $visitcode; ?>)
-					<?php } ?>
-					</div></td>
-					 <td class="bodytext31" valign="center"  align="left">
-					 	    	<?php
-                 	$haystack = $billnumber;
-		$needle   = "IPFCA";
-		$url = "";
-		if( strpos( $haystack, $needle ) !== false) {
-		   
-		    $url = "print_creditapproval.php?locationcode=$res45locationcode&&patientcode=$patientcode&&visitcode=$visitcode&&billnumber=$billnumber";
-		}
-		else
-		{
-			$needle   = "IPF";
-			if( strpos( $haystack, $needle ) !== false) {
-		   
-		    $url = "print_ipfinalinvoice1.php?locationcode=$res45locationcode&&patientcode=$patientcode&&visitcode=$visitcode&&billnumber=$billnumber";
-			}
-			else
-			{
-				$needle   = "CB";
-				if( strpos( $haystack, $needle ) !== false) {
-		  
-		    	$url = "print_paylater_detailed.php?locationcode=$res45locationcode&&billautonumber=$billnumber";
-				}
-				else
-				{
-					$needle   = "CF";
-					if( strpos( $haystack, $needle ) !== false) {
-			  
-			    	$url = "print_consultationbill_dmp4inch1.php?locationcode=$res45locationcode&&billautonumber=$billnumber";
-					}
-					else
-						{
-							// $needle   = "OPR";
-							// if( strpos( $haystack, $needle ) !== false) {
-					  
-					  //   	$url = "print_consultationrefund_dmp4inch1.php?locationcode=$res45locationcode&&billautonumber=$billnumber";
-							// }
-							// else
-							// {
-								//$needle   = "CB";
-							// }
-						}
-				}
-			}
-		}
-
-						$needle   = "OPR";
-						$url1='';
-
-							if( strpos( $ref_doc, $needle ) !== false) {
-					  
-					    	$url1 = "print_consultationrefund_dmp4inch1.php?locationcode=$res45locationcode&&billautonumber=$ref_doc";
-							}
-                 	 ?>
-					<div class="bodytext31">
-						<?php
-						$haystack = $billnumber;
-						$needle   = "ADP";
-						if( strpos( $haystack21, $needle21 ) !== false) {
-							  echo $billnumber;  
-						}else{ ?>
-							<a target="_blank" href="<?=$url;?>"><?php echo $billnumber; ?></a>
-						<?php  } ?>
-						<?php if($num234>0){ ?>
-							&nbsp;&nbsp;<a target="_blank" href="<?=$url1;?>"><?php echo $ref_doc; ?></a>	
-						<?php } if($num_crnno>0){ ?>
-							&nbsp;&nbsp;<a target="_blank" href="<?=$url1;?>"><?php echo $crnnumber; ?></a>	
-							<?php } if($num_crn2>0){ ?>
-							&nbsp;&nbsp;<a target="_blank" href="<?=$url1;?>"><?php echo $crnnumber2; ?></a>	 
-					<?php } if($num_adpallocaion>0){ ?>
-							&nbsp;&nbsp;<?php echo $adpallocaionnumber; ?>	
-						<?php }  ?>
-					</div></td>
-					 <td class="bodytext31" valign="center"  align="left">
-
-					<div class="bodytext31"><?php echo $billtype; ?></div></td>
-					
-					<td class="bodytext31" valign="center"  align="left">
-
-					<div class="bodytext31"><?php echo $subtype; ?></div></td>
-
-
-					<td class="bodytext31" valign="center"  align="left"> <div class="bodytext31"><?php echo $alloted_status; ?></div></td>
-
-					
-            
-				  <td class="bodytext31" valign="center"  align="right">  
-				  	  <?php if(1){ ?>
-							<?php echo number_format($res45transactionamount,2,'.',','); ?>
-						<?php }else{
-							echo '0.00';
-						} ?>  
-				  	<?php // echo number_format($res45transactionamount,2,'.',',');
-						?>
-					</td>
-
-				  <td class="bodytext31" valign="center"  align="right">
-					<div align="right"><?php echo number_format($balanceamount1,2,'.',','); ?>
-					<!-- <div align="right"><?php // if ($balanceamount != '0.00') echo number_format($balanceamount,2,'.',','); ?> -->
-					</div></td>
-
-					<td class="bodytext31" valign="center"  align="right"> <div class="bodytext31"><?php echo number_format(($balanceamount1-$res45transactionamount),2,'.',','); ?></div></td>
-
-					<td class="bodytext31" valign="center"  align="left">
-
-					<div align="center"><?php echo $daysafterbilldate; ?></div></td>
-
-				   <td class="bodytext31" valign="center"  align="right">
-
-					<div align="right"><?php echo number_format($total,2,'.',','); ?></div></td>
-
-			   </tr>
+                            <tr class="<?php echo ($colorloopcount % 2 == 0) ? 'table-row-even' : 'table-row-odd'; ?>">
+                                <td class="table-cell"><?php echo $snocount; ?></td>
+                                <td class="table-cell"><?php echo $billdate; ?></td>
+                                <td class="table-cell">
+                                    <?php 
+                                    $haystack21 = $billnumber;
+                                    $needle21 = "ADP";
+                                    if(strpos($haystack21, $needle21) !== false) {
+                                        echo "Payment (".$res2['particulars12'].")";
+                                    } else {
+                                        echo $name . " (" . $patientcode . ", " . $visitcode . ")";
+                                    }
+                                    ?>
+                                </td>
+                                <td class="table-cell">
+                                    <?php
+                                    $haystack = $billnumber;
+                                    $needle = "IPFCA";
+                                    $url = "";
+                                    if(strpos($haystack, $needle) !== false) {
+                                        $url = "print_creditapproval.php?locationcode=$res45locationcode&&patientcode=$patientcode&&visitcode=$visitcode&&billnumber=$billnumber";
+                                    } else {
+                                        $needle = "IPF";
+                                        if(strpos($haystack, $needle) !== false) {
+                                            $url = "print_ipfinalinvoice1.php?locationcode=$res45locationcode&&patientcode=$patientcode&&visitcode=$visitcode&&billnumber=$billnumber";
+                                        } else {
+                                            $needle = "CB";
+                                            if(strpos($haystack, $needle) !== false) {
+                                                $url = "print_paylater_detailed.php?locationcode=$res45locationcode&&billautonumber=$billnumber";
+                                            } else {
+                                                $needle = "CF";
+                                                if(strpos($haystack, $needle) !== false) {
+                                                    $url = "print_consultationbill_dmp4inch1.php?locationcode=$res45locationcode&&billautonumber=$billnumber";
+                                                }
+                                            }
+                                        }
+                                    }
+                                    
+                                    $needle = "OPR";
+                                    $url1 = '';
+                                    if(strpos($ref_doc, $needle) !== false) {
+                                        $url1 = "print_consultationrefund_dmp4inch1.php?locationcode=$res45locationcode&&billautonumber=$ref_doc";
+                                    }
+                                    ?>
+                                    
+                                    <?php
+                                    $haystack = $billnumber;
+                                    $needle = "ADP";
+                                    if(strpos($haystack21, $needle21) !== false) {
+                                        echo $billnumber;
+                                    } else { ?>
+                                        <a target="_blank" href="<?=$url;?>" class="btn btn-sm btn-outline">
+                                            <i class="fas fa-external-link-alt"></i> <?php echo $billnumber; ?>
+                                        </a>
+                                    <?php } ?>
+                                    
+                                    <?php if($num234 > 0) { ?>
+                                        <a target="_blank" href="<?=$url1;?>" class="btn btn-sm btn-outline">
+                                            <i class="fas fa-external-link-alt"></i> <?php echo $ref_doc; ?>
+                                        </a>
+                                    <?php } ?>
+                                    
+                                    <?php if($num_crnno > 0) { ?>
+                                        <a target="_blank" href="<?=$url1;?>" class="btn btn-sm btn-outline">
+                                            <i class="fas fa-external-link-alt"></i> <?php echo $crnnumber; ?>
+                                        </a>
+                                    <?php } ?>
+                                    
+                                    <?php if($num_crn2 > 0) { ?>
+                                        <a target="_blank" href="<?=$url1;?>" class="btn btn-sm btn-outline">
+                                            <i class="fas fa-external-link-alt"></i> <?php echo $crnnumber2; ?>
+                                        </a>
+                                    <?php } ?>
+                                    
+                                    <?php if($num_adpallocaion > 0) { ?>
+                                        <span class="badge badge-info"><?php echo $adpallocaionnumber; ?></span>
+                                    <?php } ?>
+                                </td>
+                                <td class="table-cell"><?php echo $billtype; ?></td>
+                                <td class="table-cell"><?php echo $subtype; ?></td>
+                                <td class="table-cell">
+                                    <span class="badge <?php echo ($alloted_status == 'Yes' || $alloted_status == 'Fully') ? 'badge-success' : (($alloted_status == 'Partly') ? 'badge-warning' : 'badge-danger'); ?>">
+                                        <?php echo $alloted_status; ?>
+                                    </span>
+                                </td>
+                                <td class="table-cell text-right"><?php echo number_format($res45transactionamount, 2, '.', ','); ?></td>
+                                <td class="table-cell text-right"><?php echo number_format($balanceamount1, 2, '.', ','); ?></td>
+                                <td class="table-cell text-right"><?php echo number_format(($balanceamount1 - $res45transactionamount), 2, '.', ','); ?></td>
+                                <td class="table-cell text-center">
+                                    <span class="badge <?php echo ($daysafterbilldate <= 30) ? 'badge-success' : (($daysafterbilldate <= 60) ? 'badge-warning' : 'badge-danger'); ?>">
+                                        <?php echo $daysafterbilldate; ?>
+                                    </span>
+                                </td>
+                                <td class="table-cell text-right"><?php echo number_format($total, 2, '.', ','); ?></td>
+                            </tr>
 
 			<?php
 					}
@@ -2135,40 +2081,56 @@ text-align:right;
 
 			
 
-            <tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <?php } ?>
+        </main>
+    </div>
 
-              <td colspan="16" class="bodytext31" valign="center"  align="left"  bgcolor="#ecf0f5">&nbsp;</td>
+    <!-- Modern JavaScript Functions -->
+    <script>
+        // Sidebar toggle functionality
+        function toggleSidebar() {
+            const sidebar = document.getElementById('leftSidebar');
+            const toggle = document.querySelector('.sidebar-toggle i');
+            
+            sidebar.classList.toggle('collapsed');
+            toggle.classList.toggle('fa-chevron-left');
+            toggle.classList.toggle('fa-chevron-right');
+        }
 
-            </tr>
+        // Page refresh function
+        function refreshPage() {
+            window.location.reload();
+        }
 
-				 </tbody>
+        // Export to Excel function
+        function exportToExcel() {
+            // Add export functionality here
+            alert('Export functionality will be implemented');
+        }
 
-        </table></td>
+        // Initialize sidebar toggle on menu button click
+        document.getElementById('menuToggle').addEventListener('click', function() {
+            const sidebar = document.getElementById('leftSidebar');
+            sidebar.classList.toggle('show');
+        });
 
-      </tr>
+        // Close sidebar when clicking outside
+        document.addEventListener('click', function(event) {
+            const sidebar = document.getElementById('leftSidebar');
+            const menuToggle = document.getElementById('menuToggle');
+            
+            if (!sidebar.contains(event.target) && !menuToggle.contains(event.target)) {
+                sidebar.classList.remove('show');
+            }
+        });
+    </script>
 
-	  
-
-   
-
-			<tr>
-
-        <td>&nbsp;</td>
-
-      </tr>
-<?php
-		$openingbalance =0;
-         $totalat =0;
-
-$totalamount30=0;
-$totalamount60=0;
-$totalamount90=0;
-$totalamount120=0;
-$totalamount180=0;
-$totalamountgreater=0;
-        
-$suppliercode= $searchsuppliercode;
-          $query234 = "SELECT mainset.* from ((select recorddate as transdate,docno as documentno,billtype,visitcode,patientname,patientcode,accountname,visittype,sum(sharingamount) as sharingamount,percentage,sum(transactionamount) as transactionamount,pvtdr_percentage,sum(original_amt) as original_amt,locationcode,'' as taxamount,'' as particulars,'' as refno,'billing_ipprivatedoctor' as transtable  from billing_ipprivatedoctor where doccoa='$suppliercode'  and amount <> '0.00' and amount > 0 and recorddate < '$ADate1'  and docno <> '' group by docno,doccoa order by recorddate,docno) 
+</body>
+</html> 
 		 
           union (SELECT consultationdate as transdate,docno as documentno,billtype,patientvisitcode visitcode,patientname,patientcode,accountname,'' as visittype,0 as sharingamount,'' as percentage, sum(amount) as transactionamount,'' as pvtdr_percentage, 0 as original_amt,locationcode,'' as taxamount,'' as particulars,ref_no as refno,'adhoc_creditnote' as transtable from adhoc_creditnote where billingaccountcode = '$suppliercode' and consultationdate < '$ADate1' group by accountcode,ref_no order by consultationdate)
 

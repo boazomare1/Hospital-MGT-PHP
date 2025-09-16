@@ -2,111 +2,217 @@
 session_start();
 include ("includes/loginverify.php");
 include ("db/db_connect.php");
+include ("includes/check_user_access.php");
+
 $username = $_SESSION["username"];
 $companyanum = $_SESSION["companyanum"];
 $companyname = $_SESSION["companyname"];
+
 $ipaddress = $_SERVER["REMOTE_ADDR"];
 $updatedatetime = date('Y-m-d H:i:s');
 $dateonly = date("Y-m-d");
+$errmsg = "";
+$bgcolorcode = "";
 $colorloopcount = "";
 $runningbalance = 0;
 $totalunpre = 0;
 $totalunclr = 0;
   
-if (isset($_REQUEST["frmflg1"])) { $frmflg1 = $_REQUEST["frmflg1"]; } else { $frmflg1 = ""; }
-if (isset($_REQUEST["ADate1"])) { $transactiondatefrom = $_REQUEST["ADate1"]; } else { $transactiondatefrom = date("Y-m-d"); }
-if (isset($_REQUEST["ADate2"])) { $transactiondateto = $_REQUEST["ADate2"]; } else { $transactiondateto = date("Y-m-d"); }
-if (isset($_REQUEST["searchmonth"])) { $searchmonth = $_REQUEST["searchmonth"]; } else { $searchmonth = date('m'); }
-if (isset($_REQUEST["searchyear"])) { $searchyear = $_REQUEST["searchyear"]; } else { $searchyear = ""; }
-if (isset($_REQUEST["bankname"])) 
-{ 
-	$bankfullname = $_REQUEST["bankname"];
-	/*$bankfullname = explode("-",$bankfullname,2);
-	$banknamereq = $bankfullname[0];
-	$accountnumberreq = $bankfullname[1];*/
-} 
-else 
-{ 
-	$bankfullname = "";
-	/*$banknamereq = "";
-	$accountnumberreq = "";*/
+// Handle form submission and search parameters
+if (isset($_REQUEST["frmflg1"])) { 
+    $frmflg1 = $_REQUEST["frmflg1"]; 
+} else { 
+    $frmflg1 = ""; 
 }
-$colorcode = 'bgcolor="#CBDBFA"';
+
+if (isset($_REQUEST["ADate1"])) { 
+    $transactiondatefrom = $_REQUEST["ADate1"]; 
+} else { 
+    $transactiondatefrom = date("Y-m-d"); 
+}
+
+if (isset($_REQUEST["ADate2"])) { 
+    $transactiondateto = $_REQUEST["ADate2"]; 
+} else { 
+    $transactiondateto = date("Y-m-d"); 
+}
+
+if (isset($_REQUEST["searchmonth"])) { 
+    $searchmonth = $_REQUEST["searchmonth"]; 
+} else { 
+    $searchmonth = date('m'); 
+}
+
+if (isset($_REQUEST["searchyear"])) { 
+    $searchyear = $_REQUEST["searchyear"]; 
+} else { 
+    $searchyear = ""; 
+}
+
+if (isset($_REQUEST["bankname"])) { 
+    $bankfullname = $_REQUEST["bankname"];
+} else { 
+    $bankfullname = "";
+}
 ?>
-<style type="text/css">
-<!--
-body {
-	margin-left: 0px;
-	margin-top: 0px;
-	background-color: #ecf0f5;
-}
-.bodytext3 {	FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3B3B3C; FONT-FAMILY: Tahoma; text-decoration:none
-}
--->
-</style>
-<!--<link href="datepickerstyle.css" rel="stylesheet" type="text/css" />
-<script type="text/javascript" src="js/adddate.js"></script>
-<script type="text/javascript" src="js/adddate2.js"></script>
---><style type="text/css">
-.bodytext31 {FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3b3b3c; FONT-FAMILY: Tahoma
-}
-.bodytext312 {FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3b3b3c; FONT-FAMILY: Tahoma
-}
-</style>
-<script>
-function functiontest()
-{
-if(document.getElementById("bankname").value == "")
-{
- alert("Please Select Bank To Proceed");
- document.getElementById("bankname").focus();
- return false;
-}
-/*if(document.getElementById("transactiontype").value == '')
-{
-	alert("Please Select Transaction Type To Proceed");
-	 document.getElementById("transactiontype").focus();
- 	return false;
-}*/
-}
-	</script>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bank Transaction Statement - MedStar</title>
+    
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <!-- Modern CSS -->
+    <link rel="stylesheet" href="css/banktransactionstatement-modern.css?v=<?php echo time(); ?>">
+    
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
-<script src="js/datetimepicker_css.js"></script>
 <body>
-<table width="101%" border="0" cellspacing="0" cellpadding="2">
-  <tr>
-    <td colspan="10" bgcolor="#ecf0f5"><?php include ("includes/alertmessages1.php"); ?></td>
-  </tr>
-  <tr>
-    <td colspan="10" bgcolor="#ecf0f5"><?php include ("includes/title1.php"); ?></td>
-  </tr>
-  <tr>
-    <td colspan="10" bgcolor="#ecf0f5"><?php  include ("includes/menu1.php"); ?></td>
-  </tr>
-  <tr>
-    <td colspan="10">&nbsp;</td>
-  </tr>
-  <tr>
-    <td width="1%">&nbsp;</td>
-    <td width="2%" valign="top"><?php //include ("includes/menu4.php"); ?>
-      &nbsp;</td>
-    <td width="97%" valign="top"><table width="100%" border="0" cellspacing="0" cellpadding="0">
-      <tr>
-        <td width="860"><table width="100%" border="0" cellspacing="0" cellpadding="0" class="tablebackgroundcolor1">
-            <tr>
-              <td>
-              <form method="post" action="banktransactionstatement.php">
-                <table width="759" border="0" align="left" cellpadding="4" cellspacing="0" bordercolor="#666666" id="AutoNumber3" style="border-collapse: collapse">
-                    <tbody>			  
-                <tr>
-                  <td  colspan="5" bgcolor="#ecf0f5" class="bodytext3"><strong>Bank Transaction Statement</strong></td>
-                  </tr>
-                <tr>
-                  <td width="90" bgcolor="#ffffff" class="bodytext3"><div align="left">Bank  Name</div></td>
-                  <td colspan="3" bgcolor="#ffffff" class="bodytext3"><select name="bankname" id="bankname">
-                    <option value="">SELECT BANK </option>
+    <!-- Alert Container -->
+    <div id="alertContainer"></div>
+
+    <!-- Hospital Header -->
+    <header class="hospital-header">
+        <h1 class="hospital-title">🏥 MedStar Hospital Management</h1>
+        <p class="hospital-subtitle">Advanced Healthcare Management Platform</p>
+    </header>
+
+    <!-- User Information Bar -->
+    <div class="user-info-bar">
+        <div class="user-welcome">
+            <span class="welcome-text">Welcome, <strong><?php echo htmlspecialchars($username); ?></strong></span>
+            <span class="location-info">📍 Company: <?php echo htmlspecialchars($companyname); ?></span>
+        </div>
+        <div class="user-actions">
+            <a href="mainmenu1.php" class="btn btn-outline">🏠 Main Menu</a>
+            <a href="logout.php" class="btn btn-outline">🚪 Logout</a>
+        </div>
+    </div>
+
+    <!-- Navigation Breadcrumb -->
+    <nav class="nav-breadcrumb">
+        <a href="mainmenu1.php">🏠 Home</a>
+        <span>→</span>
+        <span>Bank Transaction Statement</span>
+    </nav>
+
+    <!-- Floating Menu Toggle -->
+    <div id="menuToggle" class="floating-menu-toggle">
+        <i class="fas fa-bars"></i>
+    </div>
+
+    <!-- Main Container with Sidebar -->
+    <div class="main-container-with-sidebar">
+        <!-- Left Sidebar -->
+        <aside id="leftSidebar" class="left-sidebar">
+            <div class="sidebar-header">
+                <h3>Quick Navigation</h3>
+                <button id="sidebarToggle" class="sidebar-toggle">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <ul class="nav-list">
+                    <li class="nav-item">
+                        <a href="mainmenu1.php" class="nav-link">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="addaccountsmain.php" class="nav-link">
+                            <i class="fas fa-chart-line"></i>
+                            <span>Accounts Main</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="addaccountssub.php" class="nav-link">
+                            <i class="fas fa-chart-pie"></i>
+                            <span>Accounts Sub Type</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="addbank1.php" class="nav-link">
+                            <i class="fas fa-university"></i>
+                            <span>Bank Master</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="bankreconupdate.php" class="nav-link">
+                            <i class="fas fa-balance-scale"></i>
+                            <span>Bank Reconciliation</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="payrollbankreport1.php" class="nav-link">
+                            <i class="fas fa-file-invoice-dollar"></i>
+                            <span>Payroll Bank Report</span>
+                        </a>
+                    </li>
+                    <li class="nav-item active">
+                        <a href="banktransactionstatement.php" class="nav-link">
+                            <i class="fas fa-file-alt"></i>
+                            <span>Bank Transaction Statement</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="vat.php" class="nav-link">
+                            <i class="fas fa-receipt"></i>
+                            <span>VAT Master</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Alert Container -->
+            <div id="alertContainer">
+                <?php if (!empty($errmsg)): ?>
+                    <div class="alert alert-<?php echo $bgcolorcode === 'success' ? 'success' : ($bgcolorcode === 'failed' ? 'error' : 'info'); ?>">
+                        <i class="fas fa-<?php echo $bgcolorcode === 'success' ? 'check-circle' : ($bgcolorcode === 'failed' ? 'exclamation-triangle' : 'info-circle'); ?> alert-icon"></i>
+                        <span><?php echo htmlspecialchars($errmsg); ?></span>
+                    </div>
+                <?php endif; ?>
+            </div>
+
+            <!-- Page Header -->
+            <div class="page-header">
+                <div class="page-header-content">
+                    <h2>Bank Transaction Statement</h2>
+                    <p>Generate and view comprehensive bank transaction statements with detailed financial records.</p>
+                </div>
+                <div class="page-header-actions">
+                    <button type="button" class="btn btn-secondary" onclick="refreshPage()">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                    <button type="button" class="btn btn-outline" onclick="exportToExcel()">
+                        <i class="fas fa-download"></i> Export
+                    </button>
+                </div>
+            </div>
+
+            <!-- Add Form Section -->
+            <div class="add-form-section">
+                <div class="add-form-header">
+                    <i class="fas fa-search add-form-icon"></i>
+                    <h3 class="add-form-title">Search Bank Transaction Statement</h3>
+                </div>
+                
+                <form id="bankStatementForm" method="post" action="banktransactionstatement.php" class="add-form">
+                    <div class="form-group">
+                        <label for="bankname" class="form-label">Bank Name</label>
+                        <select name="bankname" id="bankname" class="form-input" required>
+                            <option value="">SELECT BANK</option>
                     <?php
-				 	$query11 = "select * from master_bank where bankstatus ='' ";
+                            $query11 = "SELECT * FROM master_bank WHERE bankstatus = ''";
 					$exec11 = mysqli_query($GLOBALS["___mysqli_ston"], $query11) or die("Error in Query11".mysqli_error($GLOBALS["___mysqli_ston"]));
 					while($res11 = mysqli_fetch_array($exec11))
 					{
@@ -115,20 +221,18 @@ if(document.getElementById("bankname").value == "")
 					$bankcode = $res11["bankcode"];
 					 ?>
                     <option value="<?php echo $bankcode;?>"
-                     <?php if( isset($_REQUEST['bankname']) &&  ($_REQUEST['bankname'] == $bankcode)) {?> selected <?php } ?>>
-						<?php echo $bankname;?>-<?php echo $accountnumber;?>
+                                <?php if(isset($_REQUEST['bankname']) && ($_REQUEST['bankname'] == $bankcode)) {?> selected <?php } ?>>
+                                <?php echo htmlspecialchars($bankname); ?>-<?php echo htmlspecialchars($accountnumber); ?>
                     </option>
                     <?php
 					 }
 					 ?>
-                  </select></td>
-                </tr>
+                        </select>
+                    </div>
 				
-					<tr id="monthly" >
-			
-					<td width="131" class="bodytext31" valign="center"  align="left" bgcolor="#FFFFFF">Month </td>
-                      <td width="20%" align="left" valign="center"  bgcolor="#FFFFFF" class="bodytext31">
-                        <select name="searchmonth" id="searchmonth">
+                    <div class="form-group">
+                        <label for="searchmonth" class="form-label">Month</label>
+                        <select name="searchmonth" id="searchmonth" class="form-input" required>
                           <option <?php if($searchmonth == '1') { ?> selected = 'selected' <?php } ?> value="1">January</option>
                           <option <?php if($searchmonth == '2') { ?> selected = 'selected' <?php } ?> value="2">February</option>
                           <option <?php if($searchmonth == '3') { ?> selected = 'selected' <?php } ?> value="3">March</option>
@@ -142,55 +246,47 @@ if(document.getElementById("bankname").value == "")
                           <option <?php if($searchmonth == '11'){ ?> selected = 'selected' <?php } ?> value="11">November</option>
                           <option <?php if($searchmonth == '12'){ ?> selected = 'selected' <?php } ?> value="12">December</option>
                         </select>
-                      </td>		
-						 <td  width="71" class="bodytext31" valign="center"  align="left"  bgcolor="#FFFFFF">Select Year </td>
-                  <?php $years = range(2023, strftime("2025", time())); ?>
-                      <td colspan="3" align="left" valign="center"  bgcolor="#FFFFFF" class="bodytext31">
-                        <select name="searchyear" id="searchyear">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="searchyear" class="form-label">Year</label>
+                        <select name="searchyear" id="searchyear" class="form-input" required>
                           <?php if($searchyear != ''){ ?>
                               <option value="<?php echo $searchyear; ?>"><?php echo $searchyear; ?></option>
                           <?php } ?>
                           <option value="">Select Year</option>
-                          <?php foreach($years as $year1) : ?>
+                            <?php 
+                            $years = range(2023, date('Y') + 2); 
+                            foreach($years as $year1) : ?>
                               <option value="<?php echo $year1; ?>"><?php echo $year1; ?></option>
                           <?php endforeach; ?>
                         </select>
-                      </td>
-					  
-					</tr>
+                    </div>
 					
-                <!--<tr>
-                  <td bgcolor="#ffffff" class="bodytext3"><span class="bodytext31">Date From </span></td>
-                  <td width="192" bgcolor="#ffffff" class="bodytext3"><span class="bodytext31">
-                    <input name="ADate1" id="ADate1" style="border: 1px solid #001E6A" value="<?php echo $transactiondatefrom; ?>"  size="10"  readonly="readonly" onKeyDown="return disableEnterKey()" />
-                    <img src="images2/cal.gif" onClick="javascript:NewCssCal('ADate1')" style="cursor:pointer"/></span></td>
-                  <td width="107" bgcolor="#ffffff" class="bodytext3"><span class="bodytext31">Date To</span></td>
-                  <td width="159" bgcolor="#ffffff" class="bodytext3"><span class="bodytext31">
-                    <input name="ADate2" id="ADate2" style="border: 1px solid #001E6A" value="<?php echo $transactiondateto; ?>"  size="10"  readonly="readonly" onKeyDown="return disableEnterKey()" />
-                    <img src="images2/cal.gif" onClick="javascript:NewCssCal('ADate2')" style="cursor:pointer"/></span></td>
-                  </tr>-->
-                  <tr>
-				  	<td bgcolor="#ffffff">&nbsp;</td>
-                    <td align="left" valign="middle" bgcolor="#ffffff" class="bodytext3">
- 					<input type="hidden" name="frmflag1" id="frmflag1" value="frmflag1" >				  
-				  <input  style="border: 1px solid #001E6A" type="submit" value="Search" name="Submit" onClick="return functiontest()" /></td>
-				  <td bgcolor="#ffffff">&nbsp;</td>
-				  <td bgcolor="#ffffff">&nbsp;</td>
-                  </tr>
-				  </tbody>
-				  </table>
+                    <div class="form-group">
+                        <button type="submit" id="submitBtn" class="submit-btn">
+                            <i class="fas fa-search"></i>
+                            Generate Statement
+                        </button>
+                        <button type="button" class="btn btn-secondary" onclick="resetForm()">
+                            <i class="fas fa-undo"></i> Reset
+                        </button>
+                    </div>
+
+                    <input type="hidden" name="frmflag1" id="frmflag1" value="frmflag1">
 				  </form>
-			    </td>
-				  </tr>
-				  <tr><td>&nbsp;</td></tr>
-                <tr >
-				<td><table width="" align="left" cellpadding="4" cellspacing="0"  style="border-collapse: collapse">
+            </div>
+            <!-- Data Table Section -->
+            <?php if($frmflag1 == 'frmflag1'): ?>
+            <div class="data-table-section">
+                <div class="data-table-header">
+                    <i class="fas fa-file-alt data-table-icon"></i>
+                    <h3 class="data-table-title">Bank Transaction Statement Results</h3>
+                </div>
+                
 				<?php
  					$sno = 0;
-				if (isset($_REQUEST["frmflag1"])) { $frmflag1 = $_REQUEST["frmflag1"]; } else { $frmflag1 = ""; }
-				//$cbfrmflag1 = $_POST['cbfrmflag1'];
-				if ($frmflag1 == 'frmflag1')
-				{	
+                if ($frmflag1 == 'frmflag1') {
 					/* if (isset($_REQUEST["ADate1"])) { $ADate1 = $_REQUEST["ADate1"]; } else { $ADate1 = ""; }
 					if (isset($_REQUEST["ADate2"])) { $ADate2 = $_REQUEST["ADate2"]; } else { $ADate2 = ""; }
 					if ($ADate1 != '' && $ADate2 != '')
@@ -217,16 +313,20 @@ if(document.getElementById("bankname").value == "")
 						$bankname2 = trim($bankname2);*/
 				?>
 					
-				<tr>
-                  <td width="30" bgcolor="#ecf0f5" class="bodytext3" align="center" valign="middle"><strong>No</strong></td>
-				  <td width="100" bgcolor="#ecf0f5" class="bodytext3" align="left" valign="middle"><strong>Transaction Date</strong></td>
-                  <td width="90" bgcolor="#ecf0f5" class="bodytext3" align="left" valign="middle"><strong>Statement Date</strong></td>
-                  <td width="100" bgcolor="#ecf0f5" class="bodytext3" align="left" valign="middle"><strong>Description</strong></td>
-				  <td width="50" bgcolor="#ecf0f5" class="bodytext3" align="left" valign="middle"><strong>Transaction <br/> Ref No</strong></td>
-				  <td width="150" bgcolor="#ecf0f5" class="bodytext3" align="right" valign="middle"><strong>Money In</strong></td>
-                  <td width="150" bgcolor="#ecf0f5" class="bodytext3" align="right" valign="middle"><strong>Money Out</strong></td>
-                  <td width="150" bgcolor="#ecf0f5" class="bodytext3" align="right" valign="middle"><strong>Running Balance</strong></td>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Transaction Date</th>
+                            <th>Statement Date</th>
+                            <th>Description</th>
+                            <th>Transaction Ref No</th>
+                            <th>Money In</th>
+                            <th>Money Out</th>
+                            <th>Running Balance</th>
                 </tr>
+                    </thead>
+                    <tbody>
 				  <?php
 				  $totatlmoneyin = 0;
 				  $totatlmoneyout = 0;
@@ -383,13 +483,16 @@ if(document.getElementById("bankname").value == "")
 						//$totatlrunningbal = $totatlrunningbal + $runningbalance;
 					}
 					?>	
-					<tr  <?php echo $colorcode; ?>>
-                  <td class="bodytext3" valign="middle"  align="center"><?php echo $sno = $sno+1;?> </td>
-				  <td class="bodytext3" valign="middle"  align="center"><?php //echo $sno = $sno+1; ?> </td>
-				  <td colspan="3" class="bodytext3" valign="middle"  align="left"><?php echo 'OPENING BALANCE AND BALANCE CARRIED OVER'; ?></td>
-                  <td class="bodytext3" valign="center"  align="right"><?php //echo number_format($totatlmoneyin,2,'.',',');?></td>
-				  <td class="bodytext3" valign="center"  align="right"><?php //echo number_format($totatlmoneyout,2,'.',',');?></td>
-				  <td class="bodytext3" valign="center"  align="right"><?php echo number_format($runningbalance,2,'.',',');?></td>
+                        <tr class="opening-balance-row">
+                            <td><?php echo $sno = $sno+1; ?></td>
+                            <td></td>
+                            <td></td>
+                            <td colspan="2"><strong>OPENING BALANCE AND BALANCE CARRIED OVER</strong></td>
+                            <td></td>
+                            <td></td>
+                            <td>
+                                <span class="balance-badge"><?php echo number_format($runningbalance,2,'.',','); ?></span>
+                            </td>
                 </tr>
 				  <?php
 				   $qrybankstatements = "SELECT postdate,chequedate,bankdate,remarks,docno,bankamount,notes,status FROM bank_record WHERE bankdate BETWEEN '$transactiondatefrom' AND  '$transactiondateto' AND bankcode = '$bankname' AND status IN ('Posted','Unpresented','Uncleared') ";
@@ -506,59 +609,80 @@ if(document.getElementById("bankname").value == "")
 							$colorcode = 'bgcolor="#ecf0f5"';
 							}		
 				  ?>
-				<tr  <?php echo $colorcode; ?>>
-                  <td class="bodytext3" valign="middle"  align="center"><?php echo $sno = $sno+1;;?> </td>
-				  <td class="bodytext3" valign="middle"  align="left"><?php echo $postingdate;?></td>
-                  <td class="bodytext3" valign="middle"  align="left"><?php echo $valuedate;?></td>
-                  <td class="bodytext3" valign="middle"  align="left"><?php echo $description.' ('.$status.')';?></td>
-				  <td class="bodytext3" valign="middle"  align="left"><?php echo $transrefno;?></td>
-                  <td class="bodytext3" valign="middle"  align="right"><?php echo number_format($moneyin,2,'.',',');?> </td>
-                  <td class="bodytext3" valign="middle"  align="right"><?php echo number_format($moneyout,2,'.',',');?></td>
-                  <td class="bodytext3" valign="center"  align="right"><?php echo number_format($runningbalance,2,'.',',');?></td>
+                        <tr>
+                            <td><?php echo $sno = $sno+1; ?></td>
+                            <td><?php echo htmlspecialchars($postingdate); ?></td>
+                            <td><?php echo htmlspecialchars($valuedate); ?></td>
+                            <td><?php echo htmlspecialchars($description.' ('.$status.')'); ?></td>
+                            <td>
+                                <span class="ref-number-badge"><?php echo htmlspecialchars($transrefno); ?></span>
+                            </td>
+                            <td>
+                                <?php if($moneyin > 0): ?>
+                                    <span class="money-in-badge"><?php echo number_format($moneyin,2,'.',','); ?></span>
+                                <?php else: ?>
+                                    <span class="amount-zero">-</span>
+                                <?php endif; ?>
+                            </td>
+                            <td>
+                                <?php if($moneyout > 0): ?>
+                                    <span class="money-out-badge"><?php echo number_format($moneyout,2,'.',','); ?></span>
+                                <?php else: ?>
+                                    <span class="amount-zero">-</span>
+                                <?php endif; ?>
+                            </td>
+                            <td>
+                                <span class="balance-badge"><?php echo number_format($runningbalance,2,'.',','); ?></span>
+                            </td>
                 </tr>
 		    <?php
 					}//CLOSE -- WHILE LOOP
 			     ?>
-                 <tr>
-                 	<td colspan="5" class="bodytext3" bgcolor="#999999" align="right" valign="middle"><strong>Total</strong></td>
-                    <td class="bodytext3" bgcolor="#999999" align="right" valign="middle"><strong><?php echo number_format($totatlmoneyin,2,'.',','); ?></strong></td>
-                    <td class="bodytext3" bgcolor="#999999" align="right" valign="middle"><strong><?php echo number_format($totatlmoneyout,2,'.',','); ?></strong></td>
-                    <td  class="bodytext3" bgcolor="#999999" align="right" valign="middle">&nbsp;</td>
-                    <!--<td class="bodytext3" bgcolor="#999999" align="right" valign="middle"><strong><?php //echo number_format($totatlrunningbal,2,'.',','); ?></strong></td>
--->                 <td align="left" valign="center" bgcolor="#ecf0f5" class="bodytext3"><div align="left"><a target="_blank" href="print_banktransactionstmnt.php?cbfrmflag1=cbfrmflag1&&ADate1=<?php echo $transactiondatefrom; ?>&&ADate2=<?php echo $transactiondateto; ?>&&bankname=<?php echo $bankname; ?>"><img src="images/pdfdownload.jpg" width="30" height="30"></a></div></td>
-                    <td align="right" valign="center" bgcolor="#ecf0f5" class="bodytext3"><div align="left"><a target="_blank" href="print_banktransactionstmnt_xls.php?cbfrmflag1=cbfrmflag1&&ADate1=<?php echo $transactiondatefrom; ?>&&ADate2=<?php echo $transactiondateto; ?>&&bankname=<?php echo $bankname; ?>"><img src="images/excel-xls-icon.png" width="30" height="30"></a></div></td>
+                    </tbody>
+                    <tfoot>
+                        <tr class="total-row">
+                            <td colspan="5" class="total-label"><strong>Total</strong></td>
+                            <td class="total-amount"><strong><?php echo number_format($totatlmoneyin,2,'.',','); ?></strong></td>
+                            <td class="total-amount"><strong><?php echo number_format($totatlmoneyout,2,'.',','); ?></strong></td>
+                            <td></td>
                  </tr>
-                 <tr>
-                 	<td colspan="5" class="bodytext3" bgcolor="#999999" align="right" valign="middle"><strong>Total Unpresented</strong></td>
-                    <td class="bodytext3" bgcolor="#999999" align="right" valign="middle"><strong><?php echo number_format(0,2,'.',','); ?></strong></td>
-                    <td class="bodytext3" bgcolor="#999999" align="right" valign="middle"><strong><?php echo number_format($totalunpre,2,'.',','); ?></strong></td>
-                    <td  class="bodytext3" bgcolor="#999999" align="right" valign="middle">&nbsp;</td>
+                        <tr class="total-row">
+                            <td colspan="5" class="total-label"><strong>Total Unpresented</strong></td>
+                            <td class="total-amount"><strong><?php echo number_format(0,2,'.',','); ?></strong></td>
+                            <td class="total-amount"><strong><?php echo number_format($totalunpre,2,'.',','); ?></strong></td>
+                            <td></td>
                  </tr>
-                 <tr>
-                 	<td colspan="5" class="bodytext3" bgcolor="#999999" align="right" valign="middle"><strong>Total Uncleared</strong></td>
-                    <td class="bodytext3" bgcolor="#999999" align="right" valign="middle"><strong><?php echo number_format($totalunclr,2,'.',','); ?></strong></td>
-                    <td class="bodytext3" bgcolor="#999999" align="right" valign="middle"><strong><?php echo number_format(0,2,'.',','); ?></strong></td>
-                    <td  class="bodytext3" bgcolor="#999999" align="right" valign="middle">&nbsp;</td>
+                        <tr class="total-row">
+                            <td colspan="5" class="total-label"><strong>Total Uncleared</strong></td>
+                            <td class="total-amount"><strong><?php echo number_format($totalunclr,2,'.',','); ?></strong></td>
+                            <td class="total-amount"><strong><?php echo number_format(0,2,'.',','); ?></strong></td>
+                            <td></td>
                  </tr>
-             
-				<tr>
-                 	<td colspan="6" class="bodytext3" bgcolor="#999999" align="right" valign="middle"><strong>Total Bank Balance :</strong></td>
-                    <td class="bodytext3" bgcolor="#999999" align="right" valign="middle"><strong><?php echo number_format($runningbalance,2,'.',','); ?></strong></td>
-                    <td  class="bodytext3" bgcolor="#999999" align="right" valign="middle">&nbsp;</td>
+                        <tr class="total-row final-balance">
+                            <td colspan="6" class="total-label"><strong>Total Bank Balance:</strong></td>
+                            <td class="total-amount final-balance-amount"><strong><?php echo number_format($runningbalance,2,'.',','); ?></strong></td>
+                            <td></td>
                 </tr>
-				 <?php   		
-				} //CLOSE -- IF(frmflag1)
-				?>	
+                    </tfoot>
 	      </table>
-          </td>
-            </tr>  
-        </table></td>
-      </tr>
-      <tr>
-        <td>&nbsp;</td>
-      </tr>
-    </table>
-</table>
-<?php include ("includes/footer1.php"); ?>
+                
+                <div class="export-actions">
+                    <a href="print_banktransactionstmnt.php?cbfrmflag1=cbfrmflag1&&ADate1=<?php echo $transactiondatefrom; ?>&&ADate2=<?php echo $transactiondateto; ?>&&bankname=<?php echo $bankname; ?>" 
+                       target="_blank" class="btn btn-primary">
+                        <i class="fas fa-file-pdf"></i> Export to PDF
+                    </a>
+                    <a href="print_banktransactionstmnt_xls.php?cbfrmflag1=cbfrmflag1&&ADate1=<?php echo $transactiondatefrom; ?>&&ADate2=<?php echo $transactiondateto; ?>&&bankname=<?php echo $bankname; ?>" 
+                       target="_blank" class="btn btn-primary">
+                        <i class="fas fa-file-excel"></i> Export to Excel
+                    </a>
+                </div>
+            </div>
+            <?php } // Close if ($frmflag1 == 'frmflag1') ?>
+            <?php endif; ?>
+        </main>
+    </div>
+
+    <!-- Modern JavaScript -->
+    <script src="js/banktransactionstatement-modern.js?v=<?php echo time(); ?>"></script>
 </body>
 </html>

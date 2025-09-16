@@ -141,29 +141,29 @@ window.open("print_deliverysubpdf2.php?printno=<?php echo $printno; ?>");
 <?php
 }
 ?>
-<style type="text/css">
-th {
-            background-color: #ffffff;
-            position: sticky;
-            top: 0;
-            z-index: 1;
-        }
-
-<!--
-body {
-	margin-left: 0px;
-	margin-top: 0px;
-	background-color: #ecf0f5;
-}
-.bodytext3 {	FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3B3B3C; FONT-FAMILY: Tahoma
-}
--->
-</style>
-<link href="css/datepickerstyle.css" rel="stylesheet" type="text/css" />
-<script type="text/javascript" src="js/adddate.js"></script>
-<script type="text/javascript" src="js/adddate2.js"></script>
-<script type="text/javascript" src="js/autocomplete_subtype.js"></script>
-<script type="text/javascript" src="js/autosuggestsubtype.js"></script>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Delivery Report Subtype - MedStar Hospital</title>
+    
+    <!-- Modern CSS -->
+    <link rel="stylesheet" href="css/deliveryreportsubtype-modern.css?v=<?php echo time(); ?>">
+    
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- Existing CSS and JS -->
+    <link href="css/datepickerstyle.css" rel="stylesheet" type="text/css" />
+    <script type="text/javascript" src="js/adddate.js"></script>
+    <script type="text/javascript" src="js/adddate2.js"></script>
+    <script type="text/javascript" src="js/autocomplete_subtype.js"></script>
+    <script type="text/javascript" src="js/autosuggestsubtype.js"></script>
+</head>
 
 <script type="text/javascript">
 
@@ -429,223 +429,250 @@ function FuncPopup()
 <script src="js/datetimepicker_css.js"></script>
 
 <body>
-	<div align="center" class="imgloader" id="imgloader" style="display:none;">
-		<div align="center" class="imgloader" id="imgloader1" style="display:;">
-			<p style="text-align:center;"><strong>Upload in Progress <br><br> Please be patience...</strong></p>
-			<img src="images/ajaxloader.gif">
-		</div>
-	</div>
-<table width="101%" border="0" cellspacing="0" cellpadding="2">
-  <tr>
-    <td colspan="10" bgcolor="#ecf0f5"><?php include ("includes/alertmessages1.php"); ?></td>
-  </tr>
-  <tr>
-    <td colspan="10" bgcolor="#ecf0f5"><?php include ("includes/title1.php"); ?></td>
-  </tr>
-  <tr>
-    <td colspan="10" bgcolor="#ecf0f5"><?php include ("includes/menu1.php"); ?></td>
-  </tr>
-  <tr>
-    <td colspan="10">&nbsp;</td>
-  </tr>
-  <tr>
-    <td width="1%">&nbsp;</td>
-    <td width="2%" valign="top"><?php //include ("includes/menu4.php"); ?>
-      &nbsp;</td>
-    <td width="97%" valign="top"><table width="116%" border="0" cellspacing="0" cellpadding="0">
-      <tr>
-        <td width="860">
+    <!-- Loading Overlay -->
+    <div align="center" class="imgloader" id="imgloader" style="display:none;">
+        <div align="center" class="imgloader" id="imgloader1" style="display:;">
+            <p style="text-align:center;"><strong>Upload in Progress <br><br> Please be patience...</strong></p>
+            <img src="images/ajaxloader.gif">
+        </div>
+    </div>
+
+    <!-- Hospital Header -->
+    <div class="hospital-header">
+        <h1 class="hospital-title">MedStar Hospital</h1>
+        <p class="hospital-subtitle">Delivery Report Subtype Management</p>
+    </div>
+
+    <!-- User Info Bar -->
+    <div class="user-info-bar">
+        <div class="user-welcome">
+            <span class="welcome-text">Welcome, <?php echo $username; ?></span>
+            <span class="location-info">Location: <?php echo $companyname; ?></span>
+        </div>
+        <div class="user-actions">
+            <a href="logout.php" class="btn btn-outline btn-sm">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </a>
+        </div>
+    </div>
+
+    <!-- Navigation Breadcrumb -->
+    <div class="nav-breadcrumb">
+        <a href="dashboard.php">Dashboard</a>
+        <span>/</span>
+        <a href="reports.php">Reports</a>
+        <span>/</span>
+        <span>Delivery Report Subtype</span>
+    </div>
+
+    <!-- Floating Menu Toggle -->
+    <button class="floating-menu-toggle" id="menuToggle">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <!-- Alert Container -->
+    <div id="alertContainer"></div>
+    <!-- Main Container with Sidebar -->
+    <div class="main-container-with-sidebar">
+        <!-- Left Sidebar -->
+        <div class="left-sidebar" id="leftSidebar">
+            <div class="sidebar-header">
+                <h3>Navigation</h3>
+                <button class="sidebar-toggle" id="sidebarToggle">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+            </div>
+            <nav class="sidebar-nav">
+                <ul class="nav-list">
+                    <li class="nav-item">
+                        <a href="dashboard.php" class="nav-link">
+                            <i class="fas fa-tachometer-alt"></i>
+                            Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="reports.php" class="nav-link">
+                            <i class="fas fa-chart-bar"></i>
+                            Reports
+                        </a>
+                    </li>
+                    <li class="nav-item active">
+                        <a href="deliveryreportsubtype.php" class="nav-link">
+                            <i class="fas fa-file-medical"></i>
+                            Delivery Report Subtype
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="patientlist.php" class="nav-link">
+                            <i class="fas fa-users"></i>
+                            Patients
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="billing.php" class="nav-link">
+                            <i class="fas fa-receipt"></i>
+                            Billing
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+
+        <!-- Main Content -->
+        <main class="main-content">
 		
 		
-              <form name="cbform1" method="post" action="deliveryreportsubtype.php">
-		<table width="800" border="0" align="left" cellpadding="4" cellspacing="0" bordercolor="#666666" id="AutoNumber3" style="border-collapse: collapse">
-          <tbody>
-            <tr bgcolor="#011E6A">
-              <td colspan="2" bgcolor="#ecf0f5" class="bodytext3"><strong>Delivery Report Subtype</strong></td>
-              <td colspan="2" align="right" bgcolor="#ecf0f5" class="bodytext3" id="ajaxlocation"><strong> Location </strong>
-             
-            
-                  <?php
-						
-						if ($location!='')
-						{
-						$query12 = "select locationname from master_location where locationcode='$location' order by locationname";
-						$exec12 = mysqli_query($GLOBALS["___mysqli_ston"], $query12) or die ("Error in Query12".mysqli_error($GLOBALS["___mysqli_ston"]));
-						$res12 = mysqli_fetch_array($exec12);
-						
-						$res1location = $res12["locationname"];
-						//echo $location;
-						}
-						else
-						{
-						$query1 = "select locationname from login_locationdetails where username='$username' and docno='$docno' group by locationname order by locationname";
-						$exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
-						$res1 = mysqli_fetch_array($exec1);
-						
-						echo $res1location = $res1["locationname"];
-						//$res1locationanum = $res1["locationcode"];
-						}
-						?>
-						
-						
-                  
-                  </td> 
-              </tr>
-            <!--<tr>
-              <td colspan="4" align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">
-			  <input name="printreceipt1" type="reset" id="printreceipt1" onClick="return funcPrintReceipt1()" style="border: 1px solid #001E6A" value="Print Receipt - Previous Payment Entry" /> 
-                *To Print Other Receipts Please Go To Menu:	Reports	-&gt; Payments Given 
-				</td>
-              </tr>-->
-            <tr>
-              <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">Search Subtype </td>
-              <td width="82%" colspan="3" align="left" valign="top"  bgcolor="#FFFFFF"><span class="bodytext3">
-              <input name="searchsuppliername1" type="text" id="searchsuppliername1" value="<?php echo $searchsuppliername; ?>" size="50" autocomplete="off">
-			  <input name="searchsuppliername1hiddentextbox" id="searchsuppliername1hiddentextbox" type="hidden" value="">
-			  <input name="searchsubtypeanum1" id="searchsubtypeanum1" value="<?php echo $searchsubtypeanum1; ?>" type="hidden">
-              </span></td>
-           </tr>
-		   <tr>
-		              <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">Search Account </td>
-		              <td width="82%" colspan="3" align="left" valign="top"  bgcolor="#FFFFFF"><span class="bodytext3">
-		              <input name="searchaccount" type="text" id="searchaccount" value="<?php echo $searchaccount; ?>" onkeyup="return funcservice();" size="50" >
-					  <input type="hidden" name="searchaccountcode" onBlur="return suppliercodesearch1()" id="searchaccountcode" style="text-transform:uppercase" value="<?php echo $searchaccountcode; ?>" size="20" />
-		              </span></td>
-           	</tr>
-			  <tr>
-                      <td class="bodytext31" valign="center"  align="left" 
-                bgcolor="#FFFFFF"> Date From </td>
-                      <td width="30%" align="left" valign="center"  bgcolor="#FFFFFF" class="bodytext31"><input name="ADate1" id="ADate1" value="<?php echo $ADate1; ?>"  size="10"  readonly="readonly" onKeyDown="return disableEnterKey()" />
-                          <img src="images2/cal.gif" onClick="javascript:NewCssCal('ADate1')" style="cursor:pointer"/> </td>
-                      <td width="16%" align="left" valign="center"  bgcolor="#FFFFFF" class="bodytext31"> Date To </td>
-                      <td width="33%" align="left" valign="center"  bgcolor="#FFFFFF"><span class="bodytext31">
-                        <input name="ADate2" id="ADate2" value="<?php echo $ADate2; ?>"  size="10"  readonly="readonly" onKeyDown="return disableEnterKey()" />
-                        <img src="images2/cal.gif" onClick="javascript:NewCssCal('ADate2')" style="cursor:pointer"/> </span></td>
-                    </tr>
-					<tr>
-  			  <td width="10%" align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">Location</td>
-              <td width="30%" align="left" valign="top"  bgcolor="#FFFFFF"><span class="bodytext3">
-			 
-				 <select name="location" id="location" onChange="ajaxlocationfunction(this.value);">
-                    <?php
-						
-						$query1 = "select * from login_locationdetails where username='$username' and docno='$docno' order by locationname";
-						$exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
-						$loccode=array();
-						while ($res1 = mysqli_fetch_array($exec1))
-						{
-						$locationname = $res1["locationname"];
-						$locationcode = $res1["locationcode"];
-						
-						?>
-						 <option value="<?php echo $locationcode; ?>" <?php if($location!='')if($location==$locationcode){echo "selected";}?>><?php echo $locationname; ?></option>
-						<?php
-						} 
-						?>
-                      </select>
-                      
-					 
-              </span></td>
-			   <td width="10%" align="left" colspan="2" valign="middle"  bgcolor="#FFFFFF" class="bodytext3"></td>
-			  </tr>
-					
-            <tr>
-              <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3"><input type="hidden" name="searchsuppliercode" onBlur="return suppliercodesearch1()" onKeyDown="return suppliercodesearch2()" id="searchsuppliercode" style="text-transform:uppercase" value="<?php echo $searchsuppliercode; ?>" size="20" /></td>
-              <td colspan="3" align="left" valign="top"  bgcolor="#FFFFFF">
-			  <input type="hidden" name="cbfrmflag1" value="cbfrmflag1">
-                  <input  type="submit" onClick="return funcAccount1()" value="Search" name="Submit" />
-                  <input name="resetbutton" type="reset" id="resetbutton" value="Reset" /></td>
-            </tr>
-          </tbody>
-        </table>
-		</form>		</td>
+            <!-- Page Header -->
+            <div class="page-header">
+                <div class="page-header-content">
+                    <h2>Delivery Report Subtype</h2>
+                    <p>Search and manage delivery reports by subtype</p>
+                </div>
+                <div class="page-header-actions">
+                    <button type="button" class="btn btn-outline" onclick="refreshPage()">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                    <button type="button" class="btn btn-outline" onclick="exportToExcel()">
+                        <i class="fas fa-download"></i> Export
+                    </button>
+                </div>
+            </div>
+
+            <!-- Search Form Container -->
+            <div class="search-form-container">
+                <form name="cbform1" method="post" action="deliveryreportsubtype.php" class="search-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="searchsuppliername1" class="form-label">Search Subtype</label>
+                            <input name="searchsuppliername1" type="text" id="searchsuppliername1" 
+                                   value="<?php echo $searchsuppliername; ?>" 
+                                   class="form-control" autocomplete="off" placeholder="Enter subtype name">
+                            <input name="searchsuppliername1hiddentextbox" id="searchsuppliername1hiddentextbox" type="hidden" value="">
+                            <input name="searchsubtypeanum1" id="searchsubtypeanum1" value="<?php echo $searchsubtypeanum1; ?>" type="hidden">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="searchaccount" class="form-label">Search Account</label>
+                            <input name="searchaccount" type="text" id="searchaccount" 
+                                   value="<?php echo $searchaccount; ?>" 
+                                   onkeyup="return funcservice();" 
+                                   class="form-control" placeholder="Enter account name">
+                            <input type="hidden" name="searchaccountcode" onBlur="return suppliercodesearch1()" 
+                                   id="searchaccountcode" style="text-transform:uppercase" 
+                                   value="<?php echo $searchaccountcode; ?>" />
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="ADate1" class="form-label">Date From</label>
+                            <input name="ADate1" id="ADate1" value="<?php echo $ADate1; ?>" 
+                                   class="form-control" readonly="readonly" 
+                                   onKeyDown="return disableEnterKey()" />
+                            <img src="images2/cal.gif" onClick="javascript:NewCssCal('ADate1')" 
+                                 style="cursor:pointer; position: absolute; right: 10px; top: 50%; transform: translateY(-50%);"/>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="ADate2" class="form-label">Date To</label>
+                            <input name="ADate2" id="ADate2" value="<?php echo $ADate2; ?>" 
+                                   class="form-control" readonly="readonly" 
+                                   onKeyDown="return disableEnterKey()" />
+                            <img src="images2/cal.gif" onClick="javascript:NewCssCal('ADate2')" 
+                                 style="cursor:pointer; position: absolute; right: 10px; top: 50%; transform: translateY(-50%);"/>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="location" class="form-label">Location</label>
+                            <select name="location" id="location" onChange="ajaxlocationfunction(this.value);" class="form-control">
+                                <?php
+                                $query1 = "select * from login_locationdetails where username='$username' and docno='$docno' order by locationname";
+                                $exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
+                                $loccode=array();
+                                while ($res1 = mysqli_fetch_array($exec1))
+                                {
+                                    $locationname = $res1["locationname"];
+                                    $locationcode = $res1["locationcode"];
+                                ?>
+                                    <option value="<?php echo $locationcode; ?>" <?php if($location!='')if($location==$locationcode){echo "selected";}?>><?php echo $locationname; ?></option>
+                                <?php
+                                } 
+                                ?>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Current Location</label>
+                            <div class="form-control" style="background: var(--background-accent);" id="ajaxlocation">
+                                <strong>
+                                <?php
+                                if ($location!='')
+                                {
+                                    $query12 = "select locationname from master_location where locationcode='$location' order by locationname";
+                                    $exec12 = mysqli_query($GLOBALS["___mysqli_ston"], $query12) or die ("Error in Query12".mysqli_error($GLOBALS["___mysqli_ston"]));
+                                    $res12 = mysqli_fetch_array($exec12);
+                                    $res1location = $res12["locationname"];
+                                }
+                                else
+                                {
+                                    $query1 = "select locationname from login_locationdetails where username='$username' and docno='$docno' group by locationname order by locationname";
+                                    $exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
+                                    $res1 = mysqli_fetch_array($exec1);
+                                    echo $res1location = $res1["locationname"];
+                                }
+                                ?>
+                                </strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <input type="hidden" name="searchsuppliercode" onBlur="return suppliercodesearch1()" 
+                               onKeyDown="return suppliercodesearch2()" id="searchsuppliercode" 
+                               style="text-transform:uppercase" value="<?php echo $searchsuppliercode; ?>" />
+                        <input type="hidden" name="cbfrmflag1" value="cbfrmflag1">
+                        
+                        <button type="submit" onClick="return funcAccount1()" class="btn btn-primary">
+                            <i class="fas fa-search"></i> Search
+                        </button>
+                        <button name="resetbutton" type="reset" id="resetbutton" class="btn btn-secondary">
+                            <i class="fas fa-undo"></i> Reset
+                        </button>
+                        <button type="button" class="btn btn-outline" onclick="clearForm()">
+                            <i class="fas fa-times"></i> Clear
+                        </button>
+                    </div>
+                </form>
+            </div>		</td>
       </tr>
       <tr>
         <td>&nbsp;</td>
       </tr>
        <tr>
         <td>
-		<form method="post" name="form4" action="deliveryreportsubtype.php">
-        <input type="hidden" name="locationnameget" value="<?php echo $locationname;?>" >
-                      <input type="hidden" name="locationcodeget" value="<?php echo $locationcode;?>" >
-		<table id="AutoNumber3" style="BORDER-COLLAPSE: collapse" 
-            bordercolor="#666666" cellspacing="0" cellpadding="4" width="1000" 
-            align="left" border="0">
-          <tbody>
-            <tr>
-              <td colspan="5" bgcolor="#ecf0f5" class="bodytext31"><strong><?php echo $searchsuppliername; ?></strong></td>
-              <td colspan="4" bgcolor="#ecf0f5" class="bodytext31"><span class="bodytext311">
-              <?php
-				if (isset($_REQUEST["cbfrmflag1"])) { $cbfrmflag1 = $_REQUEST["cbfrmflag1"]; } else { $cbfrmflag1 = ""; }
-				//$cbfrmflag1 = $_REQUEST['cbfrmflag1'];
-				if ($cbfrmflag1 == 'cbfrmflag1')
-				{
-					if (isset($_REQUEST["cbcustomername"])) { $cbcustomername = $_REQUEST["cbcustomername"]; } else { $cbcustomername = ""; }
-					//$cbbillnumber = $_REQUEST['cbbillnumber'];
-					if (isset($_REQUEST["customername"])) { $customername = $_REQUEST["customername"]; } else { $customername = ""; }
-					//$cbbillstatus = $_REQUEST['cbbillstatus'];
-					
-					if (isset($_REQUEST["cbbillnumber"])) { $cbbillnumber = $_REQUEST["cbbillnumber"]; } else { $cbbillnumber = ""; }
-					//$cbbillnumber = $_REQUEST['cbbillnumber'];
-					if (isset($_REQUEST["cbbillstatus"])) { $cbbillstatus = $_REQUEST["cbbillstatus"]; } else { $cbbillstatus = ""; }
-					//$cbbillstatus = $_REQUEST['cbbillstatus'];
-					
-					//$transactiondatefrom = $_REQUEST['ADate1'];
-					//$transactiondateto = $_REQUEST['ADate2'];
-					
-					//$paymenttype = $_REQUEST['paymenttype'];
-					//$billstatus = $_REQUEST['billstatus'];
-					
-					$urlpath = "ADate1=$transactiondatefrom&&ADate2=$transactiondateto&&username=$username&&companyanum=$companyanum";//&&companyname=$companyname";
-				}
-				else
-				{
-					$urlpath = "ADate1=$transactiondatefrom&&ADate2=$transactiondateto&&username=$username&&companyanum=$companyanum";//&&companyname=$companyname";
-				}
-				?>
- 				<?php
-				//For excel file creation.
-				
-				/*$applocation1 = $applocation1; //Value from db_connect.php file giving application path.
-				$filename1 = "print_paymentgivenreport1.php?$urlpath";
-				$fileurl = $applocation1."/".$filename1;
-				$filecontent1 = @file_get_contents($fileurl);
-				
-				$indiatimecheck = date('d-M-Y-H-i-s');
-				$foldername = "dbexcelfiles";
-				$fp = fopen($foldername.'/PaymentGivenToSupplier.xls', 'w+');
-				fwrite($fp, $filecontent1);
-				fclose($fp);*/
-
-				?>
-              <script language="javascript">
-				function printbillreport1()
-				{
-					window.open("print_paymentgivenreport1.php?<?php echo $urlpath; ?>","Window1",'width=900,height=950,toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=1,resizable=1,left=25,top=25');
-					//window.open("message_popup.php?anum="+anum,"Window1",'toolbar=0,scrollbars=0,location=0,statusbar=0,menubar=0,resizable=1,width=200,height=400,left=312,top=84');
-				}
-				function printbillreport2()
-				{
-					window.location = "dbexcelfiles/PaymentGivenToSupplier.xls"
-				}
-				</script>
-              <!--<input  value="Print Report" onClick="javascript:printbillreport1()" name="resetbutton2" type="submit" id="resetbutton2"  style="border: 1px solid #001E6A" />
-&nbsp;				<input  value="Export Excel" onClick="javascript:printbillreport2()" name="resetbutton22" type="button" id="resetbutton22"  style="border: 1px solid #001E6A" />-->
-</span></td>
-            </tr>
-			<tr>
-			<th class="bodytext31" valign="center"  align="left" bgcolor="#ffffff"><strong>Select</strong></th>
-			<th class="bodytext31" valign="center"  align="left" bgcolor="#ffffff"><strong>No.</strong></th>
-			<th width="12%" align="left" valign="center"  bgcolor="#ffffff" class="bodytext31"><div align="left"><strong>Reg No</strong></div></th>
-			<th width="17%" align="left" valign="center"  bgcolor="#ffffff" class="bodytext31"><strong> Patient </strong></th>
-			<th width="12%" align="left" valign="center"  bgcolor="#ffffff" class="bodytext31"><strong> Bill No </strong></th>
-			<th width="12%" align="left" valign="center"  bgcolor="#ffffff" class="bodytext31"><strong> Account </strong></th>
-			<th width="12%" align="left" valign="center"  bgcolor="#ffffff" class="bodytext31"><strong> Scheme</strong></th>
-			<th width="13%" align="left" valign="center"  bgcolor="#ffffff" class="bodytext31"><div align="left"><strong>Bill Date </strong></div></th>
-			<th width="13%" align="left" valign="center" bgcolor="#ffffff" class="bodytext31"> <div align="right"><strong>Amount</strong></div></th>
-			<th width="2%" align="left" valign="center"  bgcolor="#ecf0f5" class="bodytext31">&nbsp;</th>
-			<th width="24%" align="left" valign="center"  bgcolor="#ecf0f5" class="bodytext31">&nbsp;</th>
-			</tr>
+            <!-- Data Table Container -->
+            <div class="data-table-container">
+                <form method="post" name="form4" action="deliveryreportsubtype.php">
+                    <input type="hidden" name="locationnameget" value="<?php echo $locationname;?>" >
+                    <input type="hidden" name="locationcodeget" value="<?php echo $locationcode;?>" >
+                    
+                    <table class="modern-table">
+                        <thead>
+                            <tr>
+                                <th>Select</th>
+                                <th>No.</th>
+                                <th>Reg No</th>
+                                <th>Patient</th>
+                                <th>Bill No</th>
+                                <th>Account</th>
+                                <th>Scheme</th>
+                                <th>Bill Date</th>
+                                <th>Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody>
 			<?php 
 			if (isset($_REQUEST["cbfrmflag1"])) { $cbfrmflag1 = $_REQUEST["cbfrmflag1"]; } else { $cbfrmflag1 = ""; }
 		    if ($cbfrmflag1 == 'cbfrmflag1')
@@ -1170,28 +1197,22 @@ function FuncPopup()
               <?php } ?>
 			</tr>
 			<tr>
-              <td colspan="9" class="bodytext31" valign="center"  align="left">
-			  
-			  <!--<input type="hidden" name="printno" id="printno" value="<?php echo $printnumber; ?>">-->
-			  <input type="hidden" name="frmflag2" id="frmflag2" value="frmflag2">
-			  <input type="submit" name="Submit1" value="Submit" style="border:solid 1px #001E6A;" onClick="return validcheck()">
-			  </td>
-			</tr>
-			<?php
-			}
-			
-			?>
-          </tbody>
-        </table>
-		</form>
-		</td>
-      </tr>
-	  
-    </table>
-	</td>
-	</tr>
-</table>
-<?php include ("includes/footer1.php"); ?>
+                                <td colspan="9" style="text-align: center; padding: 1.5rem;">
+                                    <input type="hidden" name="frmflag2" id="frmflag2" value="frmflag2">
+                                    <button type="submit" name="Submit1" class="btn btn-primary" onClick="return validcheck()">
+                                        <i class="fas fa-paper-plane"></i> Submit Selected Records
+                                    </button>
+                                </td>
+                            </tr>
+                            <?php
+                            }
+                            ?>
+                        </tbody>
+                    </table>
+                </form>
+            </div>
+        </main>
+    </div>
     <!-- Modern JavaScript -->
     <script src="js/deliveryreportsubtype-modern.js?v=<?php echo time(); ?>"></script>
 </body>

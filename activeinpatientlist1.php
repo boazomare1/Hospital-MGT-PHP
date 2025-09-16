@@ -2,18 +2,24 @@
 session_start();
 include ("includes/loginverify.php");
 include ("db/db_connect.php");
-//echo $menu_id;
 include ("includes/check_user_access.php");
-$ipaddress = $_SERVER['REMOTE_ADDR'];
-$updatedatetime = date('Y-m-d');
-$username = $_SESSION['username'];
+
+$username = $_SESSION["username"];
 $docno = $_SESSION['docno'];
-$companyanum = $_SESSION['companyanum'];
-$companyname = $_SESSION['companyname'];
+$companyanum = $_SESSION["companyanum"];
+$companyname = $_SESSION["companyname"];
+
+$ipaddress = $_SERVER["REMOTE_ADDR"];
+$updatedatetime = date('Y-m-d H:i:s');
+$errmsg = "";
+$bgcolorcode = "";
+$colorloopcount = "";
+
+// Date ranges
 $transactiondatefrom = date('Y-m-d', strtotime('-1 month'));
 $transactiondateto = date('Y-m-d');
- 
-$errmsg = "";
+
+// Initialize variables
 $banum = "1";
 $supplieranum = "";
 $custid = "";
@@ -31,44 +37,39 @@ $res1employeename  = $res1["employeecode"];
 
 
 
-$location =isset( $_REQUEST['location'])?$_REQUEST['location']:'';
-if (isset($_REQUEST["searchpatient"])) { $searchpatient = $_REQUEST["searchpatient"]; } else { $searchpatient = ""; }
-if (isset($_REQUEST["searchpatientcode"])) { $searchpatientcode = $_REQUEST["searchpatientcode"]; } else { $searchpatientcode = ""; }
-if (isset($_REQUEST["searchvisitcode"])) { $searchvisitcode = $_REQUEST["searchvisitcode"]; } else { $searchvisitcode = ""; }
-if (isset($_REQUEST["ward"])) { $ward12 = $_REQUEST["ward"]; } else { $ward12 = ""; }
+// Handle form parameters
+$location = isset($_REQUEST['location']) ? $_REQUEST['location'] : '';
+$searchpatient = isset($_REQUEST["searchpatient"]) ? $_REQUEST["searchpatient"] : "";
+$searchpatientcode = isset($_REQUEST["searchpatientcode"]) ? $_REQUEST["searchpatientcode"] : "";
+$searchvisitcode = isset($_REQUEST["searchvisitcode"]) ? $_REQUEST["searchvisitcode"] : "";
+$ward12 = isset($_REQUEST["ward"]) ? $_REQUEST["ward"] : "";
+$getcanum = isset($_REQUEST["canum"]) ? $_REQUEST["canum"] : "";
+$cbfrmflag2 = isset($_REQUEST["cbfrmflag2"]) ? $_REQUEST["cbfrmflag2"] : "";
+$frmflag2 = isset($_REQUEST["frmflag2"]) ? $_REQUEST["frmflag2"] : "";
 
-if (isset($_REQUEST["canum"])) { $getcanum = $_REQUEST["canum"]; } else { $getcanum = ""; }
-//$getcanum = $_GET['canum'];
-if ($getcanum != '')
-{
-	$query4 = "select * from master_supplier where auto_number = '$getcanum' and locationcode='$locationcode'";
-	$exec4 = mysqli_query($GLOBALS["___mysqli_ston"], $query4) or die ("Error in Query4".mysqli_error($GLOBALS["___mysqli_ston"]));
-	$res4 = mysqli_fetch_array($exec4);
-	$cbsuppliername = $res4['suppliername'];
-	$suppliername = $res4['suppliername'];
+// Handle supplier selection
+if ($getcanum != '') {
+    $query4 = "select * from master_supplier where auto_number = '$getcanum' and locationcode='$locationcode'";
+    $exec4 = mysqli_query($GLOBALS["___mysqli_ston"], $query4) or die ("Error in Query4".mysqli_error($GLOBALS["___mysqli_ston"]));
+    $res4 = mysqli_fetch_array($exec4);
+    $cbsuppliername = $res4['suppliername'];
+    $suppliername = $res4['suppliername'];
 }
 
-
-
-if (isset($_REQUEST["cbfrmflag2"])) { $cbfrmflag2 = $_REQUEST["cbfrmflag2"]; } else { $cbfrmflag2 = ""; }
-//$cbfrmflag2 = $_REQUEST['cbfrmflag2'];
-if (isset($_REQUEST["frmflag2"])) { $frmflag2 = $_REQUEST["frmflag2"]; } else { $frmflag2 = ""; }
-//$frmflag2 = $_POST['frmflag2'];
-
-if ($frmflag2 == 'frmflag2')
-{
-
+// Handle form submission
+if ($frmflag2 == 'frmflag2') {
+    // Add form processing logic here if needed
 }
 
-if (isset($_REQUEST["st"])) { $st = $_REQUEST["st"]; } else { $st = ""; }
-//$st = $_REQUEST['st'];
-if ($st == '1')
-{
-	$errmsg = "Success. Payment Entry Update Completed.";
-}
-if ($st == '2')
-{
-	$errmsg = "Failed. Payment Entry Not Completed.";
+// Handle status messages
+$st = isset($_REQUEST["st"]) ? $_REQUEST["st"] : "";
+
+if ($st == '1') {
+    $errmsg = "Success. Payment Entry Update Completed.";
+    $bgcolorcode = 'success';
+} elseif ($st == '2') {
+    $errmsg = "Failed. Payment Entry Not Completed.";
+    $bgcolorcode = 'failed';
 }
 
 ?>
@@ -107,6 +108,51 @@ if ($st == '2')
     .bodytext3 {	FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3B3B3C; FONT-FAMILY: Tahoma
     }
     -->
+    
+    /* Modern inpatient list styling */
+    .package-badge {
+        background-color: #28a745;
+        color: white;
+        padding: 2px 6px;
+        border-radius: 12px;
+        font-size: 10px;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+    
+    .patient-name {
+        font-weight: 600;
+        color: #2c3e50;
+    }
+    
+    .patient-code {
+        font-family: 'Courier New', monospace;
+        font-weight: 600;
+        color: #007bff;
+    }
+    
+    .ward-header {
+        background-color: #e9ecef;
+        font-weight: 600;
+        color: #495057;
+    }
+    
+    .action-dropdown {
+        min-width: 150px;
+        font-size: 12px;
+    }
+    
+    .patient-row:hover {
+        background-color: #f8f9fa;
+    }
+    
+    .table-subheader {
+        background-color: #e9ecef;
+        font-weight: 600;
+    }
+    
+    .text-center { text-align: center; }
+    .text-right { text-align: right; }
     </style>
 <script language="javascript">
 
@@ -324,12 +370,87 @@ text-align:right;
         <span>Active Inpatient List</span>
     </nav>
 
-    <!-- Main Container -->
-    <div class="main-container">
-        <!-- Alert Container -->
-        <div id="alertContainer">
-            <?php include ("includes/alertmessages1.php"); ?>
-        </div>
+    <!-- Floating Menu Toggle -->
+    <div id="menuToggle" class="floating-menu-toggle">
+        <i class="fas fa-bars"></i>
+    </div>
+
+    <!-- Main Container with Sidebar -->
+    <div class="main-container-with-sidebar">
+        <!-- Left Sidebar -->
+        <aside id="leftSidebar" class="left-sidebar">
+            <div class="sidebar-header">
+                <h3>Quick Navigation</h3>
+                <button id="sidebarToggle" class="sidebar-toggle">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <ul class="nav-list">
+                    <li class="nav-item">
+                        <a href="mainmenu1.php" class="nav-link">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="patientregistration.php" class="nav-link">
+                            <i class="fas fa-user-plus"></i>
+                            <span>Patient Registration</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="ipvisitentry.php" class="nav-link">
+                            <i class="fas fa-hospital"></i>
+                            <span>IP Visit Entry</span>
+                        </a>
+                    </li>
+                    <li class="nav-item active">
+                        <a href="activeinpatientlist1.php" class="nav-link">
+                            <i class="fas fa-bed"></i>
+                            <span>Active Inpatient List</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="ipdischarge.php" class="nav-link">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span>IP Discharge</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="bedallocation.php" class="nav-link">
+                            <i class="fas fa-bed"></i>
+                            <span>Bed Allocation</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="wardmaster.php" class="nav-link">
+                            <i class="fas fa-building"></i>
+                            <span>Ward Master</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="inpatientactivity.php" class="nav-link">
+                            <i class="fas fa-chart-line"></i>
+                            <span>IP Activity Report</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Alert Container -->
+            <div id="alertContainer">
+                <?php if (!empty($errmsg)): ?>
+                    <div class="alert alert-<?php echo $bgcolorcode === 'success' ? 'success' : ($bgcolorcode === 'failed' ? 'error' : 'info'); ?>">
+                        <i class="fas fa-<?php echo $bgcolorcode === 'success' ? 'check-circle' : ($bgcolorcode === 'failed' ? 'exclamation-triangle' : 'info-circle'); ?> alert-icon"></i>
+                        <span><?php echo htmlspecialchars($errmsg); ?></span>
+                    </div>
+                <?php endif; ?>
+            </div>
 
         <!-- Page Header -->
         <div class="page-header">
@@ -354,89 +475,94 @@ text-align:right;
             </a>
         </div>
 
-        <!-- Search Form Section -->
-        <div class="form-section">
-            <h3><i class="fas fa-search"></i> Search Active Inpatients</h3>
-		
-            
-            <form name="cbform1" method="post" action="activeinpatientlist1.php">
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="searchpatient">Patient Name</label>
-                        <input name="searchpatient" type="text" id="searchpatient" value="" autocomplete="off" placeholder="Enter patient name">
+            <!-- Search Form Section -->
+            <div class="form-section">
+                <div class="form-section-header">
+                    <i class="fas fa-search form-section-icon"></i>
+                    <h3 class="form-section-title">Search Active Inpatients</h3>
+                </div>
+                
+                <form name="cbform1" method="post" action="activeinpatientlist1.php" class="form-section-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="searchpatient" class="form-label">Patient Name</label>
+                            <input name="searchpatient" type="text" id="searchpatient" value="" autocomplete="off" 
+                                   placeholder="Enter patient name" class="form-input">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="searchpatientcode" class="form-label">Patient Code</label>
+                            <input name="searchpatientcode" type="text" id="searchpatientcode" value="" autocomplete="off" 
+                                   placeholder="Enter patient code" class="form-input">
+                        </div>
                     </div>
                     
-                    <div class="form-group">
-                        <label for="searchpatientcode">Patient Code</label>
-                        <input name="searchpatientcode" type="text" id="searchpatientcode" value="" autocomplete="off" placeholder="Enter patient code">
-                    </div>
-                </div>
-                
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="searchvisitcode">Visit Code</label>
-                        <input name="searchvisitcode" type="text" id="searchvisitcode" value="" autocomplete="off" placeholder="Enter visit code">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="searchvisitcode" class="form-label">Visit Code</label>
+                            <input name="searchvisitcode" type="text" id="searchvisitcode" value="" autocomplete="off" 
+                                   placeholder="Enter visit code" class="form-input">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="location" class="form-label">Location</label>
+                            <select name="location" id="location" onChange="funcwardChange1(); ajaxlocationfunction(this.value);" class="form-input">
+                                <option value="">Select Location</option>
+                                <?php
+                                $query1 = "select * from login_locationdetails where username='$username' and docno='$docno' order by locationname";
+                                $exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
+                                $loccode=array();
+                                while ($res1 = mysqli_fetch_array($exec1))
+                                {
+                                    $locationname = $res1["locationname"];
+                                    $locationcode = $res1["locationcode"];
+                                    ?>
+                                    <option value="<?php echo $locationcode; ?>" <?php if($location!=''){if($location == $locationcode){echo "selected";}}?>><?php echo $locationname; ?></option>
+                                    <?php
+                                }
+                                ?>
+                            </select>
+                        </div>
                     </div>
                     
-                    <div class="form-group">
-                        <label for="location">Location</label>
-                        <select name="location" id="location" onChange="funcwardChange1(); ajaxlocationfunction(this.value);">
-                            <option value="">Select Location</option>
-                            <?php
-                            $query1 = "select * from login_locationdetails where username='$username' and docno='$docno' order by locationname";
-                            $exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
-                            $loccode=array();
-                            while ($res1 = mysqli_fetch_array($exec1))
-                            {
-                                $locationname = $res1["locationname"];
-                                $locationcode = $res1["locationcode"];
-                                ?>
-                                <option value="<?php echo $locationcode; ?>" <?php if($location!=''){if($location == $locationcode){echo "selected";}}?>><?php echo $locationname; ?></option>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="ward" class="form-label">Ward</label>
+                            <select name="ward" id="ward" class="form-input">
+                                <option value="">Select Ward</option>
                                 <?php
-                            }
-                            ?>
-                        </select>
-                    </div>
-                </div>
-                
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="ward">Ward</label>
-                        <select name="ward" id="ward">
-                            <option value="">Select Ward</option>
-                            <?php
-                            $query = "select * from login_locationdetails where username='$username' and docno='$docno' order by locationname"; 
-                            $exec = mysqli_query($GLOBALS["___mysqli_ston"], $query) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
-                            $res = mysqli_fetch_array($exec);
-                            
-                            $locationname  = $res["locationname"]; 
-                            $locationcode2 = $res["locationcode"];
-                            
-                            $query78 = "select B.auto_number,B.ward,A.wardcode from nurse_ward as A join master_ward as B on (B.auto_number=A.wardcode) where  A.locationcode='$locationcode2' and B.recordstatus=''  and A.employeecode='$res1employeename'  order by A.defaultward desc";
-                            $exec78 = mysqli_query($GLOBALS["___mysqli_ston"], $query78) or die(mysqli_error($GLOBALS["___mysqli_ston"]));
-                            while($res78 = mysqli_fetch_array($exec78))
-                            {
-                                $wardanum = $res78['auto_number'];
-                                $wardname = $res78['ward'];
+                                $query = "select * from login_locationdetails where username='$username' and docno='$docno' order by locationname"; 
+                                $exec = mysqli_query($GLOBALS["___mysqli_ston"], $query) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
+                                $res = mysqli_fetch_array($exec);
+                                
+                                $locationname  = $res["locationname"]; 
+                                $locationcode2 = $res["locationcode"];
+                                
+                                $query78 = "select B.auto_number,B.ward,A.wardcode from nurse_ward as A join master_ward as B on (B.auto_number=A.wardcode) where  A.locationcode='$locationcode2' and B.recordstatus=''  and A.employeecode='$res1employeename'  order by A.defaultward desc";
+                                $exec78 = mysqli_query($GLOBALS["___mysqli_ston"], $query78) or die(mysqli_error($GLOBALS["___mysqli_ston"]));
+                                while($res78 = mysqli_fetch_array($exec78))
+                                {
+                                    $wardanum = $res78['auto_number'];
+                                    $wardname = $res78['ward'];
+                                    ?>
+                                    <option value="<?php echo $wardanum; ?>"<?php if($wardanum == $ward12) { echo "selected"; }?>><?php echo $wardname; ?></option>
+                                    <?php
+                                }
                                 ?>
-                                <option value="<?php echo $wardanum; ?>"<?php if($wardanum == $ward12) { echo "selected"; }?>><?php echo $wardname; ?></option>
-                                <?php
-                            }
-                            ?>
-                        </select>
+                            </select>
+                        </div>
                     </div>
-                </div>
-                
-                <div class="form-actions">
-                    <input type="hidden" name="cbfrmflag1" value="cbfrmflag1">
-                    <button type="submit" class="btn btn-primary" name="Submit" onClick="return funcvalidcheck();">
-                        <i class="fas fa-search"></i> Search
-                    </button>
-                    <button type="reset" class="btn btn-secondary" id="resetbutton">
-                        <i class="fas fa-undo"></i> Reset
-                    </button>
-                </div>
-            </form>
+                    
+                    <div class="form-actions">
+                        <input type="hidden" name="cbfrmflag1" value="cbfrmflag1">
+                        <button type="submit" class="btn btn-primary" name="Submit" onClick="return funcvalidcheck();">
+                            <i class="fas fa-search"></i> Search
+                        </button>
+                        <button type="reset" class="btn btn-secondary" id="resetbutton">
+                            <i class="fas fa-undo"></i> Reset
+                        </button>
+                    </div>
+                </form>
             
             <!-- Current Location Display -->
             <div class="current-location">
@@ -462,15 +588,25 @@ text-align:right;
             </div>
         </div>		
 
-        <!-- Results Section -->
-        <div class="data-table-section">
-            <div class="table-header">
-                <h3><i class="fas fa-list"></i> Active Inpatient List</h3>
-                <div class="search-bar">
-                    <input type="text" placeholder="Search patients..." id="patientSearch">
-                    <i class="fas fa-search"></i>
+            <!-- Results Section -->
+            <div class="data-table-section">
+                <div class="data-table-header">
+                    <i class="fas fa-list data-table-icon"></i>
+                    <h3 class="data-table-title">Active Inpatient List</h3>
                 </div>
-            </div>
+                
+                <!-- Search Bar -->
+                <div style="margin-bottom: 1rem;">
+                    <div style="display: flex; gap: 1rem; align-items: center;">
+                        <input type="text" id="patientSearch" class="form-input" 
+                               placeholder="Search patients..." 
+                               style="flex: 1; max-width: 300px;"
+                               oninput="searchPatients(this.value)">
+                        <button type="button" class="btn btn-secondary" onclick="clearPatientSearch()">
+                            <i class="fas fa-times"></i> Clear
+                        </button>
+                    </div>
+                </div>
             
             <?php
             $colorloopcount=0;
@@ -525,9 +661,9 @@ text-align:right;
 			 $wardnum = $res34['auto_number'];
 			 $wardname5 = $res34['ward'];
 			?>
-                            <tr class="ward-header">
+                            <tr class="table-subheader ward-header">
                                 <td colspan="12">
-                                    <i class="fas fa-hospital"></i> <?php echo $wardname5; ?>
+                                    <i class="fas fa-hospital"></i> <strong><?php echo htmlspecialchars($wardname5); ?></strong>
                                 </td>
                             </tr>
 			<?php
@@ -683,27 +819,27 @@ text-align:right;
                             <tr class="table-row patient-row <?php echo ($showcolor == 0) ? 'table-row-even' : 'table-row-odd'; ?>" 
                                 data-patient-code="<?php echo $patientcode; ?>" 
                                 data-visit-code="<?php echo $visitcode; ?>">
-                                <td><?php echo $sno = $sno + 1;?></td>
-                                <td>
+                                <td class="text-center"><?php echo $sno = $sno + 1;?></td>
+                                <td class="text-center">
                                     <?php if($pkg_label): ?>
-                                        <span class="package-label"><?php echo $pkg_label; ?></span>
+                                        <span class="package-badge"><?php echo $pkg_label; ?></span>
                                     <?php endif; ?>
                                 </td>
                                 <td>
                                     <div class="patient-name"><?php echo htmlspecialchars($patientname); ?></div>
                                 </td>
-                                <td><?php echo $res10age; ?></td>
-                                <td><?php echo $res10gender; ?></td>
-                                <td>
-                                    <div class="patient-code"><?php echo $patientcode; ?></div>
+                                <td class="text-center"><?php echo htmlspecialchars($res10age); ?></td>
+                                <td class="text-center"><?php echo htmlspecialchars($res10gender); ?></td>
+                                <td class="text-center">
+                                    <div class="patient-code"><?php echo htmlspecialchars($patientcode); ?></div>
                                 </td>
-                                <td><?php echo $date; ?></td>
-                                <td><?php echo $visitcode; ?></td>
-                                <td><?php echo $wardname1; ?></td>
-                                <td><?php echo $bedname; ?></td>
+                                <td class="text-center"><?php echo htmlspecialchars($date); ?></td>
+                                <td class="text-center"><?php echo htmlspecialchars($visitcode); ?></td>
+                                <td class="text-center"><?php echo htmlspecialchars($wardname1); ?></td>
+                                <td class="text-center"><?php echo htmlspecialchars($bedname); ?></td>
                                 <td><?php echo htmlspecialchars($subtypename); ?></td>
-                                <td>
-                                    <select name="order" id="order" class="action-dropdown" onChange="this.options[this.selectedIndex].value && (window.location = this.options[this.selectedIndex].value);">
+                                <td class="text-center">
+                                    <select name="order" id="order" class="form-input action-dropdown" onChange="this.options[this.selectedIndex].value && (window.location = this.options[this.selectedIndex].value);">
                                         <option>Select Action</option>
                                         <option value="ipmedicinedirectissue.php?patientcode=<?php echo $patientcode; ?>&visitcode=<?php echo $visitcode;?>&searchlocation=<?php echo $searchlocation;?>&menuid=<?php echo $menu_id; ?>">Medicine Issue</option>
                                         <!--<option value="medicinereturnrequest.php?patientcode=<?php echo $patientcode; ?>&visitcode=<?php echo $visitcode;?>&searchlocation=<?php echo $searchlocation;?>">Medicine Return</option>-->
@@ -722,13 +858,82 @@ text-align:right;
 		   ?>
                     </tbody>
                 </table>
-            <?php
-            }
-            ?>
-        </div>
+                <?php
+                }
+                ?>
+            </div>
+        </main>
     </div>
     
     <!-- Modern JavaScript -->
+    <script>
+        // Modern JavaScript functions
+        function refreshPage() {
+            window.location.reload();
+        }
+
+        function exportToExcel() {
+            // Add export functionality here
+            alert('Export functionality will be implemented');
+        }
+
+        function printReport() {
+            window.print();
+        }
+
+        function resetForm() {
+            document.getElementById("cbform1").reset();
+        }
+
+        function searchPatients(searchTerm) {
+            const table = document.querySelector('.data-table tbody');
+            if (table) {
+                const rows = table.querySelectorAll('tr');
+                
+                rows.forEach(row => {
+                    const text = row.textContent.toLowerCase();
+                    if (text.includes(searchTerm.toLowerCase())) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+            }
+        }
+
+        function clearPatientSearch() {
+            document.getElementById('patientSearch').value = '';
+            searchPatients('');
+        }
+
+        // Enhanced ward change function
+        function funcwardChange1() {
+            // This function is already defined in the PHP section
+            // The functionality remains the same but with modern styling
+        }
+
+        // Sidebar functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const menuToggle = document.getElementById('menuToggle');
+            const sidebar = document.getElementById('leftSidebar');
+            const sidebarToggle = document.getElementById('sidebarToggle');
+
+            menuToggle.addEventListener('click', function() {
+                sidebar.classList.toggle('active');
+            });
+
+            sidebarToggle.addEventListener('click', function() {
+                sidebar.classList.toggle('active');
+            });
+
+            // Close sidebar when clicking outside
+            document.addEventListener('click', function(event) {
+                if (!sidebar.contains(event.target) && !menuToggle.contains(event.target)) {
+                    sidebar.classList.remove('active');
+                }
+            });
+        });
+    </script>
     <script src="js/activeinpatientlist1-modern.js?v=<?php echo time(); ?>"></script>
 </body>
 </html>

@@ -3,98 +3,94 @@ session_start();
 include ("includes/loginverify.php");
 include ("db/db_connect.php");
 
-$ipaddress = $_SERVER['REMOTE_ADDR'];
-$updatedatetime = date('Y-m-d');
-$username = $_SESSION['username'];
+$username = $_SESSION["username"];
+$companyanum = $_SESSION["companyanum"];
+$companyname = $_SESSION["companyname"];
 $docno = $_SESSION['docno'];
-$companyanum = $_SESSION['companyanum'];
-$companyname = $_SESSION['companyname'];
+
+$ipaddress = $_SERVER["REMOTE_ADDR"];
+$updatedatetime = date('Y-m-d H:i:s');
+$errmsg = "";
+$bgcolorcode = "";
+$colorloopcount = "";
+
+// Date ranges
 $paymentreceiveddatefrom = date('d/m/Y 07:00', strtotime('-1 day'));
 $paymentreceiveddateto = date('d/m/Y 07:00');
 $transactiondatefrom = date('Y-m-d', strtotime('-1 month'));
 $transactiondateto = date('Y-m-d');
-$resipdeprate1 ='0.00';
-$resip10rate1 ='0.00';
-$resip11rate1  ='0.00';
-$reference_no='';
-$errmsg = "";
+
+// Initialize variables
 $banum = "1";
 $supplieranum = "";
 $custid = "";
 $custname = "";
 $total = '0.00';
-$total_pos= '0.00';
+$total_pos = '0.00';
 $refund_total = '0.00';
 $balanceamount = "0.00";
 $openingbalance = "0.00";
 $searchsuppliername = "";
 $cbsuppliername = "";
 $snocount = "";
-$colorloopcount="";
 $grandtotal = 0;
 $refund_gtotal = 0;
 $after_refund = 0;
+$total_neg = "0.00";
+$total_final = "0.00";
+$total_postive = "0.00";
+$download = "";
+$reference_no = '';
 
-$total_neg="0.00";
-$total_final="0.00";
-$total_postive="0.00";
-$total_final="0.00";
-
-$download="";
-
-
-
-$res10username="";
-$res5labusername="";
-
-$total = '0.00';
+// Rate variables
+$resipdeprate1 = '0.00';
+$resip10rate1 = '0.00';
+$resip11rate1 = '0.00';
+$res10username = "";
+$res5labusername = "";
 $res5labitemrate1 = '0.00'; 
 $res5consamount = '0.00'; 
 $res6servicesitemrate1 = '0.00';
 $res7pharmacyitemrate1 = '0.00';
-$res8radiologyitemrate1= '0.00';
- $res9referalitemrate1 = '0.00';
-  $res10consultationitemrate1= '0.00'; 
-  $resip1rate1= '0.00';
-  $resip2rate1= '0.00';
-  $resip3rate1= '0.00';
-  $resip4rate1= '0.00';
-  $resip5rate1= '0.00';
-  $resip6rate1= '0.00';
-  $resip7rate1= '0.00';
-  $resip8rate1= '0.00';
-  $resip9rate1= '0.00';
-  
-  $resr1consultationrate1= '0.00';
-  $resr2rate1= '0.00';
-  $resr3rate1= '0.00';
-  $resr4rate1= '0.00';
-  $resr5rate1= '0.00';
-  $resr6rate1= '0.00';
-  $resr7rate1= '0.00';
-$errmsg = "";
-$banum = "1";
+$res8radiologyitemrate1 = '0.00';
+$res9referalitemrate1 = '0.00';
+$res10consultationitemrate1 = '0.00'; 
+$resip1rate1 = '0.00';
+$resip2rate1 = '0.00';
+$resip3rate1 = '0.00';
+$resip4rate1 = '0.00';
+$resip5rate1 = '0.00';
+$resip6rate1 = '0.00';
+$resip7rate1 = '0.00';
+$resip8rate1 = '0.00';
+$resip9rate1 = '0.00';
+$resr1consultationrate1 = '0.00';
+$resr2rate1 = '0.00';
+$resr3rate1 = '0.00';
+$resr4rate1 = '0.00';
+$resr5rate1 = '0.00';
+$resr6rate1 = '0.00';
+$resr7rate1 = '0.00';
 
-if (isset($_REQUEST["slocation"])) {$slocation = $_REQUEST["slocation"]; } else { $slocation = ""; }
-if (isset($_REQUEST["set_type"])) {$set_type = $_REQUEST["set_type"]; } else { $set_type = "Summary"; }
+// Handle form parameters
+$slocation = isset($_REQUEST["slocation"]) ? $_REQUEST["slocation"] : "";
+$set_type = isset($_REQUEST["set_type"]) ? $_REQUEST["set_type"] : "Summary";
+$location = isset($_REQUEST['location']) ? $_REQUEST['location'] : '';
+$getcanum = isset($_REQUEST["canum"]) ? $_REQUEST["canum"] : "";
+$searchsuppliername = isset($_REQUEST["searchsuppliername"]) ? $_REQUEST["searchsuppliername"] : "";
+$cbfrmflag1 = isset($_REQUEST["cbfrmflag1"]) ? $_REQUEST["cbfrmflag1"] : "";
 
-//This include updatation takes too long to load for hunge items database.
+// Include autocomplete functionality
 include ("autocompletebuild_account2.php");
- $location=isset($_REQUEST['location'])?$_REQUEST['location']:'';
-if (isset($_REQUEST["canum"])) { $getcanum = $_REQUEST["canum"]; } else { $getcanum = ""; }
-//$getcanum = $_GET['canum'];
-if ($getcanum != '')
-{
-	$query4 = "select * from master_supplier where auto_number = '$getcanum'";
-	$exec4 = mysqli_query($GLOBALS["___mysqli_ston"], $query4) or die ("Error in Query4".mysqli_error($GLOBALS["___mysqli_ston"]));
-	$res4 = mysqli_fetch_array($exec4);
-	$cbsuppliername = $res4['suppliername'];
-	$suppliername = $res4['suppliername'];
+
+// Handle supplier selection
+if ($getcanum != '') {
+    $query4 = "select * from master_supplier where auto_number = '$getcanum'";
+    $exec4 = mysqli_query($GLOBALS["___mysqli_ston"], $query4) or die ("Error in Query4".mysqli_error($GLOBALS["___mysqli_ston"]));
+    $res4 = mysqli_fetch_array($exec4);
+    $cbsuppliername = $res4['suppliername'];
+    $suppliername = $res4['suppliername'];
 }
-
-if (isset($_REQUEST["searchsuppliername"])) { $searchsuppliername = $_REQUEST["searchsuppliername"]; } else { $searchsuppliername = ""; }
-
-if (isset($_REQUEST["cbfrmflag1"])) { $cbfrmflag1 = $_REQUEST["cbfrmflag1"]; } else { $cbfrmflag1 = ""; }
 //$cbfrmflag1 = $_POST['cbfrmflag1'];
 if ($cbfrmflag1 == 'cbfrmflag1')
 {
@@ -604,12 +600,81 @@ text-align:right;
         <span>Detail Recon Report</span>
     </nav>
 
-    <!-- Main Container -->
-    <div class="main-container">
-        <!-- Alert Container -->
-        <div id="alertContainer">
-            <?php include ("includes/alertmessages1.php"); ?>
-        </div>
+    <!-- Floating Menu Toggle -->
+    <div id="menuToggle" class="floating-menu-toggle">
+        <i class="fas fa-bars"></i>
+    </div>
+
+    <!-- Main Container with Sidebar -->
+    <div class="main-container-with-sidebar">
+        <!-- Left Sidebar -->
+        <aside id="leftSidebar" class="left-sidebar">
+            <div class="sidebar-header">
+                <h3>Quick Navigation</h3>
+                <button id="sidebarToggle" class="sidebar-toggle">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <ul class="nav-list">
+                    <li class="nav-item">
+                        <a href="mainmenu1.php" class="nav-link">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="accountreceivableentrylist.php" class="nav-link">
+                            <i class="fas fa-receipt"></i>
+                            <span>Account Receivable</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="corporateoutstanding.php" class="nav-link">
+                            <i class="fas fa-building"></i>
+                            <span>Corporate Outstanding</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="accountstatement.php" class="nav-link">
+                            <i class="fas fa-file-invoice-dollar"></i>
+                            <span>Account Statement</span>
+                        </a>
+                    </li>
+                    <li class="nav-item active">
+                        <a href="detail_recon.php" class="nav-link">
+                            <i class="fas fa-balance-scale"></i>
+                            <span>Detail Reconciliation</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="addaccountsmain.php" class="nav-link">
+                            <i class="fas fa-chart-line"></i>
+                            <span>Accounts Main</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="addaccountssub.php" class="nav-link">
+                            <i class="fas fa-chart-pie"></i>
+                            <span>Accounts Sub Type</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Alert Container -->
+            <div id="alertContainer">
+                <?php if (!empty($errmsg)): ?>
+                    <div class="alert alert-<?php echo $bgcolorcode === 'success' ? 'success' : ($bgcolorcode === 'failed' ? 'error' : 'info'); ?>">
+                        <i class="fas fa-<?php echo $bgcolorcode === 'success' ? 'check-circle' : ($bgcolorcode === 'failed' ? 'exclamation-triangle' : 'info-circle'); ?> alert-icon"></i>
+                        <span><?php echo htmlspecialchars($errmsg); ?></span>
+                    </div>
+                <?php endif; ?>
+            </div>
 
         <!-- Page Header -->
         <div class="page-header">
@@ -627,14 +692,15 @@ text-align:right;
             </div>
         </div>
 
-        <!-- Search Form Section -->
-        <div class="form-section">
-            <h3><i class="fas fa-search"></i> Search Parameters</h3>
-		
-		
-            
-            <form name="cbform1" method="post" action="detail_recon.php">
-                <input name="searchsuppliername" type="hidden" id="searchsuppliername" value="<?php echo $searchsuppliername; ?>" size="50" autocomplete="off">
+            <!-- Search Form Section -->
+            <div class="form-section">
+                <div class="form-section-header">
+                    <i class="fas fa-search form-section-icon"></i>
+                    <h3 class="form-section-title">Search Parameters</h3>
+                </div>
+                
+                <form name="cbform1" method="post" action="detail_recon.php" class="form-section-form">
+                    <input name="searchsuppliername" type="hidden" id="searchsuppliername" value="<?php echo $searchsuppliername; ?>" size="50" autocomplete="off">
                 
                 <!-- Current Location Display -->
                 <div class="current-location">
@@ -4346,9 +4412,51 @@ if($total_postive=='')
                 </tbody>
             </table>
         </div>
+        </main>
     </div>
     
     <!-- Modern JavaScript -->
+    <script>
+        // Modern JavaScript functions
+        function refreshPage() {
+            window.location.reload();
+        }
+
+        function exportToExcel() {
+            // Add export functionality here
+            alert('Export functionality will be implemented');
+        }
+
+        function printReport() {
+            window.print();
+        }
+
+        function resetForm() {
+            document.getElementById("cbform1").reset();
+        }
+
+        // Sidebar functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const menuToggle = document.getElementById('menuToggle');
+            const sidebar = document.getElementById('leftSidebar');
+            const sidebarToggle = document.getElementById('sidebarToggle');
+
+            menuToggle.addEventListener('click', function() {
+                sidebar.classList.toggle('active');
+            });
+
+            sidebarToggle.addEventListener('click', function() {
+                sidebar.classList.toggle('active');
+            });
+
+            // Close sidebar when clicking outside
+            document.addEventListener('click', function(event) {
+                if (!sidebar.contains(event.target) && !menuToggle.contains(event.target)) {
+                    sidebar.classList.remove('active');
+                }
+            });
+        });
+    </script>
     <script src="js/detail_recon-modern.js?v=<?php echo time(); ?>"></script>
 </body>
 </html>

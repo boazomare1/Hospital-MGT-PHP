@@ -1,347 +1,414 @@
-/**
- * Modern JavaScript for Add Consultation Template
- * Handles CKEditor integration, form validation, and modern interactions
- */
+// Add Consultation Template Modern JavaScript
+let editorInstance = null;
 
-// Modern ES6+ JavaScript with enhanced functionality
-class AddConsultationTemplate {
-    constructor() {
-        this.editor = null;
-        this.init();
+// DOM Elements
+let templatenameInput, editor1Textarea, submitBtn, form;
+
+// Initialize the page
+document.addEventListener('DOMContentLoaded', function() {
+    initializeElements();
+    setupEventListeners();
+    setupSidebarToggle();
+    initializeCKEditor();
+    setupFormValidation();
+    setupKeyboardShortcuts();
+});
+
+function initializeElements() {
+    templatenameInput = document.getElementById('templatename');
+    editor1Textarea = document.getElementById('editor1');
+    submitBtn = document.querySelector('input[name="Submit2223"]');
+    form = document.querySelector('form[name="frmsales"]');
+}
+
+function setupEventListeners() {
+    if (submitBtn) {
+        submitBtn.addEventListener('click', handleFormSubmit);
     }
-
-    init() {
-        this.setupEventListeners();
-        this.initializeCKEditor();
-        this.setupFormValidation();
+    
+    if (templatenameInput) {
+        templatenameInput.addEventListener('input', handleTemplateNameChange);
     }
-
-    setupEventListeners() {
-        // Form submission handler
-        const form = document.querySelector('form[name="frmsales"]');
-        if (form) {
-            form.addEventListener('submit', (e) => {
-                if (!this.validateForm()) {
-                    e.preventDefault();
-                }
-            });
-        }
-
-        // Real-time validation
-        this.setupRealTimeValidation();
+    
+    if (form) {
+        form.addEventListener('submit', handleFormValidation);
     }
+}
 
-    initializeCKEditor() {
-        // Initialize CKEditor if available
-        if (typeof CKEDITOR !== 'undefined') {
-            // Wait for DOM to be ready
-            if (document.readyState === 'loading') {
-                document.addEventListener('DOMContentLoaded', () => {
-                    this.setupCKEditor();
-                });
-            } else {
-                this.setupCKEditor();
+function setupSidebarToggle() {
+    const menuToggle = document.getElementById('menuToggle');
+    const sidebarToggle = document.getElementById('sidebarToggle');
+    const leftSidebar = document.getElementById('leftSidebar');
+    
+    if (menuToggle && leftSidebar) {
+        menuToggle.addEventListener('click', function() {
+            leftSidebar.classList.toggle('collapsed');
+            const icon = menuToggle.querySelector('i');
+            if (icon) {
+                icon.classList.toggle('fa-bars');
+                icon.classList.toggle('fa-times');
             }
-        } else {
-            console.warn('CKEditor not loaded. Please ensure ckeditor.js is included.');
-        }
+        });
     }
-
-    setupCKEditor() {
-        const textarea = document.getElementById('consultation');
-        if (textarea && typeof CKEDITOR !== 'undefined') {
-            // Configure CKEditor with modern settings
-            this.editor = CKEDITOR.replace('consultation', {
-                height: 300,
-                width: '100%',
-                toolbar: [
-                    { name: 'document', items: ['Source', '-', 'NewPage', 'Preview', 'Print', '-', 'Templates'] },
-                    { name: 'clipboard', items: ['Cut', 'Copy', 'Paste', 'PasteText', 'PasteFromWord', '-', 'Undo', 'Redo'] },
-                    { name: 'editing', items: ['Find', 'Replace', '-', 'SelectAll', '-', 'Scayt'] },
-                    { name: 'forms', items: ['Form', 'Checkbox', 'Radio', 'TextField', 'Textarea', 'Select', 'Button', 'ImageButton', 'HiddenField'] },
-                    '/',
-                    { name: 'basicstyles', items: ['Bold', 'Italic', 'Underline', 'Strike', 'Subscript', 'Superscript', '-', 'ClearFormatting'] },
-                    { name: 'paragraph', items: ['NumberedList', 'BulletedList', '-', 'Outdent', 'Indent', '-', 'Blockquote', 'CreateDiv', '-', 'JustifyLeft', 'JustifyCenter', 'JustifyRight', 'JustifyBlock', '-', 'BidiLtr', 'BidiRtl'] },
-                    { name: 'links', items: ['Link', 'Unlink', 'Anchor'] },
-                    { name: 'insert', items: ['Image', 'Flash', 'Table', 'HorizontalRule', 'Smiley', 'SpecialChar', 'PageBreak', 'Iframe'] },
-                    '/',
-                    { name: 'styles', items: ['Styles', 'Format', 'Font', 'FontSize'] },
-                    { name: 'colors', items: ['TextColor', 'BGColor'] },
-                    { name: 'tools', items: ['Maximize', 'ShowBlocks'] }
-                ],
-                language: 'en',
-                uiColor: '#f8f9fa',
-                removeDialogTabs: 'image:advanced;link:advanced',
-                filebrowserBrowseUrl: '',
-                filebrowserUploadUrl: '',
-                filebrowserImageBrowseUrl: '',
-                filebrowserImageUploadUrl: '',
-                contentsCss: 'css/addconsultationtemplate-modern.css'
-            });
-
-            // Add event listeners for CKEditor
-            this.editor.on('change', () => {
-                this.validateEditorContent();
-            });
-
-            this.editor.on('blur', () => {
-                this.validateEditorContent();
-            });
-        }
+    
+    if (sidebarToggle && leftSidebar) {
+        sidebarToggle.addEventListener('click', function() {
+            leftSidebar.classList.toggle('collapsed');
+            const icon = sidebarToggle.querySelector('i');
+            if (icon) {
+                icon.classList.toggle('fa-chevron-left');
+                icon.classList.toggle('fa-chevron-right');
+            }
+        });
     }
+}
 
-    setupFormValidation() {
-        // Add modern validation attributes
-        const templateNameInput = document.getElementById('templatename');
-        if (templateNameInput) {
-            templateNameInput.setAttribute('maxlength', '100');
-            templateNameInput.setAttribute('required', 'required');
-        }
-    }
-
-    setupRealTimeValidation() {
-        // Template name validation
-        const templateNameInput = document.getElementById('templatename');
-        if (templateNameInput) {
-            templateNameInput.addEventListener('input', (e) => {
-                this.validateTemplateName(e.target.value);
-            });
-
-            templateNameInput.addEventListener('blur', (e) => {
-                this.validateTemplateName(e.target.value);
-            });
-        }
-    }
-
-    validateForm() {
-        const errors = [];
-
-        // Template name validation
-        const templateName = document.getElementById('templatename');
-        if (!templateName || !templateName.value.trim()) {
-            errors.push('Please enter a template name.');
-            this.showFieldError(templateName, 'Template name is required.');
-        } else if (templateName.value.length > 100) {
-            errors.push('Template name must be 100 characters or less.');
-            this.showFieldError(templateName, 'Template name must be 100 characters or less.');
-        } else {
-            this.clearFieldError(templateName);
-        }
-
-        // Editor content validation
-        if (!this.validateEditorContent()) {
-            errors.push('Please enter template content.');
-        }
-
-        if (errors.length > 0) {
-            this.showAlert(errors.join(' '), 'error');
-            return false;
-        }
-
-        return true;
-    }
-
-    validateTemplateName(value) {
-        const field = document.getElementById('templatename');
-        if (!value.trim()) {
-            this.showFieldError(field, 'Template name is required.');
-        } else if (value.length > 100) {
-            this.showFieldError(field, 'Template name must be 100 characters or less.');
-        } else {
-            this.clearFieldError(field);
-        }
-    }
-
-    validateEditorContent() {
-        let content = '';
+function initializeCKEditor() {
+    if (typeof CKEDITOR !== 'undefined' && editor1Textarea) {
+        editorInstance = CKEDITOR.replace('editor1', {
+            height: 400,
+            toolbar: [
+                { name: 'document', items: ['Source', '-', 'NewPage', 'Preview', 'Print', '-', 'Templates'] },
+                { name: 'clipboard', items: ['Cut', 'Copy', 'Paste', 'PasteText', 'PasteFromWord', '-', 'Undo', 'Redo'] },
+                { name: 'editing', items: ['Find', 'Replace', '-', 'SelectAll', '-', 'Scayt'] },
+                { name: 'forms', items: ['Form', 'Checkbox', 'Radio', 'TextField', 'Textarea', 'Select', 'Button', 'ImageButton', 'HiddenField'] },
+                '/',
+                { name: 'basicstyles', items: ['Bold', 'Italic', 'Underline', 'Strike', 'Subscript', 'Superscript', '-', 'CopyFormatting', 'RemoveFormat'] },
+                { name: 'paragraph', items: ['NumberedList', 'BulletedList', '-', 'Outdent', 'Indent', '-', 'Blockquote', 'CreateDiv', '-', 'JustifyLeft', 'JustifyCenter', 'JustifyRight', 'JustifyBlock', '-', 'BidiLtr', 'BidiRtl', 'Language'] },
+                { name: 'links', items: ['Link', 'Unlink', 'Anchor'] },
+                { name: 'insert', items: ['Image', 'Flash', 'Table', 'HorizontalRule', 'Smiley', 'SpecialChar', 'PageBreak', 'Iframe'] },
+                '/',
+                { name: 'styles', items: ['Styles', 'Format', 'Font', 'FontSize'] },
+                { name: 'colors', items: ['TextColor', 'BGColor'] },
+                { name: 'tools', items: ['Maximize', 'ShowBlocks'] },
+                { name: 'about', items: ['About'] }
+            ],
+            language: 'en',
+            uiColor: '#f8f9fa',
+            contentsCss: 'body { font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif; font-size: 14px; line-height: 1.6; }'
+        });
         
-        if (this.editor) {
-            content = this.editor.getData();
+        editorInstance.on('change', function() {
+            updateEditorContent();
+        });
+        
+        editorInstance.on('focus', function() {
+            showEditorFocus();
+        });
+        
+        editorInstance.on('blur', function() {
+            hideEditorFocus();
+        });
+    }
+}
+
+function setupFormValidation() {
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            if (!validateForm()) {
+                e.preventDefault();
+                showAlert('Please fill in all required fields correctly.', 'error');
+            }
+        });
+    }
+}
+
+function validateForm() {
+    let isValid = true;
+    const errors = [];
+    
+    // Validate template name
+    if (templatenameInput && templatenameInput.value.trim() === '') {
+        errors.push('Template name is required');
+        isValid = false;
+    }
+    
+    // Validate editor content
+    let editorContent = '';
+    if (editorInstance) {
+        editorContent = editorInstance.getData();
+    } else if (editor1Textarea) {
+        editorContent = editor1Textarea.value;
+    }
+    
+    if (editorContent.trim() === '') {
+        errors.push('Template content is required');
+        isValid = false;
+    }
+    
+    if (!isValid) {
+        showAlert(errors.join('<br>'), 'error');
+    }
+    
+    return isValid;
+}
+
+function handleFormSubmit(e) {
+    if (!validateForm()) {
+        e.preventDefault();
+        return;
+    }
+    
+    showLoadingState();
+    
+    // Add loading state to submit button
+    if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.value = 'Saving Template...';
+    }
+}
+
+function handleTemplateNameChange() {
+    if (templatenameInput) {
+        // Auto-uppercase the template name
+        templatenameInput.value = templatenameInput.value.toUpperCase();
+        
+        // Update character count or validation
+        updateTemplateNameValidation();
+    }
+}
+
+function updateTemplateNameValidation() {
+    if (templatenameInput) {
+        const value = templatenameInput.value.trim();
+        const isValid = value.length >= 3;
+        
+        if (value.length > 0 && !isValid) {
+            templatenameInput.style.borderColor = '#ef4444';
         } else {
-            // Fallback for when CKEditor is not available
-            const textarea = document.getElementById('consultation');
-            if (textarea) {
-                content = textarea.value;
-            }
-        }
-
-        // Remove HTML tags and check for actual content
-        const textContent = content.replace(/<[^>]*>/g, '').trim();
-        
-        if (!textContent) {
-            this.showEditorError('Please enter template content.');
-            return false;
-        } else {
-            this.clearEditorError();
-            return true;
-        }
-    }
-
-    showFieldError(field, message) {
-        if (!field) return;
-
-        field.classList.add('error');
-        field.style.borderColor = '#dc3545';
-        
-        // Remove existing error message
-        const existingError = field.parentNode.querySelector('.field-error');
-        if (existingError) {
-            existingError.remove();
-        }
-
-        // Add error message
-        const errorDiv = document.createElement('div');
-        errorDiv.className = 'field-error';
-        errorDiv.textContent = message;
-        field.parentNode.appendChild(errorDiv);
-    }
-
-    clearFieldError(field) {
-        if (!field) return;
-
-        field.classList.remove('error');
-        field.style.borderColor = '';
-        const errorDiv = field.parentNode.querySelector('.field-error');
-        if (errorDiv) {
-            errorDiv.remove();
-        }
-    }
-
-    showEditorError(message) {
-        // Show error for CKEditor
-        const editorContainer = document.querySelector('.cke');
-        if (editorContainer) {
-            editorContainer.style.borderColor = '#dc3545';
-        }
-
-        // Remove existing error message
-        const existingError = document.querySelector('.editor-error');
-        if (existingError) {
-            existingError.remove();
-        }
-
-        // Add error message
-        const errorDiv = document.createElement('div');
-        errorDiv.className = 'editor-error field-error';
-        errorDiv.textContent = message;
-        errorDiv.style.marginTop = '5px';
-        
-        const editorWrapper = document.querySelector('.editor-container') || document.querySelector('.cke');
-        if (editorWrapper) {
-            editorWrapper.parentNode.insertBefore(errorDiv, editorWrapper.nextSibling);
-        }
-    }
-
-    clearEditorError() {
-        // Clear error for CKEditor
-        const editorContainer = document.querySelector('.cke');
-        if (editorContainer) {
-            editorContainer.style.borderColor = '';
-        }
-
-        const errorDiv = document.querySelector('.editor-error');
-        if (errorDiv) {
-            errorDiv.remove();
-        }
-    }
-
-    showAlert(message, type = 'info') {
-        // Create modern alert
-        const alertDiv = document.createElement('div');
-        alertDiv.className = `alert alert-${type === 'error' ? 'error' : 'success'}`;
-        alertDiv.textContent = message;
-        alertDiv.style.position = 'fixed';
-        alertDiv.style.top = '20px';
-        alertDiv.style.right = '20px';
-        alertDiv.style.zIndex = '9999';
-        alertDiv.style.maxWidth = '400px';
-        alertDiv.style.padding = '15px 20px';
-        alertDiv.style.borderRadius = '4px';
-        alertDiv.style.boxShadow = '0 4px 6px rgba(0,0,0,0.1)';
-
-        document.body.appendChild(alertDiv);
-
-        // Auto remove after 5 seconds
-        setTimeout(() => {
-            if (alertDiv.parentNode) {
-                alertDiv.parentNode.removeChild(alertDiv);
-            }
-        }, 5000);
-    }
-
-    // Save template with loading state
-    saveTemplate() {
-        if (this.validateForm()) {
-            // Show loading state
-            const submitButton = document.querySelector('input[name="Submit2223"]');
-            if (submitButton) {
-                submitButton.disabled = true;
-                submitButton.value = 'Saving...';
-                submitButton.classList.add('loading');
-            }
-
-            // Submit the form
-            const form = document.querySelector('form[name="frmsales"]');
-            if (form) {
-                form.submit();
-            }
-        }
-    }
-
-    // Reset form
-    resetForm() {
-        const form = document.querySelector('form[name="frmsales"]');
-        if (form) {
-            form.reset();
-            
-            // Clear CKEditor content
-            if (this.editor) {
-                this.editor.setData('');
-            }
-            
-            // Clear any error messages
-            const errorMessages = form.querySelectorAll('.field-error');
-            errorMessages.forEach(error => error.remove());
-            
-            // Reset field styles
-            const inputs = form.querySelectorAll('input');
-            inputs.forEach(input => {
-                input.style.borderColor = '';
-                input.classList.remove('error');
-            });
+            templatenameInput.style.borderColor = '';
         }
     }
 }
 
-// Legacy function compatibility
-window.textareacontentcheck = function() {
-    const template = new AddConsultationTemplate();
-    return template.validateForm();
-};
+function updateEditorContent() {
+    if (editorInstance) {
+        const content = editorInstance.getData();
+        if (editor1Textarea) {
+            editor1Textarea.value = content;
+        }
+    }
+}
 
-window.disableEnterKey = function(event) {
-    const key = event.keyCode || event.which;
+function showEditorFocus() {
+    const editorContainer = document.querySelector('.editor-container');
+    if (editorContainer) {
+        editorContainer.style.borderColor = '#3b82f6';
+        editorContainer.style.boxShadow = '0 0 0 3px rgba(59, 130, 246, 0.1)';
+    }
+}
+
+function hideEditorFocus() {
+    const editorContainer = document.querySelector('.editor-container');
+    if (editorContainer) {
+        editorContainer.style.borderColor = '';
+        editorContainer.style.boxShadow = '';
+    }
+}
+
+function showLoadingState() {
+    const alertContainer = document.getElementById('alertContainer');
+    if (alertContainer) {
+        alertContainer.innerHTML = `
+            <div class="alert alert-info">
+                <i class="fas fa-spinner fa-spin"></i>
+                Saving your consultation template, please wait...
+            </div>
+        `;
+    }
+}
+
+function showAlert(message, type = 'info') {
+    const alertContainer = document.getElementById('alertContainer');
+    if (alertContainer) {
+        const alertClass = `alert-${type}`;
+        const iconClass = getIconForAlertType(type);
+        
+        alertContainer.innerHTML = `
+            <div class="alert ${alertClass}">
+                <i class="${iconClass}"></i>
+                ${message}
+            </div>
+        `;
+        
+        // Auto-hide success messages after 3 seconds
+        if (type === 'success') {
+            setTimeout(() => {
+                alertContainer.innerHTML = '';
+            }, 3000);
+        }
+    }
+}
+
+function getIconForAlertType(type) {
+    const icons = {
+        'success': 'fas fa-check-circle',
+        'error': 'fas fa-exclamation-circle',
+        'warning': 'fas fa-exclamation-triangle',
+        'info': 'fas fa-info-circle'
+    };
+    return icons[type] || icons['info'];
+}
+
+function setupKeyboardShortcuts() {
+    document.addEventListener('keydown', function(e) {
+        // Ctrl + S to save
+        if (e.ctrlKey && e.key === 's') {
+            e.preventDefault();
+            if (submitBtn) {
+                submitBtn.click();
+            }
+        }
+        
+        // Escape to clear form
+        if (e.key === 'Escape') {
+            if (confirm('Are you sure you want to clear the form?')) {
+                clearForm();
+            }
+        }
+        
+        // F5 to refresh
+        if (e.key === 'F5') {
+            e.preventDefault();
+            refreshPage();
+        }
+    });
+}
+
+function clearForm() {
+    if (templatenameInput) {
+        templatenameInput.value = '';
+    }
     
-    if (key === 13) { // Enter key
+    if (editorInstance) {
+        editorInstance.setData('');
+    } else if (editor1Textarea) {
+        editor1Textarea.value = '';
+    }
+    
+    showAlert('Form cleared successfully.', 'success');
+}
+
+function refreshPage() {
+    window.location.reload();
+}
+
+function exportTemplate() {
+    if (editorInstance) {
+        const content = editorInstance.getData();
+        const templateName = templatenameInput ? templatenameInput.value : 'consultation_template';
+        
+        // Create a downloadable HTML file
+        const htmlContent = `
+<!DOCTYPE html>
+<html>
+<head>
+    <title>${templateName}</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; line-height: 1.6; }
+        h1, h2, h3 { color: #333; }
+        p { margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+    ${content}
+</body>
+</html>`;
+        
+        const blob = new Blob([htmlContent], { type: 'text/html' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${templateName}.html`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        
+        showAlert('Template exported successfully.', 'success');
+    }
+}
+
+function importTemplate() {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.html,.txt';
+    input.onchange = function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const content = e.target.result;
+                if (editorInstance) {
+                    editorInstance.setData(content);
+                } else if (editor1Textarea) {
+                    editor1Textarea.value = content;
+                }
+                showAlert('Template imported successfully.', 'success');
+            };
+            reader.readAsText(file);
+        }
+    };
+    input.click();
+}
+
+// Backward compatibility functions
+function textareacontentcheck() {
+    let content = '';
+    if (editorInstance) {
+        content = editorInstance.getData();
+    } else if (editor1Textarea) {
+        content = editor1Textarea.value;
+    }
+    
+    if (content.trim() === '') {
+        showAlert('Please enter template content.', 'warning');
+        if (editorInstance) {
+            editorInstance.focus();
+        } else if (editor1Textarea) {
+            editor1Textarea.focus();
+        }
         return false;
     }
     
     return true;
-};
-
-window.funcOnLoadBodyFunctionCall = function() {
-    // Initialize when body loads
-    new AddConsultationTemplate();
-};
-
-// Initialize when DOM is ready
-document.addEventListener('DOMContentLoaded', function() {
-    new AddConsultationTemplate();
-});
-
-// Initialize with jQuery if available
-if (typeof $ !== 'undefined') {
-    $(document).ready(function() {
-        new AddConsultationTemplate();
-    });
 }
+
+function disableEnterKey(event) {
+    if (event.key === 'Enter' && event.ctrlKey) {
+        return false;
+    }
+    return true;
+}
+
+function funcOnLoadBodyFunctionCall() {
+    console.log('Add Consultation Template page loaded');
+    
+    // Initialize any additional functionality
+    if (templatenameInput) {
+        templatenameInput.focus();
+    }
+    
+    // Show success message if redirected from successful save
+    const urlParams = new URLSearchParams(window.location.search);
+    const status = urlParams.get('st');
+    if (status === 'success') {
+        showAlert('Template saved successfully!', 'success');
+    } else if (status === 'failed') {
+        showAlert('Failed to save template. Please try again.', 'error');
+    }
+}
+
+// Initialize everything when DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Add Consultation Template page initialized');
+    
+    // Set up auto-save functionality (optional)
+    if (editorInstance) {
+        setInterval(function() {
+            if (editorInstance.checkDirty()) {
+                updateEditorContent();
+            }
+        }, 30000); // Auto-save every 30 seconds
+    }
+});

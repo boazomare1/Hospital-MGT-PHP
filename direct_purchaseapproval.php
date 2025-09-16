@@ -3,23 +3,31 @@ session_start();
 ob_start();
 include ("includes/loginverify.php");
 include ("db/db_connect.php");
-//echo $menu_id;
 include ("includes/check_user_access.php");
-$ipaddress = $_SERVER['REMOTE_ADDR'];
+
+$username = $_SESSION["username"];
+$companyanum = $_SESSION["companyanum"];
+$companyname = $_SESSION["companyname"];
+$docno = $_SESSION['docno'];
+$docno1 = $_SESSION['docno'];
+
+$ipaddress = $_SERVER["REMOTE_ADDR"];
 $updatedatetime = date('Y-m-d H:i:s');
-$username = $_SESSION['username'];
-$companyanum = $_SESSION['companyanum'];
-$companyname = $_SESSION['companyname'];
+$errmsg = "";
+$bgcolorcode = "";
+$colorloopcount = "";
+
+// Date ranges
 $transactiondatefrom = date('Y-m-d', strtotime('-1 month'));
 $transactiondateto = date('Y-m-d');
 $currentdate = date("Y-m-d");
-$docno = $_SESSION['docno'];
-$docno1 = $_SESSION['docno'];
-$ADate1=isset($_REQUEST['ADate1'])?$_REQUEST['ADate1']:date('Y-m-d',strtotime('-1 month'));
-$ADate2=isset($_REQUEST['ADate2'])?$_REQUEST['ADate2']:date('Y-m-d');
-$location=isset($_REQUEST['location'])?$_REQUEST['location']:'';
-if (isset($_REQUEST["frm1submit1"])) { $frm1submit1 = $_REQUEST["frm1submit1"]; } else { $frm1submit1 = ""; }
-if (isset($_REQUEST["cbfrmflag1"])) { $cbfrmflag1 = $_REQUEST["cbfrmflag1"]; } else { $cbfrmflag1 = ""; }
+
+// Handle form parameters
+$ADate1 = isset($_REQUEST['ADate1']) ? $_REQUEST['ADate1'] : date('Y-m-d', strtotime('-1 month'));
+$ADate2 = isset($_REQUEST['ADate2']) ? $_REQUEST['ADate2'] : date('Y-m-d');
+$location = isset($_REQUEST['location']) ? $_REQUEST['location'] : '';
+$frm1submit1 = isset($_REQUEST["frm1submit1"]) ? $_REQUEST["frm1submit1"] : "";
+$cbfrmflag1 = isset($_REQUEST["cbfrmflag1"]) ? $_REQUEST["cbfrmflag1"] : "";
 
 $query = "select * from login_locationdetails where username='$username' and docno='$docno1' order by locationname";
 $exec = mysqli_query($GLOBALS["___mysqli_ston"], $query) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
@@ -205,6 +213,75 @@ padding-left:690px;
 text-align:right;
 font-weight:bold;
 }
+
+/* Modern table styles */
+.dropdown-toggle {
+    color: #007bff;
+    text-decoration: none;
+    margin-right: 8px;
+    font-size: 12px;
+}
+
+.dropdown-toggle:hover {
+    color: #0056b3;
+}
+
+.dropdown-content {
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    margin: 10px 0;
+    padding: 15px;
+}
+
+.detail-table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: white;
+    border-radius: 4px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.detail-table th {
+    background-color: #e9ecef;
+    padding: 12px 8px;
+    text-align: center;
+    font-weight: 600;
+    border-bottom: 2px solid #dee2e6;
+}
+
+.detail-table td {
+    padding: 10px 8px;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.detail-row:hover {
+    background-color: #f8f9fa;
+}
+
+.status-badge {
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.status-pending {
+    background-color: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffeaa7;
+}
+
+.form-checkbox {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+}
+
+.text-center { text-align: center; }
+.text-right { text-align: right; }
 </style>
 <link href="autocomplete.css" rel="stylesheet">
 <script type="text/javascript" src="js/jquery-1.10.2.js"></script>
@@ -245,12 +322,81 @@ font-weight:bold;
         <span>Direct Purchase Approval</span>
     </nav>
 
-    <!-- Main Container -->
-    <div class="main-container">
-        <!-- Alert Container -->
-        <div id="alertContainer">
-            <?php include ("includes/alertmessages1.php"); ?>
-        </div>
+    <!-- Floating Menu Toggle -->
+    <div id="menuToggle" class="floating-menu-toggle">
+        <i class="fas fa-bars"></i>
+    </div>
+
+    <!-- Main Container with Sidebar -->
+    <div class="main-container-with-sidebar">
+        <!-- Left Sidebar -->
+        <aside id="leftSidebar" class="left-sidebar">
+            <div class="sidebar-header">
+                <h3>Quick Navigation</h3>
+                <button id="sidebarToggle" class="sidebar-toggle">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <ul class="nav-list">
+                    <li class="nav-item">
+                        <a href="mainmenu1.php" class="nav-link">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="purchase_indent.php" class="nav-link">
+                            <i class="fas fa-shopping-cart"></i>
+                            <span>Purchase Indent</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="manual_lpo.php" class="nav-link">
+                            <i class="fas fa-file-invoice"></i>
+                            <span>Manual LPO</span>
+                        </a>
+                    </li>
+                    <li class="nav-item active">
+                        <a href="direct_purchaseapproval.php" class="nav-link">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Direct Purchase Approval</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="materialreceiptnote.php" class="nav-link">
+                            <i class="fas fa-truck"></i>
+                            <span>Material Receipt</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="supplier_master.php" class="nav-link">
+                            <i class="fas fa-users"></i>
+                            <span>Supplier Master</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="purchase_report.php" class="nav-link">
+                            <i class="fas fa-chart-bar"></i>
+                            <span>Purchase Reports</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Alert Container -->
+            <div id="alertContainer">
+                <?php if (!empty($errmsg)): ?>
+                    <div class="alert alert-<?php echo $bgcolorcode === 'success' ? 'success' : ($bgcolorcode === 'failed' ? 'error' : 'info'); ?>">
+                        <i class="fas fa-<?php echo $bgcolorcode === 'success' ? 'check-circle' : ($bgcolorcode === 'failed' ? 'exclamation-triangle' : 'info-circle'); ?> alert-icon"></i>
+                        <span><?php echo htmlspecialchars($errmsg); ?></span>
+                    </div>
+                <?php endif; ?>
+            </div>
 
         <!-- Page Header -->
         <div class="page-header">
@@ -268,11 +414,14 @@ font-weight:bold;
             </div>
         </div>
 
-        <!-- Search Form Section -->
-        <div class="form-section">
-            <h3><i class="fas fa-search"></i> Search Purchase Requests</h3>
-            
-            <form name="cbform1" method="post" action="direct_purchaseapproval.php">
+            <!-- Search Form Section -->
+            <div class="form-section">
+                <div class="form-section-header">
+                    <i class="fas fa-search form-section-icon"></i>
+                    <h3 class="form-section-title">Search Purchase Requests</h3>
+                </div>
+                
+                <form name="cbform1" method="post" action="direct_purchaseapproval.php" class="form-section-form">
                 <!-- Current Location Display -->
                 <div class="current-location">
                     <strong>Current Location: </strong>
@@ -296,89 +445,104 @@ font-weight:bold;
                     </span>
                 </div>
                 
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="location">Location</label>
-                        <select name="location" id="location" onChange="ajaxlocationfunction(this.value);">
-                            <option value="All">All</option>
-                            <?php
-                            $query1 = "select * from master_location where status=''  order by locationname";
-                            $exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
-                            $loccode=array();
-                            while ($res1 = mysqli_fetch_array($exec1))
-                            {
-                                $locationname = $res1["locationname"];
-                                $locationcode1 = $res1["locationcode"];
-                                ?>
-                                <option value="<?php echo $locationcode1; ?>" <?php if($location!='')if($location==$locationcode1){echo "selected";}?>><?php echo $locationname; ?></option>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="location" class="form-label">Location</label>
+                            <select name="location" id="location" class="form-input" onChange="ajaxlocationfunction(this.value);">
+                                <option value="All">All</option>
                                 <?php
-                            } 
-                            ?>
-                        </select>
-                    </div>
-                </div>
-                
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="ADate1">Date From</label>
-                        <div class="date-input-group">
-                            <input name="ADate1" id="ADate1" value="<?php echo $ADate1; ?>" readonly="readonly" onKeyDown="return disableEnterKey()" class="date-picker">
-                            <i class="fas fa-calendar-alt date-icon" onClick="javascript:NewCssCal('ADate1')" style="cursor:pointer"></i>
+                                $query1 = "select * from master_location where status=''  order by locationname";
+                                $exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
+                                $loccode=array();
+                                while ($res1 = mysqli_fetch_array($exec1))
+                                {
+                                    $locationname = $res1["locationname"];
+                                    $locationcode1 = $res1["locationcode"];
+                                    ?>
+                                    <option value="<?php echo $locationcode1; ?>" <?php if($location!='')if($location==$locationcode1){echo "selected";}?>><?php echo $locationname; ?></option>
+                                    <?php
+                                } 
+                                ?>
+                            </select>
                         </div>
                     </div>
                     
-                    <div class="form-group">
-                        <label for="ADate2">Date To</label>
-                        <div class="date-input-group">
-                            <input name="ADate2" id="ADate2" value="<?php echo $ADate2; ?>" readonly="readonly" onKeyDown="return disableEnterKey()" class="date-picker">
-                            <i class="fas fa-calendar-alt date-icon" onClick="javascript:NewCssCal('ADate2')" style="cursor:pointer"></i>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="ADate1" class="form-label">Date From</label>
+                            <div class="date-input-group">
+                                <input name="ADate1" id="ADate1" value="<?php echo $ADate1; ?>" readonly="readonly" onKeyDown="return disableEnterKey()" class="form-input date-picker">
+                                <i class="fas fa-calendar-alt date-icon" onClick="javascript:NewCssCal('ADate1')" style="cursor:pointer"></i>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="ADate2" class="form-label">Date To</label>
+                            <div class="date-input-group">
+                                <input name="ADate2" id="ADate2" value="<?php echo $ADate2; ?>" readonly="readonly" onKeyDown="return disableEnterKey()" class="form-input date-picker">
+                                <i class="fas fa-calendar-alt date-icon" onClick="javascript:NewCssCal('ADate2')" style="cursor:pointer"></i>
+                            </div>
                         </div>
                     </div>
-                </div>
-                
-                <div class="form-actions">
-                    <input type="hidden" name="cbfrmflag1" value="cbfrmflag1">
-                    <button type="submit" class="btn btn-primary" name="Submit">
-                        <i class="fas fa-search"></i> Search
-                    </button>
-                    <button type="reset" class="btn btn-secondary" id="resetbutton">
-                        <i class="fas fa-undo"></i> Reset
-                    </button>
-                </div>
+                    
+                    <div class="form-actions">
+                        <input type="hidden" name="cbfrmflag1" value="cbfrmflag1">
+                        <button type="submit" class="btn btn-primary" name="Submit">
+                            <i class="fas fa-search"></i> Search
+                        </button>
+                        <button type="reset" class="btn btn-secondary" id="resetbutton">
+                            <i class="fas fa-undo"></i> Reset
+                        </button>
+                    </div>
             </form>
 			</td>
 			</tr>
-			<script>
-			$(function() {$("[id^='droupid']").hide(0);
-			}
-			);
-			function dropdown(id,action)
-			{
-			if(action=='down')
-			{
-			$("#droupid"+id).slideDown(300); $("#down"+id).hide(0); $("#up"+id).show();
-			}
-			else if(action=='up')
-			{
-			$("#droupid"+id).slideUp(300);  $("#up"+id).hide(0); $("#down"+id).show();
-			}
-			}
-			</script>			
-			<form method="post" name="form1" action="direct_purchaseapproval.php"  onSubmit="return validcheck()">
-			<tr>
-			<td colspan="10" bgcolor="#ecf0f5" class="bodytext31"><div align="left"><strong>Direct Pruchase Order</strong></label></div></td>
-			</tr>
-			
-			<tr>
-					<td class="bodytext31" valign="center"  align="left" bgcolor="#ffffff"><div align="center"><strong>No.</strong></div></td>
-					<td width=""  align="left" valign="center" bgcolor="#ffffff" class="bodytext31"><div align="center"><strong>Location </strong></div></td>
-					<td width=""  align="left" valign="center" bgcolor="#ffffff" class="bodytext31"><div align="center"><strong>Date </strong></div></td>
-					<td width=""  align="left" valign="center" bgcolor="#ffffff" class="bodytext31"><div align="center"><strong>Doc No</strong></div></td>
-					<td width=""  align="left" valign="center" bgcolor="#ffffff" class="bodytext31"><div align="center"><strong>user</strong></div></td>
-					<td width=""  align="left" valign="center" bgcolor="#ffffff" class="bodytext31"><div align="center"><strong>Status</strong></div></td>
-					<td width=""  align="left" valign="center" bgcolor="#ffffff" class="bodytext31"><div align="center"><strong>Amount</strong></div></td>
-					<td width=""  align="left" valign="center" bgcolor="#ffffff" class="bodytext31"><div align="center"><strong>Approve</strong></div></td>
-            </tr>
+                <script>
+                $(function() {
+                    $("[id^='droupid']").hide(0);
+                });
+                
+                function dropdown(id, action) {
+                    if (action == 'down') {
+                        $("#droupid" + id).slideDown(300);
+                        $("#down" + id).hide(0);
+                        $("#up" + id).show();
+                    } else if (action == 'up') {
+                        $("#droupid" + id).slideUp(300);
+                        $("#up" + id).hide(0);
+                        $("#down" + id).show();
+                    }
+                }
+                
+                function checkboxselect(docno, checkboxId) {
+                    // Add any checkbox selection logic here
+                    console.log('Selected document:', docno, 'Checkbox ID:', checkboxId);
+                }
+                
+                function validcheck() {
+                    var checkedBoxes = $('input[name^="select"]:checked');
+                    if (checkedBoxes.length === 0) {
+                        alert('Please select at least one purchase request to approve.');
+                        return false;
+                    }
+                    return confirm('Are you sure you want to approve the selected purchase requests?');
+                }
+                </script>			
+                <form method="post" name="form1" action="direct_purchaseapproval.php" onSubmit="return validcheck()">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>No.</th>
+                                <th>Location</th>
+                                <th>Date</th>
+                                <th>Doc No</th>
+                                <th>User</th>
+                                <th>Status</th>
+                                <th>Amount</th>
+                                <th>Approve</th>
+                            </tr>
+                        </thead>
+                        <tbody>
 			<?php
 			if($cbfrmflag1=='cbfrmflag1'){
 			if($location=='All')
@@ -414,32 +578,46 @@ font-weight:bold;
 				$colorcode = 'bgcolor="#ecf0f5"';
 			} 
 			?>
-			<tr <?php echo $colorcode; ?>>
-
-				<td class="bodytext31" valign="center"  align="left"><?php  $sno = $sno + 1; ?>
-				<a id="down<?php echo $sno; ?>" onClick="dropdown(<?php echo $sno; ?>,'down')" href="#" style="background:url(img/arrow1.png) 0px 10px;width:20px;height:10px;float:left;display:block;text-decoration:none;"></a>
-				<a id="up<?php echo $sno; ?>"  onClick="dropdown(<?php echo $sno; ?>,'up')" href="#" style="background:url(img/arrow1.png) 0px 0px;width:20px;height:10px;float:left;display:block;text-decoration:none;display:none;"></a><div align="center"><?php echo $sno ; ?></div></td>
-				<td class="bodytext31" valign="center"  align="left"><div align="center"><?php echo $locationname; ?></div></td>
-				<td class="bodytext31" valign="center"  align="left"><div align="center"><?php echo $date; ?></div></td>
-				<td class="bodytext31" valign="center"  align="left"><div align="center"><?php echo $docno; ?></div></td>
-				<td class="bodytext31" valign="center"  align="left"><div align="center"><?php echo $user; ?></div></td>
-				<td class="bodytext31" valign="center"  align="left"><div class="bodytext31" align="center"><?php echo 'pending' ?></div></td>
-				<td class="bodytext31" valign="center"  align="left"><div class="bodytext31" align="center"><?php echo number_format($budgetamount,2,'.',','); ?></div></td>
-				<td class="bodytext31" valign="center"  align="left"><div class="bodytext31" align="center"><input type="checkbox"  name="select[<?php echo $sno;?>]" id="select<?php echo $sno;?>" value="<?php echo $docno; ?>" onClick="checkboxselect('<?php echo $docno; ?>',this.id)" class="select"></div></td>
-			</tr>
+                            <tr class="table-row <?php echo ($showcolor == 0) ? 'table-row-even' : 'table-row-odd'; ?>">
+                                <td class="text-center">
+                                    <?php $sno = $sno + 1; ?>
+                                    <a id="down<?php echo $sno; ?>" onClick="dropdown(<?php echo $sno; ?>,'down')" href="#" class="dropdown-toggle">
+                                        <i class="fas fa-chevron-down"></i>
+                                    </a>
+                                    <a id="up<?php echo $sno; ?>" onClick="dropdown(<?php echo $sno; ?>,'up')" href="#" class="dropdown-toggle" style="display:none;">
+                                        <i class="fas fa-chevron-up"></i>
+                                    </a>
+                                    <?php echo $sno; ?>
+                                </td>
+                                <td class="text-center"><?php echo htmlspecialchars($locationname); ?></td>
+                                <td class="text-center"><?php echo htmlspecialchars($date); ?></td>
+                                <td class="text-center">
+                                    <strong><?php echo htmlspecialchars($docno); ?></strong>
+                                </td>
+                                <td class="text-center"><?php echo htmlspecialchars($user); ?></td>
+                                <td class="text-center">
+                                    <span class="status-badge status-pending">Pending</span>
+                                </td>
+                                <td class="text-right"><?php echo number_format($budgetamount, 2, '.', ','); ?></td>
+                                <td class="text-center">
+                                    <input type="checkbox" name="select[<?php echo $sno;?>]" id="select<?php echo $sno;?>" value="<?php echo $docno; ?>" onClick="checkboxselect('<?php echo $docno; ?>',this.id)" class="form-checkbox">
+                                </td>
+                            </tr>
 			
-			<tr>
-			<span>
-			<td colspan="10"><div id="droupid<?php echo $sno; ?>" style="BORDER-COLLAPSE: collapse;">
-			<table id="dr1" style="BORDER-COLLAPSE: collapse" bordercolor="#666666" cellspacing="0" cellpadding="2" width="99%" align="left" border="0">
-			<tbody id="foo">
-			<tr>
-				<td bgcolor="#ffffff" class="bodytext31" valign="center"  align="center" width="25%"><strong>Suplier Name</strong></td>
-				<td bgcolor="#ffffff" class="bodytext31" valign="center"  align="center" width="30%"><strong>Item Name</strong></td>
-				<td bgcolor="#ffffff" class="bodytext31" valign="center"  align="center"><strong>Rate</strong></td>
-				<td bgcolor="#ffffff" class="bodytext31" valign="center"  align="center"><strong>Qty</strong></td>
-				<td bgcolor="#ffffff" class="bodytext31" valign="center"  align="center"><strong>Amount</strong></td>
-			</tr>
+                            <tr>
+                                <td colspan="8">
+                                    <div id="droupid<?php echo $sno; ?>" class="dropdown-content" style="display: none;">
+                                        <table class="detail-table">
+                                            <thead>
+                                                <tr>
+                                                    <th>Supplier Name</th>
+                                                    <th>Item Name</th>
+                                                    <th>Rate</th>
+                                                    <th>Qty</th>
+                                                    <th>Amount</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
 			<?php
 			$sno2 = 0;
 			$totalamount=0;	
@@ -456,54 +634,130 @@ font-weight:bold;
 			$amount = $res12['amount'];
 		
 			?>
-			<tr>
-			<td class="bodytext31" valign="center"  align="left"><div align="center"><?php echo $suppliername;?></div></td>
-			<td class="bodytext31" valign="center"  align="left"><div align="center"><?php echo $medicinename;?></div></td>
-			<td class="bodytext31" valign="center"  align="left"><div align="center"><?php echo $rate;?></div></td>
-			<td class="bodytext31" valign="center"  align="left"><div align="center"><?php echo $reqqty;?></div></td>
-			<td class="bodytext31" valign="center"  align="left"><div align="center"><?php echo $amount;?></div></td>
-			</tr>
+                                                <tr class="detail-row">
+                                                    <td class="text-center"><?php echo htmlspecialchars($suppliername); ?></td>
+                                                    <td class="text-center"><?php echo htmlspecialchars($medicinename); ?></td>
+                                                    <td class="text-right"><?php echo number_format($rate, 2); ?></td>
+                                                    <td class="text-center"><?php echo htmlspecialchars($reqqty); ?></td>
+                                                    <td class="text-right"><?php echo number_format($amount, 2); ?></td>
+                                                </tr>
 			<?php
 			}
 			?>
-			</tbody>
-			</table>
-			</td>
-			</span>
-			</tr>
-			<?php
-			}
-			}
-			?>
-			<tr>
-			<td class="bodytext31" valign="center"  align="left">&nbsp;</td>
-			</tr>
-			<tr>
-			<td colspan="7" class="bodytext31" valign="center"  align="right">
-			<input type="hidden" name="frm1submit1" value="frm1submit1" />
-			<input type="submit" name="submit" value="Submit" id="savepo"></td>
-			</tr>			
-			</form>
-			</tbody>
-		</table>
-		</td>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </td>
+                            </tr>
+                            <?php
+                            }
+                            }
+                            ?>
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="8" class="text-right">
+                                    <div class="form-actions">
+                                        <input type="hidden" name="frm1submit1" value="frm1submit1" />
+                                        <button type="submit" name="submit" id="savepo" class="btn btn-primary">
+                                            <i class="fas fa-check"></i> Approve Selected
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </form>
         </div>
         
-        <!-- Results Section -->
-        <div class="data-table-section">
-            <div class="table-header">
-                <h3><i class="fas fa-list"></i> Purchase Requests for Approval</h3>
-                <div class="search-bar">
-                    <input type="text" placeholder="Search requests..." id="requestSearch">
-                    <i class="fas fa-search"></i>
+            <!-- Results Section -->
+            <div class="data-table-section">
+                <div class="data-table-header">
+                    <i class="fas fa-list data-table-icon"></i>
+                    <h3 class="data-table-title">Purchase Requests for Approval</h3>
                 </div>
-            </div>
+                
+                <!-- Search Bar -->
+                <div style="margin-bottom: 1rem;">
+                    <div style="display: flex; gap: 1rem; align-items: center;">
+                        <input type="text" id="requestSearch" class="form-input" 
+                               placeholder="Search requests..." 
+                               style="flex: 1; max-width: 300px;"
+                               oninput="searchRequests(this.value)">
+                        <button type="button" class="btn btn-secondary" onclick="clearRequestSearch()">
+                            <i class="fas fa-times"></i> Clear
+                        </button>
+                    </div>
+                </div>
             
             <!-- Purchase approval form and table will continue here -->
-        </div>
+            </div>
+        </main>
     </div>
     
     <!-- Modern JavaScript -->
+    <script>
+        // Modern JavaScript functions
+        function refreshPage() {
+            window.location.reload();
+        }
+
+        function exportToExcel() {
+            // Add export functionality here
+            alert('Export functionality will be implemented');
+        }
+
+        function printReport() {
+            window.print();
+        }
+
+        function resetForm() {
+            document.getElementById("cbform1").reset();
+        }
+
+        function searchRequests(searchTerm) {
+            const table = document.querySelector('.data-table tbody');
+            if (table) {
+                const rows = table.querySelectorAll('tr');
+                
+                rows.forEach(row => {
+                    const text = row.textContent.toLowerCase();
+                    if (text.includes(searchTerm.toLowerCase())) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+            }
+        }
+
+        function clearRequestSearch() {
+            document.getElementById('requestSearch').value = '';
+            searchRequests('');
+        }
+
+        // Sidebar functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const menuToggle = document.getElementById('menuToggle');
+            const sidebar = document.getElementById('leftSidebar');
+            const sidebarToggle = document.getElementById('sidebarToggle');
+
+            menuToggle.addEventListener('click', function() {
+                sidebar.classList.toggle('active');
+            });
+
+            sidebarToggle.addEventListener('click', function() {
+                sidebar.classList.toggle('active');
+            });
+
+            // Close sidebar when clicking outside
+            document.addEventListener('click', function(event) {
+                if (!sidebar.contains(event.target) && !menuToggle.contains(event.target)) {
+                    sidebar.classList.remove('active');
+                }
+            });
+        });
+    </script>
     <script src="js/direct_purchaseapproval-modern.js?v=<?php echo time(); ?>"></script>
 </body>
 </html>

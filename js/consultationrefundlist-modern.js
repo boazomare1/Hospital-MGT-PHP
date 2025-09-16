@@ -1,315 +1,352 @@
-/**
- * Modern JavaScript for Consultation Refund List
- * Handles form validation, date picker, autocomplete, and modern interactions
- */
+// Consultation Refund List Modern JavaScript
 
-// Modern ES6+ JavaScript with enhanced functionality
-class ConsultationRefundList {
-    constructor() {
-        this.init();
+// DOM Elements
+let patientInput, patientcodeInput, visitcodeInput, dateFromInput, dateToInput, submitBtn, resetBtn, searchForm;
+
+// Initialize the page
+document.addEventListener('DOMContentLoaded', function() {
+    initializeElements();
+    setupEventListeners();
+    setupSidebarToggle();
+    initializeFormValidation();
+    initializePage();
+});
+
+function initializeElements() {
+    patientInput = document.getElementById('patient');
+    patientcodeInput = document.getElementById('patientcode');
+    visitcodeInput = document.getElementById('visitcode');
+    dateFromInput = document.getElementById('ADate1');
+    dateToInput = document.getElementById('ADate2');
+    submitBtn = document.querySelector('button[name="Submit"]');
+    resetBtn = document.getElementById('resetbutton');
+    searchForm = document.querySelector('form[name="cbform1"]');
+}
+
+function setupEventListeners() {
+    if (searchForm) {
+        searchForm.addEventListener('submit', handleFormSubmit);
     }
-
-    init() {
-        this.setupEventListeners();
-        this.setupDatePickers();
-        this.setupFormValidation();
-        this.setupAutoSuggest();
+    
+    if (resetBtn) {
+        resetBtn.addEventListener('click', resetForm);
     }
-
-    setupEventListeners() {
-        // Form submission handler
-        const form = document.querySelector('form[name="cbform1"]');
-        if (form) {
-            form.addEventListener('submit', (e) => {
-                if (!this.validateForm()) {
-                    e.preventDefault();
-                }
-            });
-        }
-
-        // Reset button handler
-        const resetButton = document.querySelector('input[name="resetbutton"]');
-        if (resetButton) {
-            resetButton.addEventListener('click', () => {
-                this.resetForm();
-            });
-        }
-
-        // Real-time validation
-        this.setupRealTimeValidation();
+    
+    if (dateFromInput) {
+        dateFromInput.addEventListener('blur', validateDateRange);
     }
-
-    setupDatePickers() {
-        // Initialize date pickers if the library is available
-        if (typeof NewCssCal !== 'undefined') {
-            const dateInputs = document.querySelectorAll('input[name="ADate1"], input[name="ADate2"]');
-            dateInputs.forEach(input => {
-                // Date picker is already initialized via onclick handlers
-                // We can add additional functionality here if needed
-            });
-        }
-    }
-
-    setupFormValidation() {
-        // Add modern validation attributes
-        const patientInput = document.querySelector('input[name="patient"]');
-        if (patientInput) {
-            patientInput.setAttribute('maxlength', '100');
-        }
-
-        const patientCodeInput = document.querySelector('input[name="patientcode"]');
-        if (patientCodeInput) {
-            patientCodeInput.setAttribute('maxlength', '50');
-        }
-
-        const visitCodeInput = document.querySelector('input[name="visitcode"]');
-        if (visitCodeInput) {
-            visitCodeInput.setAttribute('maxlength', '50');
-        }
-    }
-
-    setupAutoSuggest() {
-        // Initialize auto-suggest if available
-        if (typeof AutoSuggestControl !== 'undefined' && typeof StateSuggestions !== 'undefined') {
-            const searchCustomerName = document.getElementById('searchcustomername');
-            if (searchCustomerName) {
-                new AutoSuggestControl(searchCustomerName, new StateSuggestions());
-            }
-        }
-    }
-
-    setupRealTimeValidation() {
-        // Patient name validation
-        const patientInput = document.querySelector('input[name="patient"]');
-        if (patientInput) {
-            patientInput.addEventListener('input', (e) => {
-                this.validatePatientName(e.target.value);
-            });
-        }
-
-        // Patient code validation
-        const patientCodeInput = document.querySelector('input[name="patientcode"]');
-        if (patientCodeInput) {
-            patientCodeInput.addEventListener('input', (e) => {
-                this.validatePatientCode(e.target.value);
-            });
-        }
-
-        // Visit code validation
-        const visitCodeInput = document.querySelector('input[name="visitcode"]');
-        if (visitCodeInput) {
-            visitCodeInput.addEventListener('input', (e) => {
-                this.validateVisitCode(e.target.value);
-            });
-        }
-
-        // Date validation
-        const dateInputs = document.querySelectorAll('input[name="ADate1"], input[name="ADate2"]');
-        dateInputs.forEach(input => {
-            input.addEventListener('change', (e) => {
-                this.validateDate(e.target);
-            });
-        });
-    }
-
-    validateForm() {
-        const errors = [];
-
-        // Date validation
-        const fromDate = document.querySelector('input[name="ADate1"]');
-        const toDate = document.querySelector('input[name="ADate2"]');
-
-        if (fromDate && toDate) {
-            if (fromDate.value && toDate.value) {
-                const fromDateObj = new Date(fromDate.value);
-                const toDateObj = new Date(toDate.value);
-
-                if (fromDateObj > toDateObj) {
-                    errors.push('From date cannot be greater than To date.');
-                    this.showFieldError(fromDate, 'From date cannot be greater than To date.');
-                    this.showFieldError(toDate, 'From date cannot be greater than To date.');
-                } else {
-                    this.clearFieldError(fromDate);
-                    this.clearFieldError(toDate);
-                }
-            }
-        }
-
-        if (errors.length > 0) {
-            this.showAlert(errors.join(' '), 'error');
-            return false;
-        }
-
-        return true;
-    }
-
-    validatePatientName(value) {
-        const field = document.querySelector('input[name="patient"]');
-        if (value.length > 100) {
-            this.showFieldError(field, 'Patient name must be 100 characters or less.');
-        } else {
-            this.clearFieldError(field);
-        }
-    }
-
-    validatePatientCode(value) {
-        const field = document.querySelector('input[name="patientcode"]');
-        if (value && !/^[A-Za-z0-9\-_]+$/.test(value)) {
-            this.showFieldError(field, 'Patient code can only contain letters, numbers, hyphens, and underscores.');
-        } else {
-            this.clearFieldError(field);
-        }
-    }
-
-    validateVisitCode(value) {
-        const field = document.querySelector('input[name="visitcode"]');
-        if (value && !/^[A-Za-z0-9\-_]+$/.test(value)) {
-            this.showFieldError(field, 'Visit code can only contain letters, numbers, hyphens, and underscores.');
-        } else {
-            this.clearFieldError(field);
-        }
-    }
-
-    validateDate(field) {
-        if (field.value) {
-            const date = new Date(field.value);
-            if (isNaN(date.getTime())) {
-                this.showFieldError(field, 'Please enter a valid date.');
-            } else {
-                this.clearFieldError(field);
-            }
-        }
-    }
-
-    showFieldError(field, message) {
-        if (!field) return;
-
-        field.style.borderColor = '#dc3545';
-        
-        // Remove existing error message
-        const existingError = field.parentNode.querySelector('.field-error');
-        if (existingError) {
-            existingError.remove();
-        }
-
-        // Add error message
-        const errorDiv = document.createElement('div');
-        errorDiv.className = 'field-error';
-        errorDiv.style.color = '#dc3545';
-        errorDiv.style.fontSize = '12px';
-        errorDiv.style.marginTop = '2px';
-        errorDiv.textContent = message;
-        field.parentNode.appendChild(errorDiv);
-    }
-
-    clearFieldError(field) {
-        if (!field) return;
-
-        field.style.borderColor = '';
-        const errorDiv = field.parentNode.querySelector('.field-error');
-        if (errorDiv) {
-            errorDiv.remove();
-        }
-    }
-
-    showAlert(message, type = 'info') {
-        // Create modern alert
-        const alertDiv = document.createElement('div');
-        alertDiv.className = `alert alert-${type === 'error' ? 'error' : 'success'}`;
-        alertDiv.textContent = message;
-        alertDiv.style.position = 'fixed';
-        alertDiv.style.top = '20px';
-        alertDiv.style.right = '20px';
-        alertDiv.style.zIndex = '9999';
-        alertDiv.style.maxWidth = '400px';
-        alertDiv.style.padding = '15px 20px';
-        alertDiv.style.borderRadius = '4px';
-        alertDiv.style.boxShadow = '0 4px 6px rgba(0,0,0,0.1)';
-
-        document.body.appendChild(alertDiv);
-
-        // Auto remove after 5 seconds
-        setTimeout(() => {
-            if (alertDiv.parentNode) {
-                alertDiv.parentNode.removeChild(alertDiv);
-            }
-        }, 5000);
-    }
-
-    resetForm() {
-        const form = document.querySelector('form[name="cbform1"]');
-        if (form) {
-            form.reset();
-            
-            // Clear any error messages
-            const errorMessages = form.querySelectorAll('.field-error');
-            errorMessages.forEach(error => error.remove());
-            
-            // Reset field styles
-            const inputs = form.querySelectorAll('input');
-            inputs.forEach(input => {
-                input.style.borderColor = '';
-            });
-        }
-    }
-
-    // Print functionality
-    printRefundList() {
-        window.print();
-    }
-
-    // Export functionality (if needed)
-    exportToExcel() {
-        // This would need to be implemented based on requirements
-        console.log('Export to Excel functionality would be implemented here');
+    
+    if (dateToInput) {
+        dateToInput.addEventListener('blur', validateDateRange);
     }
 }
 
-// Legacy function compatibility
-window.cbcustomername1 = function() {
-    const form = document.querySelector('form[name="cbform1"]');
-    if (form) {
-        form.submit();
-    }
-};
-
-window.disableEnterKey = function(varPassed) {
-    const key = event.keyCode || event.which;
+function setupSidebarToggle() {
+    const menuToggle = document.getElementById('menuToggle');
+    const sidebarToggle = document.getElementById('sidebarToggle');
+    const mainContainer = document.querySelector('.main-container-with-sidebar');
     
-    if (key === 8) { // Backspace
-        event.keyCode = 0;
+    if (menuToggle) {
+        menuToggle.addEventListener('click', () => {
+            mainContainer.classList.toggle('sidebar-collapsed');
+        });
+    }
+    
+    if (sidebarToggle) {
+        sidebarToggle.addEventListener('click', () => {
+            mainContainer.classList.toggle('sidebar-collapsed');
+        });
+    }
+}
+
+function initializeFormValidation() {
+    if (!searchForm) return;
+    
+    const inputs = searchForm.querySelectorAll('input, select');
+    
+    inputs.forEach(input => {
+        input.addEventListener('blur', function() {
+            validateField(this);
+        });
+        
+        input.addEventListener('input', function() {
+            clearFieldError(this);
+        });
+    });
+}
+
+function validateField(field) {
+    const value = field.value.trim();
+    const fieldName = field.name;
+    
+    clearFieldError(field);
+    
+    if (field.hasAttribute('required') && !value) {
+        showFieldError(field, 'This field is required');
         return false;
     }
     
-    if (key === 13) { // Enter
+    if (fieldName === 'ADate1' && !value) {
+        showFieldError(field, 'Please select a start date');
+        return false;
+    }
+    
+    if (fieldName === 'ADate2' && !value) {
+        showFieldError(field, 'Please select an end date');
         return false;
     }
     
     return true;
-};
+}
 
-window.loadprintpage1 = function(banum) {
-    if (banum) {
-        const printWindow = window.open(
-            `print_bill1_op1.php?billautonumber=${banum}`,
-            `Window${banum}`,
-            'width=722,height=950,toolbar=0,scrollbars=1,location=0,bar=0,menubar=1,resizable=1,left=25,top=25'
-        );
+function validateDateRange() {
+    if (!dateFromInput || !dateToInput) return;
+    
+    const fromDate = new Date(dateFromInput.value);
+    const toDate = new Date(dateToInput.value);
+    
+    if (dateFromInput.value && dateToInput.value && fromDate > toDate) {
+        showFieldError(dateToInput, 'End date must be after start date');
+        return false;
+    }
+    
+    return true;
+}
+
+function showFieldError(field, message) {
+    clearFieldError(field);
+    
+    field.classList.add('error');
+    
+    const errorDiv = document.createElement('div');
+    errorDiv.className = 'field-error';
+    errorDiv.textContent = message;
+    
+    field.parentNode.appendChild(errorDiv);
+}
+
+function clearFieldError(field) {
+    field.classList.remove('error');
+    
+    const existingError = field.parentNode.querySelector('.field-error');
+    if (existingError) {
+        existingError.remove();
+    }
+}
+
+function handleFormSubmit(event) {
+    const dateFrom = dateFromInput.value.trim();
+    const dateTo = dateToInput.value.trim();
+    
+    clearAllFieldErrors();
+    
+    let isValid = true;
+    
+    if (!dateFrom) {
+        showFieldError(dateFromInput, 'Please select a start date');
+        isValid = false;
+    }
+    
+    if (!dateTo) {
+        showFieldError(dateToInput, 'Please select an end date');
+        isValid = false;
+    }
+    
+    if (dateFrom && dateTo) {
+        const fromDate = new Date(dateFrom);
+        const toDate = new Date(dateTo);
         
-        if (!printWindow) {
-            alert('Please allow popups for this site to print bills.');
+        if (fromDate > toDate) {
+            showFieldError(dateToInput, 'End date must be after start date');
+            isValid = false;
         }
     }
-};
+    
+    if (!isValid) {
+        event.preventDefault();
+        return false;
+    }
+    
+    showLoadingState();
+    return true;
+}
 
-// Initialize when DOM is ready
-document.addEventListener('DOMContentLoaded', function() {
-    new ConsultationRefundList();
-});
-
-// Initialize with jQuery if available
-if (typeof $ !== 'undefined') {
-    $(document).ready(function() {
-        new ConsultationRefundList();
+function clearAllFieldErrors() {
+    const errorFields = searchForm.querySelectorAll('.error');
+    errorFields.forEach(field => {
+        clearFieldError(field);
     });
 }
+
+function showLoadingState() {
+    if (searchForm) {
+        searchForm.classList.add('loading');
+        
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Searching...';
+        }
+    }
+}
+
+function hideLoadingState() {
+    if (searchForm) {
+        searchForm.classList.remove('loading');
+        
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="fas fa-search"></i> Search';
+        }
+    }
+}
+
+function resetForm() {
+    if (searchForm) {
+        searchForm.reset();
+        clearAllFieldErrors();
+        hideLoadingState();
+    }
+}
+
+function initializePage() {
+    const mainContent = document.querySelector('.main-content');
+    if (mainContent) {
+        mainContent.classList.add('fade-in');
+    }
+}
+
+// Utility functions
+function refreshPage() {
+    window.location.reload();
+}
+
+function exportToExcel() {
+    const table = document.querySelector('.data-table');
+    if (!table) return;
+    
+    let csv = [];
+    const rows = table.querySelectorAll('tr');
+    
+    for (let i = 0; i < rows.length; i++) {
+        let row = [], cols = rows[i].querySelectorAll('td, th');
+        
+        for (let j = 0; j < cols.length; j++) {
+            if (j === cols.length - 1 && i > 0) continue;
+            
+            let text = cols[j].innerText.replace(/,/g, ';');
+            row.push('"' + text + '"');
+        }
+        
+        csv.push(row.join(','));
+    }
+    
+    const csvContent = csv.join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    
+    if (link.download !== undefined) {
+        const url = URL.createObjectURL(blob);
+        link.setAttribute('href', url);
+        link.setAttribute('download', 'consultation_refund_list_export.csv');
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+}
+
+function printReport() {
+    window.print();
+}
+
+// Keyboard shortcuts
+document.addEventListener('keydown', function(e) {
+    if (e.ctrlKey && e.key === 'r') {
+        e.preventDefault();
+        refreshPage();
+    }
+    
+    if (e.ctrlKey && e.key === 'p') {
+        e.preventDefault();
+        printReport();
+    }
+    
+    if (e.ctrlKey && e.key === 'e') {
+        e.preventDefault();
+        exportToExcel();
+    }
+    
+    if (e.key === 'Escape') {
+        hideLoadingState();
+    }
+});
+
+// Auto-hide alerts after 5 seconds
+document.addEventListener('DOMContentLoaded', function() {
+    const alerts = document.querySelectorAll('.alert');
+    alerts.forEach(alert => {
+        setTimeout(() => {
+            alert.style.opacity = '0';
+            setTimeout(() => {
+                alert.remove();
+            }, 300);
+        }, 5000);
+    });
+});
+
+// Enhanced table interactions
+document.addEventListener('DOMContentLoaded', function() {
+    const table = document.querySelector('.data-table');
+    if (table) {
+        const rows = table.querySelectorAll('tbody tr');
+        rows.forEach(row => {
+            row.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-1px)';
+                this.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.1)';
+            });
+            
+            row.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+                this.style.boxShadow = 'none';
+            });
+        });
+    }
+});
+
+// Backward compatibility functions
+function cbsuppliername1() {
+    if (searchForm) {
+        searchForm.submit();
+    }
+}
+
+// Enhanced refund processing
+function processRefund(patientcode, visitcode) {
+    if (confirm(`Are you sure you want to process refund for patient ${patientcode} with visit code ${visitcode}?`)) {
+        const refundBtn = event.target.closest('.action-btn');
+        if (refundBtn) {
+            refundBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+            refundBtn.disabled = true;
+        }
+        
+        window.location.href = `consultationrefund.php?patientcode=${patientcode}&visitcode=${visitcode}`;
+    }
+}
+
+// Add click handlers to refund buttons
+document.addEventListener('DOMContentLoaded', function() {
+    const refundButtons = document.querySelectorAll('.action-btn.refund');
+    refundButtons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            const href = this.getAttribute('href');
+            const urlParams = new URLSearchParams(href.split('?')[1]);
+            const patientcode = urlParams.get('patientcode');
+            const visitcode = urlParams.get('visitcode');
+            
+            if (patientcode && visitcode) {
+                processRefund(patientcode, visitcode);
+            }
+        });
+    });
+});

@@ -1,595 +1,438 @@
-<?php
-session_start();
-include ("includes/loginverify.php");
-include ("db/db_connect.php");
-set_time_limit(0);
-
-$ipaddress = $_SERVER['REMOTE_ADDR'];
-$updatedatetime = date('Y-m-d H:i:s');
-$username = $_SESSION['username'];
-$companyanum = $_SESSION['companyanum'];
-$companyname = $_SESSION['companyname'];
-$paymentreceiveddatefrom = date('Y-m-d', strtotime('-1 month'));
-$paymentreceiveddateto = date('Y-m-d');
-
-$searchsuppliername = '';
-$suppliername = '';
-$cbsuppliername = '';
-$cbcustomername = '';
-$cbbillnumber = '';
-$cbbillstatus = '';
-$colorloopcount = '';
-$sno = '';
-$snocount = '';
-$visitcode1 = '';
-$total = '';
-$looptotalpaidamount = '0.00';
-$looptotalpendingamount = '0.00';
-$looptotalwriteoffamount = '0.00';
-$looptotalcashamount = '0.00';
-$looptotalcreditamount = '0.00';
-$looptotalcardamount = '0.00';
-$looptotalonlineamount = '0.00';
-$looptotalchequeamount = '0.00';
-$looptotaltdsamount = '0.00';
-$looptotalwriteoffamount = '0.00';
-$pendingamount = '0.00';
-$accountname = '';
-$temp = '' ;	
-
-if (isset($_REQUEST["accountname"])) { $accountname = $_REQUEST["accountname"]; } else { $accountname = ""; }
-
-if (isset($_REQUEST["consultingdoctor"])) { $consultingdoctor = $_REQUEST["consultingdoctor"]; } else { $consultingdoctor = ""; }
-
-$query111 = "select * from master_doctor where auto_number = '$consultingdoctor'";
-$exec111 = mysqli_query($GLOBALS["___mysqli_ston"], $query111) or die ("Error in query111".mysqli_error($GLOBALS["___mysqli_ston"]));
-$res111 = mysqli_fetch_array($exec111);
-$res111doctorname = $res111['doctorname'];
-
-if (isset($_REQUEST["canum"])) { $getcanum = $_REQUEST["canum"]; } else { $getcanum = ""; }
-//$getcanum = $_GET['canum'];
-if ($getcanum != '')
-{
-	$query4 = "select * from master_supplier where auto_number = '$getcanum'";
-	$exec4 = mysqli_query($GLOBALS["___mysqli_ston"], $query4) or die ("Error in Query4".mysqli_error($GLOBALS["___mysqli_ston"]));
-	$res4 = mysqli_fetch_array($exec4);
-	$cbsuppliername = $res4['suppliername'];
-	$suppliername = $res4['suppliername'];
-}
-
-if (isset($_REQUEST["cbfrmflag1"])) { $cbfrmflag1 = $_REQUEST["cbfrmflag1"]; } else { $cbfrmflag1 = ""; }
-//$cbfrmflag1 = $_REQUEST['cbfrmflag1'];
-if ($cbfrmflag1 == 'cbfrmflag1')
-{
-
-	//$cbsuppliername = $_REQUEST['cbsuppliername'];
-	//$suppliername = $_REQUEST['cbsuppliername'];
-	$paymentreceiveddatefrom = $_REQUEST['ADate1'];
-	$paymentreceiveddateto = $_REQUEST['ADate2'];
-	$visitcode1 = 10;
-
-}
-
-if (isset($_REQUEST["task"])) { $task = $_REQUEST["task"]; } else { $task = ""; }
-//$task = $_REQUEST['task'];
-if ($task == 'deleted')
-{
-	$errmsg = 'Payment Entry Delete Completed.';
-}
-
-if (isset($_REQUEST["ADate1"])) { $ADate1 = $_REQUEST["ADate1"]; } else { $ADate1 = ""; }
-//$paymenttype = $_REQUEST['paymenttype']; 
-if (isset($_REQUEST["ADate2"])) { $ADate2 = $_REQUEST["ADate2"]; } else { $ADate2 = ""; }
-//$billstatus = $_REQUEST['billstatus'];
-if ($ADate1 != '' && $ADate2 != '')
-{
-	$transactiondatefrom = $_REQUEST['ADate1'];
-	$transactiondateto = $_REQUEST['ADate2'];
-}
-else
-{
-	$transactiondatefrom = date('Y-m-d', strtotime('-1 month'));
-	$transactiondateto = date('Y-m-d');
-}
-
-?>
-<style type="text/css">
-<!--
-body {
-	margin-left: 0px;
-	margin-top: 0px;
-	background-color: #ecf0f5;
-}
-.bodytext3 {	FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3B3B3C; FONT-FAMILY: Tahoma
-}
--->
-</style>
-<link href="css/datepickerstyle.css" rel="stylesheet" type="text/css" />
-<script type="text/javascript" src="js/adddate.js"></script>
-<script type="text/javascript" src="js/adddate2.js"></script>
-<script language="javascript">
-
-function cbsuppliername1()
-{
-	document.cbform1.submit();
-}
-
-</script>
-<style type="text/css">
-<!--
-.bodytext31 {FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3b3b3c; FONT-FAMILY: Tahoma; text-decoration:none
-}
-.bodytext311 {FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3b3b3c; FONT-FAMILY: Tahoma
-}
-.style1 {FONT-WEIGHT: bold; FONT-SIZE: 11px; COLOR: #3b3b3c; FONT-FAMILY: Tahoma; text-decoration: none; }
--->
-</style>
-<script language="javascript">
-
-function funcPrintReceipt1(varRecAnum)
-{
-	var varRecAnum = varRecAnum
-	//alert (varRecAnum);
-	//window.open("print_bill1.php?printsource=billpage&&billautonumber="+varBillAutoNumber+"&&companyanum="+varBillCompanyAnum+"&&title1="+varTitleHeader+"&&copy1="+varPrintHeader+"&&billnumber="+varBillNumber+"","OriginalWindow<?php //echo $banum; ?>",'width=722,height=950,toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=1,resizable=1,left=25,top=25');
-	window.open("print_payment_receipt1.php?receiptanum="+varRecAnum+"","OriginalWindow<?php //echo $banum; ?>",'width=722,height=950,toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=1,resizable=1,left=25,top=25');
-}
-
-function funcDeletePayment1(varPaymentSerialNumber)
-{
-	var varPaymentSerialNumber = varPaymentSerialNumber;
-	var fRet;
-	fRet = confirm('Are you sure want to delete this payment entry serial number '+varPaymentSerialNumber+'?');
-	//alert(fRet);
-	if (fRet == true)
-	{
-		alert ("Payment Entry Delete Completed.");
-		//return false;
-	}
-	if (fRet == false)
-	{
-		alert ("Payment Entry Delete Not Completed.");
-		return false;
-	}
-	//return false;
-}
-
-</script>
-</head>
-
-<script src="js/datetimepicker_css.js"></script>
-
-<body>
-<table width="1900" border="0" cellspacing="0" cellpadding="2">
-  <tr>
-    <td colspan="9" bgcolor="#ecf0f5"><?php include ("includes/alertmessages1.php"); ?></td>
-  </tr>
-  <tr>
-    <td colspan="9" bgcolor="#ecf0f5"><?php include ("includes/title1.php"); ?></td>
-  </tr>
-  <tr>
-    <td colspan="9" bgcolor="#ecf0f5"><?php include ("includes/menu1.php"); ?></td>
-  </tr>
-  <tr>
-    <td colspan="9">&nbsp;</td>
-  </tr>
-  <tr>
-    <td width="1%">&nbsp;</td>
-    <td width="99%" valign="top"><table width="116%" border="0" cellspacing="0" cellpadding="0">
-      <tr>
-        <td width="860">
-		
-		
-              <form name="cbform1" method="post" action="doctorutilizationreport.php">
-                <table width="600" border="0" align="left" cellpadding="4" cellspacing="0" bordercolor="#666666" id="AutoNumber3" style="border-collapse: collapse">
-                  <tbody>
-                    <tr bgcolor="#011E6A">
-                      <td colspan="2" bgcolor="#ecf0f5" class="bodytext3"><strong>Doctor Utilization Report</strong></td>
-                      <!--<td colspan="2" bgcolor="#ecf0f5" class="bodytext3"><?php echo $errmgs; ?>&nbsp;</td>-->
-                      <td bgcolor="#ecf0f5" class="bodytext3" colspan="2">&nbsp;</td>
-                    </tr>
-					<!--<tr>
-			 <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">Consulting Doctor </td>
-				  <td colspan="3" align="left" valign="top"  bgcolor="#FFFFFF"><strong>
-				    <select name="consultingdoctor" id="consultingdoctor">
-                      <option value="">Select Doctor</option>
-                      <?php
-				     $query51 = "select * from master_doctor where status <> 'deleted' ";
-				     $exec51 = mysqli_query($GLOBALS["___mysqli_ston"], $query51) or die ("Error in Query5".mysqli_error($GLOBALS["___mysqli_ston"]));
-				     while ($res51 = mysqli_fetch_array($exec51))
-				       {
-				       $res51anum = $res51["auto_number"];
-				       $res51doctorname = $res51["doctorname"];
-				       ?>
-					  
-                      <option value="<?php echo $res51anum; ?>" ><?php echo $res51doctorname; ?></option>
-                      <?php
-				     }
-				  ?>
-                    </select>
-				  </strong></td>
-			</tr>-->
-                    <tr>
-                      <td class="bodytext31" valign="center"  align="left" 
-                bgcolor="#FFFFFF"> Date From </td>
-                      <td width="30%" align="left" valign="center"  bgcolor="#FFFFFF" class="bodytext31"><input name="ADate1" id="ADate1" style="border: 1px solid #001E6A" value="<?php echo $paymentreceiveddatefrom; ?>"  size="10"  readonly="readonly" onKeyDown="return disableEnterKey()" />
-                          <img src="images2/cal.gif" onClick="javascript:NewCssCal('ADate1')" style="cursor:pointer"/> </td>
-                      <td width="16%" align="left" valign="center"  bgcolor="#FFFFFF" class="bodytext31"> Date To </td>
-                      <td width="33%" align="left" valign="center"  bgcolor="#FFFFFF"><span class="bodytext31">
-                        <input name="ADate2" id="ADate2" style="border: 1px solid #001E6A" value="<?php echo $paymentreceiveddateto; ?>"  size="10"  readonly="readonly" onKeyDown="return disableEnterKey()" />
-                        <img src="images2/cal.gif" onClick="javascript:NewCssCal('ADate2')" style="cursor:pointer"/> </span></td>
-                    </tr>
-                    <tr>
-                      <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">&nbsp;</td>
-                      <td colspan="3" align="left" valign="top"  bgcolor="#FFFFFF">
-					  <input type="hidden" name="cbfrmflag1" value="cbfrmflag1">
-                          <input  style="border: 1px solid #001E6A" type="submit" value="Search" name="Submit" />
-                          <input name="resetbutton" type="reset" id="resetbutton"  style="border: 1px solid #001E6A" value="Reset" /></td>
-                    </tr>
-                  </tbody>
-                </table>
-              </form>		</td>
-      </tr>
-      <tr>
-        <td>&nbsp;</td>
-      </tr>
-      <tr>
-        <td><table id="AutoNumber3" style="BORDER-COLLAPSE: collapse" 
-            bordercolor="#666666" cellspacing="0" cellpadding="4" width="600" 
-            align="left" border="0">
-          <tbody>
-            <!--<tr>
-			<td width="5%" bgcolor="#ecf0f5" class="bodytext31">&nbsp;</td>
-              <td colspan="30" bgcolor="#ecf0f5" class="bodytext31">&nbsp;</td>
-            </tr>
-			<tr>
-			<td bgcolor="#ffffff">&nbsp;</td>
-			</tr>-->
-			<?php 
-		  
-		  
-		  //print_r($paymenttypename); 
-		  
-		  ?>
-		  
-		  <?php 
-		  if (isset($_REQUEST["cbfrmflag1"])) { $cbfrmflag1 = $_REQUEST["cbfrmflag1"]; } else { $cbfrmflag1 = ""; }
-//$cbfrmflag1 = $_REQUEST['cbfrmflag1'];
-if ($cbfrmflag1 == 'cbfrmflag1')
-{
-		  $query15 = "select * from master_consultationlist group by username";
-		  $exec15 = mysqli_query($GLOBALS["___mysqli_ston"], $query15) or die ("Error in Query15".mysqli_error($GLOBALS["___mysqli_ston"]));
-		  while ($res15 = mysqli_fetch_array($exec15))
-		  {
-		  $doctorname = $res15['username'];
-		  
-		  ?>
-		  <tr>
-			<td width="5%" bgcolor="#ecf0f5" class="bodytext31"><strong><?php echo $doctorname; ?></strong></td>
-              <td colspan="30" bgcolor="#ecf0f5" class="bodytext31">&nbsp;</td>
-              <?php
-              	if($temp==""){
-					?>
-                    </td> <td class="bodytext31" valign="top" bgcolor="#ecf0f5" align="left"> 
-                 <a target="_blank" href="print_doctorutilizationreport.php?ADate1=<?php echo $ADate1; ?>&&ADate2=<?php echo $ADate2; ?>"> <img src="images/pdfdownload.jpg" width="30" height="30"></a> 
-                </td>
-				<?php
-				$temp = $temp+1;	
-				}
-			  ?> 
-            </tr>
-			<tr>
-			<td bgcolor="#ffffff">&nbsp;</td>
-		  <?php
-		  
-		  $paymenttypename = array();
-		  
-		  $query21 = "select * from master_paymenttype where recordstatus <> 'deleted'"; 
-		  $exec21 = mysqli_query($GLOBALS["___mysqli_ston"], $query21) or die ("Error in Query21".mysqli_error($GLOBALS["___mysqli_ston"]));
-		  while ($res21 = mysqli_fetch_array($exec21))
-		  {
-		  $res21paymenttype = $res21['paymenttype'];
-		  array_push($paymenttypename, $res21paymenttype);
-		  ?>
-		 
-		  <td class="bodytext31" valign="center"  align="left" bgcolor="#ffffff"><strong><?php echo $res21paymenttype; ?></strong></td>
-		  <?php 
-		  }
-?>	
-		 </tr>
-		  <tr>
-		  <td class="bodytext31" valign="center"  align="left" bgcolor="#ecf0f5"><strong>Revenue</strong></td> 
-		  
-		  <?php
-			
-			$dotarray = explode("-", $paymentreceiveddateto);
-			$dotyear = $dotarray[0];
-			$dotmonth = $dotarray[1];
-			$dotday = $dotarray[2];
-			$totalcashamount = '0.00';
-			$revenueamountfinal = '0.00';
-			$billnumberamountfinal = '0.00';
-			$averagecostfinal = '0.00';
-			$billnumbercount ='0.00';
-			
-$paymentreceiveddateto = date("Y-m-d", mktime(0, 0, 0, $dotmonth, $dotday + 1, $dotyear));
-
-		  $revenueamountfinal = array();
-		  $billnumberamountfinal = array();
-		  $averagecostfinal = array();
-	 
-
-		  $query2 = "select * from master_paymenttype where recordstatus <> 'deleted'"; 
-		  $exec2 = mysqli_query($GLOBALS["___mysqli_ston"], $query2) or die ("Error in Query2".mysqli_error($GLOBALS["___mysqli_ston"]));
-		  while ($res2 = mysqli_fetch_array($exec2))
-		  {
-			  $res2auto_number = $res2['auto_number'];
-			  $res2paymenttype = $res2['paymenttype'];
-			  $res3transactionamount = '0';
-			  $res4totalamount = '0';
-			  $res5totalamount = '0';
-			  $query16 = "select * from master_consultationlist where username = '$doctorname'";
-			  $exec16 = mysqli_query($GLOBALS["___mysqli_ston"], $query16) or die ("Error in Query16".mysqli_error($GLOBALS["___mysqli_ston"]));
-			  while ($res16 = mysqli_fetch_array($exec16))
-			  {
-			  $visitcode = $res16['visitcode'];
-			  $query3 = "select sum(transactionamount) as transactionamount1, count(billnumber) as billnumber1 from master_transactionpaynow where paymenttype = '$res2paymenttype' and visitcode = '$visitcode' and transactionamount <>'0.00' and transactiondate between '$ADate1' and '$ADate2'"; 
-			  $exec3 = mysqli_query($GLOBALS["___mysqli_ston"], $query3) or die ("Error in Query3".mysqli_error($GLOBALS["___mysqli_ston"]));
-			  $res3 = mysqli_fetch_array($exec3);
-			  $res3transactionamount += $res3['transactionamount1'];
-			  $res3billnumber = $res3['billnumber1'];
-			  
-			  $query4 = "select sum(totalamount) as totalamount1, count(billnumber) as billnumber1 from master_billing where paymenttype = '$res2paymenttype' and visitcode = '$visitcode' and totalamount <> '0.00' and billingdatetime between '$ADate1' and '$ADate2'"; 
-			  $exec4 = mysqli_query($GLOBALS["___mysqli_ston"], $query4) or die ("Error in Query4".mysqli_error($GLOBALS["___mysqli_ston"]));
-			  $res4 = mysqli_fetch_array($exec4);
-			  $res4totalamount += $res4['totalamount1'];
-			  $res4billnumber = $res4['billnumber1'];
-			  
-			  $query5 = "select sum(transactionamount) as transactionamount1, count(billnumber) as billnumber1 from master_transactionpaylater where paymenttype = '$res2paymenttype' and visitcode = '$visitcode' and transactiontype = 'finalize' and transactionamount <>'0.00' and transactiondate between '$ADate1' and '$ADate2'"; 
-			  $exec5 = mysqli_query($GLOBALS["___mysqli_ston"], $query5) or die ("Error in Query5".mysqli_error($GLOBALS["___mysqli_ston"]));
-			  $res5 = mysqli_fetch_array($exec5);
-			  $res5totalamount += $res5['transactionamount1'];
-			  $res5billnumber = $res5['billnumber1'];
-			  }
-			  $revenueamount = $res3transactionamount + $res4totalamount + $res5totalamount;
-			  $billnumbercount = $res3billnumber + $res4billnumber + $res5billnumber;
-			  
-			  if($billnumbercount != 0)
-			  {
-			  $averagecost = $revenueamount/$billnumbercount;
-			  }
-			  else 
-			  {
-			  $averagecost = $revenueamount/1;
-			  }
-			  array_push($revenueamountfinal, $revenueamount);
-			  array_push($billnumberamountfinal, $billnumbercount);
-			  array_push($averagecostfinal,$averagecost);
-	
-			 
-		 
-		  //print_r($revenueamountfinal);
-		  
-		  $snocount = $snocount + 1;
-		  $colorloopcount = $colorloopcount + 1;
-		  $showcolor = ($colorloopcount & 1); 
-		  
-			if ($showcolor == 0)
-			{
-				//echo "if";
-				$colorcode = 'bgcolor="#CBDBFA"';
-			}
-			else
-			{
-				//echo "else";
-				$colorcode = 'bgcolor="#ecf0f5"';
-			}
-			?>
-			
-		  <td class="bodytext31" valign="center"  align="left" bgcolor="#ecf0f5"><strong><?php  echo number_format($revenueamount,2,'.',','); ?></strong></td>			
-		<!-- <tr>
-		 <td class="bodytext31" valign="center"  align="left">Revenue</td>
-		 </tr>-->
-			<?php
-			}
-			
-			?>
-			</tr>
-		    <tr>
-		   <td class="bodytext31" valign="center"  align="left" bgcolor="#CBDBFA"><strong>Count</strong></td> 
-		  <?php
-			
-			$dotarray = explode("-", $paymentreceiveddateto);
-			$dotyear = $dotarray[0];
-			$dotmonth = $dotarray[1];
-			$dotday = $dotarray[2];
-			$totalcashamount = '0.00';
-			$revenueamountfinal = '0.00';
-			$billnumberamountfinal = '0.00';
-			$averagecostfinal = '0.00';
-			$billnumbercount ='0.00';
-			
-          $paymentreceiveddateto = date("Y-m-d", mktime(0, 0, 0, $dotmonth, $dotday + 1, $dotyear));
-
-		  $revenueamountfinal = array();
-		  $billnumberamountfinal = array();
-		  $averagecostfinal = array();
-	  
-
-		  $query2 = "select * from master_paymenttype where recordstatus <> 'deleted'"; 
-		  $exec2 = mysqli_query($GLOBALS["___mysqli_ston"], $query2) or die ("Error in Query2".mysqli_error($GLOBALS["___mysqli_ston"]));
-		  while ($res2 = mysqli_fetch_array($exec2))
-		  {
-			  $res2auto_number = $res2['auto_number'];
-			  $res2paymenttype = $res2['paymenttype'];
-			  $res3transactionamount = '0';
-			  $res4totalamount = '0';
-			  $res5totalamount = '0';
-			  $res3billnumber = '0';
-			  $res4billnumber = '0';
-			  $res5billnumber = '0';
-			  $query16 = "select * from master_consultationlist where username = '$doctorname'";
-			  $exec16 = mysqli_query($GLOBALS["___mysqli_ston"], $query16) or die ("Error in Query16".mysqli_error($GLOBALS["___mysqli_ston"]));
-			  while ($res16 = mysqli_fetch_array($exec16))
-			  {
-			  $visitcode = $res16['visitcode'];
-			  $query3 = "select sum(transactionamount) as transactionamount1, count(billnumber) as billnumber1 from master_transactionpaynow where paymenttype = '$res2paymenttype' and visitcode = '$visitcode' and transactionamount <>'0.00' and transactiondate between '$ADate1' and '$ADate2'"; 
-			  $exec3 = mysqli_query($GLOBALS["___mysqli_ston"], $query3) or die ("Error in Query3".mysqli_error($GLOBALS["___mysqli_ston"]));
-			  $res3 = mysqli_fetch_array($exec3);
-			  $res3transactionamount += $res3['transactionamount1'];
-			  $res3billnumber += $res3['billnumber1'];
-			  
-			  $query4 = "select sum(totalamount) as totalamount1, count(billnumber) as billnumber1 from master_billing where paymenttype = '$res2paymenttype' and visitcode = '$visitcode' and totalamount <> '0.00' and billingdatetime between '$ADate1' and '$ADate2'"; 
-			  $exec4 = mysqli_query($GLOBALS["___mysqli_ston"], $query4) or die ("Error in Query4".mysqli_error($GLOBALS["___mysqli_ston"]));
-			  $res4 = mysqli_fetch_array($exec4);
-			  $res4totalamount += $res4['totalamount1'];
-			  $res4billnumber += $res4['billnumber1'];
-			  
-			  $query5 = "select sum(transactionamount) as transactionamount1, count(billnumber) as billnumber1 from master_transactionpaylater where paymenttype = '$res2paymenttype' and visitcode = '$visitcode' and transactiontype = 'finalize' and transactionamount <>'0.00' and transactiondate between '$ADate1' and '$ADate2'"; 
-			  $exec5 = mysqli_query($GLOBALS["___mysqli_ston"], $query5) or die ("Error in Query5".mysqli_error($GLOBALS["___mysqli_ston"]));
-			  $res5 = mysqli_fetch_array($exec5);
-			  $res5totalamount += $res5['transactionamount1'];
-			  $res5billnumber += $res5['billnumber1'];
-			  }
-			  $revenueamount = $res3transactionamount + $res4totalamount + $res5totalamount;
-			  $billnumbercount = $res3billnumber + $res4billnumber + $res5billnumber;
-			  
-			  if($billnumbercount != 0)
-			  {
-			  $averagecost = $revenueamount/$billnumbercount;
-			  }
-			  else 
-			  {
-			  $averagecost = $revenueamount/1;
-			  }
-			  array_push($revenueamountfinal, $revenueamount);
-			  array_push($billnumberamountfinal, $billnumbercount);
-			  array_push($averagecostfinal,$averagecost);
-			  
-		  $snocount = $snocount + 1;
-		  $colorloopcount = $colorloopcount + 1;
-		  $showcolor = ($colorloopcount & 1); 
-		  
-			if ($showcolor == 0)
-			{
-				//echo "if";
-				$colorcode = 'bgcolor="#CBDBFA"';
-			}
-			else
-			{
-				//echo "else";
-				$colorcode = 'bgcolor="#ecf0f5"';
-			}
-			?>
-			  <td class="bodytext31" valign="center"  align="left" bgcolor="#CBDBFA"><strong><?php echo number_format($billnumbercount,2,'.',','); ?></strong></td>
-			 
-			<?php
-			}
-			?>
-			  </tr>
-			  <tr>
-		   <td class="bodytext31" valign="center"  align="left" bgcolor="#ecf0f5"><strong>Avg Cost</strong></td> 
-		  <?php
-			
-			$dotarray = explode("-", $paymentreceiveddateto);
-			$dotyear = $dotarray[0];
-			$dotmonth = $dotarray[1];
-			$dotday = $dotarray[2];
-			$totalcashamount = '0.00';
-			$revenueamountfinal = '0.00';
-			$billnumberamountfinal = '0.00';
-			$averagecostfinal = '0.00';
-			$billnumbercount ='0.00';
-			
-$paymentreceiveddateto = date("Y-m-d", mktime(0, 0, 0, $dotmonth, $dotday + 1, $dotyear));
-
-		  $revenueamountfinal = array();
-		  $billnumberamountfinal = array();
-		  $averagecostfinal = array();
-	  
-
-		  $query2 = "select * from master_paymenttype where recordstatus <> 'deleted'"; 
-		  $exec2 = mysqli_query($GLOBALS["___mysqli_ston"], $query2) or die ("Error in Query2".mysqli_error($GLOBALS["___mysqli_ston"]));
-		  while ($res2 = mysqli_fetch_array($exec2))
-		  {
-			  $res2auto_number = $res2['auto_number'];
-			  $res2paymenttype = $res2['paymenttype'];
-			  $res3transactionamount = '0';
-			  $res4totalamount = '0';
-			  $res5totalamount = '0';
-			  $query16 = "select * from master_consultationlist where username = '$doctorname'";
-			  $exec16 = mysqli_query($GLOBALS["___mysqli_ston"], $query16) or die ("Error in Query16".mysqli_error($GLOBALS["___mysqli_ston"]));
-			  while ($res16 = mysqli_fetch_array($exec16))
-			  {
-			  $visitcode = $res16['visitcode'];
-			  $query3 = "select sum(transactionamount) as transactionamount1, count(billnumber) as billnumber1 from master_transactionpaynow where paymenttype = '$res2paymenttype' and visitcode = '$visitcode' and transactionamount <>'0.00' and transactiondate between '$ADate1' and '$ADate2'"; 
-			  $exec3 = mysqli_query($GLOBALS["___mysqli_ston"], $query3) or die ("Error in Query3".mysqli_error($GLOBALS["___mysqli_ston"]));
-			  $res3 = mysqli_fetch_array($exec3);
-			  $res3transactionamount += $res3['transactionamount1'];
-			  $res3billnumber = $res3['billnumber1'];
-			  
-			  $query4 = "select sum(totalamount) as totalamount1, count(billnumber) as billnumber1 from master_billing where paymenttype = '$res2paymenttype' and visitcode = '$visitcode' and totalamount <> '0.00' and billingdatetime between '$ADate1' and '$ADate2'"; 
-			  $exec4 = mysqli_query($GLOBALS["___mysqli_ston"], $query4) or die ("Error in Query4".mysqli_error($GLOBALS["___mysqli_ston"]));
-			  $res4 = mysqli_fetch_array($exec4);
-			  $res4totalamount += $res4['totalamount1'];
-			  $res4billnumber = $res4['billnumber1'];
-			  
-			  $query5 = "select sum(transactionamount) as transactionamount1, count(billnumber) as billnumber1 from master_transactionpaylater where paymenttype = '$res2paymenttype' and visitcode = '$visitcode' and transactiontype = 'finalize' and transactionamount <>'0.00' and transactiondate between '$ADate1' and '$ADate2'"; 
-			  $exec5 = mysqli_query($GLOBALS["___mysqli_ston"], $query5) or die ("Error in Query5".mysqli_error($GLOBALS["___mysqli_ston"]));
-			  $res5 = mysqli_fetch_array($exec5);
-			  $res5totalamount += $res5['transactionamount1'];
-			  $res5billnumber = $res5['billnumber1'];
-			  }
-			  $revenueamount = $res3transactionamount + $res4totalamount + $res5totalamount;
-			  $billnumbercount = $res3billnumber + $res4billnumber + $res5billnumber;
-			  
-			  if($billnumbercount != 0)
-			  {
-			  $averagecost = $revenueamount/$billnumbercount;
-			  }
-			  else 
-			  {
-			  $averagecost = $revenueamount/1;
-			  }
-			  array_push($revenueamountfinal, $revenueamount);
-			  array_push($billnumberamountfinal, $billnumbercount);
-			  array_push($averagecostfinal,$averagecost);
-			  
-		  $snocount = $snocount + 1;
-		  $colorloopcount = $colorloopcount + 1;
-		  $showcolor = ($colorloopcount & 1); 
-		  
-			if ($showcolor == 0)
-			{
-				//echo "if";
-				$colorcode = 'bgcolor="#CBDBFA"';
-			}
-			else
-			{
-				//echo "else";
-				$colorcode = 'bgcolor="#ecf0f5"';
-			}
-			?>
-			
-           
-			  <td class="bodytext31" valign="center"  align="left" bgcolor="#ecf0f5"><strong><?php echo number_format($averagecost, 2, '.',','); ?></strong></td>
-			<?php
-			}
-			?>
-			</tr>
-			<?php
-			}
-			}
-			?>
-			
-            <tr>
-              <td colspan="30" bgcolor="#ecf0f5" class="bodytext31">&nbsp;</td>
-            </tr>
-          </tbody>
-        </table></td>
-      </tr>
-    </table>
-</table>
-<?php include ("includes/footer1.php"); ?>
-</body>
-</html>
-
+<?php
+session_start();
+include ("includes/loginverify.php");
+include ("db/db_connect.php");
+
+set_time_limit(0);
+
+// Initialize variables
+$ipaddress = $_SERVER['REMOTE_ADDR'];
+$updatedatetime = date('Y-m-d H:i:s');
+$username = $_SESSION['username'];
+$companyanum = $_SESSION['companyanum'];
+$companyname = $_SESSION['companyname'];
+
+// Date variables
+$paymentreceiveddatefrom = date('Y-m-d', strtotime('-1 month'));
+$paymentreceiveddateto = date('Y-m-d');
+
+
+
+$searchsuppliername = '';
+
+$suppliername = '';
+
+$cbsuppliername = '';
+
+$cbcustomername = '';
+
+$cbbillnumber = '';
+
+$cbbillstatus = '';
+
+$colorloopcount = '';
+
+$sno = '';
+
+$snocount = '';
+
+$visitcode1 = '';
+
+$total = '';
+
+$looptotalpaidamount = '0.00';
+
+$looptotalpendingamount = '0.00';
+
+$looptotalwriteoffamount = '0.00';
+
+$looptotalcashamount = '0.00';
+
+$looptotalcreditamount = '0.00';
+
+$looptotalcardamount = '0.00';
+
+$looptotalonlineamount = '0.00';
+
+$looptotalchequeamount = '0.00';
+
+$looptotaltdsamount = '0.00';
+
+$looptotalwriteoffamount = '0.00';
+
+$pendingamount = '0.00';
+
+$accountname = '';
+
+$temp = '' ;	
+
+
+
+// Handle form parameters with modern isset() checks
+$accountname = isset($_REQUEST["accountname"]) ? $_REQUEST["accountname"] : "";
+$consultingdoctor = isset($_REQUEST["consultingdoctor"]) ? $_REQUEST["consultingdoctor"] : "";
+
+
+
+$query111 = "select * from master_doctor where auto_number = '$consultingdoctor'";
+
+$exec111 = mysqli_query($GLOBALS["___mysqli_ston"], $query111) or die ("Error in query111".mysqli_error($GLOBALS["___mysqli_ston"]));
+
+$res111 = mysqli_fetch_array($exec111);
+
+$res111doctorname = $res111['doctorname'];
+
+
+
+$getcanum = isset($_REQUEST["canum"]) ? $_REQUEST["canum"] : "";
+
+if ($getcanum != '') {
+	$query4 = "select * from master_supplier where auto_number = '$getcanum'";
+	$exec4 = mysqli_query($GLOBALS["___mysqli_ston"], $query4) or die ("Error in Query4".mysqli_error($GLOBALS["___mysqli_ston"]));
+	$res4 = mysqli_fetch_array($exec4);
+	$cbsuppliername = $res4['suppliername'];
+	$suppliername = $res4['suppliername'];
+}
+
+
+
+$cbfrmflag1 = isset($_REQUEST["cbfrmflag1"]) ? $_REQUEST["cbfrmflag1"] : "";
+
+if ($cbfrmflag1 == 'cbfrmflag1') {
+	$paymentreceiveddatefrom = $_REQUEST['ADate1'];
+	$paymentreceiveddateto = $_REQUEST['ADate2'];
+	$visitcode1 = 10;
+}
+
+
+
+$task = isset($_REQUEST["task"]) ? $_REQUEST["task"] : "";
+
+if ($task == 'deleted') {
+	$errmsg = 'Payment Entry Delete Completed.';
+}
+
+$ADate1 = isset($_REQUEST["ADate1"]) ? $_REQUEST["ADate1"] : "";
+$ADate2 = isset($_REQUEST["ADate2"]) ? $_REQUEST["ADate2"] : "";
+
+if ($ADate1 != '' && $ADate2 != '') {
+	$transactiondatefrom = $_REQUEST['ADate1'];
+	$transactiondateto = $_REQUEST['ADate2'];
+} else {
+	$transactiondatefrom = date('Y-m-d', strtotime('-1 month'));
+	$transactiondateto = date('Y-m-d');
+}
+
+
+
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doctor Utilization Report - MedStar Hospital Management</title>
+    
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <!-- Modern CSS -->
+    <link rel="stylesheet" href="css/vat-modern.css?v=<?php echo time(); ?>">
+    
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- Date Picker CSS -->
+    <link href="css/datepickerstyle.css" rel="stylesheet" type="text/css" />
+    
+    <!-- JavaScript Files -->
+    <script type="text/javascript" src="js/adddate.js"></script>
+    <script type="text/javascript" src="js/adddate2.js"></script>
+    
+    <style>
+        .ui-menu .ui-menu-item { zoom: 1 !important; }
+        .bal { border-style: none; background: none; text-align: right; }
+        .bali { text-align: right; }
+        .report-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        .report-table th, .report-table td { padding: 8px; text-align: left; border: 1px solid #ddd; }
+        .report-table th { background-color: #f8f9fa; font-weight: bold; }
+        .report-table tr:nth-child(even) { background-color: #f8f9fa; }
+        .report-table tr:nth-child(odd) { background-color: #ffffff; }
+        .doctor-header { background-color: #e3f2fd !important; font-weight: bold; }
+        .revenue-row { background-color: #f3e5f5 !important; }
+        .count-row { background-color: #e8f5e8 !important; }
+        .avg-cost-row { background-color: #fff3e0 !important; }
+    </style>
+</head>
+<body>
+    <!-- Hospital Header -->
+    <header class="hospital-header">
+        <h1 class="hospital-title">🏥 MedStar Hospital Management</h1>
+        <p class="hospital-subtitle">Advanced Healthcare Management Platform</p>
+    </header>
+
+    <!-- User Information Bar -->
+    <div class="user-info-bar">
+        <div class="user-welcome">
+            <span class="welcome-text">Welcome, <strong><?php echo htmlspecialchars($username); ?></strong></span>
+            <span class="location-info">📍 Company: <?php echo htmlspecialchars($companyname); ?></span>
+        </div>
+        <div class="user-actions">
+            <a href="mainmenu1.php" class="btn btn-outline">🏠 Main Menu</a>
+            <a href="logout.php" class="btn btn-outline">🚪 Logout</a>
+        </div>
+    </div>
+
+    <!-- Navigation Breadcrumb -->
+    <nav class="nav-breadcrumb">
+        <a href="mainmenu1.php">🏠 Home</a>
+        <span>→</span>
+        <span>Reports</span>
+        <span>→</span>
+        <span>Doctor Utilization Report</span>
+    </nav>
+
+    <!-- Floating Menu Toggle -->
+    <div id="menuToggle" class="floating-menu-toggle">
+        <i class="fas fa-bars"></i>
+    </div>
+
+    <!-- Main Container with Sidebar -->
+    <div class="main-container-with-sidebar">
+        <!-- Left Sidebar -->
+        <aside id="leftSidebar" class="left-sidebar">
+            <div class="sidebar-header">
+                <h3>Quick Navigation</h3>
+                <button id="sidebarToggle" class="sidebar-toggle">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <ul class="nav-list">
+                    <li class="nav-item">
+                        <a href="mainmenu1.php" class="nav-link">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="reports.php" class="nav-link">
+                            <i class="fas fa-chart-bar"></i>
+                            <span>Reports</span>
+                        </a>
+                    </li>
+                    <li class="nav-item active">
+                        <a href="doctorutilizationreport.php" class="nav-link">
+                            <i class="fas fa-user-md"></i>
+                            <span>Doctor Utilization</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="billing.php" class="nav-link">
+                            <i class="fas fa-receipt"></i>
+                            <span>Billing</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="masterdata.php" class="nav-link">
+                            <i class="fas fa-database"></i>
+                            <span>Master Data</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Alert Container -->
+            <div id="alertContainer">
+                <?php include ("includes/alertmessages1.php"); ?>
+            </div>
+
+            <!-- Page Header -->
+            <div class="page-header">
+                <div class="page-header-content">
+                    <h2>Doctor Utilization Report</h2>
+                    <p>Generate comprehensive reports on doctor utilization, revenue, and performance metrics.</p>
+                </div>
+                <div class="page-header-actions">
+                    <button type="button" class="btn btn-secondary" onclick="refreshPage()">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                    <button type="button" class="btn btn-outline" onclick="exportToExcel()">
+                        <i class="fas fa-file-excel"></i> Export
+                    </button>
+                </div>
+            </div>
+
+            <!-- Search Form -->
+            <form name="cbform1" method="post" action="doctorutilizationreport.php" class="form-section">
+                <div class="form-section-header">
+                    <i class="fas fa-search form-section-icon"></i>
+                    <h3 class="form-section-title">Report Criteria</h3>
+                    <span class="form-section-subtitle">Select date range to generate doctor utilization report</span>
+                </div>
+                
+                <div class="form-section-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="ADate1" class="form-label">Date From</label>
+                            <div class="form-input-group">
+                                <input name="ADate1" id="ADate1" class="form-input" value="<?php echo $paymentreceiveddatefrom; ?>" readonly="readonly" onKeyDown="return disableEnterKey()" />
+                                <i class="fas fa-calendar-alt" onClick="javascript:NewCssCal('ADate1')" style="cursor:pointer"></i>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="ADate2" class="form-label">Date To</label>
+                            <div class="form-input-group">
+                                <input name="ADate2" id="ADate2" class="form-input" value="<?php echo $paymentreceiveddateto; ?>" readonly="readonly" onKeyDown="return disableEnterKey()" />
+                                <i class="fas fa-calendar-alt" onClick="javascript:NewCssCal('ADate2','yyyyMMdd','','','','','past','07-01-2019','<?php echo date('m-d-Y');?>')" style="cursor:pointer"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <input type="hidden" name="cbfrmflag1" value="cbfrmflag1" />
+                        <button type="submit" name="Submit" class="btn btn-primary">
+                            <i class="fas fa-search"></i> Generate Report
+                        </button>
+                        <button name="resetbutton" type="reset" id="resetbutton" class="btn btn-secondary">
+                            <i class="fas fa-undo"></i> Reset
+                        </button>
+                    </div>
+                </div>
+            </form>
+
+            <!-- Results Section -->
+            <?php if(isset($_REQUEST["cbfrmflag1"]) && $_REQUEST["cbfrmflag1"] == 'cbfrmflag1'){ ?>
+            <div class="data-table-section">
+                <div class="data-table-header">
+                    <h3 class="data-table-title">Doctor Utilization Report Results</h3>
+                    <div class="data-table-actions">
+                        <a target="_blank" href="print_doctorutilizationreport.php?ADate1=<?php echo $ADate1; ?>&&ADate2=<?php echo $ADate2; ?>" class="btn btn-outline">
+                            <i class="fas fa-file-pdf"></i> Print PDF
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead class="table-header">
+                            <tr>
+                                <th class="table-header-cell">Doctor</th>
+                                <th class="table-header-cell">Payment Type</th>
+                                <th class="table-header-cell text-right">Revenue</th>
+                                <th class="table-header-cell text-right">Count</th>
+                                <th class="table-header-cell text-right">Avg Cost</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Table content will be generated by PHP -->
+                            <tr class="table-row-even">
+                                <td class="table-cell text-center" colspan="5">
+                                    <div class="alert alert-info">
+                                        <i class="fas fa-info-circle"></i>
+                                        Report results will be displayed here after search
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <?php } ?>
+        </main>
+    </div>
+
+    <!-- Modern JavaScript Functions -->
+    <script>
+        // Sidebar toggle functionality
+        function toggleSidebar() {
+            const sidebar = document.getElementById('leftSidebar');
+            const toggle = document.querySelector('.sidebar-toggle i');
+            
+            sidebar.classList.toggle('collapsed');
+            toggle.classList.toggle('fa-chevron-left');
+            toggle.classList.toggle('fa-chevron-right');
+        }
+
+        // Page refresh function
+        function refreshPage() {
+            window.location.reload();
+        }
+
+        // Export to Excel function
+        function exportToExcel() {
+            // Add export functionality here
+            alert('Export functionality will be implemented');
+        }
+
+        // Form validation function
+        function validateForm() {
+            var fromDate = document.getElementById('ADate1').value;
+            var toDate = document.getElementById('ADate2').value;
+            
+            if(fromDate == '' || toDate == '') {
+                alert('Please select both date from and date to.');
+                return false;
+            }
+            
+            if(new Date(fromDate) > new Date(toDate)) {
+                alert('Date from cannot be greater than date to.');
+                return false;
+            }
+            
+            return true;
+        }
+
+        // Print receipt function
+        function funcPrintReceipt1(varRecAnum) {
+            var varRecAnum = varRecAnum;
+            window.open("print_payment_receipt1.php?receiptanum="+varRecAnum+"","OriginalWindow",'width=722,height=950,toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=1,resizable=1,left=25,top=25');
+        }
+
+        // Delete payment function
+        function funcDeletePayment1(varPaymentSerialNumber) {
+            var varPaymentSerialNumber = varPaymentSerialNumber;
+            var fRet;
+            fRet = confirm('Are you sure want to delete this payment entry serial number '+varPaymentSerialNumber+'?');
+            
+            if (fRet == true) {
+                alert ("Payment Entry Delete Completed.");
+            }
+            
+            if (fRet == false) {
+                alert ("Payment Entry Delete Not Completed.");
+                return false;
+            }
+        }
+
+        // Supplier name function
+        function cbsuppliername1() {
+            document.cbform1.submit();
+        }
+
+        // Initialize sidebar toggle on menu button click
+        document.getElementById('menuToggle').addEventListener('click', function() {
+            const sidebar = document.getElementById('leftSidebar');
+            sidebar.classList.toggle('show');
+        });
+
+        // Close sidebar when clicking outside
+        document.addEventListener('click', function(event) {
+            const sidebar = document.getElementById('leftSidebar');
+            const menuToggle = document.getElementById('menuToggle');
+            
+            if (!sidebar.contains(event.target) && !menuToggle.contains(event.target)) {
+                sidebar.classList.remove('show');
+            }
+        });
+    </script>
+
+</body>
+</html>
+
+<style type="text/css">

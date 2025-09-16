@@ -1,173 +1,74 @@
 <?php
-
 session_start();
-
 include ("includes/loginverify.php");
-
 include ("db/db_connect.php");
+include ("includes/check_user_access.php");
 
 $username = $_SESSION["username"];
-
 $companyanum = $_SESSION["companyanum"];
-
 $companyname = $_SESSION["companyname"];
 
-
-
 $ipaddress = $_SERVER["REMOTE_ADDR"];
-
 $updatedatetime = date('Y-m-d H:i:s');
-
 $dateonly = date("Y-m-d");
-
+$errmsg = "";
+$bgcolorcode = "";
 $colorloopcount = "";
-
 $runningbalance = 0;
-
 $totalunpre = 0;
-
 $totalunclr = 0;
 
-  
-
-if (isset($_REQUEST["frmflg1"])) { $frmflg1 = $_REQUEST["frmflg1"]; } else { $frmflg1 = ""; }
-
-
-
-if (isset($_REQUEST["ADate1"])) { $transactiondatefrom = $_REQUEST["ADate1"]; } else { $transactiondatefrom = date("Y-m-d"); }
-
-if (isset($_REQUEST["ADate2"])) { $transactiondateto = $_REQUEST["ADate2"]; } else { $transactiondateto = date("Y-m-d"); }
-
-if (isset($_REQUEST["referenceno"])) { $referenceno = $_REQUEST["referenceno"]; } else { $referenceno = ""; }
-
-if (isset($_REQUEST["bankname"])) 
-
-{ 
-
-	$bankfullname = $_REQUEST["bankname"];
-
-	/*$bankfullname = explode("-",$bankfullname,2);
-
-	$banknamereq = $bankfullname[0];
-
-	$accountnumberreq = $bankfullname[1];*/
-
-} 
-
-else 
-
-{ 
-
-	$bankfullname = "";
-
-	/*$banknamereq = "";
-
-	$accountnumberreq = "";*/
-
+// Handle form submission and search parameters
+if (isset($_REQUEST["frmflg1"])) { 
+    $frmflg1 = $_REQUEST["frmflg1"]; 
+} else { 
+    $frmflg1 = ""; 
 }
 
-$colorcode = 'bgcolor="#CBDBFA"';
+if (isset($_REQUEST["ADate1"])) { 
+    $transactiondatefrom = $_REQUEST["ADate1"]; 
+} else { 
+    $transactiondatefrom = date("Y-m-d"); 
+}
+
+if (isset($_REQUEST["ADate2"])) { 
+    $transactiondateto = $_REQUEST["ADate2"]; 
+} else { 
+    $transactiondateto = date("Y-m-d"); 
+}
+
+if (isset($_REQUEST["referenceno"])) { 
+    $referenceno = $_REQUEST["referenceno"]; 
+} else { 
+    $referenceno = ""; 
+}
+
+if (isset($_REQUEST["bankname"])) { 
+    $bankfullname = $_REQUEST["bankname"];
+} else { 
+    $bankfullname = "";
+}
 
 
 
 ?>
 
-
-
-<style type="text/css">
-
-<!--
-
-body {
-
-	margin-left: 0px;
-
-	margin-top: 0px;
-
-	background-color: #ecf0f5;
-
-}
-
-.bodytext3 {	FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3B3B3C; FONT-FAMILY: Tahoma; text-decoration:none
-
-}
-
--->
-
-</style>
-
-<!--<link href="datepickerstyle.css" rel="stylesheet" type="text/css" />
-
-<script type="text/javascript" src="js/adddate.js"></script>
-
-<script type="text/javascript" src="js/adddate2.js"></script>
-
---><style type="text/css">
-
-
-
-.bodytext31 {FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3b3b3c; FONT-FAMILY: Tahoma
-
-}
-
-.bodytext312 {FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3b3b3c; FONT-FAMILY: Tahoma
-
-}
-
-
-
-</style>
-
-<script>
-
-function functiontest()
-
-{
-
-if(document.getElementById("referenceno").value == "")
-
-{
-
- alert("Please Enter Transaction Ref No");
-
- document.getElementById("referenceno").focus();
-
- return false;
-
-}
-
-/*if(document.getElementById("transactiontype").value == '')
-
-{
-
-	alert("Please Select Transaction Type To Proceed");
-
-	 document.getElementById("transactiontype").focus();
-
- 	return false;
-
-}*/
-
-}
-
-	</script>
-
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bank Statement Update - MedStar</title>
+    
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <!-- Modern CSS -->
+    <link rel="stylesheet" href="css/bankstatementupdate-modern.css?v=<?php echo time(); ?>">
+    
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
-
-
-
-<script src="js/datetimepicker_css.js"></script>
-
-<script src="js/jquery.min-autocomplete.js"></script>
-
-<script src="js/jquery-ui.min.js" type="text/javascript"></script>
-
-<link href="js/jquery-ui.css" rel="stylesheet">
-
-
-
-<script type="text/javascript" src="js/jquery-1.11.1.js"></script>
-
 <body>
 <script type="text/javascript">
 	
@@ -322,171 +223,189 @@ if(document.getElementById("referenceno").value == "")
 })
 
 </script>
-<table width="101%" border="0" cellspacing="0" cellpadding="2">
-
-  <tr>
-
-    <td colspan="10" bgcolor="#ecf0f5"><?php include ("includes/alertmessages1.php"); ?></td>
-
-  </tr>
-
-  <tr>
-
-    <td colspan="10" bgcolor="#ecf0f5"><?php include ("includes/title1.php"); ?></td>
-
-  </tr>
-
-  <tr>
-
-    <td colspan="10" bgcolor="#ecf0f5"><?php  include ("includes/menu1.php"); ?></td>
-
-  </tr>
-
-  <tr>
-
-    <td colspan="10">&nbsp;</td>
-
-  </tr>
-
-  <tr>
-
-    <td width="1%">&nbsp;</td>
-
-    <td width="2%" valign="top"><?php //include ("includes/menu4.php"); ?>
-
-      &nbsp;</td>
-
-    <td width="97%" valign="top"><table width="100%" border="0" cellspacing="0" cellpadding="0">
-
-      <tr>
-
-        <td width="860"><table width="100%" border="0" cellspacing="0" cellpadding="0" class="tablebackgroundcolor1">
-
-            <tr>
-
-              <td>
-
-              <form method="post" action="bankstatementupdate.php">
-
-                <table width="759" border="0" align="left" cellpadding="4" cellspacing="0" bordercolor="#666666" id="AutoNumber3" style="border-collapse: collapse">
-
-                    <tbody>			  
-
-                <tr>
-
-                  <td  colspan="5" bgcolor="#ecf0f5" class="bodytext3"><strong>Bank Statement Update</strong></td>
-
-                  </tr>
-
-                <tr>
-
-                  <td colspan="1" width="100" bgcolor="#ffffff" class="bodytext3"><div align="left">Transaction Ref No</div></td>
-                  <td bgcolor="#ffffff" class="bodytext3"><input type="text" name="referenceno" id="referenceno" class="bodytext3" value="<?php echo $referenceno; ?>"></td>
-                  <td colspan="2" bgcolor="#ffffff" class="bodytext3">&nbsp;</td>
-
-                </tr>
-
-
-                  <tr>
-
-				  	<td bgcolor="#ffffff">&nbsp;</td>
-
-                    <td align="left" valign="middle" bgcolor="#ffffff" class="bodytext3">
-
- 					<input type="hidden" name="frmflag1" id="frmflag1" value="frmflag1" >				  
-
-				  <input  style="border: 1px solid #001E6A" type="submit" value="Search" name="Submit" onClick="return functiontest()" /></td>
-
-				  <td bgcolor="#ffffff">&nbsp;</td>
-
-				  <td bgcolor="#ffffff">&nbsp;</td>
-
-                  </tr>
-
-				  </tbody>
-
-				  </table>
-
-				  </form>
-
-			    </td>
-
-				  </tr>
-
-				  <tr><td>&nbsp;</td></tr>
-
-                <tr >
-
-				<td><table width="" align="left" cellpadding="4" cellspacing="0"  style="border-collapse: collapse">
-
-				<?php
-
- 					$sno = 0;
-
-				if (isset($_REQUEST["frmflag1"])) { $frmflag1 = $_REQUEST["frmflag1"]; } else { $frmflag1 = ""; }
-
-				//$cbfrmflag1 = $_POST['cbfrmflag1'];
-
-				if ($frmflag1 == 'frmflag1')
-
-				{	
-
-					if (isset($_REQUEST["ADate1"])) { $ADate1 = $_REQUEST["ADate1"]; } else { $ADate1 = ""; }
-
-					if (isset($_REQUEST["ADate2"])) { $ADate2 = $_REQUEST["ADate2"]; } else { $ADate2 = ""; }
-
-					//if (isset($_REQUEST["referenceno"])) { $referenceno = $_REQUEST["referenceno"]; } else { $referenceno = ""; }
-
-					if ($ADate1 != '' && $ADate2 != '')
-
-					{
-
-						 $transactiondatefrom = $_REQUEST['ADate1'];
-
-						 $transactiondateto = $_REQUEST['ADate2'];
-
-					}
-
-					else
-
-					{
-
-						$transactiondatefrom = date('Y-m-d', strtotime('-1 month'));
-
-						$transactiondateto = date('Y-m-d');
-
-					}
-
-					   $bankname = $bankfullname;
-
-						
-
-				?>
-
-					
-
-				<tr>
-
-                  <td width="30" bgcolor="#ecf0f5" class="bodytext3" align="center" valign="middle"><strong>No</strong></td>
-
-				  <td width="100" bgcolor="#ecf0f5" class="bodytext3" align="left" valign="middle"><strong>Transaction Date</strong></td>
-
-                  <td width="90" bgcolor="#ecf0f5" class="bodytext3" align="left" valign="middle"><strong>Statement Date</strong></td>
-
-                  <td width="100" bgcolor="#ecf0f5" class="bodytext3" align="left" valign="middle"><strong>Description</strong></td>
-
-				  <td width="50" bgcolor="#ecf0f5" class="bodytext3" align="left" valign="middle"><strong>Transaction <br/> Ref No</strong></td>
-
-				  <td width="150" bgcolor="#ecf0f5" class="bodytext3" align="right" valign="middle"><strong>Money In</strong></td>
-
-                  <td width="150" bgcolor="#ecf0f5" class="bodytext3" align="right" valign="middle"><strong>Money Out</strong></td>
-                  <td width="50" align="left" valign="center" bgcolor="#ecf0f5" class="bodytext31"><div align="right"><strong>Action</strong></div></td>
-                    <td align="left" valign="center"  
-
-                bgcolor="#ecf0f5" class="bodytext31"><div align="right"><strong></strong></div></td>
-                 
-
-                </tr>
+    <!-- Modern Header -->
+    <header class="modern-header">
+        <div class="header-content">
+            <div class="logo-section">
+                <h1><i class="fas fa-university"></i> MedStar</h1>
+                <span class="system-name">Bank Statement Update</span>
+            </div>
+            <div class="user-info-bar">
+                <span class="welcome-text">Welcome, <strong><?php echo htmlspecialchars($username); ?></strong></span>
+                <span class="location-info">📍 Company: <?php echo htmlspecialchars($companyname); ?></span>
+            </div>
+            <div class="header-actions">
+                <a href="mainmenu1.php" class="btn btn-outline">🏠 Main Menu</a>
+                <a href="logout.php" class="btn btn-outline">🚪 Logout</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Breadcrumb Navigation -->
+    <nav class="nav-breadcrumb">
+        <div class="breadcrumb-content">
+            <a href="mainmenu1.php">🏠 Home</a>
+            <span class="breadcrumb-separator">›</span>
+            <span class="current-page">Bank Statement Update</span>
+        </div>
+    </nav>
+
+    <!-- Main Container with Sidebar -->
+    <div class="main-container-with-sidebar">
+        <!-- Left Sidebar -->
+        <aside class="left-sidebar">
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <h3><i class="fas fa-chart-line"></i> Financial Management</h3>
+                    <ul class="nav-menu">
+                        <li>
+                            <a href="mainmenu1.php" class="nav-link">
+                                <i class="fas fa-home"></i>
+                                <span>Dashboard</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="addaccountsmain.php" class="nav-link">
+                                <i class="fas fa-plus-circle"></i>
+                                <span>Add Accounts Main</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="addaccountssub.php" class="nav-link">
+                                <i class="fas fa-plus-square"></i>
+                                <span>Add Accounts Sub</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="addbank1.php" class="nav-link">
+                                <i class="fas fa-university"></i>
+                                <span>Add Bank</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="bankreconupdate.php" class="nav-link">
+                                <i class="fas fa-sync-alt"></i>
+                                <span>Bank Reconciliation</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="payrollbankreport1.php" class="nav-link">
+                                <i class="fas fa-file-invoice-dollar"></i>
+                                <span>Payroll Bank Report</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="banktransactionstatement.php" class="nav-link">
+                                <i class="fas fa-file-alt"></i>
+                                <span>Bank Transaction Statement</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="bankstatementupdate.php" class="nav-link active">
+                                <i class="fas fa-edit"></i>
+                                <span>Bank Statement Update</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="vat.php" class="nav-link">
+                                <i class="fas fa-percentage"></i>
+                                <span>VAT Management</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Page Header -->
+            <div class="page-header">
+                <h2><i class="fas fa-edit"></i> Bank Statement Update</h2>
+                <p>Update bank statement dates for transactions</p>
+            </div>
+
+            <!-- Alert Messages -->
+            <div class="alert-container">
+                <?php if (!empty($errmsg)): ?>
+                    <div class="alert alert-<?php echo $bgcolorcode === 'success' ? 'success' : ($bgcolorcode === 'failed' ? 'error' : 'info'); ?>">
+                        <i class="fas fa-<?php echo $bgcolorcode === 'success' ? 'check-circle' : ($bgcolorcode === 'failed' ? 'exclamation-triangle' : 'info-circle'); ?> alert-icon"></i>
+                        <span><?php echo htmlspecialchars($errmsg); ?></span>
+                    </div>
+                <?php endif; ?>
+            </div>
+
+            <!-- Search Form Section -->
+            <div class="search-form-section">
+                <form id="bankStatementForm" method="post" action="bankstatementupdate.php" class="add-form">
+                    <div class="form-group">
+                        <label for="referenceno" class="form-label">Transaction Reference Number</label>
+                        <input type="text" name="referenceno" id="referenceno" 
+                               value="<?php echo htmlspecialchars($referenceno); ?>" 
+                               class="form-input" placeholder="Enter transaction reference number" />
+                    </div>
+                    <div class="form-group">
+                        <button type="submit" id="submitBtn" class="submit-btn">
+                            <i class="fas fa-search"></i>
+                            Search Transactions
+                        </button>
+                        <button type="button" class="btn btn-secondary" onclick="resetForm()">
+                            <i class="fas fa-undo"></i> Reset
+                        </button>
+                    </div>
+                    <input type="hidden" name="frmflag1" id="frmflag1" value="frmflag1">
+                </form>
+            </div>
+
+            <!-- Data Table Section -->
+            <div class="data-table-section">
+                <?php
+                $sno = 0;
+                if (isset($_REQUEST["frmflag1"])) { 
+                    $frmflag1 = $_REQUEST["frmflag1"]; 
+                } else { 
+                    $frmflag1 = ""; 
+                }
+
+                if ($frmflag1 == 'frmflag1') {
+                    if (isset($_REQUEST["ADate1"])) { 
+                        $ADate1 = $_REQUEST["ADate1"]; 
+                    } else { 
+                        $ADate1 = ""; 
+                    }
+
+                    if (isset($_REQUEST["ADate2"])) { 
+                        $ADate2 = $_REQUEST["ADate2"]; 
+                    } else { 
+                        $ADate2 = ""; 
+                    }
+
+                    if ($ADate1 != '' && $ADate2 != '') {
+                        $transactiondatefrom = $_REQUEST['ADate1'];
+                        $transactiondateto = $_REQUEST['ADate2'];
+                    } else {
+                        $transactiondatefrom = date('Y-m-d', strtotime('-1 month'));
+                        $transactiondateto = date('Y-m-d');
+                    }
+                    $bankname = $bankfullname;
+                ?>
+                
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>No</th>
+                                <th>Transaction Date</th>
+                                <th>Statement Date</th>
+                                <th>Description</th>
+                                <th>Transaction Ref No</th>
+                                <th>Money In</th>
+                                <th>Money Out</th>
+                                <th>Action</th>
+                                <th>Update</th>
+                            </tr>
+                        </thead>
+                        <tbody>
 
 				  <?php
 
@@ -719,98 +638,69 @@ if(document.getElementById("referenceno").value == "")
 							$sno = $sno+1;
 				  ?>
 
-				<tr  <?php echo $colorcode; ?> id="<?php echo $sno;  ?>">
+                            <tr id="<?php echo $sno; ?>">
+                                <td><?php echo $sno; ?></td>
+                                <td><?php echo htmlspecialchars($postingdate); ?>
+                                    <input type="hidden" id="chequedate_<?php echo $sno?>" value="<?php echo $postingdate;?>">
+                                </td>
+                                <td class="expirydatetd" style="display:none;">
+                                    <input class="form-input expdatepicker" id="expdate_<?php echo $sno;?>" name="expdate[]" 
+                                           value="" size="10" readonly="readonly" onKeyDown="return disableEnterKey()" />
+                                    <i class="fas fa-calendar-alt date-picker-icon" 
+                                       onClick="javascript:NewCssCal('expdate_<?php echo $sno;?>','yyyyMMdd','','','','','')" 
+                                       style="cursor:pointer"></i>
+                                </td>
+                                <td class="expirydatetdstatic">
+                                    <div class="expdate" id="uiexpirydate_<?php echo $sno;?>">
+                                        <?php echo htmlspecialchars($valuedate); ?>
+                                    </div>
+                                </td>
+                                <td><?php echo htmlspecialchars($description.' ('.$status.')'); ?></td>
+                                <td>
+                                    <span class="ref-number-badge"><?php echo htmlspecialchars($transrefno); ?></span>
+                                </td>
+                                <td>
+                                    <?php if($moneyin > 0): ?>
+                                        <span class="money-in-badge"><?php echo number_format($moneyin,2,'.',','); ?></span>
+                                    <?php else: ?>
+                                        <span class="amount-zero">-</span>
+                                    <?php endif; ?>
+                                </td>
+                                <td>
+                                    <?php if($moneyout > 0): ?>
+                                        <span class="money-out-badge"><?php echo number_format($moneyout,2,'.',','); ?></span>
+                                    <?php else: ?>
+                                        <span class="amount-zero">-</span>
+                                    <?php endif; ?>
+                                </td>
+                                <td>
+                                    <a class="btn btn-sm btn-outline edititem" id="<?php echo $sno; ?>" href="">
+                                        <i class="fas fa-edit"></i> Edit
+                                    </a>
+                                    <input type="hidden" id="autonumber_<?php echo $sno?>" value="<?php echo $auto_number;?>">
+                                </td>
+                                <td>
+                                    <a class="btn btn-sm btn-primary saveitem" id="s_<?php echo $sno; ?>" href="" style="display:none;">
+                                        <i class="fas fa-save"></i> Update
+                                    </a>
+                                </td>
+                            </tr>
 
-                  <td class="bodytext3" valign="middle"  align="center"><?php echo $sno;?> </td>
-
-				  <td class="bodytext3" valign="middle"  align="left"><?php echo $postingdate;?><input type="hidden" id="chequedate_<?php echo $sno?>" value="<?php echo $postingdate;?>"></td>
-
-				   <td  style="display:none;" class="expirydatetd" width="123" align="left" valign="center"  bgcolor="#ffffff" class="bodytext31"><input class="expdatepicker" id="expdate_<?php  echo $sno;?>" name="expdate[]" style="border: 1px solid #001E6A" value=""  size="10"  readonly="readonly" onKeyDown="return disableEnterKey()" />
-
-			<img src="images2/cal.gif" onClick="javascript:NewCssCal('expdate_<?php  echo $sno;?>','yyyyMMdd','','','','','')" style="cursor:pointer"/>			</td>
-
-                  <td class="bodytext3 expirydatetdstatic" valign="middle"  align="left"><div class="bodytext31">
-
-                <div align="left" class="expdate" id="uiexpirydate_<?php echo $sno;?>"><?php echo $valuedate;?></div></div></td>
-
-                  <td class="bodytext3" valign="middle"  align="left"><?php echo $description.' ('.$status.')';?></td>
-
-				  <td class="bodytext3" valign="middle"  align="left"><?php echo $transrefno;?></td>
-
-                  <td class="bodytext3" valign="middle"  align="right"><?php echo number_format($moneyin,2,'.',',');?> </td>
-
-                  <td class="bodytext3" valign="middle"  align="right"><?php echo number_format($moneyout,2,'.',',');?></td>
-
-                  <td align="left" valign="center"  
-
-                 class="bodytext31"><div class="bodytext31">
-
-                <div align="right"><a class="edititem" id="<?php echo $sno; ?>" href="" style="padding-right: 10px;">Edit</a>
-
-                	<!-- <a style="display:none;" class="saveitem" id="s_<?php echo $sno; ?>" href="" >Save</a> -->
-
+                            <?php
+                            $incr += 1;
+                            } // Close while loop
+                            ?>
+                        </tbody>
+                    </table>
                 </div>
+                <?php } // Close if ($frmflag1 == 'frmflag1') ?>
+            </div>
+        </main>
+    </div>
 
-               <input type="hidden" id="autonumber_<?php echo $sno?>" value="<?php echo $auto_number;?>">
-
-              </div></td>
-
-                  <td align="left" valign="center"  
-
-                 class="bodytext31"><div class="bodytext31">
-
-                <div align="right">
-
-                	<a style="display:none;" class="saveitem" id="s_<?php echo $sno; ?>" href="" >Update</a>
-
-                </div>
-
-               
-
-              </div></td>
-
-                </tr>
-
-		    <?php
-		    $incr += 1;
-
-					}//CLOSE -- WHILE LOOP
-
-			     ?>
-
-               
-
-               
-				 <?php   		
-
-				} //CLOSE -- IF(frmflag1)
-
-				?>	
-
-	      </table>
-
-          </td>
-
-            </tr>  
-
-        </table></td>
-
-      </tr>
-
-      <tr>
-
-        <td>&nbsp;</td>
-
-      </tr>
-
-    </table>
-
-</table>
-
-<?php include ("includes/footer1.php"); ?>
-
+    <!-- Modern JavaScript -->
+    <script src="js/bankstatementupdate-modern.js?v=<?php echo time(); ?>"></script>
 </body>
-
 </html>
 
 

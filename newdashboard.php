@@ -1,372 +1,206 @@
 <?php
-
 session_start();
-
-//echo session_id();
-
 include ("db/db_connect.php");
-
 include ("includes/loginverify.php");
 
-
-
 $ipaddress = $_SERVER['REMOTE_ADDR'];
-
 $updatedatetime = date('Y-m-d H:i:s');
-
-$username=$_SESSION["username"];
-
+$username = $_SESSION["username"];
 $registrationdate = date('Y-m-d');
-
 $companyanum = $_SESSION["companyanum"];
-
 $companyname = $_SESSION["companyname"];
-
 $financialyear = $_SESSION["financialyear"];
-
 $docno = $_SESSION['docno'];
 
-$todaydate=isset($_REQUEST['ADate1'])?$_REQUEST['ADate1']:date("Y-m-d");
+$todaydate = isset($_REQUEST['ADate1']) ? $_REQUEST['ADate1'] : date("Y-m-d");
+$time = strtotime($todaydate);
+$month = date("m", $time);
+$year = date("Y", $time);
+$thismonth = $year . "-" . $month . "___";
 
-$time=strtotime($todaydate);
+// Initialize variables
+$totalRevenue = 0;
+$totalPatients = 0;
+$totalConsultations = 0;
+$totalLabTests = 0;
+$totalRadiologyTests = 0;
+$totalServices = 0;
+$totalPharmacy = 0;
+$totalIP = 0;
 
-$month=date("m",$time);
+// Get location data
+$query1 = "SELECT locationname FROM login_locationdetails WHERE username='$username' AND docno='$docno' GROUP BY locationname ORDER BY locationname";
+$exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die("Error in Query1: " . mysqli_error($GLOBALS["___mysqli_ston"]));
+$res1 = mysqli_fetch_array($exec1);
+$res1location = $res1["locationname"];
 
-$year=date("Y",$time);
+// Calculate total cash amount
+$totalcashamt = 0;
 
- 
+// Cash sales from billing_paynow
+$querycashsales = "SELECT SUM(totalamount) as amount FROM billing_paynow WHERE billdate='$todaydate'";
+$cashsalesex = mysqli_query($GLOBALS["___mysqli_ston"], $querycashsales) or die("Error in querycashsales: " . mysqli_error($GLOBALS["___mysqli_ston"]));
+$cashres = mysqli_fetch_array($cashsalesex);
+$cashamount = $cashres["amount"] ?: 0;
 
-  $thismonth=$year."-".$month."___";
+// Cash sales from billing_consultation
+$querycashsalesop = "SELECT SUM(consultation) as amount FROM billing_consultation WHERE billdate='$todaydate'";
+$cashsalesexip = mysqli_query($GLOBALS["___mysqli_ston"], $querycashsalesop) or die("Error in querycashsalesop: " . mysqli_error($GLOBALS["___mysqli_ston"]));
+$cashresip = mysqli_fetch_array($cashsalesexip);
+$cashamountop = $cashresip["amount"] ?: 0;
 
+$newcasham = $cashamount + $cashamountop;
+
+// Cash sales from billing_ip
+$querycashsalesip = "SELECT SUM(totalamountuhx) as amount FROM billing_ip WHERE billdate='$todaydate' AND patientbilltype='PAY NOW'";
+$cashsalesipex = mysqli_query($GLOBALS["___mysqli_ston"], $querycashsalesip) or die("Error in querycashsalesip: " . mysqli_error($GLOBALS["___mysqli_ston"]));
+$cashresip = mysqli_fetch_array($cashsalesipex);
+$cashamountip = $cashresip["amount"] ?: 0;
+
+$totalRevenue = $newcasham + $cashamountip;
+
+// Get patient counts
+$querytotal = "SELECT customercode FROM master_customer WHERE registrationdate='$todaydate'";
+$hospitalpatient = 0;
+$totalPatients = mysqli_num_rows(mysqli_query($GLOBALS["___mysqli_ston"], $querytotal));
+
+// Get consultation counts
+$querymaster = "SELECT department FROM master_visitentry WHERE patientcode IN (SELECT customercode FROM master_customer WHERE registrationdate='$todaydate') AND consultationdate='$todaydate'";
+$masterex = mysqli_query($GLOBALS["___mysqli_ston"], $querymaster);
+$totalConsultations = mysqli_num_rows($masterex);
+
+// Get lab test counts
+$querylab = "SELECT COUNT(*) as count FROM billing_paynowlab WHERE billdate='$todaydate'";
+$labex = mysqli_query($GLOBALS["___mysqli_ston"], $querylab);
+$labres = mysqli_fetch_array($labex);
+$totalLabTests = $labres['count'] ?: 0;
+
+// Get radiology test counts
+$queryrad = "SELECT COUNT(*) as count FROM billing_paynowradiology WHERE billdate='$todaydate'";
+$radex = mysqli_query($GLOBALS["___mysqli_ston"], $queryrad);
+$radres = mysqli_fetch_array($radex);
+$totalRadiologyTests = $radres['count'] ?: 0;
+
+// Get services counts
+$queryservice = "SELECT COUNT(*) as count FROM billing_paynowservices WHERE billdate='$todaydate'";
+$serviceex = mysqli_query($GLOBALS["___mysqli_ston"], $queryservice);
+$serviceres = mysqli_fetch_array($serviceex);
+$totalServices = $serviceres['count'] ?: 0;
+
+// Get pharmacy counts
+$querypharmacy = "SELECT COUNT(*) as count FROM billing_paynowpharmacy WHERE billdate='$todaydate'";
+$pharmacyex = mysqli_query($GLOBALS["___mysqli_ston"], $querypharmacy);
+$pharmacyres = mysqli_fetch_array($pharmacyex);
+$totalPharmacy = $pharmacyres['count'] ?: 0;
+
+// Get IP counts
+$queryip = "SELECT COUNT(*) as count FROM billing_ip WHERE billdate='$todaydate'";
+$ipex = mysqli_query($GLOBALS["___mysqli_ston"], $queryip);
+$ipres = mysqli_fetch_array($ipex);
+$totalIP = $ipres['count'] ?: 0;
+
+// Calculate yesterday's date for comparison
+$yesterdaydate = date('Y-m-d', strtotime($todaydate . ' -1 day'));
+
+// Calculate percentage changes from yesterday
+function calculatePercentageChange($today, $yesterday) {
+    if ($yesterday == 0) {
+        return $today > 0 ? 100 : 0;
+    }
+    return round((($today - $yesterday) / $yesterday) * 100, 1);
+}
+
+// Get yesterday's data for comparison
+$queryyesterdayrevenue = "SELECT 
+    (SELECT COALESCE(SUM(totalamount), 0) FROM billing_paynow WHERE billdate='$yesterdaydate') +
+    (SELECT COALESCE(SUM(consultation), 0) FROM billing_consultation WHERE billdate='$yesterdaydate') +
+    (SELECT COALESCE(SUM(totalamountuhx), 0) FROM billing_ip WHERE billdate='$yesterdaydate' AND patientbilltype='PAY NOW')
+    as yesterday_revenue";
+$yesterdayrevenueex = mysqli_query($GLOBALS["___mysqli_ston"], $queryyesterdayrevenue);
+$yesterdayrevenueres = mysqli_fetch_array($yesterdayrevenueex);
+$yesterdayRevenue = $yesterdayrevenueres['yesterday_revenue'] ?: 0;
+
+$queryyesterdaypatients = "SELECT COUNT(*) as count FROM master_customer WHERE registrationdate='$yesterdaydate'";
+$yesterdaypatientsex = mysqli_query($GLOBALS["___mysqli_ston"], $queryyesterdaypatients);
+$yesterdaypatientsres = mysqli_fetch_array($yesterdaypatientsex);
+$yesterdayPatients = $yesterdaypatientsres['count'] ?: 0;
+
+$queryyesterdayconsultations = "SELECT COUNT(*) as count FROM master_visitentry WHERE consultationdate='$yesterdaydate'";
+$yesterdayconsultationsex = mysqli_query($GLOBALS["___mysqli_ston"], $queryyesterdayconsultations);
+$yesterdayconsultationsres = mysqli_fetch_array($yesterdayconsultationsex);
+$yesterdayConsultations = $yesterdayconsultationsres['count'] ?: 0;
+
+$queryyesterdaylab = "SELECT COUNT(*) as count FROM billing_paynowlab WHERE billdate='$yesterdaydate'";
+$yesterdaylabex = mysqli_query($GLOBALS["___mysqli_ston"], $queryyesterdaylab);
+$yesterdaylabres = mysqli_fetch_array($yesterdaylabex);
+$yesterdayLabTests = $yesterdaylabres['count'] ?: 0;
+
+$queryyesterdayrad = "SELECT COUNT(*) as count FROM billing_paynowradiology WHERE billdate='$yesterdaydate'";
+$yesterdayradex = mysqli_query($GLOBALS["___mysqli_ston"], $queryyesterdayrad);
+$yesterdayradres = mysqli_fetch_array($yesterdayradex);
+$yesterdayRadiologyTests = $yesterdayradres['count'] ?: 0;
+
+$queryyesterdayservices = "SELECT COUNT(*) as count FROM billing_paynowservices WHERE billdate='$yesterdaydate'";
+$yesterdayservicesex = mysqli_query($GLOBALS["___mysqli_ston"], $queryyesterdayservices);
+$yesterdayservicesres = mysqli_fetch_array($yesterdayservicesex);
+$yesterdayServices = $yesterdayservicesres['count'] ?: 0;
+
+$queryyesterdaypharmacy = "SELECT COUNT(*) as count FROM billing_paynowpharmacy WHERE billdate='$yesterdaydate'";
+$yesterdaypharmacyex = mysqli_query($GLOBALS["___mysqli_ston"], $queryyesterdaypharmacy);
+$yesterdaypharmacyres = mysqli_fetch_array($yesterdaypharmacyex);
+$yesterdayPharmacy = $yesterdaypharmacyres['count'] ?: 0;
+
+$queryyesterdayip = "SELECT COUNT(*) as count FROM billing_ip WHERE billdate='$yesterdaydate'";
+$yesterdayipex = mysqli_query($GLOBALS["___mysqli_ston"], $queryyesterdayip);
+$yesterdayipres = mysqli_fetch_array($yesterdayipex);
+$yesterdayIP = $yesterdayipres['count'] ?: 0;
+
+// Calculate percentage changes
+$revenueChange = calculatePercentageChange($totalRevenue, $yesterdayRevenue);
+$patientsChange = calculatePercentageChange($totalPatients, $yesterdayPatients);
+$consultationsChange = calculatePercentageChange($totalConsultations, $yesterdayConsultations);
+$labChange = calculatePercentageChange($totalLabTests, $yesterdayLabTests);
+$radiologyChange = calculatePercentageChange($totalRadiologyTests, $yesterdayRadiologyTests);
+$servicesChange = calculatePercentageChange($totalServices, $yesterdayServices);
+$pharmacyChange = calculatePercentageChange($totalPharmacy, $yesterdayPharmacy);
+$ipChange = calculatePercentageChange($totalIP, $yesterdayIP);
+
+// Payment method breakdown
+$querypayment = "SELECT 
+    SUM(cashamount) as cash,
+    SUM(cardamount) as card,
+    SUM(onlineamount) as online,
+    SUM(creditamount) as credit,
+    SUM(chequeamount) as cheque
+    FROM master_transactionpaynow WHERE transactiondate = '$todaydate'";
+
+$paymentex = mysqli_query($GLOBALS["___mysqli_ston"], $querypayment);
+$paymentres = mysqli_fetch_array($paymentex);
+
+$cashAmount = $paymentres['cash'] ?: 0;
+$cardAmount = $paymentres['card'] ?: 0;
+$onlineAmount = $paymentres['online'] ?: 0;
+$creditAmount = $paymentres['credit'] ?: 0;
+$chequeAmount = $paymentres['cheque'] ?: 0;
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>New Dashboard - MedStar</title>
+    <title>Dashboard - MedStar</title>
     
     <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     
-    <!-- Chart.js for dashboard charts -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    
     <!-- Modern CSS -->
-    <link rel="stylesheet" href="css/vat-modern.css?v=<?php echo time(); ?>">
+    <link rel="stylesheet" href="css/newdashboard-modern.css?v=<?php echo time(); ?>">
     
     <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-</head>
-
-<?php
-
-  $register="select count(auto_number) as registered from master_customer where registrationdate='$todaydate'";
-
-$regex=mysqli_query($GLOBALS["___mysqli_ston"], $register);
-
-$totreg=mysqli_fetch_array($regex);
-
-$registered=$totreg['registered'];
-
-
-
-$newip="select count(visitcode) as activeip from master_ipvisitentry where bedallocation='completed' and consultationdate='$todaydate'";
-
-$queryip=mysqli_query($GLOBALS["___mysqli_ston"], $newip);
-
-$resip=mysqli_fetch_array($queryip);
-
-$newipvi=$resip['activeip'];
-
-
-
- $currentip="select count(visitcode) as activeip from ip_bedallocation where recordstatus !='discharged'";
-
-$queryactip=mysqli_query($GLOBALS["___mysqli_ston"], $currentip);
-
-$resactip=mysqli_fetch_array($queryactip);
-
-$activeip=$resactip['activeip'];
-
-
-
-//lab//
-
- $oplab="select patientvisitcode from consultation_lab where consultationdate='$todaydate' and labsamplecoll='completed'";
-
-$labop=mysqli_query($GLOBALS["___mysqli_ston"], $oplab);
-
-$oplabcount=0;
-
-$walkinlabcount=0;
-
-while($oplabtot=mysqli_fetch_array($labop))
-
-{
-
-  $oplabvisitcode=$oplabtot['patientvisitcode'];
-
-
-
- $queryoplab="select department from master_visitentry where visitcode='$oplabvisitcode'";
-
-$querylabex=mysqli_query($GLOBALS["___mysqli_ston"], $queryoplab);
-
- $reslab=mysqli_fetch_array($querylabex);
-
-  $oplabdept=$reslab['department'];
-
-if($oplabdept =="50")
-
-{
-
-	 $walkinlabcount++;
-
-	}
-
-else if($oplabdept !="50")
-
-{
-
-	 $oplabcount++;
-
-}
-
-}
-
-//radiology//
-
-$opradiology="select patientvisitcode from consultation_radiology where consultationdate='$todaydate' and prepstatus='completed'";
-
-$radiop=mysqli_query($GLOBALS["___mysqli_ston"], $opradiology);
-
-$opradcount=0;
-
-$walkinradcount=0;
-
-while($opradtot=mysqli_fetch_array($radiop))
-
-{
-
-$opradvisitcode=$opradtot['patientvisitcode'];
-
-
-
-$queryrad="select department from master_visitentry where visitcode='$opradvisitcode'";
-
-$queryradex=mysqli_query($GLOBALS["___mysqli_ston"], $queryrad);
-
-$resrad=mysqli_fetch_array($queryradex);
-
-$opraddept=$resrad['department'];
-
-if($opraddept=='50')
-
-{
-
-	$walkinradcount++;
-
-	}
-
-else if($opraddept !='50')
-
-{
-
-	$opradcount++;
-
-}
-
-}
-
-
-
-//services//
-
-$opservices="select patientvisitcode from consultation_services where consultationdate='$todaydate' and process='completed'";
-
-$radiop=mysqli_query($GLOBALS["___mysqli_ston"], $opservices);
-
-$opsercount=0;
-
-$walkinsercount=0;
-
-while($opsertot=mysqli_fetch_array($radiop))
-
-{
-
-$opservisitcode=$opsertot['patientvisitcode'];
-
-
-
-$queryrser="select department from master_visitentry where visitcode='$opservisitcode'";
-
-$queryserex=mysqli_query($GLOBALS["___mysqli_ston"], $queryrser);
-
-$resser=mysqli_fetch_array($queryserex);
-
-$opserdept=$resser['department'];
-
-if($opserdept=='50')
-
-{
-
-	$walkinsercount++;
-
-	}
-
-else if($opserdept !='50')
-
-{
-
-	$opsercount++;
-
-}
-
-}
-
-//ip lab//
-
-  $iplab="select count(auto_number) as iplab from ipconsultation_lab where consultationdate='$todaydate' and labsamplecoll='completed'";
-
- $iplabex=mysqli_query($GLOBALS["___mysqli_ston"], $iplab);
-
- $iplabfe=mysqli_fetch_array($iplabex);
-
-   $iplabcount=$iplabfe['iplab'];
-
-
-
-//ip radiology//
-
-$iprad="select count(auto_number) as iprad from ipconsultation_radiology where consultationdate='$todaydate' and prepstatus='completed'";
-
-$ipradex=mysqli_query($GLOBALS["___mysqli_ston"], $iprad);
-
-$ipradfe=mysqli_fetch_array($ipradex);
-
-$ipradcount=$ipradfe['iprad'];
-
-
-
-//ip services//
-
-$ipser="select count(auto_number) as ipser from ipconsultation_services where consultationdate='$todaydate' and process='completed'";
-
-$ipserex=mysqli_query($GLOBALS["___mysqli_ston"], $ipser);
-
-$ipserfe=mysqli_fetch_array($ipserex);
-
-$ipsercount=$ipserfe['ipser'];
-
-
-
-$opwaiver="select sum(labfxamount) as walab,sum(radiologyfxamount) as warad,sum(servicesfxamount) as waser,sum(pharmacyfxamount) as waot from billing_patientweivers where entrydate like '$thismonth'";
-
-$opwaex=mysqli_query($GLOBALS["___mysqli_ston"], $opwaiver);
-
-$opwares=mysqli_fetch_array($opwaex);
-
-$oplabamt=$opwares['walab'];
-
-$opwardamt=$opwares['warad'];
-
-$opwaseramt=$opwares['waser'];
-
-$opwaotamt=$opwares['waot'];
-
-
-
-$totalopwaiver=$oplabamt+$opwardamt+$opwaseramt+$opwaotamt;
-
-
-
-//ip waivers//
-
-   $ipwaiver="select sum(rate) as ipwaiver from ip_discount where consultationdate like '$thismonth'";
-
-$ipwaex=mysqli_query($GLOBALS["___mysqli_ston"], $ipwaiver);
-
-$ipwares=mysqli_fetch_array($ipwaex);
-
-$iptotwai=$ipwares['ipwaiver'];
-
-
-
-//op pending cash//
-
-//  $queryoppending="select sum(transactionamount) as pendingamt from master_transactionpaynow where visitcode not like '%IPV%' and transactiondate='$todaydate'";
-
-//$oppendingex=mysql_query($queryoppending) or die("my error".mysql_error());
-
-//$oppendingamt=mysql_fetch_array($oppendingex);
-
-//$oppenamt=$oppendingamt['pendingamt'];
-
-
-
-
-
-//walkin and patient//
-
- $querytotal="select customercode from master_customer where registrationdate='$todaydate'";
-
-$hospitalpatient=0;
-
-$walkin=0;
-
-$totex=mysqli_query($GLOBALS["___mysqli_ston"], $querytotal);
-
-while($regpatient=mysqli_fetch_array($totex))
-
-{
-
- $registeredpatient=$regpatient['customercode'];
-
-
-
-$querymaster="select department from master_visitentry where patientcode='$registeredpatient' and consultationdate='$todaydate'";
-
-$masterex=mysqli_query($GLOBALS["___mysqli_ston"], $querymaster);
-
-$numberofrow=mysqli_num_rows($masterex);
-
-$registeredlist=mysqli_fetch_array($masterex);
-
-$registereddept=$registeredlist['department'];
-
-
-
-//if($numberofrow>0)
-
-{
-
-	if($registereddept ==50)
-
-	{
-
-		$walkin++;
-
-	}
-
-	else 
-
-	{
-
-		
-
-		$hospitalpatient++;
-
-	}
-
-}
-
-
-
-}
-
-?>
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
     <!-- Hospital Header -->
@@ -379,12 +213,9 @@ $registereddept=$registeredlist['department'];
     <div class="user-info-bar">
         <div class="user-welcome">
             <span class="welcome-text">Welcome, <strong><?php echo htmlspecialchars($username); ?></strong></span>
-            <span class="location-info">📍 Company: <?php echo htmlspecialchars($companyname); ?></span>
+            <span class="location-info">📍 Location: <?php echo htmlspecialchars($res1location); ?> | Company: <?php echo htmlspecialchars($companyname); ?></span>
         </div>
         <div class="user-actions">
-            <button type="button" class="btn btn-outline" onclick="refreshDashboard()">
-                <i class="fas fa-sync-alt"></i> Refresh
-            </button>
             <a href="mainmenu1.php" class="btn btn-outline">🏠 Main Menu</a>
             <a href="logout.php" class="btn btn-outline">🚪 Logout</a>
         </div>
@@ -397,2401 +228,324 @@ $registereddept=$registeredlist['department'];
         <span>Dashboard</span>
     </nav>
 
-    <!-- Date Selector -->
-    <div class="date-selector">
-        <form method="GET" action="newdashboard.php" class="date-form">
-            <label for="ADate1" class="date-label">Dashboard Date:</label>
-            <input type="date" name="ADate1" id="ADate1" value="<?php echo $todaydate; ?>" class="date-input">
-            <button type="submit" class="btn btn-primary">
-                <i class="fas fa-calendar-alt"></i> Update Dashboard
-            </button>
-        </form>
+    <!-- Floating Menu Toggle -->
+    <div id="menuToggle" class="floating-menu-toggle">
+        <i class="fas fa-bars"></i>
     </div>
 
-    <!-- Main Dashboard Content -->
-    <div class="dashboard-container">
-        <!-- KPI Cards Section -->
-        <div class="kpi-section">
-            <h2 class="section-title">
-                <i class="fas fa-chart-line"></i>
-                Key Performance Indicators - <?php echo date('M d, Y', strtotime($todaydate)); ?>
-            </h2>
+    <!-- Main Container with Sidebar -->
+    <div class="main-container-with-sidebar">
+        <!-- Left Sidebar -->
+        <aside id="leftSidebar" class="left-sidebar">
+            <div class="sidebar-header">
+                <h3>Quick Navigation</h3>
+                <button id="sidebarToggle" class="sidebar-toggle">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+            </div>
             
-            <div class="kpi-grid">
-                <!-- Patient Registration KPI Card -->
-                <div class="kpi-card">
-                    <div class="kpi-icon">
-                        <i class="fas fa-user-plus"></i>
+            <nav class="sidebar-nav">
+                <ul class="nav-list">
+                    <li class="nav-item active">
+                        <a href="newdashboard.php" class="nav-link">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="patientregistration1.php" class="nav-link">
+                            <i class="fas fa-user-plus"></i>
+                            <span>Patient Registration</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="ipadmission1.php" class="nav-link">
+                            <i class="fas fa-bed"></i>
+                            <span>IP Admission</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="billing1.php" class="nav-link">
+                            <i class="fas fa-file-invoice-dollar"></i>
+                            <span>Billing</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="labitem1master.php" class="nav-link">
+                            <i class="fas fa-flask"></i>
+                            <span>Lab Management</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="radiologyitem1master.php" class="nav-link">
+                            <i class="fas fa-x-ray"></i>
+                            <span>Radiology</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="reports1.php" class="nav-link">
+                            <i class="fas fa-chart-bar"></i>
+                            <span>Reports</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Alert Container -->
+            <div id="alertContainer">
+                <?php include ("includes/alertmessages1.php"); ?>
+            </div>
+
+            <!-- Page Header -->
+            <div class="page-header">
+                <div class="page-header-content">
+                    <h2>Dashboard Overview</h2>
+                    <p>Real-time insights and analytics for your healthcare management system.</p>
+                </div>
+                <div class="page-header-actions">
+                    <button type="button" class="btn btn-secondary" onclick="refreshPage()">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                    <button type="button" class="btn btn-outline" onclick="exportDashboard()">
+                        <i class="fas fa-download"></i> Export
+                    </button>
+                    <button type="button" class="btn btn-outline" onclick="printDashboard()">
+                        <i class="fas fa-print"></i> Print
+                    </button>
+                </div>
+            </div>
+
+            <!-- Date Filter Section -->
+            <div class="date-filter-section">
+                <div class="date-filter-content">
+                    <span class="date-filter-label">View Date:</span>
+                    <input type="date" id="dashboardDate" class="date-filter-input" value="<?php echo $todaydate; ?>">
+                </div>
+                <div class="date-filter-actions">
+                    <span class="date-filter-info">Last updated: <?php echo date('H:i:s'); ?></span>
+                </div>
+            </div>
+
+            <!-- Summary Cards -->
+            <div class="summary-cards">
+                <div class="summary-card">
+                    <div class="summary-card-icon revenue">
+                        <i class="fas fa-rupee-sign"></i>
                     </div>
-                    <div class="kpi-content">
-                        <h3 class="kpi-title">New Registrations</h3>
-                        <div class="kpi-value"><?php echo number_format($registered); ?></div>
-                        <div class="kpi-subtitle">Today</div>
+                    <div class="summary-card-number">₹<?php echo number_format($totalRevenue, 0); ?></div>
+                    <div class="summary-card-label">Total Revenue</div>
+                    <div class="summary-card-change <?php echo $revenueChange >= 0 ? 'positive' : 'negative'; ?>">
+                        <?php echo $revenueChange >= 0 ? '+' : ''; ?><?php echo $revenueChange; ?>% from yesterday
                     </div>
                 </div>
-
-                <!-- Active IP Patients KPI Card -->
-                <div class="kpi-card">
-                    <div class="kpi-icon">
-                        <i class="fas fa-bed"></i>
-                    </div>
-                    <div class="kpi-content">
-                        <h3 class="kpi-title">Active IP Patients</h3>
-                        <div class="kpi-value"><?php echo number_format($activeip); ?></div>
-                        <div class="kpi-subtitle">Current</div>
-                    </div>
-                </div>
-
-                <!-- New IP Admissions KPI Card -->
-                <div class="kpi-card">
-                    <div class="kpi-icon">
-                        <i class="fas fa-procedures"></i>
-                    </div>
-                    <div class="kpi-content">
-                        <h3 class="kpi-title">New IP Admissions</h3>
-                        <div class="kpi-value"><?php echo number_format($newipvi); ?></div>
-                        <div class="kpi-subtitle">Today</div>
-                    </div>
-                </div>
-
-                <!-- Lab Tests KPI Card -->
-                <div class="kpi-card">
-                    <div class="kpi-icon">
-                        <i class="fas fa-flask"></i>
-                    </div>
-                    <div class="kpi-content">
-                        <h3 class="kpi-title">Lab Tests</h3>
-                        <div class="kpi-value"><?php echo number_format($oplabcount + $iplabcount); ?></div>
-                        <div class="kpi-subtitle">Today</div>
-                    </div>
-                </div>
-
-                <!-- Radiology Tests KPI Card -->
-                <div class="kpi-card">
-                    <div class="kpi-icon">
-                        <i class="fas fa-x-ray"></i>
-                    </div>
-                    <div class="kpi-content">
-                        <h3 class="kpi-title">Radiology Tests</h3>
-                        <div class="kpi-value"><?php echo number_format($opradcount + $ipradcount); ?></div>
-                        <div class="kpi-subtitle">Today</div>
-                    </div>
-                </div>
-
-                <!-- Services KPI Card -->
-                <div class="kpi-card">
-                    <div class="kpi-icon">
-                        <i class="fas fa-stethoscope"></i>
-                    </div>
-                    <div class="kpi-content">
-                        <h3 class="kpi-title">Services</h3>
-                        <div class="kpi-value"><?php echo number_format($opsercount + $ipsercount); ?></div>
-                        <div class="kpi-subtitle">Today</div>
-                    </div>
-                </div>
-
-                <!-- Total Waivers KPI Card -->
-                <div class="kpi-card">
-                    <div class="kpi-icon">
-                        <i class="fas fa-hand-holding-usd"></i>
-                    </div>
-                    <div class="kpi-content">
-                        <h3 class="kpi-title">Total Waivers</h3>
-                        <div class="kpi-value">$<?php echo number_format($totalopwaiver + $iptotwai, 2); ?></div>
-                        <div class="kpi-subtitle">This Month</div>
-                    </div>
-                </div>
-
-                <!-- Patient Types KPI Card -->
-                <div class="kpi-card">
-                    <div class="kpi-icon">
+                
+                <div class="summary-card">
+                    <div class="summary-card-icon patients">
                         <i class="fas fa-users"></i>
                     </div>
-                    <div class="kpi-content">
-                        <h3 class="kpi-title">Walk-in vs Hospital</h3>
-                        <div class="kpi-value"><?php echo number_format($walkin); ?> : <?php echo number_format($hospitalpatient); ?></div>
-                        <div class="kpi-subtitle">Today</div>
+                    <div class="summary-card-number"><?php echo $totalPatients; ?></div>
+                    <div class="summary-card-label">New Patients</div>
+                    <div class="summary-card-change <?php echo $patientsChange >= 0 ? 'positive' : 'negative'; ?>">
+                        <?php echo $patientsChange >= 0 ? '+' : ''; ?><?php echo $patientsChange; ?>% from yesterday
+                    </div>
+                </div>
+                
+                <div class="summary-card">
+                    <div class="summary-card-icon consultations">
+                        <i class="fas fa-stethoscope"></i>
+                    </div>
+                    <div class="summary-card-number" data-metric="consultations"><?php echo $totalConsultations; ?></div>
+                    <div class="summary-card-label">Consultations</div>
+                    <div class="summary-card-change <?php echo $consultationsChange >= 0 ? 'positive' : 'negative'; ?>">
+                        <?php echo $consultationsChange >= 0 ? '+' : ''; ?><?php echo $consultationsChange; ?>% from yesterday
+                    </div>
+                </div>
+                
+                <div class="summary-card">
+                    <div class="summary-card-icon lab">
+                        <i class="fas fa-flask"></i>
+                    </div>
+                    <div class="summary-card-number" data-metric="lab"><?php echo $totalLabTests; ?></div>
+                    <div class="summary-card-label">Lab Tests</div>
+                    <div class="summary-card-change <?php echo $labChange >= 0 ? 'positive' : 'negative'; ?>">
+                        <?php echo $labChange >= 0 ? '+' : ''; ?><?php echo $labChange; ?>% from yesterday
+                    </div>
+                </div>
+                
+                <div class="summary-card">
+                    <div class="summary-card-icon radiology">
+                        <i class="fas fa-x-ray"></i>
+                    </div>
+                    <div class="summary-card-number" data-metric="radiology"><?php echo $totalRadiologyTests; ?></div>
+                    <div class="summary-card-label">Radiology Tests</div>
+                    <div class="summary-card-change <?php echo $radiologyChange >= 0 ? 'positive' : 'negative'; ?>">
+                        <?php echo $radiologyChange >= 0 ? '+' : ''; ?><?php echo $radiologyChange; ?>% from yesterday
+                    </div>
+                </div>
+                
+                <div class="summary-card">
+                    <div class="summary-card-icon services">
+                        <i class="fas fa-tools"></i>
+                    </div>
+                    <div class="summary-card-number" data-metric="services"><?php echo $totalServices; ?></div>
+                    <div class="summary-card-label">Services</div>
+                    <div class="summary-card-change <?php echo $servicesChange >= 0 ? 'positive' : 'negative'; ?>">
+                        <?php echo $servicesChange >= 0 ? '+' : ''; ?><?php echo $servicesChange; ?>% from yesterday
+                    </div>
+                </div>
+                
+                <div class="summary-card">
+                    <div class="summary-card-icon pharmacy">
+                        <i class="fas fa-pills"></i>
+                    </div>
+                    <div class="summary-card-number"><?php echo $totalPharmacy; ?></div>
+                    <div class="summary-card-label">Pharmacy</div>
+                    <div class="summary-card-change <?php echo $pharmacyChange >= 0 ? 'positive' : 'negative'; ?>">
+                        <?php echo $pharmacyChange >= 0 ? '+' : ''; ?><?php echo $pharmacyChange; ?>% from yesterday
+                    </div>
+                </div>
+                
+                <div class="summary-card">
+                    <div class="summary-card-icon ip">
+                        <i class="fas fa-bed"></i>
+                    </div>
+                    <div class="summary-card-number" data-metric="ip"><?php echo $totalIP; ?></div>
+                    <div class="summary-card-label">IP Admissions</div>
+                    <div class="summary-card-change <?php echo $ipChange >= 0 ? 'positive' : 'negative'; ?>">
+                        <?php echo $ipChange >= 0 ? '+' : ''; ?><?php echo $ipChange; ?>% from yesterday
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Legacy Dashboard Content -->
-        <div class="legacy-content" style="display: none;">
-            <!-- Original dashboard content preserved for reference -->
-
-position: absolute;
-
-    left: 830px;
-
-    top: 420;
-
-}
-
--->
-
-</style>
-
-<link href="datepickerstyle.css" rel="stylesheet" type="text/css" />
-
-<script src="js/datetimepicker_css.js"></script>
-
-<script src="datetimepicker1_css.js"></script>
-
-<style>
-
-.hideClass
-
-{display:none;}
-
-</style>
-
-
-
-<script language="javascript">
-
-
-
-function process1login1()
-
-{
-
-	if (document.form1.username.value == "")
-
-	{
-
-		alert ("Pleae Enter Your Login.");
-
-		document.form1.username.focus();
-
-		return false;
-
-	}
-
-	else if (document.form1.password.value == "")
-
-	{	
-
-		alert ("Pleae Enter Your Password.");
-
-		document.form1.password.focus();
-
-		return false;
-
-	}
-
-}
-
-
-
-function fundatesearch()
-
-{
-
-	alert();
-
-	var fromdate = $("#ADate1").val();
-
-	var todate = $("#ADate2").val();
-
-	var sortfiled='';
-
-	var sortfunc='';
-
-	
-
-	var dataString = 'fromdate='+fromdate+'&&todate='+todate;
-
-	
-
-	$.ajax({
-
-		type: "POST",
-
-		url: "opipcashbillsajax.php",
-
-		data: dataString,
-
-		cache: true,
-
-		//delay:100,
-
-		success: function(html){
-
-		alert(html);
-
-			//$("#insertplan").empty();
-
-			//$("#insertplan").append(html);
-
-			//$("#hiddenplansearch").val('Searched');
-
-			
-
-		}
-
-	});
-
-}
-
-
-
-</script>
-
-<style type="text/css">
-
-<!--
-
-.bodytext31 {FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3b3b3c; FONT-FAMILY: Tahoma
-
-}
-
-
-
--->
-
-</style>
-
-</head>
-
-
-
-<body>
-
-<table width="101%" border="0" cellspacing="0" cellpadding="2">
-
-  <tr>
-
-    <td width="99" colspan="10" bgcolor="#ecf0f5"><?php include ("includes/alertmessages1.php"); ?></td>
-
-  </tr>
-
-  <tr>
-
-    <td colspan="10" bgcolor="#ecf0f5"><?php include ("includes/title1.php"); ?></td>
-
-  </tr>
-
-  <tr>
-
-    <td colspan="10" bgcolor="#ecf0f5"><?php include ("includes/menu1.php"); ?></td>
-
-  </tr>
-
-      </table>
-
-	  <?php
-
-	  $query341 = "select * from master_employee where username = '$username' and statistics='on'";
-
-				 $exec341 = mysqli_query($GLOBALS["___mysqli_ston"], $query341) or die ("Error in Query34".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-				 $res341 = mysqli_fetch_array($exec341);
-
-				 $rowcount341 = mysqli_num_rows($exec341);
-
-				 if($rowcount341 > 0)
-
-				 {
-
-	  ?>
-
-	    <table width="980" border="0" cellspacing="0" cellpadding="0" style="margin:30px;">
-
-        <tr>
-
-            <td colspan="2">
-
-            <?php
-
-			$query1 = "select locationname from login_locationdetails where username='$username' and docno='$docno' group by locationname order by locationname";
-
-						$exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-						$res1 = mysqli_fetch_array($exec1);
-
-						 $res1location = $res1["locationname"]; 
-
-						
-
-						 $totalcashamt=0;
-
-						$querycashsales="select sum(totalamount) as amount from billing_paynow where billdate='$todaydate'";	
-
-						$cashsalesex = mysqli_query($GLOBALS["___mysqli_ston"], $querycashsales) or die ("Error in querycashsales".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-						$cashres = mysqli_fetch_array($cashsalesex);
-
-						 $cashamount = $cashres["amount"]; 
-
-						 
-
-						 $querycashsalesop="select sum(consultation) as amount from billing_consultation where billdate='$todaydate'";	
-
-						$cashsalesexip = mysqli_query($GLOBALS["___mysqli_ston"], $querycashsalesop) or die ("Error in querycashsalesop".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-						$cashresip = mysqli_fetch_array($cashsalesexip);
-
-						 $cashamountop = $cashresip["amount"]; 
-
-						 
-
-						 $newcasham=$cashamount+$cashamountop;
-
-						 
-
-						   $querycashsalesip="select sum(totalamountuhx) as amount from billing_ip where billdate='$todaydate' and patientbilltype='PAY NOW'";	
-
-						$cashsalesipex = mysqli_query($GLOBALS["___mysqli_ston"], $querycashsalesip) or die ("Error in querycashsalesip".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-						$cashresip = mysqli_fetch_array($cashsalesipex);
-
-						 $cashamountip = $cashresip["amount"]; 
-
-						 
-
-						 $querysumip="select sum(transactionamount) as newamount from master_transactionipdeposit where transactiondate='$todaydate'";
-
-						 $cashsumipex = mysqli_query($GLOBALS["___mysqli_ston"], $querysumip) or die ("Error in querysumip".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-						$cashsumip = mysqli_fetch_array($cashsumipex);
-
-						 $depositcashamount = $cashsumip["newamount"]; 
-
-						 
-
-						 $newcashamount=$cashamountip+$depositcashamount;
-
-
-
-
-
-						 //$querysumip="select sum(transactionamount) as newamount from pos_payment where billdate='$todaydate' and visit_type <> 2";
-
-						 //$cashsumipex = mysql_query($querysumip) or die ("Error in querysumip".mysql_error());
-
-						 //$cashsumip = mysql_fetch_array($cashsumipex);
-
-						 //$newcasham = $cashsumip["newamount"]; 
-
-
-
-
-
-						 //$querysumip="select sum(transactionamount) as newamount  from pos_payment where billdate='$todaydate' and visit_type = 2";
-
-						 //$cashsumipex = mysql_query($querysumip) or die ("Error in querysumip".mysql_error());
-
-						//$cashsumip = mysql_fetch_array($cashsumipex);
-
-						 //$newcashamount = $cashsumip["newamount"]+$depositcashamount; 
-
-
-
-						 
-
-						 $totalcashamt=$newcasham+$newcashamount;	
-
-						  $drresult = array();
-
-	
-
-	$j = 0;
-
-	$crresult = array();
-
-	$querycr1 = "SELECT SUM(`consultation`) as income FROM `billing_consultation` WHERE billdate = '$todaydate'
-
-				UNION ALL SELECT SUM(`fxamount`) as income FROM `billing_paynowlab` WHERE billdate = '$todaydate'
-
-				UNION ALL SELECT SUM(`fxamount`) as income FROM `billing_paynowpharmacy` WHERE billdate = '$todaydate'
-
-				UNION ALL SELECT SUM(`fxamount`) as income FROM `billing_paynowradiology` WHERE billdate = '$todaydate'
-
-				UNION ALL SELECT SUM(`fxamount`) as income FROM `billing_paynowservices` WHERE billdate = '$todaydate' and wellnessitem <> 1
-
-				UNION ALL SELECT SUM(`cashamount`) as income FROM `billing_paynowreferal` WHERE billdate = '$todaydate'
-
-				UNION ALL SELECT SUM(`fxamount`) as income FROM `billing_referal` WHERE billdate = '$todaydate'
-
-				UNION ALL SELECT SUM(`labitemrate`) as income FROM `billing_externallab` WHERE billdate = '$todaydate'
-
-				UNION ALL SELECT SUM(`amount`) as income FROM `billing_externalpharmacy` WHERE billdate = '$todaydate'
-
-				UNION ALL SELECT SUM(`radiologyitemrate`) as income FROM `billing_externalradiology` WHERE billdate = '$todaydate'
-
-				UNION ALL SELECT SUM(`servicesitemrate`) as income FROM `billing_externalservices` WHERE billdate = '$todaydate'";
-
-	$execcr1 = mysqli_query($GLOBALS["___mysqli_ston"], $querycr1) or die ("Error in querycr1in".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-	while($rescr1 = mysqli_fetch_array($execcr1))
-
-	{
-
-	$j = $j+1;
-
-	//print_r($resdr1);
-
-	$crresult[$j] = $rescr1['income'];
-
-	//$paylater = $result[$i];
-
-	}	
-
-	//echo "total ".array_sum($crresult)." and ".array_sum($drresult);
-
-	$totalopcash = array_sum($crresult) - array_sum($drresult);
-
-
-
-						  $creditsales="select visitcode,fxamount from master_transactionpaylater where transactiondate='$todaydate' and transactiontype='finalize'";
-
-						 $creditsalesex = mysqli_query($GLOBALS["___mysqli_ston"], $creditsales) or die ("Error in creditsales".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-						 $transactionamount=0;
-
-						 $transactionamount1=0;
-
-						 $credittotal=0;
-
-						while($creditres = mysqli_fetch_array($creditsalesex))
-
-						{
-
-						  $visitcode = $creditres["visitcode"];
-
-						  $transamt = $creditres["fxamount"];
-
-						  
-
-						  $subvisit=substr($visitcode,-1);
-
-						if($subvisit=="V")
-
-						{
-
-						  $transactionamount+=$transamt;
-
-						 }
-
-						else
-
-						{
-
-						  $transactionamount1+=$transamt;
-
-							
-
-						}
-
-						}
-
-						$credittotal=$transactionamount+$transactionamount1;
-
-			?>
-
-            <strong> Location name: </strong> <?php echo $res1location?>
-
-            </td>
-
-            <td width="582">
-
-			<form action="newdashboard.php" method="post">
-
-            <strong> Date: </strong>
-
-            <input name="ADate1" id="ADate1" value="<?php echo $todaydate; ?>"  size="10"  readonly="readonly" onKeyDown="return disableEnterKey()" />
-
-			<img src="images2/cal.gif" onClick="javascript:NewCssCal('ADate1')" style="cursor:pointer"/>
-
-            
-
-			<input type="submit" value="Search" />
-
-            </form>
-
-            </td>
-
-            </table>
-
-           
-
-
-
-            </table>
-
-</table>
-
-<table width="1051" border="0" style="margin-left:30;">
-
-  <tr>
-
-    
-
-     <?php
-
-		    
-
-		  //$query2 = "select sum(cashamount) as cashamount1, sum(cardamount) as cardamount1, sum(onlineamount) as onlineamount1, sum(creditamount) as creditamount1, sum(chequeamount) as chequeamount1 from master_transactionpaynow where transactiondate = '$todaydate' "; 
-
-		 
-
-					$transactiondatefrom = $todaydate;
-
-
-
-//$paymenttype = $_REQUEST['paymenttype'];
-
-
-
-					
-
-				//	$locationcode1=isset($_REQUEST['location'])?$_REQUEST['location']:'LTC-1';
-
-					$snocount = 0;
-
-					$colorloopcount =0;
-
-		//   echo "hii".$locationcode1;
-
-		     $query23 = "select sum(cashamount) as cashamount1, sum(cardamount) as cardamount1, sum(onlineamount) as onlineamount1, sum(creditamount) as creditamount1, sum(chequeamount) as chequeamount1 from master_transactionpaynow where  transactiondate = '$transactiondatefrom' "; 
-
-		  $exec23 = mysqli_query($GLOBALS["___mysqli_ston"], $query23) or die ("Error in Query2".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-		  $res23 = mysqli_fetch_array($exec23);
-
-		  
-
-     	 $res2cashamount1 = $res23['cashamount1'];
-
-		  $res2onlineamount1 = $res23['onlineamount1'];
-
-		  $res2creditamount1 = $res23['creditamount1'];
-
-		  $res2chequeamount1 = $res23['chequeamount1'];
-
-		  $res2cardamount1 = $res23['cardamount1'];
-
-		  
-
-		  // echo  "hi".$res23['creditamount1'];
-
-	      $query3 = "select sum(cashamount) as cashamount1, sum(cardamount) as cardamount1, sum(onlineamount) as onlineamount1, sum(creditamount) as creditamount1, sum(chequeamount) as chequeamount1 from master_transactionexternal where  transactiondate = '$transactiondatefrom' "; 
-
-		  $exec3 = mysqli_query($GLOBALS["___mysqli_ston"], $query3) or die ("Error in Query3".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-		  $res3 = mysqli_fetch_array($exec3);
-
-		  
-
-     	  $res3cashamount1 = $res3['cashamount1'];
-
-		  $res3onlineamount1 = $res3['onlineamount1'];
-
-		  $res3creditamount1 = $res3['creditamount1'];
-
-		  $res3chequeamount1 = $res3['chequeamount1'];
-
-		  $res3cardamount1 = $res3['cardamount1'];
-
-		  
-
-		  
-
-		  $query4 = "select sum(cashamount) as cashamount1, sum(cardamount) as cardamount1, sum(onlineamount) as onlineamount1, sum(creditamount) as creditamount1, sum(chequeamount) as chequeamount1 from master_billing where  billingdatetime = '$transactiondatefrom' "; 
-
-		  $exec4 = mysqli_query($GLOBALS["___mysqli_ston"], $query4) or die ("Error in Query4".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-		  $res4 = mysqli_fetch_array($exec4);
-
-		  
-
-     	  $res4cashamount1 = $res4['cashamount1'];
-
-		  $res4onlineamount1 = $res4['onlineamount1'];
-
-		  $res4creditamount1 = $res4['creditamount1'];
-
-		  $res4chequeamount1 = $res4['chequeamount1'];
-
-		  $res4cardamount1 = $res4['cardamount1'];
-
-		  
-
-		  $query5 = "select sum(cashamount) as cashamount1, sum(cardamount) as cardamount1, sum(onlineamount) as onlineamount1, sum(creditamount) as creditamount1, sum(chequeamount) as chequeamount1 from refund_paynow where  transactiondate = '$transactiondatefrom' "; 
-
-		  $exec5 = mysqli_query($GLOBALS["___mysqli_ston"], $query5) or die ("Error in Query5".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-		  $res5 = mysqli_fetch_array($exec5);
-
-		  
-
-     	  $res5cashamount1 = $res5['cashamount1'];
-
-		  $res5onlineamount1 = $res5['onlineamount1'];
-
-		  $res5creditamount1 = $res5['creditamount1'];
-
-		  $res5chequeamount1 = $res5['chequeamount1'];
-
-		  $res5cardamount1 = $res5['cardamount1'];
-
-		  
-
-		  $query54 = "select sum(cashamount) as cashamount1, sum(cardamount) as cardamount1, sum(onlineamount) as onlineamount1, sum(creditamount) as creditamount1, sum(chequeamount) as chequeamount1  from deposit_refund where recorddate = '$transactiondatefrom' "; 
-
-		  $exec54 = mysqli_query($GLOBALS["___mysqli_ston"], $query54) or die ("Error in Query4".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-		  while($res54 = mysqli_fetch_array($exec54))
-
-{
-
-
-
-		
-
-			  $res54cashamount1 = $res54['cashamount1'];
-
-		  $res54onlineamount1 = $res54['onlineamount1'];
-
-		  $res54creditamount1 = $res54['creditamount1'];
-
-		  $res54chequeamount1 = $res54['chequeamount1'];
-
-		  $res54cardamount1 = $res54['cardamount1'];
-
-			
-
-
-
-			
-
-
-
-			}  //refund adv
-
-		  
-
-		  $query6 = "select sum(cashamount) as cashamount1, sum(cardamount) as cardamount1, sum(onlineamount) as onlineamount1, sum(creditamount) as creditamount1, sum(chequeamount) as chequeamount1 from master_transactionadvancedeposit where  transactiondate = '$transactiondatefrom' "; 
-
-		  $exec6 = mysqli_query($GLOBALS["___mysqli_ston"], $query6) or die ("Error in Query5".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-		  $res6 = mysqli_fetch_array($exec6);
-
-		  
-
-     	  $res6cashamount1 = $res6['cashamount1'];
-
-		  $res6onlineamount1 = $res6['onlineamount1'];
-
-		  $res6creditamount1 = $res6['creditamount1'];
-
-		  $res6chequeamount1 = $res6['chequeamount1'];
-
-		  $res6cardamount1 = $res6['cardamount1'];
-
-
-
-		  $query7 = "select sum(cashamount) as cashamount1, sum(cardamount) as cardamount1, sum(onlineamount) as onlineamount1, sum(creditamount) as creditamount1, sum(chequeamount) as chequeamount1 from master_transactionipdeposit where  transactiondate = '$transactiondatefrom' "; 
-
-		  $exec7 = mysqli_query($GLOBALS["___mysqli_ston"], $query7) or die ("Error in Query5".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-		  $res7 = mysqli_fetch_array($exec7);
-
-		  
-
-     	  $res7cashamount1 = $res7['cashamount1'];
-
-		  $res7onlineamount1 = $res7['onlineamount1'];
-
-		  $res7creditamount1 = $res7['creditamount1'];
-
-		  $res7chequeamount1 = $res7['chequeamount1'];
-
-		  $res7cardamount1 = $res7['cardamount1'];
-
-		  
-
-		  $query8 = "select sum(cashamount) as cashamount1, sum(cardamount) as cardamount1, sum(onlineamount) as onlineamount1, sum(mpesaamount) as creditamount1, sum(chequeamount) as chequeamount1 from master_transactionip where  transactiondate = '$transactiondatefrom' "; 
-
-		  $exec8 = mysqli_query($GLOBALS["___mysqli_ston"], $query8) or die ("Error in Query5".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-		  $res8 = mysqli_fetch_array($exec8);
-
-		  
-
-     	  $res8cashamount1 = $res8['cashamount1'];
-
-		  $res8onlineamount1 = $res8['onlineamount1'];
-
-		  $res8creditamount1 = $res8['creditamount1'];
-
-		  $res8chequeamount1 = $res8['chequeamount1'];
-
-		  $res8cardamount1 = $res8['cardamount1'];
-
-		  
-
-    	  $query9 = "select sum(cashamount) as cashamount1, sum(cardamount) as cardamount1, sum(onlineamount) as onlineamount1, sum(creditamount) as creditamount1, sum(chequeamount) as chequeamount1 from master_transactionipcreditapproved where  transactiondate = '$transactiondatefrom' "; 
-
-		  $exec9 = mysqli_query($GLOBALS["___mysqli_ston"], $query9) or die ("Error in Query5".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-		  $res9 = mysqli_fetch_array($exec9);
-
-		  
-
-     	  $res9cashamount1 = $res9['cashamount1'];
-
-		  $res9onlineamount1 = $res9['onlineamount1'];
-
-		  $res9creditamount1 = $res9['creditamount1'];
-
-		  $res9chequeamount1 = $res9['chequeamount1'];
-
-		  $res9cardamount1 = $res9['cardamount1'];
-
-
-
-		  $query10 = "select sum(cashamount) as cashamount1, sum(cardamount) as cardamount1, sum(onlineamount) as onlineamount1, sum(creditamount) as creditamount1, sum(chequeamount) as chequeamount1 from receiptsub_details where  transactiondate = '$transactiondatefrom' "; 
-
-		  $exec10 = mysqli_query($GLOBALS["___mysqli_ston"], $query10) or die ("Error in Query10".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-		  $res10 = mysqli_fetch_array($exec10);
-
-		  
-
-     	  $res10cashamount1 = $res10['cashamount1'];
-
-		  $res10onlineamount1 = $res10['onlineamount1'];
-
-		  $res10creditamount1 = $res10['creditamount1'];
-
-		  $res10chequeamount1 = $res10['chequeamount1'];
-
-		  $res10cardamount1 = $res10['cardamount1'];
-
-$query11 = "select sum(cashamount) as cashamount1, sum(cardamount) as cardamount1, sum(onlineamount) as onlineamount1, sum(creditamount) as creditamount1, sum(chequeamount) as chequeamount1 from master_transactionpaylater where docno like 'AR-%' and transactionstatus like 'onaccount' and transactiondate = '$transactiondatefrom' "; 
-
-		  $exec11 = mysqli_query($GLOBALS["___mysqli_ston"], $query11) or die ("Error in Query11".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-		  $res11 = mysqli_fetch_array($exec11);
-
-		  
-
-     	   $res11cashamount1 = $res11['cashamount1'];
-
-		  $res11onlineamount1 = $res11['onlineamount1'];
-
-		  $res11creditamount1 = $res11['creditamount1'];
-
-		  $res11chequeamount1 = $res11['chequeamount1'];
-
-		  $res11cardamount1 = $res11['cardamount1'];
-
-
-
-		  
-
-		  $cashamount = $res2cashamount1 + $res3cashamount1 + $res4cashamount1 + $res6cashamount1 + $res7cashamount1 + $res8cashamount1 + $res9cashamount1 + $res10cashamount1+ $res11cashamount1;
-
-		  $cardamount = $res2cardamount1 + $res3cardamount1 + $res4cardamount1 + $res6cardamount1 + $res7cardamount1 + $res8cardamount1 + $res9cardamount1 + $res10cardamount1+ $res11cardamount1;
-
-		  $chequeamount = $res2chequeamount1 + $res3chequeamount1 + $res4chequeamount1 + $res6chequeamount1 + $res7chequeamount1 + $res8chequeamount1 + $res9chequeamount1 + $res10chequeamount1+ $res11chequeamount1;
-
-		  $onlineamount = $res2onlineamount1 + $res3onlineamount1 + $res4onlineamount1 + $res6onlineamount1 + $res7onlineamount1 + $res8onlineamount1 + $res9onlineamount1 + $res10onlineamount1+ $res11onlineamount1;
-
-		  $creditamount = $res2creditamount1 + $res3creditamount1 + $res4creditamount1 + $res6creditamount1 + $res7creditamount1 + $res8creditamount1 + $res9creditamount1 + $res10creditamount1+ $res11creditamount1;
-
-		  
-
-		  $cashamount1 = $cashamount - $res5cashamount1 - $res54cashamount1;
-
-		  $cardamount1 = $cardamount - $res5cardamount1 - $res54cardamount1;
-
-		  $chequeamount1 = $chequeamount - $res5chequeamount1 - $res54chequeamount1;
-
-		  $onlineamount1 = $onlineamount - $res5onlineamount1 - $res54onlineamount1;
-
-		  $creditamount1 = $creditamount - $res5creditamount1 - $res54creditamount1;
-
-		  
-
-		  $total = $cashamount1 + $onlineamount1 + $chequeamount1 + $cardamount1 + $creditamount1;
-
-		  
-
-		  $snocount = $snocount + 1;
-
-		  $colorloopcount = $colorloopcount + 1;
-
-		  $showcolor = ($colorloopcount & 1); 
-
-		  
-
-			if ($showcolor == 0)
-
-			{
-
-				//echo "if";
-
-				$colorcode = 'bgcolor="#CBDBFA"';
-
-			}
-
-			else
-
-			{
-
-				//echo "else";
-
-				$colorcode = 'bgcolor="#ecf0f5"';
-
-			}
-
-			
-
-        
-
-			?>
-
-			<td width="600" valign="top">
-
-	<table width="600" border="0" style="font-size:medium;">
-
-			
-
-			<tr>
-
-			<td bgcolor="#ecf0f5" colspan="6" align="left"  style="color:blue"><strong>Collection Summary</strong></td>
-
-			</tr>
-
-			 <tr>
-
-              
-
-              <td width="100" align="left" valign="left"  
-
-                bgcolor="#ffffff" ><strong>Cash</strong></td>
-
-				<td width="100" align="left" valign="left"  
-
-                bgcolor="#ffffff" ><strong>Card</strong></td>
-
-				<td width="100" align="left" valign="left"  
-
-                bgcolor="#ffffff" ><strong>Cheque</strong></td>
-
-				<td width="100" align="left" valign="left"  
-
-                bgcolor="#ffffff" ><strong>Online</strong></td>
-
-				<td width="100" align="left" valign="left"  
-
-                bgcolor="#ffffff" ><strong>Mobile Money</strong></td>
-
-				<td width="100" align="left" valign="left"  
-
-                bgcolor="#ffffff" ><strong>Total</strong></td>
-
-               
-
-            </tr>
-
-           <tr <?php echo $colorcode; ?>>
-
-             
-
-               <td  valign="center"  align="right">
-
-                <div ><?php echo number_format($cashamount1,2,'.',','); ?>  </td>
-
-              <td  valign="center"  align="right">
-
-                <div ><?php echo number_format($cardamount1,2,'.',','); ?>  </td>
-
-              <td  valign="center"  align="right">
-
-			  <?php echo number_format($chequeamount1,2,'.',','); ?></td>
-
-              <td  valign="center"  align="right">
-
-			    <div align="right"><?php echo number_format($onlineamount1,2,'.',','); ?></td>
-
-				<td  valign="center"  align="right">
-
-			    <div align="right"><?php echo number_format($creditamount1,2,'.',','); ?></td>
-
-				<td  valign="center"  align="right">
-
-			    <div align="right"><?php echo number_format($total,2,'.',','); ?></td>
-
-				<td width="2%"  align="right" valign="center" bgcolor="#ecf0f5" >
-
-			    <div align="right">&nbsp;</td>
-
-				
-
-               
-
-           </tr>
-
-		   <?php
-
-		   
-
-	
-
-		   
-
-		   ?>
-
-			
-
-    </table></td>
-
-    <td width="247"><table width="247" border="0" style="font-size:medium;">
-
-      <tr bgcolor="#ccc">
-
-        <td colspan="2"  style="color: blue;"><strong>Cash Bills</strong></td>
-
-      </tr>
-
-      <tr bgcolor="#cbdbfa">
-
-        <td width="131">OP Cash Bills</td>
-
-        <td width="106" align="right"><?php echo number_format($totalopcash,2);?></td>
-
-      </tr>
-
-      <tr >
-
-        <td>&nbsp;</td>
-
-        <td align="right">&nbsp;</td>
-
-      </tr>
-
-      <tr >
-
-        <td>&nbsp;</td>
-
-        <td align="right">&nbsp;</td>
-
-      </tr>
-
-    </table></td><td width="323"><table width="250" border="0" style="font-size:medium;">
-
-      <tr bgcolor="#ccc">
-
-        <td colspan="2"  style="color: blue;"><strong>Current Credit Sales</strong></td>
-
-       
-
-      </tr>
-
-      <tr bgcolor="#CBDBFA">
-
-        <td width="122">OP Credit Bills</td>
-
-        <td width="112" align="right"><?php echo number_format($transactionamount1,2); ?></td>
-
-      </tr>
-
-      <tr  bgcolor="#ecf0f5">
-
-        <td>IP Credit Bills</td>
-
-        <td align="right"><?php echo number_format($transactionamount,2); ?> </td>
-
-      </tr>
-
-      <tr bgcolor="#FFFFFF">
-
-        <td>Total</td>
-
-        <td align="right"><?php echo number_format($credittotal,2); ?></td>
-
-      </tr>
-
-    </table></td>
-
-    
-
-  </tr>
-
-  <tr>
-
-    <td>&nbsp;</td>
-
-    <td colspan="2">&nbsp;</td>
-
-  </tr>
-
-  <tr>
-
-    <td><table width="310" height="124" border="0" style="font-size:medium;">
-
-      <tr bgcolor="#ccc">
-
-        <td colspan="3"  style="color: blue;"><strong>Current Statistics:</strong></td>
-
-        
-
-      </tr>
-
-      <tr bgcolor="#cbdbfa">
-
-        <td width="31">&nbsp;</td>
-
-        <td colspan="2"><strong>New Registration</strong></td>
-
-        
-
-      </tr>
-
-      <tr bgcolor="#ecf0f5">
-
-        <td>&nbsp;</td>
-
-        <td width="192">Hospital Patients</td>
-
-        <td width="56" align="right"><?php echo $hospitalpatient; ?></td>
-
-      </tr>
-
-      <tr bgcolor="#cbdbfa">
-
-        <td>&nbsp;</td>
-
-        <td>Walkins</td>
-
-        <td align="right"><?php echo $walkin; ?></td>
-
-      </tr>
-
-      <tr bgcolor="#fff">
-
-        <td>&nbsp;</td>
-
-        <td>Total Registered Patients</td>
-
-        <td align="right"><?php echo $registered; ?></td>
-
-      </tr>
-
-    </table></td>
-
-    <td colspan="2"><table width="290" border="0" style="font-size:medium;">
-
-      <tr bgcolor="#ccc">
-
-        <td colspan="2" align="center"  style="color: blue;"	><strong>Monthly Discount &amp; Waivers</strong></td>
-
-        
-
-      </tr>
-
-      <tr bgcolor="#cbdbfa">
-
-        <td width="137">OP Waivers</td>
-
-        <td width="143" align="right"><?php echo number_format($totalopwaiver,2); ?></td>
-
-      </tr>
-
-      <tr bgcolor="#ecf0f5">
-
-        <td>IP Waivers</td>
-
-        <td align="right"><?php echo number_format($iptotwai,2); ?></td>
-
-      </tr>
-
-      <tr>
-
-        <td>&nbsp;</td>
-
-        <td>&nbsp;</td>
-
-      </tr>
-
-      <tr>
-
-        <td>&nbsp;</td>
-
-        <td>&nbsp;</td>
-
-      </tr>
-
-    </table></td>
-
-  </tr>
-
-  <tr><td>&nbsp;</td>
-
-       </tr>
-
-  <tr>
-
-    <td colspan="3"><table width="1350" cellspacing="0" cellpadding="4px" border="0" style="font-size:medium;">
-
-      <tr bgcolor="#CCC">
-
-	  <td colspan="20" style="color: blue;"><strong>OP Departmental Statisctics</strong></td>
-
-      </tr>
-
-	  <tr bgcolor="#FFF">
-
-	  <td >Deaprtment</td>
-
-	  <td >New Visits</td>
-
-	  <td >Revisits</td>
-
-	  <td >Total Visits</td>
-
-	  <td >Triaged Patients</td>
-
-	  <td >Consulted Patients</td>
-
-	  <td >Lab Requests</td>
-
-	  <td >Lab Samples</td>
-
-	  <td >Lab Refunds</td>
-
-	  <td >Radiology Requests</td>
-
-	  <td >Radiology Processed</td>
-
-	  <td >Radiology Refunds</td>
-
-	  <td >Service Requests</td>
-
-	  <td >Service Processed</td>
-
-	  <td >Service Refunds</td>
-
-	  <td >Medicine Requests</td>
-
-	  <td >Medicine Issued</td>
-
-	  <td >Medicine Returns</td>
-
-	  <td width="100">Realized Revenue</td>
-
-	  <td width="100">Unrealized Revenue</td>
-
-      </tr>
-
-	  <?php
-
-		$snocount = 0;
-
-		$colorloopcount = 0;
-
-		$totalvisit =0;
-
-		$totalvisit1 =0;
-
-		$totaltriage = 0;
-
-		$totalconsult = 0;
-
-		$totallab = 0;
-
-		$totallabsample = 0;
-
-		$totallabrefund = 0;
-
-		$totalrad = 0;
-
-		$totalradsample = 0;
-
-		$totalradrefund = 0;
-
-		$totalser = 0;
-
-		$totalsersample = 0;
-
-		$totalserrefund = 0;
-
-		$totalmed = 0;
-
-		$totalmedissue = 0;
-
-		$totalmedreturn = 0;
-
-		$totalrevenue=0;
-
-		$totalunrealized=0;
-
-		$locationcode = 'LTC-1';
-
-		$qrydpt = "select auto_number,department from master_department where recordstatus <> 'deleted'";
-
-		$execdpt = mysqli_query($GLOBALS["___mysqli_ston"], $qrydpt) or die("Error in qrydpt ".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-		while($resdpt=mysqli_fetch_array($execdpt))
-
-		{
-
-		$dpt = $resdpt['auto_number'];
-
-		$dptname =  $resdpt['department'];
-
-		$newwalkin="select patientcode from master_visitentry where consultationdate='$todaydate' and department ='$dpt'";
-
-		$walkex=mysqli_query($GLOBALS["___mysqli_ston"], $newwalkin);
-
-		$walkpatient=0;
-
-		$walkpatient1=0;
-
-		$dptrevenue =0;
-
-		$dptunrealized =0;
-
-		while($totwalk=mysqli_fetch_array($walkex))
-
-		{
-
-			$newwalkcode=$totwalk['patientcode'];
-
-			$querywalk="select count(patientcode) as totalwalk from master_visitentry where patientcode='$newwalkcode'";
-
-			$querywalkex=mysqli_query($GLOBALS["___mysqli_ston"], $querywalk);
-
-			$reswalkt=mysqli_fetch_array($querywalkex);
-
-			$walkcount=$reswalkt['totalwalk'];
-
-			if($walkcount>1)
-
-			{
-
-				$walkpatient+=1;
-
-			}
-
-			else if($walkcount==1)
-
-			{
-
-				$walkpatient1+=1;
-
-			}
-
-			}
-
-			$qrytriage = "select count(auto_number) as triage from master_triage where department like '$dptname' and date(consultationdate)='$todaydate'";
-
-			$qrytriageex=mysqli_query($GLOBALS["___mysqli_ston"], $qrytriage);
-
-			$restriage=mysqli_fetch_array($qrytriageex);
-
-			$triage = $restriage['triage'];
-
-			$totaltriage += $triage;
-
-			$qryconsult = "select count(DISTINCT patientvisitcode) as consult from master_consultation where patientvisitcode in (select visitcode from master_visitentry where department ='$dpt') and recorddate='$todaydate'";
-
-			$qryconsultex=mysqli_query($GLOBALS["___mysqli_ston"], $qryconsult) or die (mysqli_error($GLOBALS["___mysqli_ston"]));
-
-			$resconsult=mysqli_fetch_array($qryconsultex);
-
-			$consult = $resconsult['consult'];
-
-			$totalconsult += $consult;
-
-			$qrylab = "select count(auto_number) as todaylab from consultation_lab where patientvisitcode in (select visitcode from master_visitentry where department ='$dpt') and consultationdate='$todaydate'";
-
-			$qrylabex=mysqli_query($GLOBALS["___mysqli_ston"], $qrylab);
-
-			$reslab=mysqli_fetch_array($qrylabex);
-
-			$todaylab = $reslab['todaylab'];
-
-			$totallab += $todaylab;
-
-			$qrylabsample = "select count(auto_number) as labsample from consultation_lab where patientvisitcode in (select visitcode from master_visitentry where department ='$dpt') and consultationdate='$todaydate' and labsamplecoll like 'completed' and labrefund <> 'refund'";
-
-			$qrylabsampleex=mysqli_query($GLOBALS["___mysqli_ston"], $qrylabsample);
-
-			$reslabsample=mysqli_fetch_array($qrylabsampleex);
-
-			$labsample = $reslabsample['labsample'];
-
-			$totallabsample += $labsample;
-
-			$qrylabrefund = "select count(auto_number) as labrefund from consultation_lab where patientvisitcode in (select visitcode from master_visitentry where department ='$dpt') and consultationdate='$todaydate' and labrefund like 'refund'";
-
-			$qrylabrefundex=mysqli_query($GLOBALS["___mysqli_ston"], $qrylabrefund);
-
-			$reslabrefund=mysqli_fetch_array($qrylabrefundex);
-
-			$labrefund = $reslabrefund['labrefund'];
-
-			$totallabrefund += $labrefund;
-
-			$qryrad = "select count(auto_number) as todayrad from consultation_radiology where patientvisitcode in (select visitcode from master_visitentry where department ='$dpt') and consultationdate='$todaydate'";
-
-			$qryradex=mysqli_query($GLOBALS["___mysqli_ston"], $qryrad) or die(mysqli_error($GLOBALS["___mysqli_ston"]));
-
-			$resrad=mysqli_fetch_array($qryradex);
-
-			$todayrad = $resrad['todayrad'];
-
-			$totalrad += $todayrad;
-
-			$qryradsample = "select count(auto_number) as radsample from consultation_radiology where patientvisitcode in (select visitcode from master_visitentry where department ='$dpt') and consultationdate='$todaydate' and prepstatus like 'completed' and radiologyrefund <> 'refund'";
-
-			$qryradsampleex=mysqli_query($GLOBALS["___mysqli_ston"], $qryradsample);
-
-			$resradsample=mysqli_fetch_array($qryradsampleex);
-
-			$radsample = $resradsample['radsample'];
-
-			$totalradsample += $radsample;
-
-			$qryradrefund = "select count(auto_number) as radrefund from consultation_radiology where patientvisitcode in (select visitcode from master_visitentry where department ='$dpt') and consultationdate='$todaydate' and radiologyrefund like 'refund'";
-
-			$qryradrefundex=mysqli_query($GLOBALS["___mysqli_ston"], $qryradrefund);
-
-			$resradrefund=mysqli_fetch_array($qryradrefundex);
-
-			$radrefund = $resradrefund['radrefund'];
-
-			$totalradrefund += $radrefund;
-
-			$qryser = "select count(auto_number) as todayser from consultation_services where patientvisitcode in (select visitcode from master_visitentry where department ='$dpt') and consultationdate='$todaydate' and wellnessitem <> 1 ";
-
-			$qryserex=mysqli_query($GLOBALS["___mysqli_ston"], $qryser) or die(mysqli_error($GLOBALS["___mysqli_ston"]));
-
-			$resrad=mysqli_fetch_array($qryserex);
-
-			$todayser = $resrad['todayser'];
-
-			$totalser += $todayser;
-
-			$qrysersample = "select count(auto_number) as sersample from consultation_services where patientvisitcode in (select visitcode from master_visitentry where department ='$dpt') and consultationdate='$todaydate' and process like 'completed' and servicerefund <> 'refund' and wellnessitem <> 1";
-
-			$qrysersampleex=mysqli_query($GLOBALS["___mysqli_ston"], $qrysersample);
-
-			$ressersample=mysqli_fetch_array($qrysersampleex);
-
-			$sersample = $ressersample['sersample'];
-
-			$totalsersample += $sersample;
-
-			$qryserrefund = "select count(auto_number) as serrefund from consultation_services where patientvisitcode in (select visitcode from master_visitentry where department ='$dpt') and consultationdate='$todaydate' and servicerefund like 'refund' and wellnessitem <> 1";
-
-			$qryserrefundex=mysqli_query($GLOBALS["___mysqli_ston"], $qryserrefund);
-
-			$resserrefund=mysqli_fetch_array($qryserrefundex);
-
-			$serrefund = $resserrefund['serrefund'];
-
-			$totalserrefund += $serrefund;
-
-			$qrymed = "select count(auto_number) as todaymed from master_consultationpharm where patientvisitcode in (select visitcode from master_visitentry where department ='$dpt') and recorddate='$todaydate'";
-
-			$qrymedex=mysqli_query($GLOBALS["___mysqli_ston"], $qrymed) or die(mysqli_error($GLOBALS["___mysqli_ston"]));
-
-			$resmed=mysqli_fetch_array($qrymedex);
-
-			$todaymed = $resmed['todaymed'];
-
-			$totalmed += $todaymed;
-
-			$qrymedissue = "select count(auto_number) as medissue from master_consultationpharm where patientvisitcode in (select visitcode from master_visitentry where department ='$dpt') and recorddate='$todaydate' and medicineissue like 'completed'";
-
-			$qrymedissueex=mysqli_query($GLOBALS["___mysqli_ston"], $qrymedissue);
-
-			$resmedissue=mysqli_fetch_array($qrymedissueex);
-
-			$medissue = $resmedissue['medissue'];
-
-			$totalmedissue += $medissue;
-
-			$qrymedreturn = "select count(auto_number) as medreturn from pharmacysalesreturn_details where visitcode in (select visitcode from master_visitentry where department ='$dpt') and entrydate='$todaydate'";
-
-			$qrymedreturnex=mysqli_query($GLOBALS["___mysqli_ston"], $qrymedreturn);
-
-			$resmedreturn=mysqli_fetch_array($qrymedreturnex);
-
-			$medreturn = $resmedreturn['medreturn'];
-
-			$totalmedreturn += $medreturn;
-
-			//revenue
-
-			$query1 = "select sum(consultation) as billamount1 from billing_consultation where  locationcode='$locationcode' and  billdate = '$todaydate' and patientvisitcode in (select visitcode from master_visitentry where department like '$dpt')";
-
-			$exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die ("Error in query1".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-			$res1 = mysqli_fetch_array($exec1);
-
-			$res1consultationamount = $res1['billamount1'];
-
-			$query1 = "select sum(fxamount) as billamount1 from billing_paylaterconsultation where locationcode='$locationcode' and  billdate = '$todaydate' and visitcode in (select visitcode from master_visitentry where department like '$dpt')";
-
-			$exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die ("Error in query1".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-			$res1 = mysqli_fetch_array($exec1);
-
-			$res2consultationamount = $res1['billamount1'];
-
-			
-
-			// this query for pharmacy
-
-		    $query8 = "select sum(fxamount) as amount1 from billing_paylaterpharmacy where locationcode='$locationcode' and billdate = '$todaydate' and patientvisitcode in (select visitcode from master_visitentry where department like '$dpt')";
-
-		 	$exec8 = mysqli_query($GLOBALS["___mysqli_ston"], $query8) or die ("Error in query8".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-			$res8 = mysqli_fetch_array($exec8);
-
-			$res8pharmacyitemrate = $res8['amount1'];
-
-			
-
-			$query9 = "select sum(fxamount) as amount1 from billing_paynowpharmacy where locationcode='$locationcode' and billdate = '$todaydate' and patientvisitcode in (select visitcode from master_visitentry where department like '$dpt')";
-
-		    $exec9 = mysqli_query($GLOBALS["___mysqli_ston"], $query9) or die ("Error in Query9".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-			$res9 = mysqli_fetch_array($exec9);
-
-			$res9pharmacyitemrate = $res9['amount1'];
-
-			
-
-			$query17 = "select sum(amount) as amount1 from billing_externalpharmacy where locationcode='$locationcode' and billdate = '$todaydate'  and patientvisitcode in (select visitcode from master_visitentry where department like '$dpt')";
-
-			$exec17 = mysqli_query($GLOBALS["___mysqli_ston"], $query17) or die ("Error in Query17".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-			$res17 = mysqli_fetch_array($exec17);
-
-			$res17pharmacyitemrate = $res17['amount1'];
-
-			  
-
-			//this query for laboratry
-
-			$query2 = "select sum(fxamount) as labitemrate1 from billing_paylaterlab where locationcode='$locationcode' and billdate = '$todaydate'  and patientvisitcode in (select visitcode from master_visitentry where department like '$dpt')";
-
-			$exec2 = mysqli_query($GLOBALS["___mysqli_ston"], $query2) or die ("Error in query2".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-			$res2 = mysqli_fetch_array($exec2);
-
-			$res2labitemrate = $res2['labitemrate1'];
-
-			
-
-			$query3 = "select sum(fxamount) as labitemrate1 from billing_paynowlab where locationcode='$locationcode' and billdate = '$todaydate'  and patientvisitcode in (select visitcode from master_visitentry where department like '$dpt')";
-
-			$exec3 = mysqli_query($GLOBALS["___mysqli_ston"], $query3) or die ("Error in Query3".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-			$res3 = mysqli_fetch_array($exec3);
-
-			$res3labitemrate = $res3['labitemrate1'];
-
-			
-
-			$query14 = "select sum(labitemrate) as labitemrate1 from billing_externallab where locationcode='$locationcode' and billdate = '$todaydate'  and patientvisitcode in (select visitcode from master_visitentry where department like '$dpt')";
-
-			$exec14 = mysqli_query($GLOBALS["___mysqli_ston"], $query14) or die ("Error in query14".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-			$res14 = mysqli_fetch_array($exec14);
-
-			$res14labitemrate = $res14['labitemrate1'];
-
-			
-
-			$totallabitemrate = $res2labitemrate + $res3labitemrate + $res14labitemrate;
-
-			
-
-			
-
-			//this query for radiology
-
-			$query4 = "select sum(fxamount) as radiologyitemrate1 from billing_paylaterradiology where locationcode='$locationcode' and billdate = '$todaydate'  and patientvisitcode in (select visitcode from master_visitentry where department like '$dpt')";
-
-			$exec4 = mysqli_query($GLOBALS["___mysqli_ston"], $query4) or die ("Error in query4".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-			$res4 = mysqli_fetch_array($exec4);
-
-			$res4radiologyitemrate = $res4['radiologyitemrate1'];
-
-			
-
-			$query5 = "select sum(fxamount) as radiologyitemrate1 from billing_paynowradiology where locationcode='$locationcode' and billdate = '$todaydate' and patientvisitcode in (select visitcode from master_visitentry where department like '$dpt')";
-
-			$exec5 = mysqli_query($GLOBALS["___mysqli_ston"], $query5) or die ("Error in Query5".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-			$res5 = mysqli_fetch_array($exec5);
-
-			$res5radiologyitemrate = $res5['radiologyitemrate1'];
-
-			
-
-			$query15 = "select sum(radiologyitemrate) as radiologyitemrate1 from billing_externalradiology where locationcode='$locationcode' and billdate = '$todaydate'  and patientvisitcode in (select visitcode from master_visitentry where department like '$dpt')";
-
-			$exec15 = mysqli_query($GLOBALS["___mysqli_ston"], $query15) or die ("Error in Query15".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-			$res15 = mysqli_fetch_array($exec15);
-
-			$res15radiologyitemrate = $res15['radiologyitemrate1'];
-
-			
-
-			$totalradiologyitemrate = $res4radiologyitemrate + $res5radiologyitemrate + $res15radiologyitemrate; 
-
-			
-
-			//this query for service
-
-			$query6 = "select sum(fxamount) as servicesitemrate1 from billing_paylaterservices where locationcode='$locationcode' and billdate = '$todaydate' and patientvisitcode in (select visitcode from master_visitentry where department like '$dpt' and wellnessitem <> 1)";
-
-			$exec6 = mysqli_query($GLOBALS["___mysqli_ston"], $query6) or die ("Error in query6".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-			$res6 = mysqli_fetch_array($exec6);
-
-			$res6servicesitemrate = $res6['servicesitemrate1'];
-
-			
-
-			$query7 = "select sum(fxamount) as servicesitemrate2 from billing_paynowservices where locationcode='$locationcode' and billdate = '$todaydate'  and patientvisitcode in (select visitcode from master_visitentry where department like '$dpt' and wellnessitem <> 1)";
-
-			$exec7 = mysqli_query($GLOBALS["___mysqli_ston"], $query7) or die ("Error in Query7".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-			$res7 = mysqli_fetch_array($exec7);
-
-			$res7servicesitemrate = $res7['servicesitemrate2'];
-
-			
-
-			$query16 = "select sum(servicesitemrate) as servicesitemrate3 from billing_externalservices where locationcode='$locationcode' and billdate = '$todaydate' and patientvisitcode in (select visitcode from master_visitentry where department like '$dpt')";
-
-			$exec16 = mysqli_query($GLOBALS["___mysqli_ston"], $query16) or die ("Error in Query16".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-			$res16 = mysqli_fetch_array($exec16);
-
-			$res16servicesitemrate = $res16['servicesitemrate3'];
-
-			
-
-			$totalservicesitemrate = $res6servicesitemrate + $res7servicesitemrate + $res16servicesitemrate ;
-
-			
-
-			$query10 = "select sum(referalrate) as referalrate1 from billing_paylaterreferal where locationcode='$locationcode' and billdate = '$todaydate' and patientvisitcode in (select visitcode from master_visitentry where department like '$dpt')";
-
-			$exec10 = mysqli_query($GLOBALS["___mysqli_ston"], $query10) or die ("Error in query10".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-			$res10 = mysqli_fetch_array($exec10);
-
-			$res10referalitemrate = $res10['referalrate1'];
-
-			
-
-			$query11 = "select sum(referalrate) as referalrate1 from billing_paynowreferal where locationcode='$locationcode' and billdate = '$todaydate' and patientvisitcode in (select visitcode from master_visitentry where department like '$dpt')";
-
-			$exec11 = mysqli_query($GLOBALS["___mysqli_ston"], $query11) or die ("Error in Query11".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-			$res11 = mysqli_fetch_array($exec11);
-
-			$res11referalitemrate = $res11['referalrate1']; 
-
-			
-
-			//this query for refund consultation
-
-			
-
-			$query12 = "select sum(consultation) as consultation1 from refund_consultation where locationcode='$locationcode' and billdate = '$todaydate'  and patientvisitcode in (select visitcode from master_visitentry where department like '$dpt')";
-
-			$exec12 = mysqli_query($GLOBALS["___mysqli_ston"], $query12) or die ("Error in Query12".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-			$res12 = mysqli_fetch_array($exec12);
-
-			$res12refundconsultation = $res12['consultation1'];
-
-			
-
-			//this query for refund pharmacy
-
-			
-
-			$query21 = "select sum(amount)as amount1 from refund_paylaterpharmacy where locationcode='$locationcode' and billdate = '$todaydate' and patientvisitcode in (select visitcode from master_visitentry where department like '$dpt')";
-
-			$exec21 = mysqli_query($GLOBALS["___mysqli_ston"], $query21) or die ("Error in Query21".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-			$res21 = mysqli_fetch_array($exec21) ;
-
-			$res21refundlabitemrate = $res21['amount1'];
-
-			$query22 = "select sum(amount)as amount1 from refund_paynowpharmacy where locationcode='$locationcode' and billdate = '$todaydate' and patientvisitcode in (select visitcode from master_visitentry where department like '$dpt')";
-
-			$exec22 = mysqli_query($GLOBALS["___mysqli_ston"], $query22) or die ("Error in Query22".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-			$res22 = mysqli_fetch_array($exec22) ;
-
-			$res22refundlabitemrate = $res22['amount1'];
-
-			$totalrefundpharmacy = $res22refundlabitemrate + $res21refundlabitemrate;
-
-			
-
-			//this query for refund laboratory
-
-			
-
-			$query19 = "select sum(labitemrate)as labitemrate1 from refund_paylaterlab where locationcode='$locationcode' and billdate = '$todaydate' and patientvisitcode in (select visitcode from master_visitentry where department like '$dpt')";
-
-			$exec19 = mysqli_query($GLOBALS["___mysqli_ston"], $query19) or die ("Error in Query19".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-			$res19 = mysqli_fetch_array($exec19) ;
-
-			$res19refundlabitemrate = $res19['labitemrate1'];
-
-			$query20 = "select sum(labitemrate)as labitemrate1 from refund_paynowlab where locationcode='$locationcode' and billdate = '$todaydate' and patientvisitcode in (select visitcode from master_visitentry where department like '$dpt')";
-
-			$exec20 = mysqli_query($GLOBALS["___mysqli_ston"], $query20) or die ("Error in Query20".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-			$res20 = mysqli_fetch_array($exec20) ;
-
-			$res20refundlabitemrate = $res20['labitemrate1'];
-
-			$totalrefundlab = $res20refundlabitemrate + $res19refundlabitemrate;
-
-			
-
-			//this query for refund radiology
-
-			
-
-			$query22 = "select sum(radiologyitemrate)as radiologyitemrate1 from refund_paylaterradiology where locationcode='$locationcode' and billdate = '$todaydate' and patientvisitcode in (select visitcode from master_visitentry where department like '$dpt')";
-
-			$exec22 = mysqli_query($GLOBALS["___mysqli_ston"], $query22) or die ("Error in Query22".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-			$res22 = mysqli_fetch_array($exec22) ;
-
-			$res22refundradioitemrate = $res22['radiologyitemrate1'];
-
-			$query23 = "select sum(radiologyitemrate)as radiologyitemrate1 from refund_paynowradiology where locationcode='$locationcode' and billdate = '$todaydate' and patientvisitcode in (select visitcode from master_visitentry where department like '$dpt')";
-
-			$exec23 = mysqli_query($GLOBALS["___mysqli_ston"], $query23) or die ("Error in Query23".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-			$res23 = mysqli_fetch_array($exec23) ;
-
-			$res23refundradioitemrate = $res23['radiologyitemrate1'];
-
-			$totalrefundradio = $res23refundradioitemrate + $res22refundradioitemrate;
-
-			
-
-			//this query for refund service
-
-			
-
-			$query24 = "select sum(amount)as servicesitemrate1 from refund_paylaterservices where locationcode='$locationcode' and billdate = '$todaydate' and patientvisitcode in (select visitcode from master_visitentry where department like '$dpt')";
-
-			$exec24= mysqli_query($GLOBALS["___mysqli_ston"], $query24) or die ("Error in Query24".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-			$res24 = mysqli_fetch_array($exec24) ;
-
-			$res24refundserviceitemrate = $res24['servicesitemrate1'];
-
-			$query25 = "select sum(servicetotal)as servicesitemrate1 from refund_paynowservices where locationcode='$locationcode' and billdate = '$todaydate' and patientvisitcode in (select visitcode from master_visitentry where department like '$dpt')";
-
-			$exec25 = mysqli_query($GLOBALS["___mysqli_ston"], $query25) or die ("Error in Query23".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-			$res25 = mysqli_fetch_array($exec25) ;
-
-			$res25refundserviceitemrate = $res25['servicesitemrate1'];
-
-			$totalrefundservice = $res25refundserviceitemrate + $res24refundserviceitemrate;
-
-			
-
-			//this query for refund referal
-
-			
-
-			$query26 = "select sum(referalrate)as referalrate1 from refund_paylaterreferal where locationcode='$locationcode' and billdate = '$todaydate' and patientvisitcode in (select visitcode from master_visitentry where department like '$dpt')";
-
-			$exec26= mysqli_query($GLOBALS["___mysqli_ston"], $query26) or die ("Error in Query24".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-			$res26 = mysqli_fetch_array($exec26) ;
-
-			$res26refundreferalitemrate = $res26['referalrate1'];
-
-			$query27 = "select sum(referalrate)as referalrate1 from refund_paynowreferal where locationcode='$locationcode' and billdate = '$todaydate' and patientvisitcode in (select visitcode from master_visitentry where department like '$dpt')";
-
-			$exec27 = mysqli_query($GLOBALS["___mysqli_ston"], $query27) or die ("Error in Query27".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-			$res27 = mysqli_fetch_array($exec27) ;
-
-			$res27refundreferalitemrate = $res27['referalrate1'];
-
-			$totalrefundreferal = $res27refundreferalitemrate + $res26refundreferalitemrate;
-
-							  
-
-			  //ENDS
-
-			  //for cash total
-
-			  $cashtotal1=$res1consultationamount+$res9pharmacyitemrate+$res3labitemrate+$res5radiologyitemrate+$res7servicesitemrate+$res11referalitemrate;
-
-			  
-
-			  //for credit total
-
-			  $credittotal1=$res2consultationamount+$res8pharmacyitemrate+$res2labitemrate+$res4radiologyitemrate+$res6servicesitemrate+$res10referalitemrate;
-
-			  //for external total
-
-			 
-
-			  //for refund total
-
-			  $refundtotal1=$res12refundconsultation+$totalrefundpharmacy+$totalrefundlab+$totalrefundradio+$totalrefundservice+$totalrefundreferal;
-
-			  $dptrevenue=$cashtotal1+$credittotal1-$refundtotal1;
-
-			$totalrevenue +=$dptrevenue;
-
-			//revenue end
-
-			
-
-			//unrealized
-
-			$totalpharmacysalesreturn =0;
-
-			$overaltotalrefund =0;
-
-			$query2 = "select patientcode,visitcode,patientfullname,consultationdate,accountfullname,subtype,planname,planpercentage from master_visitentry where billtype='PAY LATER' and overallpayment='' and consultationdate = '$todaydate' AND visitcode NOT IN (SELECT visitcode FROM billing_paylater) AND department like '$dpt' order by accountfullname desc ";
-
-		  $exec2 = mysqli_query($GLOBALS["___mysqli_ston"], $query2) or die ("Error in Query2un".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-		  while ($res2 = mysqli_fetch_array($exec2))
-
-		  {
-
-		  $res2patientcode = $res2['patientcode'];
-
-		  $res2visitcode = $res2['visitcode'];
-
-		  $res2patientfullname = $res2['patientfullname'];
-
-		  $res2registrationdate = $res2['consultationdate'];
-
-		  $res2accountname = $res2['accountfullname'];
-
-		  $subtype = $res2['subtype'];
-
-		  $plannumber = $res2['planname'];
-
-			
-
-			$queryplanname = "select forall from master_planname where auto_number ='".$plannumber."' ";// and (billingdatetime between '$triagedatefrom' and '$triagedateto')";//
-
-			$execplanname = mysqli_query($GLOBALS["___mysqli_ston"], $queryplanname) or die ("Error in Queryplanname".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-			$resplanname = mysqli_fetch_array($execplanname);
-
-		 	$planforall = $resplanname['forall'];
-
-			$planpercentage=$res2['planpercentage'];
-
-			//$copay=($consultationfee/100)*$planpercentage;
-
-			
-
-		  
-
-		  $Querylab=mysqli_query($GLOBALS["___mysqli_ston"], "select subtype,planname  from master_customer where customercode='$res2patientcode'");
-
-			$execlab=mysqli_fetch_array($Querylab);
-
-			$patientsubtype=$execlab['subtype'];
-
-			$querysubtype=mysqli_query($GLOBALS["___mysqli_ston"], "select * from master_subtype where auto_number='$patientsubtype'");
-
-			$execsubtype=mysqli_fetch_array($querysubtype);
-
-			$patientsubtype1=$execsubtype['subtype'];
-
-			$patientsubtypeano=$execsubtype['auto_number'];
-
-			$patientplan=$execlab['planname'];
-
-			$currency=$execsubtype['currency'];
-
-			$fxrate=$execsubtype['fxrate'];
-
-			if($currency=='')
-
-			{
-
-				$currency='UGX';
-
-			}
-
-			$labtemplate = $execsubtype['labtemplate'];
-
-			if($labtemplate == '') { $labtemplate = 'master_lab'; }
-
-			$radtemplate = $execsubtype['radtemplate'];
-
-			if($radtemplate == '') { $radtemplate = 'master_radiology'; }
-
-			$sertemplate = $execsubtype['sertemplate'];
-
-			if($sertemplate == '') { $sertemplate = 'master_services'; }
-
-		  
-
-		  $res3labitemrate = 0;
-
-		  $query3 = "select labitemcode from consultation_lab where patientcode = '$res2patientcode' and patientvisitcode = '$res2visitcode' and consultationdate = '$todaydate'";
-
-		  $exec3 = mysqli_query($GLOBALS["___mysqli_ston"], $query3) or die ("Error in query3".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-		  while($res3 = mysqli_fetch_array($exec3))
-
-		  {
-
-		  		$labcode = $res3['labitemcode']; 
-
-				$queryfx = "select rateperunit from $labtemplate where itemcode = '$labcode'";
-
-				$execfx = mysqli_query($GLOBALS["___mysqli_ston"], $queryfx) or die ("Error in Queryfx".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-				$resfx = mysqli_fetch_array($execfx);
-
-				$labrate=$resfx['rateperunit'] * $fxrate;
-
-				if(($planpercentage!=0.00)&&($planforall=='yes'))
-
-			  	{ 
-
-					$labrate = $labrate - ($labrate/100)*$planpercentage;
-
-				}
-
-				$res3labitemrate = $res3labitemrate + $labrate;
-
-		  }
-
-		  
-
-		  $res4servicesitemrate = 0;
-
-		  $query4 = "select servicesitemcode,serviceqty,refundquantity from consultation_services where patientcode = '$res2patientcode' and patientvisitcode = '$res2visitcode' and consultationdate = '$todaydate' and wellnessitem <> 1";
-
-		  $exec4 = mysqli_query($GLOBALS["___mysqli_ston"], $query4) or die ("Error in query4".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-		  while($res4 = mysqli_fetch_array($exec4))
-
-		  {
-
-		  	 $sercode=$res4['servicesitemcode'];
-
-			 $serqty=$res4['serviceqty'];
-
-			 $serrefqty=$res4['refundquantity'];
-
-			
-
-			 $serqty = $serqty-$serrefqty;
-
-			
-
-			$queryfx = "select rateperunit from $sertemplate where itemcode = '$sercode'";
-
-			$execfx = mysqli_query($GLOBALS["___mysqli_ston"], $queryfx) or die ("Error in Queryfx".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-			$resfx = mysqli_fetch_array($execfx);
-
-			$serrate=$resfx['rateperunit'] * $fxrate;
-
-			$serrate = $serrate * $serqty;
-
-			if(($planpercentage!=0.00)&&($planforall=='yes'))
-
-			{ 
-
-				$serrate = $serrate - ($serrate/100)*$planpercentage;
-
-			}
-
-			$res4servicesitemrate = $res4servicesitemrate + $serrate;
-
-		  }
-
-		  
-
-		  $res5radiologyitemrate = 0;
-
-		  $query5 = "select radiologyitemcode from consultation_radiology where patientcode = '$res2patientcode' and patientvisitcode = '$res2visitcode' and consultationdate = '$todaydate' ";
-
-		  $exec5 = mysqli_query($GLOBALS["___mysqli_ston"], $query5) or die ("Error in query5".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-		  while($res5 = mysqli_fetch_array($exec5))
-
-		  {
-
-		  	$radcode=$res5['radiologyitemcode'];
-
-			
-
-			$queryfx = "select rateperunit from $radtemplate where itemcode = '$radcode'";
-
-			$execfx = mysqli_query($GLOBALS["___mysqli_ston"], $queryfx) or die ("Error in Queryfx".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-			$resfx = mysqli_fetch_array($execfx);
-
-			$radrate=$resfx['rateperunit'] * $fxrate;
-
-			if(($planpercentage!=0.00)&&($planforall=='yes'))
-
-			{ 
-
-				$radrate = $radrate - ($radrate/100)*$planpercentage;
-
-			}
-
-			$res5radiologyitemrate = $res5radiologyitemrate + $radrate;
-
-		  }
-
-		  
-
-		  $query6 = "select sum(referalrate) as referalrate1 from consultation_referal where patientcode = '$res2patientcode' and patientvisitcode = '$res2visitcode' and consultationdate = '$todaydate' ";
-
-		  $exec6 = mysqli_query($GLOBALS["___mysqli_ston"], $query6) or die ("Error in query6".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-		  $res6 = mysqli_fetch_array($exec6);
-
-		  $res6referalrate = $res6['referalrate1'];
-
-		  if ($res6referalrate =='')
-
-		  {
-
-		  $res6referalrate = '0.00';
-
-		  }
-
-		  else 
-
-		  {
-
-		    $res6referalrate = $res6['referalrate1'] * $fxrate;
-
-		  }
-
-		  if(($planpercentage!=0.00)&&($planforall=='yes'))
-
-		  { 
-
-		  $res6referalrate=$res6referalrate - ($res6referalrate/100)*$planpercentage;
-
-		  }
-
-		  
-
-		  $query7 = "select sum(consultationfees) as consultationfees1 from master_visitentry where patientcode = '$res2patientcode' and visitcode = '$res2visitcode' and consultationdate = '$todaydate'";
-
-		  $exec7 = mysqli_query($GLOBALS["___mysqli_ston"], $query7) or die ("Error in query7".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-		  $res7 = mysqli_fetch_array($exec7);
-
-		  $res7consultationfees = $res7['consultationfees1'] * $fxrate;
-
-		  if(($planpercentage!=0.00)&&($planforall=='yes'))
-
-		  { 
-
-		  $copay=($res7consultationfees/100)*$planpercentage;
-
-		  }
-
-		  else
-
-		  {
-
-		  $copay = 0;
-
-		  }
-
-		  $res7consultationfees = $res7consultationfees - $copay;
-
-		  
-
-		  $query8 = "select sum(copayfixedamount) as copayfixedamount1 from master_billing where patientcode = '$res2patientcode' and visitcode = '$res2visitcode' and consultationdate = '$todaydate'";
-
-		  $exec8 = mysqli_query($GLOBALS["___mysqli_ston"], $query8) or die ("Error in query8".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-		  $res8 = mysqli_fetch_array($exec8);
-
-		  $res8copayfixedamount = $res8['copayfixedamount1'];
-
-		  $res8copayfixedamount = 0;
-
-		  
-
-		  $consultation = $res7consultationfees - $res8copayfixedamount;
-
-		  
-
-		  $query9 = "select sum(totalamount) as totalamount1 from pharmacysales_details where patientcode = '$res2patientcode' and visitcode = '$res2visitcode' and entrydate = '$todaydate' ";
-
-		  $exec9 = mysqli_query($GLOBALS["___mysqli_ston"], $query9) or die ("Error in query9".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-		  $res9 = mysqli_fetch_array($exec9);
-
-		  $res9pharmacyrate = $res9['totalamount1'];
-
-		  
-
-		  if ($res9pharmacyrate == '')
-
-		  {
-
-		  $res9pharmacyrate = '0.00';
-
-		  }
-
-		  else 
-
-		  {
-
-		  $res9pharmacyrate = $res9['totalamount1'];
-
-		  }
-
-		  
-
-		  if(($planpercentage!=0.00)&&($planforall=='yes'))
-
-		  {
-
-		  	$res9pharmacyrate = $res9pharmacyrate - ($res9pharmacyrate/100)*$planpercentage;
-
-		  }
-
-		  
-
-			$query321 = "select sum(totalamount) as totalamount2 from pharmacysalesreturn_details where visitcode='$res2visitcode' and entrydate = '$todaydate'";// and ipdocno = '$refno'";//group by itemcode";
-
-			$exec321 = mysqli_query($GLOBALS["___mysqli_ston"], $query321) or die ("Error in Query321".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-		  $numpharmacysalereturn=mysqli_num_rows($exec321);
-
-		  $totalpharmacysalesreturn=$totalpharmacysalesreturn+$numpharmacysalereturn;
-
-		  //echo '<br>Total Pharmacy Return '.mysql_num_rows($exec321);
-
-		    $res321 = mysqli_fetch_array($exec321);
-
-
-
-		  $res9pharmacyreturnrate = $res321['totalamount2'];
-
-		  if(($planpercentage!=0.00)&&($planforall=='yes'))
-
-		  {
-
-		  	$res9pharmacyreturnrate = $res9pharmacyreturnrate - ($res9pharmacyreturnrate/100)*$planpercentage;
-
-		  }
-
-		  $res9pharmacyrate=$res9pharmacyrate- $res9pharmacyreturnrate;
-
-		  
-
-			$query322 = "select sum(totalamount) as totalrefund from refund_paylater where visitcode='$res2visitcode'";// and entrydate = '$todaydate'";// and ipdocno = '$refno'";//group by itemcode";
-
-			$exec322 = mysqli_query($GLOBALS["___mysqli_ston"], $query322) or die ("Error in Query321".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-		    $res322 = mysqli_fetch_array($exec322);
-
-		  $totalrefund = $res322['totalrefund'];
-
-		  
-
-		   $overaltotalrefund=$overaltotalrefund+$totalrefund;
-
-		  
-
-		  
-
-		  
-
-		  $totalamount = $res3labitemrate + $res4servicesitemrate + $res5radiologyitemrate + $res6referalrate + $consultation + $res9pharmacyrate + $overaltotalrefund;
-
-		  $dptunrealized = $dptunrealized + $totalamount;
-
-		 }
-
-			$totalunrealized += $dptunrealized;
-
-			//unrealized end
-
-			
-
-			$snocount = $snocount + 1;
-
-		  $colorloopcount = $colorloopcount + 1;
-
-		  $showcolor = ($colorloopcount & 1); 
-
-		  
-
-			if ($showcolor == 0)
-
-			{
-
-				//echo "if";
-
-				$colorcode = 'bgcolor="#CBDBFA"';
-
-			}
-
-			else
-
-			{
-
-				//echo "else";
-
-				$colorcode = 'bgcolor="#ecf0f5"';
-
-			}
-
-	  ?>
-
-	  <tr <?=$colorcode?>>
-
-	  <td ><?=$resdpt['department'];?></td>
-
-	  <td align="right" style="padding-right:8px"><?=$walkpatient;?></td>
-
-	  <td align="right" style="padding-right:8px"><?=$walkpatient1;?></td>
-
-	  <td align="right" style="padding-right:8px"><?=$walkpatient1+$walkpatient;?></td>
-
-	  <td align="right" style="padding-right:8px"><?=$triage;?></td>
-
-	  <td align="right" style="padding-right:8px"><?=$consult;?></td>
-
-	  <td align="right" style="padding-right:8px"><?=$todaylab;?></td>
-
-	  <td align="right" style="padding-right:8px"><?=$labsample;?></td>
-
-	  <td align="right" style="padding-right:8px"><?=$labrefund;?></td>
-
-	  <td align="right" style="padding-right:8px"><?=$todayrad;?></td>
-
-	  <td align="right" style="padding-right:8px"><?=$radsample;?></td>
-
-	  <td align="right" style="padding-right:8px"><?=$radrefund;?></td>
-
-	  <td align="right" style="padding-right:8px"><?=$todayser;?></td>
-
-	  <td align="right" style="padding-right:8px"><?=$sersample;?></td>
-
-	  <td align="right" style="padding-right:8px"><?=$serrefund;?></td>
-
-	  <td align="right" style="padding-right:8px"><?=$todaymed;?></td>
-
-	  <td align="right" style="padding-right:8px"><?=$medissue;?></td>
-
-	  <td align="right" style="padding-right:8px"><?=$medreturn;?></td>
-
-	  <td align="right" style="padding-right:8px"><?= number_format($dptrevenue,'2','.',',');?></td>
-
-	  <td align="right" style="padding-right:8px"><?= number_format($dptunrealized,'2','.',',');?></td>
-
-      </tr>
-
-	  <?php
-
-	  $totalvisit +=$walkpatient; 
-
-	  $totalvisit1 +=$walkpatient1; 
-
-	  }
-
-	  ?>
-
-	  <tr bgcolor='#ccc'>
-
-	  <td ><strong>Total :</strong></td>
-
-	  <td align="right" style="padding-right:8px"><?=$totalvisit;?></td>
-
-	  <td align="right" style="padding-right:8px"><?=$totalvisit1;?></td>
-
-	  <td align="right" style="padding-right:8px"><?=$totalvisit1+$totalvisit;?></td>
-
-	  <td align="right" style="padding-right:8px"><?=$totaltriage;?></td>
-
-	  <td align="right" style="padding-right:8px"><?=$totalconsult;?></td>
-
-	  <td align="right" style="padding-right:8px"><?=$totallab;?></td>
-
-	  <td align="right" style="padding-right:8px"><?=$totallabsample;?></td>
-
-	  <td align="right" style="padding-right:8px"><?=$totallabrefund;?></td>
-
-	  <td align="right" style="padding-right:8px"><?=$totalrad;?></td>
-
-	  <td align="right" style="padding-right:8px"><?=$totalradsample;?></td>
-
-	  <td align="right" style="padding-right:8px"><?=$totalradrefund;?></td>
-
-	  <td align="right" style="padding-right:8px"><?=$totalser;?></td>
-
-	  <td align="right" style="padding-right:8px"><?=$totalsersample;?></td>
-
-	  <td align="right" style="padding-right:8px"><?=$totalserrefund;?></td>
-
-	  <td align="right" style="padding-right:8px"><?=$totalmed;?></td>
-
-	  <td align="right" style="padding-right:8px"><?=$totalmedissue;?></td>
-
-	  <td align="right" style="padding-right:8px"><?=$totalmedreturn;?></td>
-
-	  <td align="right" style="padding-right:8px"><?=number_format($totalrevenue,'2','.',',');?></td>
-
-	  <td align="right" style="padding-right:8px"><?=number_format($totalunrealized,'2','.',',');?></td>
-
-      </tr>
-
-	  <tr >
-
-	  <td colspan="20">&nbsp;</td>
-
-      </tr>
-
-	   <tr bgcolor="#CCC">
-
-	  <td colspan="4" style="color: blue;"><strong>IP Statisctics</strong></td>
-
-	  <td colspan="2">IP Lab</td>
-
-	  <td colspan="2">IP Radiology</td>
-
-	  <td colspan="2">IP Services</td>
-
-      </tr>
-
-      <tr bgcolor="#cbdbfa">
-
-        <td colspan="3">Current Active Inpatients</td>
-
-        <td align="right" ><?php echo $activeip; ?></td>
-
-		   <td align="right" colspan="2"><?php echo $iplabcount; ?></td>
-
-        <td align="right" colspan="2"><?php echo $ipradcount; ?></td>
-
-        <td align="right" colspan="2"><?php echo $ipsercount; ?></td>
-
-     
-
-      </tr>
-
-    </table></td>
-
-  
-
-     
-
-  <tr>
-
-    <td>&nbsp;</td>
-
-    <td colspan="2">&nbsp;</td>
-
-  </tr>
-
-</table>
-
-
-
-<?php
-
-}
-
-?>
-
-<?php include ("includes/footer1.php"); ?>
-        <!-- Charts Section -->
-        <div class="charts-section">
-            <h2 class="section-title">
-                <i class="fas fa-chart-bar"></i>
-                Dashboard Analytics
-            </h2>
-            
-            <div class="charts-grid">
-                <div class="chart-container">
-                    <canvas id="departmentChart"></canvas>
+            <!-- Financial Overview -->
+            <div class="financial-cards">
+                <div class="financial-card">
+                    <div class="financial-card-header">
+                        <div class="financial-card-title">
+                            <i class="fas fa-money-bill-wave financial-card-icon"></i>
+                            Cash Payments
+                        </div>
+                    </div>
+                    <div class="financial-card-amount" data-payment="cash">₹<?php echo number_format($cashAmount, 2); ?></div>
+                    <div class="financial-card-subtitle">Today's cash transactions</div>
                 </div>
-                <div class="chart-container">
-                    <canvas id="revenueChart"></canvas>
+                
+                <div class="financial-card">
+                    <div class="financial-card-header">
+                        <div class="financial-card-title">
+                            <i class="fas fa-credit-card financial-card-icon"></i>
+                            Card Payments
+                        </div>
+                    </div>
+                    <div class="financial-card-amount" data-payment="card">₹<?php echo number_format($cardAmount, 2); ?></div>
+                    <div class="financial-card-subtitle">Today's card transactions</div>
                 </div>
-                <div class="chart-container">
-                    <canvas id="patientFlowChart"></canvas>
+                
+                <div class="financial-card">
+                    <div class="financial-card-header">
+                        <div class="financial-card-title">
+                            <i class="fas fa-mobile-alt financial-card-icon"></i>
+                            Online Payments
+                        </div>
+                    </div>
+                    <div class="financial-card-amount" data-payment="online">₹<?php echo number_format($onlineAmount, 2); ?></div>
+                    <div class="financial-card-subtitle">Today's online transactions</div>
                 </div>
-                <div class="chart-container">
-                    <canvas id="serviceUtilizationChart"></canvas>
+                
+                <div class="financial-card">
+                    <div class="financial-card-header">
+                        <div class="financial-card-title">
+                            <i class="fas fa-handshake financial-card-icon"></i>
+                            Credit Payments
+                        </div>
+                    </div>
+                    <div class="financial-card-amount" data-payment="credit">₹<?php echo number_format($creditAmount, 2); ?></div>
+                    <div class="financial-card-subtitle">Today's credit transactions</div>
                 </div>
             </div>
-        </div>
 
-        <!-- Quick Actions Section -->
-        <div class="quick-actions-section">
-            <h2 class="section-title">
-                <i class="fas fa-bolt"></i>
-                Quick Actions
-            </h2>
-            
-            <div class="quick-actions-grid">
-                <a href="dailykpi_report.php" class="quick-action-card">
-                    <i class="fas fa-chart-line"></i>
-                    <span>Daily KPI Report</span>
-                </a>
-                <a href="activeinpatientlist.php" class="quick-action-card">
-                    <i class="fas fa-bed"></i>
-                    <span>Active IP List</span>
-                </a>
-                <a href="customerstatement.php" class="quick-action-card">
-                    <i class="fas fa-file-invoice-dollar"></i>
-                    <span>Customer Statement</span>
-                </a>
-                <a href="debtorsreport.php" class="quick-action-card">
-                    <i class="fas fa-chart-pie"></i>
-                    <span>Debtors Report</span>
-                </a>
+            <!-- Charts Section -->
+            <div class="charts-section">
+                <div class="charts-header">
+                    <div class="charts-title">
+                        <i class="fas fa-chart-line"></i>
+                        Analytics & Trends
+                    </div>
+                </div>
+                
+                <div class="charts-grid">
+                    <div class="chart-container">
+                        <canvas id="revenueChart"></canvas>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="patientChart"></canvas>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="paymentMethodChart"></canvas>
+                    </div>
+                </div>
             </div>
-        </div>
+
+            <!-- Quick Actions -->
+            <div class="quick-actions">
+                <div class="quick-actions-header">
+                    <div class="quick-actions-title">
+                        <i class="fas fa-bolt"></i>
+                        Quick Actions
+                    </div>
+                </div>
+                
+                <div class="quick-actions-grid">
+                    <a href="patientregistration1.php" class="quick-action-card" data-action="patient-registration">
+                        <div class="quick-action-icon">
+                            <i class="fas fa-user-plus"></i>
+                        </div>
+                        <div class="quick-action-label">Patient Registration</div>
+                    </a>
+                    
+                    <a href="ipadmission1.php" class="quick-action-card" data-action="ip-admission">
+                        <div class="quick-action-icon">
+                            <i class="fas fa-bed"></i>
+                        </div>
+                        <div class="quick-action-label">IP Admission</div>
+                    </a>
+                    
+                    <a href="billing1.php" class="quick-action-card" data-action="billing">
+                        <div class="quick-action-icon">
+                            <i class="fas fa-file-invoice-dollar"></i>
+                        </div>
+                        <div class="quick-action-label">Billing</div>
+                    </a>
+                    
+                    <a href="labitem1master.php" class="quick-action-card" data-action="lab-management">
+                        <div class="quick-action-icon">
+                            <i class="fas fa-flask"></i>
+                        </div>
+                        <div class="quick-action-label">Lab Management</div>
+                    </a>
+                    
+                    <a href="radiologyitem1master.php" class="quick-action-card" data-action="radiology">
+                        <div class="quick-action-icon">
+                            <i class="fas fa-x-ray"></i>
+                        </div>
+                        <div class="quick-action-label">Radiology</div>
+                    </a>
+                    
+                    <a href="reports1.php" class="quick-action-card" data-action="reports">
+                        <div class="quick-action-icon">
+                            <i class="fas fa-chart-bar"></i>
+                        </div>
+                        <div class="quick-action-label">Reports</div>
+                    </a>
+                </div>
+            </div>
+        </main>
     </div>
 
     <!-- Modern JavaScript -->
     <script src="js/newdashboard-modern.js?v=<?php echo time(); ?>"></script>
 </body>
 </html>
-
-
-

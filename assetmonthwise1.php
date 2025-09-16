@@ -181,7 +181,7 @@ else if ($st == 'failed')
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     
     <!-- Modern CSS -->
-    <link rel="stylesheet" href="css/vat-modern.css?v=<?php echo time(); ?>">
+    <link rel="stylesheet" href="css/assetmonthwise1-modern.css?v=<?php echo time(); ?>">
     
     <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -272,12 +272,37 @@ function process1backkeypress1()
         <span>Asset Monthwise</span>
     </nav>
 
-    <!-- Main Container -->
-    <div class="main-container">
-        <!-- Alert Container -->
-        <div id="alertContainer">
-            <?php eval(base64_decode('IGluY2x1ZGUgKCJpbmNsdWRlcy9hbGVydG1lc3NhZ2VzMS5waHAiKTsg')); ?>
+    <!-- Floating Menu Toggle -->
+    <div class="floating-menu-toggle">
+        <i class="fas fa-bars"></i>
+    </div>
+
+    <!-- Main Container with Sidebar -->
+    <div class="main-container-with-sidebar">
+        <!-- Left Sidebar -->
+        <div class="left-sidebar">
+            <div class="sidebar-header">
+                <h3 class="sidebar-title">Asset Reports</h3>
+                <p class="sidebar-subtitle">Asset Management & Analysis</p>
+            </div>
+            <ul class="sidebar-nav">
+                <li><a href="assetmonthwise1.php" class="active"><i class="fas fa-calendar-alt"></i> Monthwise Report</a></li>
+                <li><a href="fixedasset_depreciation_detailed_report.php"><i class="fas fa-chart-line"></i> Depreciation Detailed</a></li>
+                <li><a href="fixedasset_depreciation_summary_report.php"><i class="fas fa-chart-bar"></i> Depreciation Summary</a></li>
+                <li><a href="fixedasset_register.php"><i class="fas fa-list"></i> Asset Register</a></li>
+                <li><a href="fixedasset_category.php"><i class="fas fa-tags"></i> Asset Categories</a></li>
+                <li><a href="fixedasset_purchase.php"><i class="fas fa-plus"></i> Add Asset</a></li>
+                <li><a href="fixedasset_disposal.php"><i class="fas fa-trash"></i> Asset Disposal</a></li>
+                <li><a href="fixedasset_transfer.php"><i class="fas fa-exchange-alt"></i> Asset Transfer</a></li>
+            </ul>
         </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Alert Container -->
+            <div id="alertContainer">
+                <?php eval(base64_decode('IGluY2x1ZGUgKCJpbmNsdWRlcy9hbGVydG1lc3NhZ2VzMS5waHAiKTsg')); ?>
+            </div>
 
         <!-- Page Header -->
         <div class="page-header">
@@ -299,42 +324,52 @@ function process1backkeypress1()
         </div>
 
         <!-- Form Section -->
-        <div class="form-section">
-            <h3><i class="fas fa-calculator"></i> Depreciation Monthwise</h3>
+        <div class="form-container">
+            <h3 class="form-title"><i class="fas fa-calculator"></i> Depreciation Monthwise</h3>
             
-            <form name="form1" id="form1" method="post" action="assetmonthwise1.php">
-
-                <div class="form-row">
+            <form name="form1" id="reportForm" method="post" action="assetmonthwise1.php">
+                <div class="form-grid">
                     <div class="form-group">
-                        <label for="assignmonth1">Select Month</label>
+                        <label for="assignmonth1" class="form-label">Select Month</label>
                         <div class="date-input-group">
-                            <input type="text" name="assignmonth1" id="assignmonth1" readonly="readonly" value="<?php echo $assignmonth1; ?>" class="date-picker">
+                            <input type="text" name="assignmonth1" id="assignmonth1" readonly="readonly" value="<?php echo $assignmonth1; ?>" class="form-control date-picker">
                             <i class="fas fa-calendar-alt date-icon" onClick="javascript:NewCssCal('assignmonth1','MMMYYYY')" style="cursor:pointer"></i>
                         </div>
                     </div>
                     
-                    <div class="form-group">
-                        <label>&nbsp;</label>
-                        <input type="hidden" name="searchdescription" id="searchdescription">
-                        <input type="hidden" name="searchsuppliername1hiddentextbox" id="searchsuppliername1hiddentextbox">
-                        <input name="searchsuppliername" id="searchsuppliername" autocomplete="off" type="hidden" size="50" />
-                        <input type="hidden" name="searchemployeecode" id="searchemployeecode" readonly="readonly">
-                        <input type="hidden" name="frmflag34" id="frmflag34" value="frmflag34">
-                        <button type="submit" name="frmsubmit" class="btn btn-primary">
-                            <i class="fas fa-search"></i> Submit
-                        </button>
-                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <input type="hidden" name="searchdescription" id="searchdescription">
+                    <input type="hidden" name="searchsuppliername1hiddentextbox" id="searchsuppliername1hiddentextbox">
+                    <input name="searchsuppliername" id="searchsuppliername" autocomplete="off" type="hidden" size="50" />
+                    <input type="hidden" name="searchemployeecode" id="searchemployeecode" readonly="readonly">
+                    <input type="hidden" name="frmflag34" id="frmflag34" value="frmflag34">
+                    <button type="submit" name="frmsubmit" class="btn btn-primary">
+                        <i class="fas fa-search"></i> Generate Report
+                    </button>
+                    <button type="button" class="btn btn-secondary" onclick="clearForm()">
+                        <i class="fas fa-times"></i> Clear
+                    </button>
                 </div>
             </form>
         </div>
 
         <!-- Results Section -->
-        <div class="data-table-section">
-            <div class="table-header">
-                <h3><i class="fas fa-table"></i> Asset Depreciation Data</h3>
-                <div class="search-bar">
+        <div class="data-table-container">
+            <div class="data-table-header">
+                <h3 class="data-table-title"><i class="fas fa-table"></i> Asset Depreciation Data</h3>
+                <div class="data-table-search">
+                    <i class="fas fa-search search-icon"></i>
                     <input type="text" placeholder="Search assets..." id="assetSearch">
-                    <i class="fas fa-search"></i>
+                </div>
+                <div class="data-table-actions">
+                    <button class="btn btn-success" onclick="exportToExcel()">
+                        <i class="fas fa-file-excel"></i> Export
+                    </button>
+                    <button class="btn btn-warning" onclick="printReport()">
+                        <i class="fas fa-print"></i> Print
+                    </button>
                 </div>
             </div>
             
@@ -459,6 +494,7 @@ function process1backkeypress1()
                     </button>
                 </div>
             </form>
+        </div>
         </div>
     </div>
 

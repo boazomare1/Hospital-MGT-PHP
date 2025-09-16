@@ -242,184 +242,247 @@ function cbsuppliername1()
 
 </script>
 
-<link rel="stylesheet" type="text/css" href="css/autosuggest.css" />        
-<style type="text/css">
-<!--
-.bodytext3 {FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3b3b3c; FONT-FAMILY: Tahoma; text-decoration:none
-}
-.bodytext31 {FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3b3b3c; FONT-FAMILY: Tahoma; text-decoration:none
-}
-.bodytext311 {FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3b3b3c; FONT-FAMILY: Tahoma; text-decoration:none
-}
--->
-.bal
-{
-border-style:none;
-background:none;
-text-align:right;
-}
-.bali
-{
-text-align:right;
-}
-.ui-menu .ui-menu-item{ zoom:1 !important; }
-
-.bodytext32 {FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3B3B3C; FONT-FAMILY: Tahoma;}
-.bodytext32 {FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3b3b3c; FONT-FAMILY: Tahoma; text-decoration:none
-}
-</style>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Delivery vs Dispatch - MedStar</title>
+    
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <!-- Modern CSS -->
+    <link rel="stylesheet" href="css/deliveryvsdispatch-modern.css?v=<?php echo time(); ?>">
+    
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- Existing CSS -->
+    <link rel="stylesheet" type="text/css" href="css/autosuggest.css" />
+</head>
 
 
 
 <body>
-<table width="101%" border="0" cellspacing="0" cellpadding="2">
-  <tr>
-    <td colspan="10" bgcolor="#ecf0f5"><?php include ("includes/alertmessages1.php"); ?></td>
-  </tr>
-  <tr>
-    <td colspan="10" bgcolor="#ecf0f5"><?php include ("includes/title1.php"); ?></td>
-  </tr>
-  <tr>
-    <td colspan="10" bgcolor="#ecf0f5"><?php include ("includes/menu1.php"); ?></td>
-  </tr>
-  <tr>
-    <td colspan="10">&nbsp;</td>
-  </tr>
-  <tr>
-    <td width="1%">&nbsp;</td>
-    <td width="2%" valign="top"><?php //include ("includes/menu4.php"); ?>
-      &nbsp;</td>
-    <td width="97%" valign="top"><table width="116%" border="0" cellspacing="0" cellpadding="0">
-      <tr>
-        <td width="860">
-		
-		
-              <form name="cbform1" method="post" action="deliveryvsdispatch.php" >
-              <!-- <form name="cbform1" method="post" action="" > -->
-		<table width="800" border="0" align="left" cellpadding="4" cellspacing="0" bordercolor="#666666" id="AutoNumber3" style="border-collapse: collapse">
-          <tbody>
-            <tr bgcolor="#011E6A">
-              <td colspan="2" bgcolor="#ecf0f5" class="bodytext3"><strong>Dispatch Claim Invoices </strong></td>
-              <td colspan="2" align="right" bgcolor="#ecf0f5" class="bodytext3" id="ajaxlocation"><strong> Location </strong>
-             
-            
-                  <?php
-						
-						if ($location!='')
-						{
-						$query12 = "select locationname from master_location where locationcode='$location' order by locationname";
-						$exec12 = mysqli_query($GLOBALS["___mysqli_ston"], $query12) or die ("Error in Query12".mysqli_error($GLOBALS["___mysqli_ston"]));
-						$res12 = mysqli_fetch_array($exec12);
-						
-						echo $res1location = $res12["locationname"];
-						//echo $location;
-						}
-						else
-						{
-						$query1 = "select locationname from login_locationdetails where username='$username' and docno='$docno' group by locationname order by locationname";
-						$exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
-						$res1 = mysqli_fetch_array($exec1);
-						
-						echo $res1location = $res1["locationname"];
-						//$res1locationanum = $res1["locationcode"];
-						}
-						
-						
+    <!-- Hospital Header -->
+    <header class="hospital-header">
+        <h1 class="hospital-title">🏥 MedStar Hospital Management</h1>
+        <p class="hospital-subtitle">Advanced Healthcare Management Platform</p>
+    </header>
 
-						?>
-						
-						
-                  
-                  </td> 
-              </tr>
-            <!--<tr>
-              <td colspan="4" align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">
-			  <input name="printreceipt1" type="reset" id="printreceipt1" onClick="return funcPrintReceipt1()" style="border: 1px solid #001E6A" value="Print Receipt - Previous Payment Entry" /> 
-                *To Print Other Receipts Please Go To Menu:	Reports	-&gt; Payments Given 
-				</td>
-              </tr>-->
-            <tr>
-              <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">Search Subtype</td>
-              <td width="82%" colspan="3" align="left" valign="top"  bgcolor="#FFFFFF"><span class="bodytext3">
-                <span class="bodytext32">
-                <input name="searchsuppliername1" type="text" id="searchsuppliername1" value="<?php echo $searchsuppliername; ?>" size="50" autocomplete="off">
-                </span>
-                <input name="searchaccoutnameanum" id="searchaccoutnameanum" value="<?php echo $searchaccoutnameanum; ?>" type="hidden">
-              </span></td>
-           </tr>
+    <!-- User Information Bar -->
+    <div class="user-info-bar">
+        <div class="user-welcome">
+            <span class="welcome-text">Welcome, <strong><?php echo htmlspecialchars($username); ?></strong></span>
+            <span class="location-info">📍 Company: <?php echo htmlspecialchars($companyname); ?></span>
+        </div>
+        <div class="user-actions">
+            <a href="logout.php" class="btn btn-outline btn-sm">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </a>
+        </div>
+    </div>
 
-            <tr>
-              <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">Search Account </td>
-              <td width="82%" colspan="3" align="left" valign="top"  bgcolor="#FFFFFF"><span class="bodytext3">
-                <span class="bodytext32">
-                <input name="searchaccoutname" type="text" id="searchaccoutname" value="<?php echo $searchaccoutname; ?>" size="50" autocomplete="off" >
-                </span>
-                <input name="searchsuppliername1hiddentextbox" id="searchsuppliername1hiddentextbox" type="hidden" value="">
-			  <input name="searchsubtypeanum1" id="searchsubtypeanum1" value="<?php echo $searchsubtypeanum1; ?>" type="hidden">
-              </span></td>
-           </tr>
-			  <tr>
-                      <td class="bodytext31" valign="center"  align="left" 
-                bgcolor="#FFFFFF"> Date From </td>
-                      <td width="30%" align="left" valign="center"  bgcolor="#FFFFFF" class="bodytext31"><input name="ADate1" id="ADate1" value="<?php echo $ADate1; ?>"  size="10"  readonly="readonly" onKeyDown="return disableEnterKey()" />
-                          <img src="images2/cal.gif" onClick="javascript:NewCssCal('ADate1')" style="cursor:pointer"/> </td>
-                      <td width="16%" align="left" valign="center"  bgcolor="#FFFFFF" class="bodytext31"> Date To </td>
-                      <td width="33%" align="left" valign="center"  bgcolor="#FFFFFF"><span class="bodytext31">
-                        <input name="ADate2" id="ADate2" value="<?php echo $ADate2; ?>"  size="10"  readonly="readonly" onKeyDown="return disableEnterKey()" />
-                        <img src="images2/cal.gif" onClick="javascript:NewCssCal('ADate2')" style="cursor:pointer"/> </span></td>
-                    </tr>
-						<tr>
-  			  <td width="10%" align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">Location</td>
-              <td width="30%" align="left" valign="top"  bgcolor="#FFFFFF"><span class="bodytext3">
-			 
-				 <select name="location" id="location" onChange="ajaxlocationfunction(this.value);">
-                    <?php
-						
-						$query1 = "select * from login_locationdetails where   username='$username' and docno='$docno' order by locationname";
-						$exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
-						$loccode=array();
-						while ($res1 = mysqli_fetch_array($exec1))
-						{
-						$locationname = $res1["locationname"];
-						$locationcode = $res1["locationcode"];
-						
-						?>
-						 <option value="<?php echo $locationcode; ?>" <?php if($location!='')if($location==$locationcode){echo "selected";}?>><?php echo $locationname; ?></option>
-						<?php
-						} 
-						?>
-                      </select>
-					 
-              </span></td>
-			   <td width="10%" align="left" colspan="2" valign="middle"  bgcolor="#FFFFFF" class="bodytext3"></td>
-			  </tr>
-					
-            <tr>
-              <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3"><input type="hidden" name="searchsuppliercode" onBlur="return suppliercodesearch1()" onKeyDown="return suppliercodesearch2()" id="searchsuppliercode" style="text-transform:uppercase" value="<?php echo $searchsuppliercode; ?>" size="20" /></td>
-              <td colspan="3" align="left" valign="top"  bgcolor="#FFFFFF">
-			  <input type="hidden" name="cbfrmflag1" value="cbfrmflag1">
-                  <input  type="submit"  value="Search" name="Submit" />
-                  <input name="resetbutton" type="reset" id="resetbutton" value="Reset" /></td>
-            </tr>
-          </tbody>
-        </table>
-		</form>		</td>
-      </tr>
-      <tr>
-        <td>
-		<table id="AutoNumber3" style="BORDER-COLLAPSE: collapse" bordercolor="#666666" cellspacing="0" cellpadding="4" align="left" border="0">
-		<tr><td colspan="8">&nbsp;</td></tr>
+    <!-- Navigation Breadcrumb -->
+    <nav class="nav-breadcrumb">
+        <a href="mainmenu1.php">🏠 Home</a>
+        <span>→</span>
+        <span>Delivery vs Dispatch</span>
+    </nav>
 
-		<tr bgcolor="#FFFFFF">
-		<td class="bodytext31" valign="center"  align="center" width="50px"><strong>S.No</strong></th>
-		<th class="bodytext31" valign="center"  align="center" width="300px"><strong>Account</strong></th>
-		<th class="bodytext31" valign="center"  align="center" width="50px"><strong>Inv.Delivered(OP)</strong></th>
-		<th class="bodytext31" valign="center"  align="center" width="50px"><strong>Inv.Delivered(IP)</strong></th>
-		<th class="bodytext31" valign="center"  align="center" width="50px"><strong>Total</strong></th>
-		<th class="bodytext31" valign="center"  align="center" width="50px"><strong>Inv.Dispatched(OP)</strong></th>
-		<th class="bodytext31" valign="center"  align="center" width="50px"><strong>Inv.Dispatched(IP)</strong></th>
-		<th class="bodytext31" valign="center"  align="center" width="50px"><strong>Total</strong></th>
-		</tr>
+    <!-- Floating Menu Toggle -->
+    <div id="menuToggle" class="floating-menu-toggle">
+        <i class="fas fa-bars"></i>
+    </div>
+
+    <!-- Alert Container -->
+    <div id="alertContainer"></div>
+
+    <!-- Main Container with Sidebar -->
+    <div class="main-container-with-sidebar">
+        <!-- Left Sidebar -->
+        <div class="left-sidebar" id="leftSidebar">
+            <div class="sidebar-header">
+                <h3>Navigation</h3>
+                <button class="sidebar-toggle" id="sidebarToggle">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+            </div>
+            <nav class="sidebar-nav">
+                <ul class="nav-list">
+                    <li class="nav-item">
+                        <a href="dashboard.php" class="nav-link">
+                            <i class="fas fa-tachometer-alt"></i>
+                            Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="reports.php" class="nav-link">
+                            <i class="fas fa-chart-bar"></i>
+                            Reports
+                        </a>
+                    </li>
+                    <li class="nav-item active">
+                        <a href="deliveryvsdispatch.php" class="nav-link">
+                            <i class="fas fa-truck"></i>
+                            Delivery vs Dispatch
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="patientlist.php" class="nav-link">
+                            <i class="fas fa-users"></i>
+                            Patients
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="billing.php" class="nav-link">
+                            <i class="fas fa-receipt"></i>
+                            Billing
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Page Header -->
+            <div class="page-header">
+                <div class="page-header-content">
+                    <h2>Delivery vs Dispatch</h2>
+                    <p>Compare delivery and dispatch statistics for invoices</p>
+                </div>
+                <div class="page-header-actions">
+                    <button type="button" class="btn btn-outline" onclick="refreshPage()">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                    <button type="button" class="btn btn-outline" onclick="exportToExcel()">
+                        <i class="fas fa-download"></i> Export
+                    </button>
+                </div>
+            </div>
+
+            <!-- Search Form Container -->
+            <div class="search-form-container">
+                <form name="cbform1" method="post" action="deliveryvsdispatch.php" class="search-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="searchsuppliername1" class="form-label">Search Subtype</label>
+                            <input name="searchsuppliername1" type="text" id="searchsuppliername1" 
+                                   value="<?php echo $searchsuppliername; ?>" 
+                                   class="form-control" autocomplete="off" placeholder="Enter subtype name">
+                            <input name="searchaccoutnameanum" id="searchaccoutnameanum" value="<?php echo $searchaccoutnameanum; ?>" type="hidden">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="searchaccoutname" class="form-label">Search Account</label>
+                            <input name="searchaccoutname" type="text" id="searchaccoutname" 
+                                   value="<?php echo $searchaccoutname; ?>" 
+                                   class="form-control" autocomplete="off" placeholder="Enter account name">
+                            <input name="searchsuppliername1hiddentextbox" id="searchsuppliername1hiddentextbox" type="hidden" value="">
+                            <input name="searchsubtypeanum1" id="searchsubtypeanum1" value="<?php echo $searchsubtypeanum1; ?>" type="hidden">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="ADate1" class="form-label">Date From</label>
+                            <input name="ADate1" id="ADate1" value="<?php echo $ADate1; ?>" 
+                                   class="form-control" readonly="readonly" 
+                                   onKeyDown="return disableEnterKey()" />
+                            <img src="images2/cal.gif" onClick="javascript:NewCssCal('ADate1')" 
+                                 style="cursor:pointer; position: absolute; right: 10px; top: 50%; transform: translateY(-50%);"/>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="ADate2" class="form-label">Date To</label>
+                            <input name="ADate2" id="ADate2" value="<?php echo $ADate2; ?>" 
+                                   class="form-control" readonly="readonly" 
+                                   onKeyDown="return disableEnterKey()" />
+                            <img src="images2/cal.gif" onClick="javascript:NewCssCal('ADate2')" 
+                                 style="cursor:pointer; position: absolute; right: 10px; top: 50%; transform: translateY(-50%);"/>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="location" class="form-label">Location</label>
+                            <select name="location" id="location" onChange="ajaxlocationfunction(this.value);" class="form-control">
+                                <?php
+                                $query1 = "select * from login_locationdetails where username='$username' and docno='$docno' order by locationname";
+                                $exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
+                                $loccode=array();
+                                while ($res1 = mysqli_fetch_array($exec1))
+                                {
+                                    $locationname = $res1["locationname"];
+                                    $locationcode = $res1["locationcode"];
+                                ?>
+                                    <option value="<?php echo $locationcode; ?>" <?php if($location!='')if($location==$locationcode){echo "selected";}?>><?php echo $locationname; ?></option>
+                                <?php
+                                } 
+                                ?>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Current Location</label>
+                            <div class="form-control" style="background: var(--background-accent);" id="ajaxlocation">
+                                <strong>
+                                <?php
+                                if ($location!='')
+                                {
+                                    $query12 = "select locationname from master_location where locationcode='$location' order by locationname";
+                                    $exec12 = mysqli_query($GLOBALS["___mysqli_ston"], $query12) or die ("Error in Query12".mysqli_error($GLOBALS["___mysqli_ston"]));
+                                    $res12 = mysqli_fetch_array($exec12);
+                                    echo $res1location = $res12["locationname"];
+                                }
+                                else
+                                {
+                                    $query1 = "select locationname from login_locationdetails where username='$username' and docno='$docno' group by locationname order by locationname";
+                                    $exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
+                                    $res1 = mysqli_fetch_array($exec1);
+                                    echo $res1location = $res1["locationname"];
+                                }
+                                ?>
+                                </strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <input type="hidden" name="searchsuppliercode" onBlur="return suppliercodesearch1()" 
+                               onKeyDown="return suppliercodesearch2()" id="searchsuppliercode" 
+                               style="text-transform:uppercase" value="<?php echo $searchsuppliercode; ?>" />
+                        <input type="hidden" name="cbfrmflag1" value="cbfrmflag1">
+                        
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-search"></i> Search
+                        </button>
+                        <button name="resetbutton" type="reset" id="resetbutton" class="btn btn-secondary">
+                            <i class="fas fa-undo"></i> Reset
+                        </button>
+                        <button type="button" class="btn btn-outline" onclick="clearForm()">
+                            <i class="fas fa-times"></i> Clear
+                        </button>
+                    </div>
+                </form>
+            </div>            <!-- Data Table Container -->
+            <div class="data-table-container">
+                <table class="modern-table">
+                    <thead>
+                        <tr>
+                            <th>S.No</th>
+                            <th>Account</th>
+                            <th>Inv.Delivered(OP)</th>
+                            <th>Inv.Delivered(IP)</th>
+                            <th>Total</th>
+                            <th>Inv.Dispatched(OP)</th>
+                            <th>Inv.Dispatched(IP)</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
 	  <?php
 		if (isset($_REQUEST["cbfrmflag1"])) { $cbfrmflag1 = $_REQUEST["cbfrmflag1"]; } else { $cbfrmflag1 = ""; }
 		if($cbfrmflag1 == 'cbfrmflag1')
@@ -450,9 +513,11 @@ text-align:right;
 			//  $res2numa = mysql_num_rows($exec255a);
 
 			?>
-		<tr>
-		<td colspan="8" bgcolor="#ecf0f5" class="bodytext31"><strong><?php echo $searchsuppliername; ?></strong></td>
-        </tr>
+                            <tr style="background: var(--background-accent);">
+                                <td colspan="8" style="font-weight: bold; padding: 1rem;">
+                                    <?php echo $searchsuppliername; ?>
+                                </td>
+                            </tr>
 		
 		<?php
 
@@ -527,47 +592,39 @@ text-align:right;
 			$res_accountname =mysqli_real_escape_string($GLOBALS["___mysqli_ston"], $res_accn['accountname']);
 
 			?>
-			<tr <?php echo $colorcode; ?>>
-			<td class="bodytext31" valign="center"  align="left" width="50px"><?php echo $colorloopcount; ?></td>
-			<td class="bodytext31" valign="center"  align="left" width="300px"><?php echo $res_accountname; ?></td>
-			<!-- <td class="bodytext31" valign="center"  align="left" width="300px"><?php  // echo $res2['accountname']; ?></td> -->
-			<td class="bodytext31" valign="center"  align="right" width="50px"><?php if($res26['delivery_op']>0) echo $res26['delivery_op']; else echo '0'; ?></td>
-			<td class="bodytext31" valign="center"  align="right" width="50px"><?php if($res24['delivery_ip']>0) echo $res24['delivery_ip']; else echo '0'; ?></td>
-            <td class="bodytext31" valign="center"  align="right" width="50px"><?php echo $res24['delivery_ip']+$res26['delivery_op']; ?></td>
-			<td class="bodytext31" valign="center"  align="right" width="50px"><?php if($res22['dispatch_op']>0) echo $res22['dispatch_op']; else echo '0'; ?></td>
-			<td class="bodytext31" valign="center"  align="right" width="50px"><?php if($res21['dispatch_ip']>0) echo $res21['dispatch_ip']; else echo '0'; ?></td>
-			<td class="bodytext31" valign="center"  align="right" width="50px"><?php echo $res21['dispatch_ip']+$res22['dispatch_op']; ?></td>
-			</tr>
+                            <tr>
+                                <td><?php echo $colorloopcount; ?></td>
+                                <td><?php echo $res_accountname; ?></td>
+                                <td style="text-align: right;"><?php if($res26['delivery_op']>0) echo $res26['delivery_op']; else echo '0'; ?></td>
+                                <td style="text-align: right;"><?php if($res24['delivery_ip']>0) echo $res24['delivery_ip']; else echo '0'; ?></td>
+                                <td style="text-align: right;"><?php echo $res24['delivery_ip']+$res26['delivery_op']; ?></td>
+                                <td style="text-align: right;"><?php if($res22['dispatch_op']>0) echo $res22['dispatch_op']; else echo '0'; ?></td>
+                                <td style="text-align: right;"><?php if($res21['dispatch_ip']>0) echo $res21['dispatch_ip']; else echo '0'; ?></td>
+                                <td style="text-align: right;"><?php echo $res21['dispatch_ip']+$res22['dispatch_op']; ?></td>
+                            </tr>
 			<?php
 		   }
 		  }
 		}
 		 ?>
-		<tr >
-		<td class="bodytext31" valign="center"  align="left" width="50px"></td>
-		<td class="bodytext31" valign="center"  align="right" width="300px"><strong>Grand Total:</strong></td>
-		<td class="bodytext31" valign="center"  align="left" width="50px"></td>
-		<td class="bodytext31" valign="center"  align="left" width="50px"></td>
-		<td class="bodytext31" valign="center"  align="right" width="50px"><strong><?php echo number_format($delivery_tot);?></strong></td>
-		<td class="bodytext31" valign="center"  align="left" width="50px"></td>
-		<td class="bodytext31" valign="center"  align="left" width="50px"></td>
-		<td class="bodytext31" valign="center"  align="right" width="50px"><strong><?php echo number_format($dispatch_tot);?></strong></td>
-		</tr>
-		 <?php
-
-		}
-	  ?>
-	    <tr><td colspan="8">&nbsp;</td></tr>
-	   </table>
-       </td>
-      </tr>
-       
-	  
-    </table>
-	</td>
-	</tr>
-</table>
-<?php include ("includes/footer1.php"); ?>
+                            <tr style="background: var(--background-accent); font-weight: bold;">
+                                <td></td>
+                                <td style="text-align: right;">Grand Total:</td>
+                                <td></td>
+                                <td></td>
+                                <td style="text-align: right;"><?php echo number_format($delivery_tot);?></td>
+                                <td></td>
+                                <td></td>
+                                <td style="text-align: right;"><?php echo number_format($dispatch_tot);?></td>
+                            </tr>
+                            <?php
+                            }
+                            ?>
+                        </tbody>
+                    </table>
+                </div>
+            </main>
+        </div>
     <!-- Modern JavaScript -->
     <script src="js/deliveryvsdispatch-modern.js?v=<?php echo time(); ?>"></script>
 </body>

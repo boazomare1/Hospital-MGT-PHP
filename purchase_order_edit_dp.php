@@ -2,19 +2,25 @@
 session_start();
 include ("includes/loginverify.php");
 include ("db/db_connect.php");
-//echo $menu_id;
 include ("includes/check_user_access.php");
-$ipaddress = $_SERVER['REMOTE_ADDR'];
-$updatedatetime = date('Y-m-d');
-$username = $_SESSION['username'];
+
+$username = $_SESSION["username"];
 $docno = $_SESSION['docno'];
-$companyanum = $_SESSION['companyanum'];
-$companyname = $_SESSION['companyname'];
+$companyanum = $_SESSION["companyanum"];
+$companyname = $_SESSION["companyname"];
+
+$ipaddress = $_SERVER["REMOTE_ADDR"];
+$updatedatetime = date('Y-m-d H:i:s');
+$errmsg = "";
+$bgcolorcode = "";
+$colorloopcount = "";
+
+// Date ranges
 $transactiondatefrom = date('Y-m-d', strtotime('-1 month'));
 $transactiondateto = date('Y-m-d');
-$location =isset( $_REQUEST['location'])?$_REQUEST['location']:'';
 $dateonly = date("Y-m-d");
-$errmsg = "";
+
+// Initialize variables
 $banum = "1";
 $supplieranum = "";
 $custid = "";
@@ -33,15 +39,16 @@ $totalnet = 0;
 $grandgrn = 0;
 $grandgrt = 0;
 $grandnet = 0;
-if(isset($_REQUEST["cbfrmflag1"])){ $cbfrmflag1 = $_REQUEST["cbfrmflag1"];}else{$cbfrmflag1 = "";}
-if(isset($_REQUEST["suppliername"])){ $searchsuppliername = $_REQUEST["suppliername"];}else{$searchsuppliername = "";}
-if(isset($_REQUEST["suppliercode"])){ $searchsuppliercode = $_REQUEST["suppliercode"];}else{$searchsuppliercode = "";}
-if(isset($_REQUEST["ponumber"])){ $searchponumber = $_REQUEST["ponumber"];}else{$searchponumber = "";}
-if(isset($_REQUEST["ADate1"])){ $ADate1 = $_REQUEST["ADate1"];}else{$ADate1 = date('Y-m-d');}
-if(isset($_REQUEST["ADate2"])){ $ADate2 = $_REQUEST["ADate2"];}else{$ADate2 = date('Y-m-d');}
-// if(isset($_REQUEST["reporttype"])){ $reporttype = $_REQUEST["reporttype"];}else{$reporttype = "";}
-// 
-if (isset($_REQUEST["frm1submit1"])) { $frm1submit1 = $_REQUEST["frm1submit1"]; } else { $frm1submit1 = ""; }
+
+// Handle form parameters
+$location = isset($_REQUEST['location']) ? $_REQUEST['location'] : '';
+$cbfrmflag1 = isset($_REQUEST["cbfrmflag1"]) ? $_REQUEST["cbfrmflag1"] : "";
+$searchsuppliername = isset($_REQUEST["suppliername"]) ? $_REQUEST["suppliername"] : "";
+$searchsuppliercode = isset($_REQUEST["suppliercode"]) ? $_REQUEST["suppliercode"] : "";
+$searchponumber = isset($_REQUEST["ponumber"]) ? $_REQUEST["ponumber"] : "";
+$ADate1 = isset($_REQUEST["ADate1"]) ? $_REQUEST["ADate1"] : date('Y-m-d');
+$ADate2 = isset($_REQUEST["ADate2"]) ? $_REQUEST["ADate2"] : date('Y-m-d');
+$frm1submit1 = isset($_REQUEST["frm1submit1"]) ? $_REQUEST["frm1submit1"] : "";
 if ($frm1submit1 == 'frm1submit1')
 {
 	
@@ -110,6 +117,45 @@ if ($frm1submit1 == 'frm1submit1')
     }
     .ui-menu .ui-menu-item{ zoom:1 !important; }
     -->
+    
+    /* Modern input styling for PO edit */
+    .rate-input, .qty-input, .amount-input {
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        padding: 6px 8px;
+        font-size: 13px;
+        text-align: center;
+        background-color: #fff;
+        transition: border-color 0.3s ease;
+    }
+    
+    .rate-input:focus, .qty-input:focus {
+        border-color: #007bff;
+        outline: none;
+        box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+    }
+    
+    .amount-input {
+        background-color: #f8f9fa;
+        font-weight: 600;
+        color: #495057;
+    }
+    
+    .table-subheader {
+        background-color: #e9ecef;
+        font-weight: 600;
+    }
+    
+    .table-row-detail {
+        background-color: #f8f9fa;
+    }
+    
+    .table-row-detail:hover {
+        background-color: #e9ecef;
+    }
+    
+    .text-center { text-align: center; }
+    .text-right { text-align: right; }
     </style>
 <script language="javascript">
 function ajaxlocationfunction(val)
@@ -316,12 +362,81 @@ text-align:right;
         <span>Edit Purchase Order</span>
     </nav>
 
-    <!-- Main Container -->
-    <div class="main-container">
-        <!-- Alert Container -->
-        <div id="alertContainer">
-            <?php include ("includes/alertmessages1.php"); ?>
-        </div>
+    <!-- Floating Menu Toggle -->
+    <div id="menuToggle" class="floating-menu-toggle">
+        <i class="fas fa-bars"></i>
+    </div>
+
+    <!-- Main Container with Sidebar -->
+    <div class="main-container-with-sidebar">
+        <!-- Left Sidebar -->
+        <aside id="leftSidebar" class="left-sidebar">
+            <div class="sidebar-header">
+                <h3>Quick Navigation</h3>
+                <button id="sidebarToggle" class="sidebar-toggle">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <ul class="nav-list">
+                    <li class="nav-item">
+                        <a href="mainmenu1.php" class="nav-link">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="purchase_indent.php" class="nav-link">
+                            <i class="fas fa-shopping-cart"></i>
+                            <span>Purchase Indent</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="manual_lpo.php" class="nav-link">
+                            <i class="fas fa-file-invoice"></i>
+                            <span>Manual LPO</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="direct_purchaseapproval.php" class="nav-link">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Direct Purchase Approval</span>
+                        </a>
+                    </li>
+                    <li class="nav-item active">
+                        <a href="purchase_order_edit_dp.php" class="nav-link">
+                            <i class="fas fa-edit"></i>
+                            <span>Edit Purchase Order</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="materialreceiptnote.php" class="nav-link">
+                            <i class="fas fa-truck"></i>
+                            <span>Material Receipt</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="supplier_master.php" class="nav-link">
+                            <i class="fas fa-users"></i>
+                            <span>Supplier Master</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Alert Container -->
+            <div id="alertContainer">
+                <?php if (!empty($errmsg)): ?>
+                    <div class="alert alert-<?php echo $bgcolorcode === 'success' ? 'success' : ($bgcolorcode === 'failed' ? 'error' : 'info'); ?>">
+                        <i class="fas fa-<?php echo $bgcolorcode === 'success' ? 'check-circle' : ($bgcolorcode === 'failed' ? 'exclamation-triangle' : 'info-circle'); ?> alert-icon"></i>
+                        <span><?php echo htmlspecialchars($errmsg); ?></span>
+                    </div>
+                <?php endif; ?>
+            </div>
 
         <!-- Page Header -->
         <div class="page-header">
@@ -339,28 +454,32 @@ text-align:right;
             </div>
         </div>
 
-        <!-- Search Form Section -->
-        <div class="form-section">
-            <h3><i class="fas fa-search"></i> Search Purchase Order</h3>
-            
-            <form name="cbform1" method="post" action="purchase_order_edit_dp.php">
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="pono">Purchase Order Number</label>
-                        <input name="pono" type="text" id="pono" value="" autocomplete="off" required placeholder="Enter PO number to search">
-                    </div>
+            <!-- Search Form Section -->
+            <div class="form-section">
+                <div class="form-section-header">
+                    <i class="fas fa-search form-section-icon"></i>
+                    <h3 class="form-section-title">Search Purchase Order</h3>
                 </div>
                 
-                <div class="form-actions">
-                    <input type="hidden" name="cbfrmflag1" value="cbfrmflag1">
-                    <button type="submit" class="btn btn-primary" name="Submit">
-                        <i class="fas fa-search"></i> Search
-                    </button>
-                    <button name="resetbutton" type="reset" id="resetbutton" class="btn btn-secondary">
-                        <i class="fas fa-undo"></i> Reset
-                    </button>
-                </div>
-            </form>
+                <form name="cbform1" method="post" action="purchase_order_edit_dp.php" class="form-section-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="pono" class="form-label">Purchase Order Number</label>
+                            <input name="pono" type="text" id="pono" value="" autocomplete="off" required 
+                                   placeholder="Enter PO number to search" class="form-input">
+                        </div>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <input type="hidden" name="cbfrmflag1" value="cbfrmflag1">
+                        <button type="submit" class="btn btn-primary" name="Submit">
+                            <i class="fas fa-search"></i> Search
+                        </button>
+                        <button name="resetbutton" type="reset" id="resetbutton" class="btn btn-secondary">
+                            <i class="fas fa-undo"></i> Reset
+                        </button>
+                    </div>
+                </form>
             
             <!-- Current Location Display -->
             <div class="current-location">
@@ -386,15 +505,25 @@ text-align:right;
             </div>
         </div>
 
-        <!-- Results Section -->
-        <div class="data-table-section">
-            <div class="table-header">
-                <h3><i class="fas fa-list"></i> Purchase Order Details</h3>
-                <div class="search-bar">
-                    <input type="text" placeholder="Search items..." id="poSearch">
-                    <i class="fas fa-search"></i>
+            <!-- Results Section -->
+            <div class="data-table-section">
+                <div class="data-table-header">
+                    <i class="fas fa-list data-table-icon"></i>
+                    <h3 class="data-table-title">Purchase Order Details</h3>
                 </div>
-            </div>
+                
+                <!-- Search Bar -->
+                <div style="margin-bottom: 1rem;">
+                    <div style="display: flex; gap: 1rem; align-items: center;">
+                        <input type="text" id="poSearch" class="form-input" 
+                               placeholder="Search items..." 
+                               style="flex: 1; max-width: 300px;"
+                               oninput="searchPOItems(this.value)">
+                        <button type="button" class="btn btn-secondary" onclick="clearPOSearch()">
+                            <i class="fas fa-times"></i> Clear
+                        </button>
+                    </div>
+                </div>
             
             <?php
             //AFTER SEARCH
@@ -427,18 +556,18 @@ text-align:right;
                   $qrypodetatils="SELECT 'manual_lpo' as source,entrydate as billdate,purchaseindentdocno,billnumber,suppliername,SUM(rate*quantity) AS totvalue,null as goodsstatus  from manual_lpo where recordstatus='generated'  and billnumber = '$ponumber' group by billnumber ";
                     ?>
                     
-                    <table class="data-table">
-                        <thead>
-                            <tr>
-                                <th>No.</th>
-                                <th>Date</th>
-                                <th>PI</th>
-                                <th>PO</th>
-                                <th>Supplier Name</th>
-                                <th>PO Value</th>
-                            </tr>
-                        </thead>
-                        <tbody>   
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>No.</th>
+                            <th>Date</th>
+                            <th>PI</th>
+                            <th>PO</th>
+                            <th>Supplier Name</th>
+                            <th>PO Value</th>
+                        </tr>
+                    </thead>
+                    <tbody>   
     
     <?php
 	
@@ -496,18 +625,18 @@ text-align:right;
 			$colorcode = 'bgcolor="#ecf0f5"';
 			
 	?>
-                            <tr class="table-row <?php echo ($showcolor == 0) ? 'table-row-even' : 'table-row-odd'; ?>">
-                                <td><?php echo $sno = $sno + 1;?></td>
-                                <td><?php echo $billdate;?></td>
-                                <td><?php echo $pinumber;?></td>
-                                <td>
-                                    <strong><?php echo $ponumber;?></strong>
-                                    <input type="hidden" id="pinumber" name="pinumber" value="<?php echo $ponumber;?>" />
-                                    <input type="hidden" id="ponumber" name="ponumber" value="<?php echo $ponumber;?>" />
-                                </td>
-                                <td><?php echo htmlspecialchars($suppliername);?></td>
-                                <td class="text-right"><?php echo number_format($totalamount, 2, '.', ',');?></td>
-                            </tr>
+                        <tr class="table-row <?php echo ($showcolor == 0) ? 'table-row-even' : 'table-row-odd'; ?>">
+                            <td class="text-center"><?php echo $sno = $sno + 1;?></td>
+                            <td class="text-center"><?php echo htmlspecialchars($billdate);?></td>
+                            <td class="text-center"><?php echo htmlspecialchars($pinumber);?></td>
+                            <td class="text-center">
+                                <strong><?php echo htmlspecialchars($ponumber);?></strong>
+                                <input type="hidden" id="pinumber" name="pinumber" value="<?php echo $ponumber;?>" />
+                                <input type="hidden" id="ponumber" name="ponumber" value="<?php echo $ponumber;?>" />
+                            </td>
+                            <td><?php echo htmlspecialchars($suppliername);?></td>
+                            <td class="text-right"><?php echo number_format($totalamount, 2, '.', ',');?></td>
+                        </tr>
      <?php
 $cno=0;
      	if($totalamount>=0){
@@ -532,43 +661,43 @@ $cno=0;
 		$totamountval_det = $totamountval_det + $fxamount_det;
 		$po_freeqty_det = $respodetailed["free"];
 		?>
-                            <?php if($detailed_cnt == 1){ ?>
-                                <tr class="table-subheader">
-                                    <td>&nbsp;</td>
-                                    <td><strong>Date</strong></td>
-                                    <td><strong>Item Name</strong></td>
-                                    <td><strong>Rate</strong></td>
-                                    <td><strong>Order Qty</strong></td>
-                                    <td><strong>Amount</strong></td>
-                                </tr> 
-                            <?php 
-                            } 
-                            $detailed_cnt = $detailed_cnt + 1;
-                            ?>
-                            <tr class="table-row table-row-detail">
+                        <?php if($detailed_cnt == 1){ ?>
+                            <tr class="table-subheader">
                                 <td>&nbsp;</td>
-                                <td><?php echo $billdate_det;?></td>
-                                <td><?php echo htmlspecialchars($itemname_det);?></td>
-                                <td>
-                                    <input type="text" id="rate_val<?php echo $cno;?>" name="rate_val<?php echo $cno;?>" 
-                                           value="<?php echo $rate_det;?>" onKeyUp="calamount('<?php echo $cno;?>')" 
-                                           class="rate-input" placeholder="0.00">
-                                    <input type="hidden" id="autonumber<?php echo $cno;?>" name="autonumber<?php echo $cno;?>" value="<?php echo $auto_number_det;?>" />
-                                    <input type="hidden" id="itemname<?php echo $cno;?>" name="itemname<?php echo $cno;?>" value="<?php echo $itemname_det;?>" />
-                                    <input type="hidden" id="itemcode<?php echo $cno;?>" name="itemcode<?php echo $cno;?>" value="<?php echo $itemcode_det;?>" />
-                                </td>
-                                <td>
-                                    <input type="text" id="qty_val<?php echo $cno;?>" name="qty_val<?php echo $cno;?>" 
-                                           value="<?php echo number_format($pkgqnty_det, 2, '.', ',');?>" 
-                                           onKeyUp="calamount('<?php echo $cno;?>')" 
-                                           class="qty-input" placeholder="0.00">
-                                </td>
-                                <td>
-                                    <input type="text" id="indv_amount<?php echo $cno;?>" name="indv_amount<?php echo $cno;?>" 
-                                           value="<?php echo number_format($rate_det*$pkgqnty_det, 2, '.', ',');?>" 
-                                           class="amount-input" readonly>
-                                </td>
-                            </tr>
+                                <td><strong>Date</strong></td>
+                                <td><strong>Item Name</strong></td>
+                                <td><strong>Rate</strong></td>
+                                <td><strong>Order Qty</strong></td>
+                                <td><strong>Amount</strong></td>
+                            </tr> 
+                        <?php 
+                        } 
+                        $detailed_cnt = $detailed_cnt + 1;
+                        ?>
+                        <tr class="table-row table-row-detail">
+                            <td>&nbsp;</td>
+                            <td class="text-center"><?php echo htmlspecialchars($billdate_det);?></td>
+                            <td><?php echo htmlspecialchars($itemname_det);?></td>
+                            <td class="text-center">
+                                <input type="text" id="rate_val<?php echo $cno;?>" name="rate_val<?php echo $cno;?>" 
+                                       value="<?php echo $rate_det;?>" onKeyUp="calamount('<?php echo $cno;?>')" 
+                                       class="form-input rate-input" placeholder="0.00" style="width: 100px;">
+                                <input type="hidden" id="autonumber<?php echo $cno;?>" name="autonumber<?php echo $cno;?>" value="<?php echo $auto_number_det;?>" />
+                                <input type="hidden" id="itemname<?php echo $cno;?>" name="itemname<?php echo $cno;?>" value="<?php echo $itemname_det;?>" />
+                                <input type="hidden" id="itemcode<?php echo $cno;?>" name="itemcode<?php echo $cno;?>" value="<?php echo $itemcode_det;?>" />
+                            </td>
+                            <td class="text-center">
+                                <input type="text" id="qty_val<?php echo $cno;?>" name="qty_val<?php echo $cno;?>" 
+                                       value="<?php echo number_format($pkgqnty_det, 2, '.', ',');?>" 
+                                       onKeyUp="calamount('<?php echo $cno;?>')" 
+                                       class="form-input qty-input" placeholder="0.00" style="width: 100px;">
+                            </td>
+                            <td class="text-center">
+                                <input type="text" id="indv_amount<?php echo $cno;?>" name="indv_amount<?php echo $cno;?>" 
+                                       value="<?php echo number_format($rate_det*$pkgqnty_det, 2, '.', ',');?>" 
+                                       class="form-input amount-input" readonly style="width: 120px;">
+                            </td>
+                        </tr>
 	<?php
 	
 	}
@@ -592,15 +721,99 @@ $cno=0;
                         <button name="Submit222" type="submit" class="btn btn-success">
                             <i class="fas fa-save"></i> Save Changes
                         </button>
+                        <button type="button" class="btn btn-secondary" onclick="resetForm()">
+                            <i class="fas fa-undo"></i> Reset
+                        </button>
                     </div>
                 </form>
-            <?php
-            } //CLOSE -- if ($cbfrmflag1 == 'cbfrmflag1')
-            ?>
-        </div>
+                <?php
+                } //CLOSE -- if ($cbfrmflag1 == 'cbfrmflag1')
+                ?>
+            </div>
+        </main>
     </div>
     
     <!-- Modern JavaScript -->
+    <script>
+        // Modern JavaScript functions
+        function refreshPage() {
+            window.location.reload();
+        }
+
+        function exportToExcel() {
+            // Add export functionality here
+            alert('Export functionality will be implemented');
+        }
+
+        function printReport() {
+            window.print();
+        }
+
+        function resetForm() {
+            document.getElementById("cbform1").reset();
+        }
+
+        function searchPOItems(searchTerm) {
+            const table = document.querySelector('.data-table tbody');
+            if (table) {
+                const rows = table.querySelectorAll('tr');
+                
+                rows.forEach(row => {
+                    const text = row.textContent.toLowerCase();
+                    if (text.includes(searchTerm.toLowerCase())) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+            }
+        }
+
+        function clearPOSearch() {
+            document.getElementById('poSearch').value = '';
+            searchPOItems('');
+        }
+
+        // Enhanced calculation function
+        function calamount(id) {
+            var get_qty = $("#qty_val" + id).val();
+            var get_rate = $("#rate_val" + id).val();
+            var amount = '0.00';
+            
+            // Remove commas for calculation
+            get_qty = get_qty.replace(/,/g, '');
+            get_rate = get_rate.replace(/,/g, '');
+            
+            if (get_qty > 0 && get_rate > 0) {
+                var amount = parseFloat(get_qty) * parseFloat(get_rate);
+                amount = parseFloat(amount).toFixed(2);
+                amount = amount.toString().replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1,");
+                $("#indv_amount" + id).val(amount);
+            }
+        }
+
+        // Sidebar functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const menuToggle = document.getElementById('menuToggle');
+            const sidebar = document.getElementById('leftSidebar');
+            const sidebarToggle = document.getElementById('sidebarToggle');
+
+            menuToggle.addEventListener('click', function() {
+                sidebar.classList.toggle('active');
+            });
+
+            sidebarToggle.addEventListener('click', function() {
+                sidebar.classList.toggle('active');
+            });
+
+            // Close sidebar when clicking outside
+            document.addEventListener('click', function(event) {
+                if (!sidebar.contains(event.target) && !menuToggle.contains(event.target)) {
+                    sidebar.classList.remove('active');
+                }
+            });
+        });
+    </script>
     <script src="js/purchase_order_edit_dp-modern.js?v=<?php echo time(); ?>"></script>
 </body>
 </html>

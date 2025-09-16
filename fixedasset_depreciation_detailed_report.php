@@ -149,7 +149,7 @@ if ($st == '2')
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     
     <!-- Modern CSS -->
-    <link rel="stylesheet" href="css/vat-modern.css?v=<?php echo time(); ?>">
+    <link rel="stylesheet" href="css/fixedasset_depreciation_detailed_report-modern.css?v=<?php echo time(); ?>">
     
     <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -584,12 +584,37 @@ var billnumbers = "<?php echo $_REQUEST['billnumber']; ?>";
         <span>Fixed Asset Depreciation Detailed Report</span>
     </nav>
 
-    <!-- Main Container -->
-    <div class="main-container">
-        <!-- Alert Container -->
-        <div id="alertContainer">
-            <?php include ("includes/alertmessages1.php"); ?>
+    <!-- Floating Menu Toggle -->
+    <div class="floating-menu-toggle">
+        <i class="fas fa-bars"></i>
+    </div>
+
+    <!-- Main Container with Sidebar -->
+    <div class="main-container-with-sidebar">
+        <!-- Left Sidebar -->
+        <div class="left-sidebar">
+            <div class="sidebar-header">
+                <h3 class="sidebar-title">Fixed Asset Reports</h3>
+                <p class="sidebar-subtitle">Asset Management & Depreciation</p>
+            </div>
+            <ul class="sidebar-nav">
+                <li><a href="fixedasset_depreciation_detailed_report.php" class="active"><i class="fas fa-chart-line"></i> Depreciation Detailed</a></li>
+                <li><a href="fixedasset_depreciation_summary_report.php"><i class="fas fa-chart-bar"></i> Depreciation Summary</a></li>
+                <li><a href="fixedasset_register.php"><i class="fas fa-list"></i> Asset Register</a></li>
+                <li><a href="fixedasset_category.php"><i class="fas fa-tags"></i> Asset Categories</a></li>
+                <li><a href="fixedasset_purchase.php"><i class="fas fa-plus"></i> Add Asset</a></li>
+                <li><a href="fixedasset_disposal.php"><i class="fas fa-trash"></i> Asset Disposal</a></li>
+                <li><a href="fixedasset_transfer.php"><i class="fas fa-exchange-alt"></i> Asset Transfer</a></li>
+                <li><a href="fixedasset_maintenance.php"><i class="fas fa-wrench"></i> Maintenance</a></li>
+            </ul>
         </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Alert Container -->
+            <div id="alertContainer">
+                <?php include ("includes/alertmessages1.php"); ?>
+            </div>
 
         <!-- Page Header -->
         <div class="page-header">
@@ -611,14 +636,14 @@ var billnumbers = "<?php echo $_REQUEST['billnumber']; ?>";
         </div>
 
         <!-- Search Form Section -->
-        <div class="form-section">
-            <h3><i class="fas fa-search"></i> Report Filters</h3>
+        <div class="form-container">
+            <h3 class="form-title"><i class="fas fa-search"></i> Report Filters</h3>
             
-            <form name="cbform1" method="post" action="fixedasset_depreciation_detailed_report.php">
-                <div class="form-row">
+            <form name="cbform1" id="reportForm" method="post" action="fixedasset_depreciation_detailed_report.php">
+                <div class="form-grid">
                     <div class="form-group">
-                        <label for="location">Location</label>
-                        <select name="location" id="location" onChange="ajaxlocationfunction(this.value);">
+                        <label for="location" class="form-label">Location</label>
+                        <select name="location" id="location" class="form-control" onChange="ajaxlocationfunction(this.value);">
 
                   <?php
 
@@ -650,8 +675,8 @@ var billnumbers = "<?php echo $_REQUEST['billnumber']; ?>";
                     </div>
                     
                     <div class="form-group">
-                        <label for="categoryid">Category</label>
-                        <select name="categoryid" id="categoryid">
+                        <label for="categoryid" class="form-label">Category</label>
+                        <select name="categoryid" id="categoryid" class="form-control">
                             <option value="">Select Category</option>
                   <?php
 
@@ -682,8 +707,8 @@ var billnumbers = "<?php echo $_REQUEST['billnumber']; ?>";
                     </div>
                     
                     <div class="form-group">
-                        <label for="search_month">As on Month</label>
-                        <select name="search_month">
+                        <label for="search_month" class="form-label">As on Month</label>
+                        <select name="search_month" class="form-control">
                             <option <?php if($searchmonth == '01') { ?> selected = 'selected' <?php } ?> value="01">January</option>
                             <option <?php if($searchmonth == '02') { ?> selected = 'selected' <?php } ?> value="02">February</option>
                             <option <?php if($searchmonth == '03') { ?> selected = 'selected' <?php } ?> value="03">March</option>
@@ -700,8 +725,8 @@ var billnumbers = "<?php echo $_REQUEST['billnumber']; ?>";
                     </div>
                     
                     <div class="form-group">
-                        <label for="search_year">Year</label>
-                        <select name="search_year">
+                        <label for="search_year" class="form-label">Year</label>
+                        <select name="search_year" class="form-control">
                             <option value="">Select Year</option>
                             <?php 
                             if (isset($_REQUEST["search_month"])) { $searchmonth = $_REQUEST["search_month"]; } else { $searchmonth = ""; }
@@ -724,23 +749,34 @@ var billnumbers = "<?php echo $_REQUEST['billnumber']; ?>";
                         </select>
                     </div>
                     
-                    <div class="form-group">
-                        <label>&nbsp;</label>
-                        <button type="submit" class="btn btn-primary" onClick="return funcvalidcheck();">
-                            <i class="fas fa-search"></i> Generate Report
-                        </button>
-                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary" onClick="return funcvalidcheck();">
+                        <i class="fas fa-search"></i> Generate Report
+                    </button>
+                    <button type="button" class="btn btn-secondary" onclick="clearForm()">
+                        <i class="fas fa-times"></i> Clear
+                    </button>
                 </div>
             </form>
         </div>
 
         <!-- Results Section -->
-        <div class="data-table-section">
-            <div class="table-header">
-                <h3><i class="fas fa-chart-line"></i> Fixed Asset Depreciation Report</h3>
-                <div class="search-bar">
+        <div class="data-table-container">
+            <div class="data-table-header">
+                <h3 class="data-table-title"><i class="fas fa-chart-line"></i> Fixed Asset Depreciation Report</h3>
+                <div class="data-table-search">
+                    <i class="fas fa-search search-icon"></i>
                     <input type="text" placeholder="Search assets..." id="assetSearch">
-                    <i class="fas fa-search"></i>
+                </div>
+                <div class="data-table-actions">
+                    <button class="btn btn-success" onclick="exportToExcel()">
+                        <i class="fas fa-file-excel"></i> Export
+                    </button>
+                    <button class="btn btn-warning" onclick="printReport()">
+                        <i class="fas fa-print"></i> Print
+                    </button>
                 </div>
             </div>
             
@@ -1068,6 +1104,7 @@ $date_range=$d->format( 'Y-m-t' );
 
 		  $grandtotal_netbookvalue = $grandtotal_purchasecost - $grandtotal_accdepr;
 		  
+           }
            ?>
             
           
@@ -1084,6 +1121,7 @@ $date_range=$d->format( 'Y-m-t' );
                 </table>
             </form>
         </div>
+        </div>
     </div>
 
     <!-- Modern JavaScript -->
@@ -1094,23 +1132,18 @@ $date_range=$d->format( 'Y-m-t' );
 </html>
 
 <?php 
-
-
 function getCategoryAssetIds($asset_category_id)
 {
-	
 	$assetids_arr = array();
 	$qry = " select asset_id from assets_register where asset_category_id='$asset_category_id' ";
 	
 	$exec5 = mysqli_query($GLOBALS["___mysqli_ston"], $qry) or die ("Error in Query5".mysqli_error($GLOBALS["___mysqli_ston"]));
 
 	while ($res5 = mysqli_fetch_array($exec5))
-
-				{
-					$assetids_arr[] = $res5['asset_id'];
-					//echo $res5['asset_id'].'<br>';
-				}
+	{
+		$assetids_arr[] = $res5['asset_id'];
+		//echo $res5['asset_id'].'<br>';
+	}
 	return $assetids_arr;
 }
 ?>
-

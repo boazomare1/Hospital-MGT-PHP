@@ -3,6 +3,7 @@ session_start();
 include ("includes/loginverify.php");
 include ("db/db_connect.php");
 
+// Initialize variables
 $ipaddress = $_SERVER['REMOTE_ADDR'];
 $updatedatetime = date('Y-m-d');
 $updatetime = date('Y-m-d H:i:s');
@@ -15,6 +16,7 @@ $paymentreceiveddateto = date('Y-m-d');
 $transactiondatefrom = date('Y-m-d', strtotime('-1 month'));
 $transactiondateto = date('Y-m-d');
 
+// Initialize form variables
 $errmsg = "";
 $banum = "1";
 $supplieranum = "";
@@ -25,8 +27,8 @@ $openingbalance = "0.00";
 $searchsuppliername = "";
 $cbsuppliername = "";
 $snocount = "";
-$colorloopcount="";
- $total = "0.00";
+$colorloopcount = "";
+$total = "0.00";
 $query_acc = "SELECT * FROM finance_ledger_mapping WHERE map_anum = '20' AND record_status <> 'deleted'";
 $exec_acc = mysqli_query($GLOBALS["___mysqli_ston"], $query_acc) or die ("Error in Query_acc".mysqli_error($GLOBALS["___mysqli_ston"]));
 $ledgername = '';
@@ -35,17 +37,15 @@ $res_acc = mysqli_fetch_array($exec_acc);
 $accountcode1 = $res_acc['ledger_id'];
 $accountname1 = trim($res_acc['ledger_name']);
 
-if (isset($_REQUEST["ADate1"])) { $ADate1 = $_REQUEST["ADate1"]; } else { $ADate1 = $transactiondatefrom; }
+// Handle form parameters with modern isset() checks
+$ADate1 = isset($_REQUEST["ADate1"]) ? $_REQUEST["ADate1"] : $transactiondatefrom;
+$ADate2 = isset($_REQUEST["ADate2"]) ? $_REQUEST["ADate2"] : $transactiondateto;
+$searchaccoutname = isset($_REQUEST["searchaccoutname"]) ? $_REQUEST["searchaccoutname"] : "";
+$searchaccoutnameanum = isset($_REQUEST["searchaccoutnameanum"]) ? $_REQUEST["searchaccoutnameanum"] : "";
 
-if (isset($_REQUEST["ADate2"])) { $ADate2 = $_REQUEST["ADate2"]; } else { $ADate2 = $transactiondateto; }
-if (isset($_REQUEST["searchaccoutname"])) { $searchaccoutname = $_REQUEST["searchaccoutname"]; } else { $searchaccoutname = ""; }
-if (isset($_REQUEST["searchaccoutnameanum"])) { $searchaccoutnameanum = $_REQUEST["searchaccoutnameanum"]; } else { $searchaccoutnameanum = ""; }
-
- 
-//This include updatation takes too long to load for hunge items database.
-//include ("autocompletebuild_accounts.php");
- $location=isset($_REQUEST['location'])?$_REQUEST['location']:'';
- $locationcode1=isset($_REQUEST['location'])?$_REQUEST['location']:'';
+// Handle location parameters
+$location = isset($_REQUEST['location']) ? $_REQUEST['location'] : '';
+$locationcode1 = isset($_REQUEST['location']) ? $_REQUEST['location'] : '';
  	$query12 = "select locationname from master_location where locationcode='$location' order by locationname";
 						$exec12 = mysqli_query($GLOBALS["___mysqli_ston"], $query12) or die ("Error in Query12".mysqli_error($GLOBALS["___mysqli_ston"]));
 						$res12 = mysqli_fetch_array($exec12);
@@ -347,43 +347,162 @@ window.open("print_deliveryreportsubtype2xl.php?printno=<?php echo $printno; ?>"
 }
 ?>
 
-<style type="text/css">
-th {
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Delivery Report Subtype Print - MedStar Hospital Management</title>
+    
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <!-- Modern CSS -->
+    <link rel="stylesheet" href="css/vat-modern.css?v=<?php echo time(); ?>">
+    
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- Additional CSS -->
+    <link href="css/datepickerstyle.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="css/autosuggest.css" />
+    
+    <style>
+        th {
             background-color: #ffffff;
             position: sticky;
             top: 0;
             z-index: 1;
-        }
+        }
+        .bodytext31:hover { font-size:14px; }
+        .bal {
+            border-style:none;
+            background:none;
+            text-align:right;
+        }
+        .bali {
+            text-align:right;
+        }
+        .ui-menu .ui-menu-item{ zoom:1 !important; }
+    </style>
+</head>
+<body>
+    <!-- Hospital Header -->
+    <header class="hospital-header">
+        <h1 class="hospital-title">🏥 MedStar Hospital Management</h1>
+        <p class="hospital-subtitle">Advanced Healthcare Management Platform</p>
+    </header>
 
-<!--
-body {
-	margin-left: 0px;
-	margin-top: 0px;
-	background-color: #ecf0f5;
-}
-.bodytext3 {	FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3B3B3C; FONT-FAMILY: Tahoma;}
--->
-</style>
-<link href="css/datepickerstyle.css" rel="stylesheet" type="text/css" />
-<!-- <link href="autocomplete.css" rel="stylesheet"> -->
+    <!-- User Information Bar -->
+    <div class="user-info-bar">
+        <div class="user-welcome">
+            <span class="welcome-text">Welcome, <strong><?php echo htmlspecialchars($username2); ?></strong></span>
+            <span class="location-info">📍 Company: <?php echo htmlspecialchars($companyname); ?></span>
+        </div>
+        <div class="user-actions">
+            <a href="mainmenu1.php" class="btn btn-outline">🏠 Main Menu</a>
+            <a href="logout.php" class="btn btn-outline">🚪 Logout</a>
+        </div>
+    </div>
 
+    <!-- Navigation Breadcrumb -->
+    <nav class="nav-breadcrumb">
+        <a href="mainmenu1.php">🏠 Home</a>
+        <span>→</span>
+        <span>Reports</span>
+        <span>→</span>
+        <span>Delivery Report Subtype Print</span>
+    </nav>
 
- 
-<!-- <script src="js/jquery.min-autocomplete.js"></script> -->
-<!-- <script src="js/jquery-ui.min.js"></script> -->
+    <!-- Floating Menu Toggle -->
+    <div id="menuToggle" class="floating-menu-toggle">
+        <i class="fas fa-bars"></i>
+    </div>
 
-<!-- <script src="js/jquery.min-autocomplete.js"></script> -->
-<!-- <script src="js/jquery-ui.min.js"></script> -->
+    <!-- Main Container with Sidebar -->
+    <div class="main-container-with-sidebar">
+        <!-- Left Sidebar -->
+        <aside id="leftSidebar" class="left-sidebar">
+            <div class="sidebar-header">
+                <h3>Quick Navigation</h3>
+                <button id="sidebarToggle" class="sidebar-toggle">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <ul class="nav-list">
+                    <li class="nav-item">
+                        <a href="mainmenu1.php" class="nav-link">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="billing.php" class="nav-link">
+                            <i class="fas fa-receipt"></i>
+                            <span>Billing</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="dispatch.php" class="nav-link">
+                            <i class="fas fa-truck"></i>
+                            <span>Dispatch</span>
+                        </a>
+                    </li>
+                    <li class="nav-item active">
+                        <a href="deliveryreportsubtypeprint.php" class="nav-link">
+                            <i class="fas fa-file-alt"></i>
+                            <span>Delivery Report Subtype</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="reports.php" class="nav-link">
+                            <i class="fas fa-chart-bar"></i>
+                            <span>Reports</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="finance.php" class="nav-link">
+                            <i class="fas fa-calculator"></i>
+                            <span>Finance</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
 
-<!-- <link href="css/datepickerstyle.css" rel="stylesheet" type="text/css" /> -->
-<script type="text/javascript" src="js/adddate.js"></script>
-<script type="text/javascript" src="js/adddate2.js"></script>
-<script type="text/javascript" src="js/autocomplete_subtype.js"></script>
-<script type="text/javascript" src="js/autosuggestsubtype.js"></script>
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Alert Container -->
+            <div id="alertContainer">
+                <?php include ("includes/alertmessages1.php"); ?>
+            </div>
 
- <script src="js/jquery-1.11.1.min.js"></script>
-<!-- <script src="js/jquery.min-autocomplete.js"></script> -->
-<script src="js/jquery-ui.min.js"></script> 
+            <!-- Page Header -->
+            <div class="page-header">
+                <div class="page-header-content">
+                    <h2>Delivery Report Subtype Print</h2>
+                    <p>Search and process delivery reports by subtype with comprehensive tracking and dispatch management.</p>
+                </div>
+                <div class="page-header-actions">
+                    <button type="button" class="btn btn-secondary" onclick="refreshPage()">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                    <button type="button" class="btn btn-outline" onclick="exportToExcel()">
+                        <i class="fas fa-download"></i> Export
+                    </button>
+                    <button type="button" class="btn btn-outline" onclick="printReport()">
+                        <i class="fas fa-print"></i> Print
+                    </button>
+                </div>
+            </div>
+
+    <script type="text/javascript" src="js/adddate.js"></script>
+    <script type="text/javascript" src="js/adddate2.js"></script>
+    <script type="text/javascript" src="js/autocomplete_subtype.js"></script>
+    <script type="text/javascript" src="js/autosuggestsubtype.js"></script>
+    <script src="js/jquery-ui.min.js"></script> 
 <script>
 
 // $(function() {
@@ -654,163 +773,87 @@ function FuncPopup()
 </style>
 </head>
 <script src="js/datetimepicker_css.js"></script>
-<body>
-	<div align="center" class="imgloader" id="imgloader" style="display:none;">
-		<div align="center" class="imgloader" id="imgloader1" style="display:;">
-			<p style="text-align:center;"><strong>Upload in Progress <br><br> Please be patience...</strong></p>
-			<img src="images/ajaxloader.gif">
-		</div>
-	</div>
-<table width="101%" border="0" cellspacing="0" cellpadding="2">
-  <tr>
-    <td colspan="10" bgcolor="#ecf0f5"><?php include ("includes/alertmessages1.php"); ?></td>
-  </tr>
-  <tr>
-    <td colspan="10" bgcolor="#ecf0f5"><?php include ("includes/title1.php"); ?></td>
-  </tr>
-  <tr>
-    <td colspan="10" bgcolor="#ecf0f5"><?php include ("includes/menu1.php"); ?></td>
-  </tr>
-  <tr>
-    <td colspan="10">&nbsp;</td>
-  </tr>
-   
-  <tr>
-    <td width="1%">&nbsp;</td>
-    <td width="2%" valign="top"><?php //include ("includes/menu4.php"); ?>
-      &nbsp;</td>
-     <td width="97%" valign="top"><table width="116%" border="0" cellspacing="0" cellpadding="0">
-	 <?php if($slade_st == 'faild') { ?>
-	  <tr>
+            <!-- Loading Overlay -->
+            <div class="loading-overlay" id="imgloader" style="display:none;">
+                <div class="loading-content">
+                    <div class="loading-spinner"></div>
+                    <p><strong>Upload in Progress</strong></p>
+                    <p>Please be patient...</p>
+                </div>
+            </div>
 
-                <td  align="left" valign="middle"   class="bodytext31" ><font color='red' size='4'><strong>There is a Problem Uploading Some claim/invoice to Slade, please re-upload again under 'Reprint Dispatch Report' Module</strong></font></td>
-
-               
-
-              </tr>
-  <?php } ?>
-      <tr>
-        <td width="860">
+            <!-- Slade Error Alert -->
+            <?php if($slade_st == 'faild') { ?>
+            <div class="alert alert-warning">
+                <i class="fas fa-exclamation-triangle"></i>
+                <strong>Upload Issue:</strong> There is a problem uploading some claim/invoice to Slade. Please re-upload again under 'Reprint Dispatch Report' Module.
+            </div>
+            <?php } ?>
 		
 		
-              <form name="cbform1" method="post" action="deliveryreportsubtypeprint.php">
-		<table width="800" border="0" align="left" cellpadding="4" cellspacing="0" bordercolor="#666666" id="AutoNumber3" style="border-collapse: collapse">
-          <tbody>
-            <tr bgcolor="#011E6A">
-              <td colspan="2" bgcolor="#ecf0f5" class="bodytext3"><strong>Dispatch Report Subtype</strong></td>
-              <td colspan="2" align="right" bgcolor="#ecf0f5" class="bodytext3" id="ajaxlocation"><strong> Location </strong>
-             
-            
-                  <?php
-						
-						if ($location!='')
-						{
-						$query12 = "select locationname from master_location where locationcode='$location' order by locationname";
-						$exec12 = mysqli_query($GLOBALS["___mysqli_ston"], $query12) or die ("Error in Query12".mysqli_error($GLOBALS["___mysqli_ston"]));
-						$res12 = mysqli_fetch_array($exec12);
-						
-						echo $res1location = $res12["locationname"];
-						//echo $location;
-						}
-						else
-						{
-						$query1 = "select locationname from login_locationdetails where username='$username2' and docno='$docno' group by locationname order by locationname";
-						$exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
-						$res1 = mysqli_fetch_array($exec1);
-						
-						echo $res1location = $res1["locationname"];
-						//$res1locationanum = $res1["locationcode"];
-						}
-						
-						
-
-						?>
-						
-						
-                  
-                  </td> 
-              </tr>
-            <!--<tr>
-              <td colspan="4" align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">
-			  <input name="printreceipt1" type="reset" id="printreceipt1" onClick="return funcPrintReceipt1()" style="border: 1px solid #001E6A" value="Print Receipt - Previous Payment Entry" /> 
-                *To Print Other Receipts Please Go To Menu:	Reports	-&gt; Payments Given 
-				</td>
-              </tr>-->
-            <tr>
-              <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">Search Subtype</td>
-              <td width="82%" colspan="3" align="left" valign="top"  bgcolor="#FFFFFF"><span class="bodytext3">
-                <span class="bodytext32">
-                <input name="searchsuppliername1" type="text" id="searchsuppliername1" value="<?php echo $searchsuppliername; ?>" size="50" autocomplete="off">
-                </span>
-                <input name="searchsuppliername1hiddentextbox" id="searchsuppliername1hiddentextbox" type="hidden" value="">
-                <input name="searchaccoutnameanum" id="searchaccoutnameanum" value="<?php echo $searchaccoutnameanum; ?>" type="hidden">
-				<input name="searchsubtypeanum1" id="searchsubtypeanum1" value="<?php echo $searchsubtypeanum1; ?>" type="hidden">
-              </span></td>
-           </tr>
-
-           <!-- <tr>
-              <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">Search Account </td>
-              <td width="82%" colspan="3" align="left" valign="top"  bgcolor="#FFFFFF"><span class="bodytext3">
-                <span class="bodytext32">
-                <input name="searchaccoutname" type="text" id="searchaccoutname" value="<?php echo $searchaccoutname; ?>" size="50" autocomplete="off" >
-                </span>
-                <input name="searchsuppliername1hiddentextbox" id="searchsuppliername1hiddentextbox" type="hidden" value="">
-			  <input name="searchsubtypeanum1" id="searchsubtypeanum1" value="<?php echo $searchsubtypeanum1; ?>" type="hidden">
-              </span></td>
-           </tr>-->
-			  <tr>
-                      <td class="bodytext31" valign="center"  align="left" 
-                bgcolor="#FFFFFF"> Date From </td>
-                      <td width="30%" align="left" valign="center"  bgcolor="#FFFFFF" class="bodytext31"><input name="ADate1" id="ADate1" value="<?php echo $ADate1; ?>"  size="10"  readonly="readonly" onKeyDown="return disableEnterKey()" />
-                          <img src="images2/cal.gif" onClick="javascript:NewCssCal('ADate1')" style="cursor:pointer"/> </td>
-                      <td width="16%" align="left" valign="center"  bgcolor="#FFFFFF" class="bodytext31"> Date To </td>
-                      <td width="33%" align="left" valign="center"  bgcolor="#FFFFFF"><span class="bodytext31">
-                        <input name="ADate2" id="ADate2" value="<?php echo $ADate2; ?>"  size="10"  readonly="readonly" onKeyDown="return disableEnterKey()" />
-                        <img src="images2/cal.gif" onClick="javascript:NewCssCal('ADate2')" style="cursor:pointer"/> </span></td>
-                    </tr>
-						<tr>
-  			  <td width="10%" align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">Location</td>
-              <td width="30%" align="left" valign="top"  bgcolor="#FFFFFF"><span class="bodytext3">
-			 
-				 <select name="location" id="location" onChange="ajaxlocationfunction(this.value);">
-				<!-- <option value="" <?php if($location==''){echo "selected";}?>>All</option>-->
-                    <?php
-						
-						$query1 = "select * from master_employeelocation where   username='$username2' group by locationname order by locationname";
-						$exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
-						$loccode=array();
-						while ($res1 = mysqli_fetch_array($exec1))
-						{
-						$locationname = $res1["locationname"];
-						$locationcode = $res1["locationcode"];
-						
-						?>
-						 <option value="<?php echo $locationcode; ?>" <?php if($location!='')if($location==$locationcode){echo "selected";}?>><?php echo $locationname; ?></option>
-						<?php
-						} 
-						?>
-                      </select>
-					 
-              </span></td>
-			   <td width="10%" align="left" colspan="2" valign="middle"  bgcolor="#FFFFFF" class="bodytext3"></td>
-			  </tr>
-					
-            <tr>
-              <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3"><input type="hidden" name="searchsuppliercode" onBlur="return suppliercodesearch1()" onKeyDown="return suppliercodesearch2()" id="searchsuppliercode" style="text-transform:uppercase" value="<?php echo $searchsuppliercode; ?>" size="20" /></td>
-              <td colspan="3" align="left" valign="top"  bgcolor="#FFFFFF">
-			  <input type="hidden" name="cbfrmflag1" value="cbfrmflag1">
-                  <input  type="submit" onClick="return funcAccount1()" value="Search" name="Submit" />
-                  <input name="resetbutton" type="reset" id="resetbutton" value="Reset" /></td>
-            </tr>
-          </tbody>
-        </table>
-		</form>		</td>
-      </tr>
-      <tr>
-        <td>&nbsp;</td>
-      </tr>
-       <tr>
-        <td>
+            <!-- Search Form -->
+            <form name="cbform1" method="post" action="deliveryreportsubtypeprint.php" class="search-form">
+                <div class="form-section">
+                    <div class="form-section-header">
+                        <i class="fas fa-search form-section-icon"></i>
+                        <h3 class="form-section-title">Search Dispatch Report Subtype</h3>
+                    </div>
+                    
+                    <div class="form-section-form">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="searchsuppliername1" class="form-label">Search Subtype</label>
+                                <input name="searchsuppliername1" type="text" id="searchsuppliername1" class="form-input" value="<?php echo $searchsuppliername; ?>" size="50" autocomplete="off" placeholder="Enter subtype name">
+                                <input name="searchsuppliername1hiddentextbox" id="searchsuppliername1hiddentextbox" type="hidden" value="">
+                                <input name="searchaccoutnameanum" id="searchaccoutnameanum" value="<?php echo $searchaccoutnameanum; ?>" type="hidden">
+                                <input name="searchsubtypeanum1" id="searchsubtypeanum1" value="<?php echo $searchsubtypeanum1; ?>" type="hidden">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="location" class="form-label">Location</label>
+                                <select name="location" id="location" class="form-input" onChange="ajaxlocationfunction(this.value);">
+                                    <?php
+                                    $query1 = "select * from master_employeelocation where username='$username2' group by locationname order by locationname";
+                                    $exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
+                                    while ($res1 = mysqli_fetch_array($exec1)) {
+                                        $locationname = $res1["locationname"];
+                                        $locationcode = $res1["locationcode"];
+                                    ?>
+                                        <option value="<?php echo $locationcode; ?>" <?php if($location!='')if($location==$locationcode){echo "selected";}?>><?php echo $locationname; ?></option>
+                                    <?php } ?>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="ADate1" class="form-label">Date From</label>
+                                <input name="ADate1" id="ADate1" value="<?php echo $ADate1; ?>" class="form-input" size="10" readonly="readonly" onKeyDown="return disableEnterKey()" />
+                                <i class="fas fa-calendar-alt" onClick="javascript:NewCssCal('ADate1')" style="cursor:pointer; margin-left: 5px;"></i>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="ADate2" class="form-label">Date To</label>
+                                <input name="ADate2" id="ADate2" value="<?php echo $ADate2; ?>" class="form-input" size="10" readonly="readonly" onKeyDown="return disableEnterKey()" />
+                                <i class="fas fa-calendar-alt" onClick="javascript:NewCssCal('ADate2')" style="cursor:pointer; margin-left: 5px;"></i>
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <input type="hidden" name="cbfrmflag1" value="cbfrmflag1">
+                                <button type="submit" onClick="return funcAccount1()" class="btn btn-primary" name="Submit">
+                                    <i class="fas fa-search"></i> Search
+                                </button>
+                                <button name="resetbutton" type="reset" id="resetbutton" class="btn btn-secondary">
+                                    <i class="fas fa-undo"></i> Reset
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+            <!-- Results Section -->
 		<form method="post" name="form4" action="deliveryreportsubtypeprint.php">
 		<table id="AutoNumber3" style="BORDER-COLLAPSE: collapse" 
             bordercolor="#666666" cellspacing="0" cellpadding="4" width="1100" 
@@ -1418,11 +1461,197 @@ function FuncPopup()
 		</form>
 		</td>
       </tr>
-	  
-    </table>
-	</td>
-	</tr>
-</table>
-<?php include ("includes/footer1.php"); ?>
+        </main>
+    </div>
+
+    <!-- Modern JavaScript Functions -->
+    <script>
+        // Sidebar toggle functionality
+        function toggleSidebar() {
+            const sidebar = document.getElementById('leftSidebar');
+            const toggle = document.querySelector('.sidebar-toggle i');
+            
+            sidebar.classList.toggle('collapsed');
+            toggle.classList.toggle('fa-chevron-left');
+            toggle.classList.toggle('fa-chevron-right');
+        }
+
+        // Page refresh function
+        function refreshPage() {
+            window.location.reload();
+        }
+
+        // Export to Excel function
+        function exportToExcel() {
+            // Add export functionality here
+            alert('Export functionality will be implemented');
+        }
+
+        // Print report function
+        function printReport() {
+            window.print();
+        }
+
+        // Initialize sidebar toggle on menu button click
+        document.getElementById('menuToggle').addEventListener('click', function() {
+            const sidebar = document.getElementById('leftSidebar');
+            sidebar.classList.toggle('show');
+        });
+
+        // Close sidebar when clicking outside
+        document.addEventListener('click', function(event) {
+            const sidebar = document.getElementById('leftSidebar');
+            const menuToggle = document.getElementById('menuToggle');
+            
+            if (!sidebar.contains(event.target) && !menuToggle.contains(event.target)) {
+                sidebar.classList.remove('show');
+            }
+        });
+    </script>
+
+    <!-- Include Required JavaScript Files -->
+    <script src="js/datetimepicker_css.js"></script>
+
+    <!-- JavaScript for functionality -->
+    <script type="text/javascript">
+        function clickcheck(cat,val) {
+            if(cat=='com') {
+                document.getElementById("misscheck"+val).checked=false;
+                document.getElementById("incomcheck"+val).checked=false;
+            } else if(cat=='incom') {
+                document.getElementById("comcheck"+val).checked=false;
+                document.getElementById("misscheck"+val).checked=false;
+            } else {
+                document.getElementById("comcheck"+val).checked=false;
+                document.getElementById("incomcheck"+val).checked=false;
+            }
+        }
+
+        function ajaxlocationfunction(val) { 
+            if (window.XMLHttpRequest) {
+                xmlhttp = new XMLHttpRequest();
+            } else {
+                xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
+            }
+            xmlhttp.onreadystatechange = function() {
+                if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+                    document.getElementById("ajaxlocation").innerHTML = xmlhttp.responseText;
+                }
+            }
+            xmlhttp.open("GET", "ajax/ajaxgetlocationname.php?loccode=" + val, true);
+            xmlhttp.send();
+        }
+
+        window.onload = function () {
+            var oTextbox = new AutoSuggestControl1(document.getElementById("searchsuppliername1"), new StateSuggestions1());
+        }
+
+        function funcAccount1() {
+            if((document.getElementById("searchsubtypeanum1").value == "" || document.getElementById("searchsuppliername1").value == "")) {
+                alert('Please Select Sub type ');
+                document.getElementById("searchsuppliername1").focus();
+                return false;
+            }
+        }
+
+        function cbsuppliername1() {
+            document.cbform1.submit();
+        }
+
+        function validcheck() {
+            if(confirm("Do You Want To Save The Record?") == false) {
+                return false;
+            }	
+            FuncPopup();
+            $('#submit').prop("disabled", true);
+            return true;
+        }
+
+        function upload_claim_new(autono,billno,maintype) {
+            FuncPopup();
+            var autono_final = autono;
+            var billno = billno;
+            var maintype = maintype;
+            var property = document.getElementById('claimpdfa'+autono_final).files[0];
+            var image_name = property.name;
+            var image_extension = image_name.split('.').pop().toLowerCase();
+
+            if(jQuery.inArray(image_extension,['pdf']) == -1) {
+                alert("Please Upload only the PDF files!");
+                $("#imgloader").hide();
+                $('#claimpdfa'+autono_final).val('');
+                return false;
+            }
+
+            var check = confirm("Are you sure you want to Upload the "+image_name+"?");
+            if (check != true) {
+                $("#imgloader").hide();
+                $('#claimpdfa'+autono_final).val('');
+                return false;
+            }
+
+            var form_data = new FormData();
+            form_data.append("file",property);
+            $.ajax({
+                url:'upload_files.php?auto='+autono_final+'&&uploadtype=claim&&billno='+billno+'&&uploadfrom=dispatch&&maintype='+maintype,
+                method:'POST',
+                data:form_data,
+                contentType:false,
+                cache:false,
+                processData:false,
+                success:function(data) {
+                    $('#claimpdfa'+autono_final).val('');
+                    $("#imgloader").hide();
+                    $("#showcalimpdf"+autono_final).show();
+                }
+            });
+        }
+
+        function upload_invoice(autono,billno,maintype) {
+            FuncPopup();
+            var autono_final = autono;
+            var billno = billno;
+            var maintype = maintype;
+            var property = document.getElementById('invoicepdf'+autono_final).files[0];
+            var image_name = property.name;
+            var image_extension = image_name.split('.').pop().toLowerCase();
+            
+            if(jQuery.inArray(image_extension,['pdf']) == -1) {
+                alert("Please Upload only the PDF files!");
+                $("#imgloader").hide();
+                $('#invoicepdf'+autono_final).val('');
+                return false;
+            }
+
+            var check = confirm("Are you sure you want to Upload the "+image_name+"?");
+            if (check != true) {
+                $("#imgloader").hide();
+                $('#invoicepdf'+autono_final).val('');
+                return false;
+            }
+
+            var form_data = new FormData();
+            form_data.append("file",property);
+            $.ajax({
+                url:'upload_files.php?auto='+autono_final+'&&uploadtype=invoice&&uploadfrom=dispatch&&billno='+billno+'&&maintype='+maintype,
+                method:'POST',
+                data:form_data,
+                contentType:false,
+                cache:false,
+                processData:false,
+                success:function(data) {
+                    $('#invoicepdf'+autono_final).val('');
+                    $("#imgloader").hide();
+                    $("#invoicepdfview"+autono_final).show();
+                }
+            });
+        }
+
+        function FuncPopup() {
+            window.scrollTo(0,0);
+            document.getElementById("imgloader").style.display = "";
+        }
+    </script>
+
 </body>
 </html>

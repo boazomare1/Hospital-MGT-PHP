@@ -96,9 +96,6 @@ else if ($st == 'failed')
 
 ?>
 
-<style type="text/css">
-
-?>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -131,77 +128,12 @@ else if ($st == 'failed')
 
 
 
-<script language="javascript">
 
 
 
-function captureEscapeKey1()
-
-{
-
-	//alert ("Back Key Press");
-
-	if (event.keyCode==8) 
-
-	{
-
-		//alert ("Escape Key Press.");
-
-		//event.keyCode=0; 
-
-		//return event.keyCode 
-
-		//return false;
-
-	}
-
-}
-
-
-
-</script>
-
-
-
-<style type="text/css">
-
-<!--
-
-.bodytext31 {FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3b3b3c; FONT-FAMILY: Tahoma
-
-}
-
--->
-
-</style>
 
 </head>
 
-<script language="javascript">
-
-
-
-function from1submit1()
-
-{
-
-    if(document.getElementById("searchcomponent").value == "")
-
-	{
-
-		alert("Select Payroll Component");
-
-		document.getElementById("searchcomponent").focus();
-
-		return false;
-
-	}
-
-}
-
-
-
-</script>
 
 <script src="js/datetimepicker1_css.js"></script>
 
@@ -233,298 +165,263 @@ function from1submit1()
         <span>Payroll Component Report</span>
     </nav>
 
-    <!-- Main Container -->
-    <div class="main-container">
-
-<table width="101%" align="left" border="0" cellspacing="0" cellpadding="2">
-
-  <tr>
-
-    <td colspan="10" bgcolor="#ecf0f5"><?php include ("includes/alertmessages1.php"); ?></td>
-
-  </tr>
-
-  <tr>
-
-    <td colspan="10" bgcolor="#ecf0f5"><?php include ("includes/title1.php"); ?></td>
-
-  </tr>
-
-  <tr>
-
-    <td colspan="10" bgcolor="#ecf0f5">
-
-	<?php 
-
-	
-
-		include ("includes/menu1.php"); 
-
-	
-
-	//	include ("includes/menu2.php"); 
-
-	
-
-	?>	</td>
-
-  </tr>
-
-  <tr>
-
-    <td height="25" colspan="10">&nbsp;</td>
-
-  </tr>
-
-  <tr>
-
-   <td width="1%" align="left" valign="top">&nbsp;</td>
-
-    <td  valign="top">
-
-	<form name="form1" id="form1" method="post" action="payrollcomponentreport1.php" onSubmit="return from1submit1()">
-
-	<table width="900" border="0" align="left" cellpadding="4" cellspacing="0" bordercolor="#666666" id="AutoNumber3" style="border-collapse: collapse">
-
-	<tbody>
-
-	<tr bgcolor="#999999">
-
-	<td colspan="30" align="left" class="bodytext3"><strong>Search Report</strong></td>
-
-	</tr>
-
-	<tr>
-
-	<td width="95" align="left" class="bodytext3">Search Employee</td>
-
-	<td colspan="4" align="left" class="bodytext3">
-
-	<input type="hidden" name="autobuildemployee" id="autobuildemployee">
-
-	<input type="hidden" name="searchemployeecode" id="searchemployeecode">
-
-	<input type="text" name="searchemployee" id="searchemployee" autocomplete="off" value="<?php echo $searchemployee; ?>" size="50" style="border:solid 1px #001E6A;"></td>
-
-	</tr>
-
-	<tr>
-
-	<td align="left" class="bodytext3">Search Month</td>
-
-	<td width="63" align="left" class="bodytext3"><select name="searchmonth" id="searchmonth">
-
-	<?php if($searchmonth != '') { ?>
-
-	<option value="<?php echo $searchmonth; ?>"><?php echo $searchmonth; ?></option>
-
-	<?php } ?>
-
-	<?php
-
-	$arraymonth = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-
-	$monthcount = count($arraymonth);
-
-	for($i=0;$i<$monthcount;$i++)
-
-	{
-
-	?>
-
-	<option value="<?php echo $arraymonth[$i]; ?>"><?php echo $arraymonth[$i]; ?></option>
-
-	<?php
-
-	}
-
-	?>
-
-	</select><span class="bodytext3">&nbsp; &nbsp; &nbsp;Search Year &nbsp; &nbsp;</span>
-
-	<select name="searchyear" id="searchyear">
-
-	<?php if($searchyear != '') { ?>
-
-	<option value="<?php echo $searchyear; ?>"><?php echo $searchyear; ?></option>
-
-	<?php } ?>
-
-	<?php
-
-	for($j=2010;$j<=date('Y');$j++)
-
-	{
-
-	?>
-
-	<option value="<?php echo $j; ?>"><?php echo $j; ?></option>
-
-	<?php
-
-	}
-
-	?>
-
-	</select></td>
-
-	<td align="left" class="bodytext3">&nbsp;</td>
-
-	</tr>
-
-	<tr>
-
-	<td align="left" class="bodytext3">Search Component</td>
-
-	<td align="left" class="bodytext3">
-
-	<select name="searchcomponent" id="searchcomponent">
-
-	<option value="">Select</option>
-
-	<?php
-
-	$query13 = "select * from master_payrollcomponent where recordstatus <> 'deleted'";
-
-	$exec13 = mysqli_query($GLOBALS["___mysqli_ston"], $query13) or die ("Error in Query13".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-	while($res13 = mysqli_fetch_array($exec13))
-
-	{
-
-	$componentname = $res13['componentname'];
-
-	$componentanum = $res13['auto_number'];
-
-	?>
-
-	<option value="<?php echo $componentanum; ?>" <?php if($searchcomponent == $componentanum) { echo "selected"; } ?>><?php echo $componentname; ?></option>
-
-	<?php
-
-	}
-
-	?>
-
-	</select>
-
-	</td>
-
-	<td colspan="3" align="left" class="bodytext3">
-
-	</td>
-
-	</tr>
-
-	<tr>
-
-	<td align="left" class="bodytext3">
-
-	</td>
-
-	<td align="left" class="bodytext3">
-
-	<input type="hidden" name="frmflag1" id="frmflag1" value="frmflag1">
-
-	<input type="submit" name="Search" value="Submit" style="border:solid 1px #001E6A;"></td>
-
-	<td align="left" colspan="3">&nbsp;</td>
-
-	</td>
-
-	</tbody>
-
-	</table>
-
-	</form>
-
-	</td>
-
-	</tr>
-
-	<tr>
-
-   <td width="1%" align="left" valign="top">&nbsp;</td>
-
-    <td  valign="top">
-
-	<?php
-
-	$totalamount = '0.00';
-
-	if($frmflag1 == 'frmflag1')
-
-	{	
-
-		if (isset($_REQUEST["frmflag1"])) { $frmflag1 = $_REQUEST["frmflag1"]; } else { $frmflag1 = ""; }
-
-		if (isset($_REQUEST["searchemployee"])) { $searchemployee = $_REQUEST["searchemployee"]; } else { $searchemployee = ""; }
-
-		if (isset($_REQUEST["searchmonth"])) { $searchmonth = $_REQUEST["searchmonth"]; } else { $searchmonth = date('M'); }
-
-		if (isset($_REQUEST["searchyear"])) { $searchyear = $_REQUEST["searchyear"]; } else { $searchyear = date('Y'); }
-
-
-
-		$searchmonthyear = $searchmonth.'-'.$searchyear; 
-
-		
-
-		$url = "frmflag1=$frmflag1&&searchmonth=$searchmonth&&searchyear=$searchyear&&searchemployee=$searchemployee";
-
-
-
-	?>	
-
-	<table width="600" border="0" align="left" cellpadding="4" cellspacing="0" bordercolor="#666666" id="AutoNumber3" style="border-collapse: collapse">
-
-	<tbody>
-
-	<tr bgcolor="#FFFFFF">
-
-	<td colspan="30" align="center" class="bodytext3"><strong>&nbsp;</strong></td>
-
-	</tr>
-
-	<tr bgcolor="#ecf0f5">
-
-	<td colspan="30" align="left" class="bodytext3"><strong>Payroll Report</strong></td>
-
-	</tr>
-
-	<tr bgcolor="#FFFFFF">
-
-	<td colspan="30" align="left" class="bodytext3"><strong>EMPLOYER'S PIN : <?php echo $companycode; ?></strong></td>
-
-	</tr>
-
-	<tr bgcolor="#FFFFFF">
-
-	<td colspan="30" align="left" class="bodytext3"><strong>EMPLOYER'S NAME : <?php echo $companyname; ?></strong></td>
-
-	</tr>
-
-	<tr bgcolor="#FFFFFF">
-
-	<td colspan="30" align="left" class="bodytext3"><strong>MONTH OF CONTRIBUTION : <?php echo $searchmonthyear; ?></strong></td>
-
-	</tr>
-
-	<tr>
-
-	<td width="25" align="center" bgcolor="#ecf0f5" class="bodytext3"><strong>S.No</strong></td>
-
-	<td width="217" align="left" bgcolor="#ecf0f5" class="bodytext3"><strong>EMPLOYEE NAME</strong></td>
-
-	<td width="25" align="left" bgcolor="#ecf0f5" class="bodytext3"><strong>ID NO</strong></td>
-
-	<td width="25" align="left" bgcolor="#ecf0f5" class="bodytext3"><strong>PIN NO</strong></td>
-
-	<td align="right" bgcolor="#ecf0f5" class="bodytext3" width="77"><strong>AMOUNT</strong></td>
-
-	<td align="left" bgcolor="#ecf0f5" class="bodytext3" width="47">&nbsp;</td>
-
-	</tr>
+    <!-- Floating Menu Toggle -->
+    <div id="menuToggle" class="floating-menu-toggle">
+        <i class="fas fa-bars"></i>
+    </div>
+
+    <!-- Main Container with Sidebar -->
+    <div class="main-container-with-sidebar">
+        <!-- Left Sidebar -->
+        <aside id="leftSidebar" class="left-sidebar">
+            <div class="sidebar-header">
+                <h3>Quick Navigation</h3>
+                <button id="sidebarToggle" class="sidebar-toggle">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <ul class="nav-list">
+                    <li class="nav-item">
+                        <a href="mainmenu1.php" class="nav-link">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="cashradiologyrefund.php" class="nav-link">
+                            <i class="fas fa-x-ray"></i>
+                            <span>Cash Radiology Refund</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="cashrefundapprovallist.php" class="nav-link">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Refund Approval List</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="chequescollected.php" class="nav-link">
+                            <i class="fas fa-money-check"></i>
+                            <span>Cheques Collected</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="claimtxnidedit.php" class="nav-link">
+                            <i class="fas fa-edit"></i>
+                            <span>Claim Transaction Edit</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="payrollprocess1.php" class="nav-link">
+                            <i class="fas fa-money-bill-wave"></i>
+                            <span>Payroll Process</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="stockreportbyitem3.php" class="nav-link">
+                            <i class="fas fa-boxes"></i>
+                            <span>Stock Report by Item</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="paymentmodecollectionsummary.php" class="nav-link">
+                            <i class="fas fa-credit-card"></i>
+                            <span>Payment Mode Collection Summary</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="paymentmodecollectionbyuser.php" class="nav-link">
+                            <i class="fas fa-users"></i>
+                            <span>Payment Mode Collection by User</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="revenuereport_summary.php" class="nav-link">
+                            <i class="fas fa-chart-line"></i>
+                            <span>Revenue Report Summary</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="comparativereport.php" class="nav-link">
+                            <i class="fas fa-balance-scale"></i>
+                            <span>Comparative Report</span>
+                        </a>
+                    </li>
+                    <li class="nav-item active">
+                        <a href="payrollcomponentreport1.php" class="nav-link">
+                            <i class="fas fa-calculator"></i>
+                            <span>Payroll Component Report</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Alert Container -->
+            <div id="alertContainer">
+                <?php include("includes/alertmessages1.php"); ?>
+            </div>
+
+            <!-- Page Header -->
+            <div class="page-header">
+                <div class="page-header-content">
+                    <h2>Payroll Component Report</h2>
+                    <p>Generate detailed payroll component reports for specific employees and time periods.</p>
+                </div>
+                <div class="page-header-actions">
+                    <button type="button" class="btn btn-secondary" onclick="refreshPage()">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                    <button type="button" class="btn btn-outline" onclick="exportToExcel()">
+                        <i class="fas fa-download"></i> Export
+                    </button>
+                </div>
+            </div>
+
+            <!-- Payroll Component Report Section -->
+            <div class="payroll-component-section">
+                <div class="payroll-component-header">
+                    <div class="payroll-component-icon">
+                        <i class="fas fa-calculator"></i>
+                    </div>
+                    <div class="payroll-component-title">Search Report</div>
+                </div>
+
+                <form name="form1" id="form1" method="post" action="payrollcomponentreport1.php" onSubmit="return from1submit1()" class="search-form">
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="searchemployee" class="form-label">Search Employee</label>
+                            <div class="employee-search-input">
+                                <input type="text" name="searchemployee" id="searchemployee" autocomplete="off" value="<?php echo htmlspecialchars($searchemployee); ?>" class="form-input" placeholder="Type to search employees...">
+                                <input type="hidden" name="autobuildemployee" id="autobuildemployee">
+                                <input type="hidden" name="searchemployeecode" id="searchemployeecode">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="searchmonth" class="form-label">Search Month</label>
+                            <select name="searchmonth" id="searchmonth" class="form-select">
+                                <?php if($searchmonth != '') { ?>
+                                <option value="<?php echo htmlspecialchars($searchmonth); ?>"><?php echo htmlspecialchars($searchmonth); ?></option>
+                                <?php } ?>
+                                <?php
+                                $arraymonth = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+                                $monthcount = count($arraymonth);
+                                for($i=0;$i<$monthcount;$i++) {
+                                ?>
+                                <option value="<?php echo $arraymonth[$i]; ?>"><?php echo $arraymonth[$i]; ?></option>
+                                <?php
+                                }
+                                ?>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="searchyear" class="form-label">Search Year</label>
+                            <select name="searchyear" id="searchyear" class="form-select">
+                                <?php if($searchyear != '') { ?>
+                                <option value="<?php echo htmlspecialchars($searchyear); ?>"><?php echo htmlspecialchars($searchyear); ?></option>
+                                <?php } ?>
+                                <?php
+                                for($j=2010;$j<=date('Y');$j++) {
+                                ?>
+                                <option value="<?php echo $j; ?>"><?php echo $j; ?></option>
+                                <?php
+                                }
+                                ?>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="searchcomponent" class="form-label">Search Component</label>
+                            <select name="searchcomponent" id="searchcomponent" class="form-select">
+                                <option value="">Select Component</option>
+                                <?php
+                                $query13 = "select * from master_payrollcomponent where recordstatus <> 'deleted'";
+                                $exec13 = mysqli_query($GLOBALS["___mysqli_ston"], $query13) or die ("Error in Query13".mysqli_error($GLOBALS["___mysqli_ston"]));
+                                while($res13 = mysqli_fetch_array($exec13)) {
+                                    $componentname = $res13['componentname'];
+                                    $componentanum = $res13['auto_number'];
+                                ?>
+                                <option value="<?php echo htmlspecialchars($componentanum); ?>" <?php if($searchcomponent == $componentanum) { echo "selected"; } ?>><?php echo htmlspecialchars($componentname); ?></option>
+                                <?php
+                                }
+                                ?>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <input type="hidden" name="frmflag1" id="frmflag1" value="frmflag1">
+                    
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-search"></i> Submit
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Results Section -->
+            <div class="results-section">
+                <?php
+                $totalamount = '0.00';
+                if($frmflag1 == 'frmflag1') {
+                    if (isset($_REQUEST["frmflag1"])) { $frmflag1 = $_REQUEST["frmflag1"]; } else { $frmflag1 = ""; }
+                    if (isset($_REQUEST["searchemployee"])) { $searchemployee = $_REQUEST["searchemployee"]; } else { $searchemployee = ""; }
+                    if (isset($_REQUEST["searchmonth"])) { $searchmonth = $_REQUEST["searchmonth"]; } else { $searchmonth = date('M'); }
+                    if (isset($_REQUEST["searchyear"])) { $searchyear = $_REQUEST["searchyear"]; } else { $searchyear = date('Y'); }
+                    
+                    $searchmonthyear = $searchmonth.'-'.$searchyear; 
+                    $url = "frmflag1=$frmflag1&&searchmonth=$searchmonth&&searchyear=$searchyear&&searchemployee=$searchemployee";
+                ?>
+                
+                <div class="results-header">
+                    <div class="results-title">Payroll Component Report Results</div>
+                    <div class="results-actions">
+                        <button type="button" class="btn btn-outline" onclick="printReport()">
+                            <i class="fas fa-print"></i> Print
+                        </button>
+                    </div>
+                </div>
+
+                <div class="report-header">
+                    <h3>Payroll Report</h3>
+                    <div class="report-info">
+                        <div class="report-info-item">
+                            <div class="report-info-label">Employer's PIN</div>
+                            <div class="report-info-value"><?php echo htmlspecialchars($companycode); ?></div>
+                        </div>
+                        <div class="report-info-item">
+                            <div class="report-info-label">Employer's Name</div>
+                            <div class="report-info-value"><?php echo htmlspecialchars($companyname); ?></div>
+                        </div>
+                        <div class="report-info-item">
+                            <div class="report-info-label">Month of Contribution</div>
+                            <div class="report-info-value"><?php echo htmlspecialchars($searchmonthyear); ?></div>
+                        </div>
+                    </div>
+                </div>
+
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>S.No</th>
+                            <th>Employee Name</th>
+                            <th>ID No</th>
+                            <th>PIN No</th>
+                            <th>Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
 
 	<?php
 
@@ -606,21 +503,13 @@ function from1submit1()
 
 	?>
 
-	<tr <?php echo $colorcode; ?>>
-
-	<td align="center" class="bodytext3"><?php echo $colorloopcount; ?></td>
-
-	<td align="left" class="bodytext3"><?php echo $res2employeename; ?></td>
-
-	<td align="left" class="bodytext3"><?php echo $passportnumber; ?></td>
-
-	<td align="left" class="bodytext3"><?php echo $pinno; ?></td>
-
-	<td align="right" class="bodytext3" width="77"><?php echo number_format($componentamount,0,'.',','); ?></td>
-
-	<td align="right" class="bodytext3" width="47">&nbsp;</td>
-
-	</tr>	
+                        <tr class="employee-row">
+                            <td align="center"><?php echo $colorloopcount; ?></td>
+                            <td class="employee-name"><?php echo htmlspecialchars($res2employeename); ?></td>
+                            <td class="employee-id"><?php echo htmlspecialchars($passportnumber); ?></td>
+                            <td class="employee-pin"><?php echo htmlspecialchars($pinno); ?></td>
+                            <td class="amount-cell amount-positive"><?php echo number_format($componentamount,0,'.',','); ?></td>
+                        </tr>	
 
 	<?php
 
@@ -632,40 +521,18 @@ function from1submit1()
 
 	?>
 
-	<tr>
+                        <tr class="summary-row">
+                            <td colspan="4" class="summary-label">Total:</td>
+                            <td class="summary-value"><?php echo number_format($totalamount,0,'.',','); ?></td>
+                        </tr>
+                    </tbody>
+                </table> 
 
-	<td colspan="4" bgcolor="#ecf0f5" align="right" class="bodytext3"><strong>Total :</strong></td>
-
-	<td bgcolor="#ecf0f5" align="right" class="bodytext3"><strong><?php echo number_format($totalamount,0,'.',','); ?></strong></td>
-
-	<td align="left" bgcolor="#ecf0f5" class="bodytext3" width="47">&nbsp;</td>
-
-	</tr>
-
-	<!---<tr>
-
-	<td colspan="6" align="right" class="bodytext3"><a href="print_nhifreport1.php?<?php echo $url; ?>"><img src="images/pdfdownload.jpg" height="40" width="40"></a></td>
-
-	</tr>--->
-
-	</tbody>
-
-	</table> 
-
-	<?php
-
-	}
-
-	?>
-
-	</td>
-
-  	</tr>
-
-    </table>
-
-<?php include ("includes/footer1.php"); ?>
-
+                <?php
+                }
+                ?>
+            </div>
+        </main>
     </div>
 
     <!-- Modern JavaScript -->

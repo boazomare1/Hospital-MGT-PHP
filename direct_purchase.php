@@ -1,24 +1,30 @@
 <?php
 session_start();
 error_reporting(0);
-//date_default_timezone_set('Asia/Calcutta');
 include ("db/db_connect.php");
 include ("includes/loginverify.php");
-$updatedatetime = date("Y-m-d H:i:s");
-$indiandatetime = date ("d-m-Y H:i:s");
-$dateonly = date("Y-m-d");
-$currentdate = date("Y-m-d");
+
 $username = $_SESSION["username"];
-$ipaddress = $_SERVER["REMOTE_ADDR"];
 $companyanum = $_SESSION["companyanum"];
 $companyname = $_SESSION["companyname"];  
 $financialyear = $_SESSION["financialyear"];
 $docno1 = $_SESSION['docno'];
-$locationname=isset($_REQUEST['locationname'])?$_REQUEST['locationname']:'';
-$locationcode=isset($_REQUEST['locationcode'])?$_REQUEST['locationcode']:'';
-$storecode=isset($_REQUEST['storecode'])?$_REQUEST['storecode']:'';
-$store=isset($_REQUEST['store'])?$_REQUEST['store']:'';
-$templateid=isset($_REQUEST['templateid'])?$_REQUEST['templateid']:'';
+
+$ipaddress = $_SERVER["REMOTE_ADDR"];
+$updatedatetime = date("Y-m-d H:i:s");
+$indiandatetime = date ("d-m-Y H:i:s");
+$dateonly = date("Y-m-d");
+$currentdate = date("Y-m-d");
+
+$errmsg = "";
+$bgcolorcode = "";
+
+// Handle form parameters
+$locationname = isset($_REQUEST['locationname']) ? $_REQUEST['locationname'] : '';
+$locationcode = isset($_REQUEST['locationcode']) ? $_REQUEST['locationcode'] : '';
+$storecode = isset($_REQUEST['storecode']) ? $_REQUEST['storecode'] : '';
+$store = isset($_REQUEST['store']) ? $_REQUEST['store'] : '';
+$templateid = isset($_REQUEST['templateid']) ? $_REQUEST['templateid'] : '';
 //$template_id=isset($_REQUEST['map_template_code'])?$_REQUEST['map_template_code']:'';
 $query = "select * from login_locationdetails where username='$username' and docno='$docno1' order by locationname";
 $exec = mysqli_query($GLOBALS["___mysqli_ston"], $query) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
@@ -35,7 +41,10 @@ $query77 = "select job_title from master_employee where username = '$username'";
 $exec77 = mysqli_query($GLOBALS["___mysqli_ston"], $query77) or die ("Error in Query77".mysqli_error($GLOBALS["___mysqli_ston"]));
 $res77 = mysqli_fetch_array($exec77);
 $job_title = $res77['job_title'];
-if (isset($_REQUEST["frm1submit1"])) { $frm1submit1 = $_REQUEST["frm1submit1"]; } else { $frm1submit1 = ""; }
+
+// Handle form submission
+$frm1submit1 = isset($_REQUEST["frm1submit1"]) ? $_REQUEST["frm1submit1"] : "";
+
 if ($frm1submit1 == 'frm1submit1')
 {
   if($username!='')
@@ -331,15 +340,13 @@ if (isset($_REQUEST["st"])) { $st = $_REQUEST["st"]; } else { $st = ""; }
 //$st = $_REQUEST["st"];
 if (isset($_REQUEST["banum"])) { $banum = $_REQUEST["banum"]; } else { $banum = ""; }
 //$banum = $_REQUEST["banum"];
-if ($st == '1')
-{
-  $errmsg = "Success. New Bill Updated. You May Continue To Add Another Bill.";
-  $bgcolorcode = 'success';
-}
-if ($st == '2')
-{
-  $errmsg = "Failed. New Bill Cannot Be Completed.";
-  $bgcolorcode = 'failed';
+// Handle status messages
+if ($st == '1') {
+    $errmsg = "Success. New Bill Updated. You May Continue To Add Another Bill.";
+    $bgcolorcode = 'success';
+} elseif ($st == '2') {
+    $errmsg = "Failed. New Bill Cannot Be Completed.";
+    $bgcolorcode = 'failed';
 }
 if ($st == '1' && $banum != '')
 {
@@ -917,164 +924,222 @@ function spl() {
 </head>
       
 <body>
-    <!-- Modern Header -->
-    <header class="modern-header">
-        <div class="header-content">
-            <div class="hospital-logo">
-                <div class="hospital-icon">
-                    <i class="fas fa-hospital"></i>
-                </div>
-                <div class="hospital-info">
-                    <h1>MedStar Hospital Management</h1>
-                    <p>Direct Purchase Order System</p>
-                </div>
-            </div>
-            <div class="user-info">
-                <div class="user-avatar">
-                    <?php echo strtoupper(substr($username, 0, 2)); ?>
-                </div>
-                <div class="user-details">
-                    <h3><?php echo $username; ?></h3>
-                    <p><?php echo $companyname; ?></p>
-                </div>
-            </div>
-        </div>
+    <!-- Hospital Header -->
+    <header class="hospital-header">
+        <h1 class="hospital-title">🏥 MedStar Hospital Management</h1>
+        <p class="hospital-subtitle">Advanced Healthcare Management Platform</p>
     </header>
+
+    <!-- User Information Bar -->
+    <div class="user-info-bar">
+        <div class="user-welcome">
+            <span class="welcome-text">Welcome, <strong><?php echo htmlspecialchars($username); ?></strong></span>
+            <span class="location-info">📍 Company: <?php echo htmlspecialchars($companyname); ?></span>
+        </div>
+        <div class="user-actions">
+            <a href="mainmenu1.php" class="btn btn-outline">🏠 Main Menu</a>
+            <a href="logout.php" class="btn btn-outline">🚪 Logout</a>
+        </div>
+    </div>
 
     <!-- Navigation Breadcrumb -->
     <nav class="nav-breadcrumb">
-        <div class="breadcrumb-content">
-            <div class="breadcrumb">
-                <a href="dashboard.php">Dashboard</a>
-                <span class="breadcrumb-separator">›</span>
-                <a href="purchase_management.php">Purchase Management</a>
-                <span class="breadcrumb-separator">›</span>
-                <span>Direct Purchase</span>
-            </div>
-        </div>
+        <a href="mainmenu1.php">🏠 Home</a>
+        <span>→</span>
+        <span>Purchase Management</span>
+        <span>→</span>
+        <span>Direct Purchase</span>
     </nav>
 
-    <!-- Main Container -->
-    <div class="main-container">
-        <!-- Success Message -->
-        <?php if($success=='success'){ ?>
-        <div class="success-message">
-            <div class="success-icon">
-                <i class="fas fa-check"></i>
-            </div>
-            <div>
-                <strong>Transaction Successfully Saved</strong>
-                <p>Your purchase order has been created successfully.</p>
-            </div>
-        </div>
-        <?php } ?>
+    <!-- Floating Menu Toggle -->
+    <div id="menuToggle" class="floating-menu-toggle">
+        <i class="fas fa-bars"></i>
+    </div>
 
-        <!-- Page Header -->
-        <div class="page-header">
-            <div class="page-title">
-                <div class="page-icon">
-                    <i class="fas fa-shopping-cart"></i>
-                </div>
-                <div>
-                    <h1>Direct Purchase Order</h1>
-                    <p class="page-subtitle">Create and manage direct purchase orders for medical supplies and equipment</p>
-                </div>
+    <!-- Main Container with Sidebar -->
+    <div class="main-container-with-sidebar">
+        <!-- Left Sidebar -->
+        <aside id="leftSidebar" class="left-sidebar">
+            <div class="sidebar-header">
+                <h3>Quick Navigation</h3>
+                <button id="sidebarToggle" class="sidebar-toggle">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
             </div>
             
-            <!-- Quick Actions -->
-            <div class="quick-actions">
-                <a href="purchase_order_list.php" class="action-btn">
-                    <i class="fas fa-list"></i>
-                    View Orders
-                </a>
-                <a href="supplier_management.php" class="action-btn">
-                    <i class="fas fa-users"></i>
-                    Manage Suppliers
-                </a>
-                <a href="template_management.php" class="action-btn">
-                    <i class="fas fa-file-alt"></i>
-                    Templates
-                </a>
-            </div>
-        </div>
+            <nav class="sidebar-nav">
+                <ul class="nav-list">
+                    <li class="nav-item">
+                        <a href="mainmenu1.php" class="nav-link">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="purchase_indent.php" class="nav-link">
+                            <i class="fas fa-shopping-cart"></i>
+                            <span>Purchase Indent</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="manual_lpo.php" class="nav-link">
+                            <i class="fas fa-file-invoice"></i>
+                            <span>Manual LPO</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="direct_purchaseapproval.php" class="nav-link">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Direct Purchase Approval</span>
+                        </a>
+                    </li>
+                    <li class="nav-item active">
+                        <a href="direct_purchase.php" class="nav-link">
+                            <i class="fas fa-shopping-bag"></i>
+                            <span>Direct Purchase</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="purchase_order_edit_dp.php" class="nav-link">
+                            <i class="fas fa-edit"></i>
+                            <span>Edit Purchase Order</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="materialreceiptnote.php" class="nav-link">
+                            <i class="fas fa-truck"></i>
+                            <span>Material Receipt</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="supplier_master.php" class="nav-link">
+                            <i class="fas fa-users"></i>
+                            <span>Supplier Master</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
 
-        <form name="form1" id="frmsales" method="post" action="direct_purchase.php">
-            <!-- Purchase Order Details -->
-            <div class="form-container">
-                <div class="form-header">
-                    <div class="form-header-icon">
-                        <i class="fas fa-file-invoice"></i>
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Alert Container -->
+            <div id="alertContainer">
+                <?php if (!empty($errmsg)): ?>
+                    <div class="alert alert-<?php echo $bgcolorcode === 'success' ? 'success' : ($bgcolorcode === 'failed' ? 'error' : 'info'); ?>">
+                        <i class="fas fa-<?php echo $bgcolorcode === 'success' ? 'check-circle' : ($bgcolorcode === 'failed' ? 'exclamation-triangle' : 'info-circle'); ?> alert-icon"></i>
+                        <span><?php echo htmlspecialchars($errmsg); ?></span>
                     </div>
-                    <h2>Purchase Order Details</h2>
+                <?php endif; ?>
+                
+                <?php if($success=='success'): ?>
+                    <div class="alert alert-success">
+                        <i class="fas fa-check-circle alert-icon"></i>
+                        <span>Transaction Successfully Saved - Your purchase order has been created successfully.</span>
+                    </div>
+                <?php endif; ?>
+            </div>
+
+            <!-- Page Header -->
+            <div class="page-header">
+                <div class="page-header-content">
+                    <h2>Direct Purchase Order</h2>
+                    <p>Create and manage direct purchase orders for medical supplies and equipment with real-time calculations and validation.</p>
                 </div>
-                <div class="form-body">
-                    <div class="form-grid">
-                        <div class="form-group">
-                            <label for="docno">Document Number</label>
-                            <input type="text" name="docno" id="docno" class="form-control" value="<?php echo $billnumbercode; ?>" readonly>
-                        </div>
-                        <div class="form-group">
-                            <label for="date">Date</label>
-                            <input type="text" name="date" id="date" class="form-control" value="<?php echo $dateonly; ?>" readonly>
-                        </div>
-                        <div class="form-group">
-                            <label for="location">Location</label>
-                            <input type="text" name="location" id="location" class="form-control" value="<?php echo $locationname; ?>" readonly>
-                            <input type="hidden" name="locationcode" value="<?php echo $locationcode?>">
-                        </div>
-                        <div class="form-group">
-                            <label for="map_template">Template</label>
-                            <input type="text" name="map_template" id="map_template" class="form-control" value="<?php echo $map_template; ?>" autocomplete="off" placeholder="Search for template...">
-                            <input type="hidden" name="map_template_code" id="map_template_code" value="<?php echo $map_template_code; ?>">
-                            <input type="hidden" name="map_template_autono" id="map_template_autono" value="<?php echo $map_template_autono ?>">
-                        </div>
-                    </div>
+                <div class="page-header-actions">
+                    <button type="button" class="btn btn-secondary" onclick="refreshPage()">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                    <button type="button" class="btn btn-outline" onclick="exportToExcel()">
+                        <i class="fas fa-download"></i> Export
+                    </button>
+                    <button type="button" class="btn btn-outline" onclick="printReport()">
+                        <i class="fas fa-print"></i> Print
+                    </button>
                 </div>
             </div>
-            <!-- Purchase Configuration -->
-            <div class="form-container">
-                <div class="form-header">
-                    <div class="form-header-icon">
-                        <i class="fas fa-cogs"></i>
+
+            <form name="form1" id="frmsales" method="post" action="direct_purchase.php">
+                <!-- Purchase Order Details -->
+                <div class="form-section">
+                    <div class="form-section-header">
+                        <i class="fas fa-file-invoice form-section-icon"></i>
+                        <h3 class="form-section-title">Purchase Order Details</h3>
                     </div>
-                    <h2>Purchase Configuration</h2>
-                </div>
-                <div class="form-body">
-                    <div class="form-grid">
-                        <div class="form-group">
-                            <label for="blanket">Blanket Order</label>
-                            <select name="blanket" id="blanket" class="form-control form-select">
-                                <option value="no">No</option>
-                            </select>
+                    
+                    <div class="form-section-form">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="docno" class="form-label">Document Number</label>
+                                <input type="text" name="docno" id="docno" class="form-input" value="<?php echo $billnumbercode; ?>" readonly>
+                            </div>
+                            <div class="form-group">
+                                <label for="date" class="form-label">Date</label>
+                                <input type="text" name="date" id="date" class="form-input" value="<?php echo $dateonly; ?>" readonly>
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label for="currency">Currency</label>
-                            <select name="currency" id="currency" class="form-control form-select">
-                                <?php
-                                $query1currency = "select currency,rate from master_currency where recordstatus = '' ";
-                                $exec1currency = mysqli_query($GLOBALS["___mysqli_ston"], $query1currency) or die ("Error in Query1currency".mysqli_error($GLOBALS["___mysqli_ston"]));
-                                while ($res1currency = mysqli_fetch_array($exec1currency))
-                                {
-                                    $currency = $res1currency["currency"];
-                                    $rate = $res1currency["rate"];
-                                ?>
-                                <option value="<?php echo $rate.','.$currency; ?>"><?php echo $currency; ?></option>
-                                <?php } ?>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="fxamount">FX Rate</label>
-                            <input name="fxamount" type="text" id="fxamount" class="form-control" value="1" readonly>
-                        </div>
-                        <div class="form-group">
-                            <label for="supplier">Supplier</label>
-                            <input type="text" name="supplier" id="supplier" class="form-control" value="<?php echo $suppliername; ?>" autocomplete="off" placeholder="Search for supplier...">
-                            <input type="hidden" name="srchsuppliercode" id="srchsuppliercode" value="<?php echo $suppliercode; ?>">
-                            <input type="hidden" name="searchsupplieranum" id="searchsupplieranum" value="<?php echo $srchsupplieranum ?>">
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="location" class="form-label">Location</label>
+                                <input type="text" name="location" id="location" class="form-input" value="<?php echo $locationname; ?>" readonly>
+                                <input type="hidden" name="locationcode" value="<?php echo $locationcode?>">
+                            </div>
+                            <div class="form-group">
+                                <label for="map_template" class="form-label">Template</label>
+                                <input type="text" name="map_template" id="map_template" class="form-input" value="<?php echo $map_template; ?>" autocomplete="off" placeholder="Search for template...">
+                                <input type="hidden" name="map_template_code" id="map_template_code" value="<?php echo $map_template_code; ?>">
+                                <input type="hidden" name="map_template_autono" id="map_template_autono" value="<?php echo $map_template_autono ?>">
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
+                <!-- Purchase Configuration -->
+                <div class="form-section">
+                    <div class="form-section-header">
+                        <i class="fas fa-cogs form-section-icon"></i>
+                        <h3 class="form-section-title">Purchase Configuration</h3>
+                    </div>
+                    
+                    <div class="form-section-form">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="blanket" class="form-label">Blanket Order</label>
+                                <select name="blanket" id="blanket" class="form-input">
+                                    <option value="no">No</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="currency" class="form-label">Currency</label>
+                                <select name="currency" id="currency" class="form-input">
+                                    <?php
+                                    $query1currency = "select currency,rate from master_currency where recordstatus = '' ";
+                                    $exec1currency = mysqli_query($GLOBALS["___mysqli_ston"], $query1currency) or die ("Error in Query1currency".mysqli_error($GLOBALS["___mysqli_ston"]));
+                                    while ($res1currency = mysqli_fetch_array($exec1currency))
+                                    {
+                                        $currency = $res1currency["currency"];
+                                        $rate = $res1currency["rate"];
+                                    ?>
+                                    <option value="<?php echo $rate.','.$currency; ?>"><?php echo $currency; ?></option>
+                                    <?php } ?>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="fxamount" class="form-label">FX Rate</label>
+                                <input name="fxamount" type="text" id="fxamount" class="form-input" value="1" readonly>
+                            </div>
+                            <div class="form-group">
+                                <label for="supplier" class="form-label">Supplier</label>
+                                <input type="text" name="supplier" id="supplier" class="form-input" value="<?php echo $suppliername; ?>" autocomplete="off" placeholder="Search for supplier...">
+                                <input type="hidden" name="srchsuppliercode" id="srchsuppliercode" value="<?php echo $suppliercode; ?>">
+                                <input type="hidden" name="searchsupplieranum" id="searchsupplieranum" value="<?php echo $srchsupplieranum ?>">
+                            </div>
+                        </div>
+                    </div>
+                </div>
             <?php 
             $query1mail = "select emailto,emailcc from master_email where recordstatus <> 'deleted' and module='Purchase Indent' order by auto_number desc";
             $exec1mail = mysqli_query($GLOBALS["___mysqli_ston"], $query1mail) or die ("Error in Query1mail".mysqli_error($GLOBALS["___mysqli_ston"]));
@@ -1128,74 +1193,87 @@ function spl() {
             </div>
             <?php } ?>
 
-            <!-- Items Section -->
-            <div class="items-section">
-                <div class="items-header">
-                    <div class="items-header-icon">
-                        <i class="fas fa-boxes"></i>
+                <!-- Items Section -->
+                <div class="data-table-section">
+                    <div class="data-table-header">
+                        <i class="fas fa-boxes data-table-icon"></i>
+                        <h3 class="data-table-title">Purchase Items</h3>
                     </div>
-                    <h3>Purchase Items</h3>
-                </div>
-                <table class="items-table">
-                    <thead>
-                        <tr>
-                            <th>Item Description</th>
-                            <th>Quantity</th>
-                            <th>Rate</th>
-                            <th>Tax %</th>
-                            <th>Amount</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="insertrow">
-                        <!-- Items will be added here dynamically -->
-                    </tbody>
-                </table>
-                <!-- Add Item Form -->
-                <div class="add-item-form">
-                    <div class="add-item-grid">
-                        <div class="form-group">
-                            <label for="medicinename">Item Description</label>
-                            <input name="medicinename" type="text" id="medicinename" class="form-control" autocomplete="off" onClick="clickmedicine();" onkeydown="return spl()" placeholder="Enter item description...">
-                            <input type="hidden" name="medicinenamel" id="medicinenamel" value="">
+                    
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Item Description</th>
+                                <th>Quantity</th>
+                                <th>Rate</th>
+                                <th>Tax %</th>
+                                <th>Amount</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="insertrow">
+                            <!-- Items will be added here dynamically -->
+                        </tbody>
+                    </table>
+                    <!-- Add Item Form -->
+                    <div class="form-section">
+                        <div class="form-section-header">
+                            <i class="fas fa-plus form-section-icon"></i>
+                            <h3 class="form-section-title">Add New Item</h3>
                         </div>
-                        <div class="form-group">
-                            <label for="req_qty">Quantity</label>
-                            <input name="req_qty" type="number" id="req_qty" class="form-control" onKeyUp="CalculateAmount()" onChange="CalculateAmount()" placeholder="Qty">
-                        </div>
-                        <div class="form-group">
-                            <label for="rate_fx">Rate</label>
-                            <input id="rate_fx" name="rate_fx" type="text" class="form-control" onKeyUp="CalculateAmount()" placeholder="Rate">
-                            <input id="rate" name="rate" type="hidden" readonly>
-                        </div>
-                        <div class="form-group">
-                            <label for="tax_percent">Tax %</label>
-                            <select name="tax_percent" id="tax_percent" class="form-control form-select" onchange="CalculateAmount()">
-                                <?php 
-                                $query_wht = "SELECT * from master_tax";
-                                $exec_wht = mysqli_query($GLOBALS["___mysqli_ston"], $query_wht) or die ("Error in query_wht".mysqli_error($GLOBALS["___mysqli_ston"]));
-                                while ($res_wht = mysqli_fetch_array($exec_wht))
-                                { ?>
-                                <option value="<?=$res_wht['taxpercent'];?>"><?=ucwords($res_wht['taxname']) ;?></option>
-                                <?php } ?>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="amount">Amount</label>
-                            <input name="amount" type="text" id="amount" class="form-control" readonly placeholder="Amount">
-                        </div>
-                        <div class="form-group">
-                            <label>&nbsp;</label>
-                            <button type="button" name="Add" id="Add" onClick="return insertitem10()" class="add-item-btn">
-                                <i class="fas fa-plus"></i>
-                                Add Item
-                            </button>
+                        
+                        <div class="form-section-form">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="medicinename" class="form-label">Item Description</label>
+                                    <input name="medicinename" type="text" id="medicinename" class="form-input" autocomplete="off" onClick="clickmedicine();" onkeydown="return spl()" placeholder="Enter item description...">
+                                    <input type="hidden" name="medicinenamel" id="medicinenamel" value="">
+                                </div>
+                                <div class="form-group">
+                                    <label for="req_qty" class="form-label">Quantity</label>
+                                    <input name="req_qty" type="number" id="req_qty" class="form-input" onKeyUp="CalculateAmount()" onChange="CalculateAmount()" placeholder="Qty">
+                                </div>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="rate_fx" class="form-label">Rate</label>
+                                    <input id="rate_fx" name="rate_fx" type="text" class="form-input" onKeyUp="CalculateAmount()" placeholder="Rate">
+                                    <input id="rate" name="rate" type="hidden" readonly>
+                                </div>
+                                <div class="form-group">
+                                    <label for="tax_percent" class="form-label">Tax %</label>
+                                    <select name="tax_percent" id="tax_percent" class="form-input" onchange="CalculateAmount()">
+                                        <?php 
+                                        $query_wht = "SELECT * from master_tax";
+                                        $exec_wht = mysqli_query($GLOBALS["___mysqli_ston"], $query_wht) or die ("Error in query_wht".mysqli_error($GLOBALS["___mysqli_ston"]));
+                                        while ($res_wht = mysqli_fetch_array($exec_wht))
+                                        { ?>
+                                        <option value="<?=$res_wht['taxpercent'];?>"><?=ucwords($res_wht['taxname']) ;?></option>
+                                        <?php } ?>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="amount" class="form-label">Amount</label>
+                                    <input name="amount" type="text" id="amount" class="form-input" readonly placeholder="Amount">
+                                </div>
+                                <div class="form-group">
+                                    <label>&nbsp;</label>
+                                    <button type="button" name="Add" id="Add" onClick="return insertitem10()" class="btn btn-primary">
+                                        <i class="fas fa-plus"></i>
+                                        Add Item
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <input type="hidden" name="serialnumber" id="serialnumber" value="1">
+                            <input type="hidden" name="h" id="h" value="0">
                         </div>
                     </div>
-                    <input type="hidden" name="serialnumber" id="serialnumber" value="1">
-                    <input type="hidden" name="h" id="h" value="0">
                 </div>
-            </div>
             <!-- Total Section -->
             <div class="total-section">
                 <div class="total-display">
@@ -1240,27 +1318,28 @@ function spl() {
                 <textarea id="consultation" class="terms-editor ckeditor" name="editor1"><?php echo $terms;?></textarea>
             </div>
 
-            <!-- Action Buttons -->
-            <div class="action-buttons">
-                <input type="hidden" name="frm1submit1" value="frm1submit1" />
-                <input type="hidden" name="loopcount" value="<?php echo $i - 1; ?>" />
-                
-                <button type="button" class="btn btn-secondary" onclick="window.history.back()">
-                    <i class="fas fa-arrow-left"></i>
-                    Cancel
-                </button>
-                
-                <button type="button" class="btn btn-secondary" onclick="clearForm()">
-                    <i class="fas fa-undo"></i>
-                    Clear Form
-                </button>
-                
-                <button type="submit" class="btn btn-success" id="saveindent" onclick='return savechk()'>
-                    <i class="fas fa-save"></i>
-                    Save Purchase Order
-                </button>
-            </div>
-        </form>
+                <!-- Action Buttons -->
+                <div class="form-actions">
+                    <input type="hidden" name="frm1submit1" value="frm1submit1" />
+                    <input type="hidden" name="loopcount" value="<?php echo $i - 1; ?>" />
+                    
+                    <button type="button" class="btn btn-secondary" onclick="window.history.back()">
+                        <i class="fas fa-arrow-left"></i>
+                        Cancel
+                    </button>
+                    
+                    <button type="button" class="btn btn-secondary" onclick="clearForm()">
+                        <i class="fas fa-undo"></i>
+                        Clear Form
+                    </button>
+                    
+                    <button type="submit" class="btn btn-success" id="saveindent" onclick='return savechk()'>
+                        <i class="fas fa-save"></i>
+                        Save Purchase Order
+                    </button>
+                </div>
+            </form>
+        </main>
     </div>
 
     <!-- Include Modern JavaScript -->
@@ -1277,7 +1356,22 @@ function spl() {
     <script type="text/javascript" src="js/jquery.min-autocomplete.js"></script>
     <script type="text/javascript" src="js/jquery-ui.min.js"></script>
 
+    <!-- Modern JavaScript -->
     <script>
+        // Modern JavaScript functions
+        function refreshPage() {
+            window.location.reload();
+        }
+
+        function exportToExcel() {
+            // Add export functionality here
+            alert('Export functionality will be implemented');
+        }
+
+        function printReport() {
+            window.print();
+        }
+
         // Clear form function
         function clearForm() {
             if (confirm('Are you sure you want to clear the form? All entered data will be lost.')) {
@@ -1287,6 +1381,28 @@ function spl() {
                 document.getElementById('total-display').textContent = '$0.00';
             }
         }
+
+        // Sidebar functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const menuToggle = document.getElementById('menuToggle');
+            const sidebar = document.getElementById('leftSidebar');
+            const sidebarToggle = document.getElementById('sidebarToggle');
+
+            menuToggle.addEventListener('click', function() {
+                sidebar.classList.toggle('active');
+            });
+
+            sidebarToggle.addEventListener('click', function() {
+                sidebar.classList.toggle('active');
+            });
+
+            // Close sidebar when clicking outside
+            document.addEventListener('click', function(event) {
+                if (!sidebar.contains(event.target) && !menuToggle.contains(event.target)) {
+                    sidebar.classList.remove('active');
+                }
+            });
+        });
     </script>
 </body>
 </html>

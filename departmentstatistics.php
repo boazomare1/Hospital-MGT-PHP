@@ -1,3 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Department Statistics - MedStar</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="css/departmentstatistics-modern.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="js/datetimepicker_css.js"></script>
+    <script src="datetimepicker1_css.js"></script>
+    <link href="datepickerstyle.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+
 <?php
 session_start();
 //echo session_id();
@@ -37,30 +52,36 @@ if($location!='')
 	}
 ?>
 
-<style type="text/css">
-<!--
-body {
-	margin-left: 0px;
-	margin-top: 0px;
-	background-color: #ecf0f5;
-}
-.bodytext3 {	FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3B3B3C; FONT-FAMILY: Tahoma
-}
-#position
-{
-position: absolute;
-    left: 830px;
-    top: 420;
-}
--->
-</style>
-<link href="datepickerstyle.css" rel="stylesheet" type="text/css" />
-<script src="js/datetimepicker_css.js"></script>
-<script src="datetimepicker1_css.js"></script>
-<style>
-.hideClass
-{display:none;}
-</style>
+<!-- Modern Hospital Header -->
+<header class="hospital-header">
+    <h1 class="hospital-title">🏥 MedStar Hospital Management</h1>
+    <p class="hospital-subtitle">Advanced Healthcare Management Platform</p>
+</header>
+
+<!-- User Info Bar -->
+<div class="user-info-bar">
+    <div class="user-welcome">
+        <span class="welcome-text">Welcome, <?php echo htmlspecialchars($username); ?></span>
+        <span class="location-info">Company: <?php echo htmlspecialchars($companyname); ?></span>
+    </div>
+    <div class="user-actions">
+        <a href="logout.php" class="btn btn-outline btn-sm">
+            <i class="fas fa-sign-out-alt"></i> Logout
+        </a>
+    </div>
+</div>
+
+<!-- Navigation Breadcrumb -->
+<nav class="nav-breadcrumb">
+    <a href="index.php">🏠 Home</a>
+    <span>→</span>
+    <span>Department Statistics</span>
+</nav>
+
+<!-- Floating Menu Toggle -->
+<div class="floating-menu-toggle" id="menuToggle">
+    <i class="fas fa-bars"></i>
+</div>
 
 <script language="javascript">
 
@@ -116,18 +137,68 @@ function fundatesearch()
 </style>
 </head>
 
-<body>
-<table width="101%" border="0" cellspacing="0" cellpadding="2">
-  <tr>
-    <td width="99" colspan="10" bgcolor="#ecf0f5"><?php include ("includes/alertmessages1.php"); ?></td>
-  </tr>
-  <tr>
-    <td colspan="10" bgcolor="#ecf0f5"><?php include ("includes/title1.php"); ?></td>
-  </tr>
-  <tr>
-    <td colspan="10" bgcolor="#ecf0f5"><?php include ("includes/menu1.php"); ?></td>
-  </tr>
-</table>
+<!-- Main Container with Sidebar -->
+<div class="main-container-with-sidebar">
+    <!-- Left Sidebar -->
+    <div class="left-sidebar" id="leftSidebar">
+        <div class="sidebar-header">
+            <h3>Navigation</h3>
+            <button class="sidebar-toggle" id="sidebarToggle">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+        </div>
+        <nav class="sidebar-nav">
+            <ul class="nav-list">
+                <li class="nav-item active">
+                    <a href="departmentstatistics.php" class="nav-link">
+                        <i class="fas fa-chart-bar"></i>
+                        Department Statistics
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="index.php" class="nav-link">
+                        <i class="fas fa-home"></i>
+                        Dashboard
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="reports.php" class="nav-link">
+                        <i class="fas fa-file-alt"></i>
+                        Reports
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Alert Container -->
+        <div id="alertContainer">
+            <?php include ("includes/alertmessages1.php"); ?>
+        </div>
+
+        <!-- Page Header -->
+        <div class="page-header">
+            <div class="page-header-content">
+                <h2>Department Statistics</h2>
+                <p>View comprehensive statistics and analytics by department</p>
+            </div>
+            <div class="page-header-actions">
+                <button type="button" class="btn btn-outline" onclick="printReport()">
+                    <i class="fas fa-print"></i> Print
+                </button>
+                <button type="button" class="btn btn-outline" onclick="exportToExcel()">
+                    <i class="fas fa-file-excel"></i> Export
+                </button>
+                <button type="button" class="btn btn-outline" onclick="refreshPage()">
+                    <i class="fas fa-sync-alt"></i> Refresh
+                </button>
+            </div>
+        </div>
+
+        <!-- Search Form Container -->
+        <div class="search-form-container">
   <?php
   $query341 = "select * from master_employee where username = '$username' and statistics='on'";
 			 $exec341 = mysqli_query($GLOBALS["___mysqli_ston"], $query341) or die ("Error in Query34".mysqli_error($GLOBALS["___mysqli_ston"]));
@@ -137,130 +208,71 @@ function fundatesearch()
 			 {*/
   ?>
 
- <!-- filter table -->
- <form name="cbform1" method="post" action="departmentstatistics.php">
-          <table width="800" border="0" align="left" cellpadding="4" cellspacing="0" bordercolor="#666666" id="AutoNumber3" style="border-collapse: collapse; margin-left:30px;margin-top:10px;">
-          <tbody>
-		  <!--<tr bgcolor="red">
-              <td colspan="4" bgcolor="red" class="bodytext3"><strong> PLEASE REFRESH PAGE BEFORE MAKING BILL </strong></td>
-              </tr>-->
-            <tr bgcolor="#011E6A">
-              <td colspan="3" bgcolor="#ecf0f5" class="bodytext3"><strong> Search Dept Report </strong></td>
-              <td colspan="1" bgcolor="#ecf0f5" class="bodytext3" id="ajaxlocation"><strong> Location </strong>
-             
-                  <?php
-						
-					if ($location!='')
-						{
-						$query12 = "select locationname from master_location where locationcode='$location' order by locationname";
-						$exec12 = mysqli_query($GLOBALS["___mysqli_ston"], $query12) or die ("Error in Query12".mysqli_error($GLOBALS["___mysqli_ston"]));
-						$res12 = mysqli_fetch_array($exec12);
-						
-						echo $res1location = $res12["locationname"];
-						//echo $location;
-						}
-						else
-						{
-						$query1 = "select locationname from login_locationdetails where username='$username' and docno='$docno' group by locationname order by locationname";
-						$exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
-						$res1 = mysqli_fetch_array($exec1);
-						
-						echo $res1location = $res1["locationname"];
-						//$res1locationanum = $res1["locationcode"];
-						}
-						?>
-						
-                  
-                  </td>
-     
-              </tr>
-             <tr>
-              <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">Location</td>
-              <td colspan="4" align="left" valign="top"  bgcolor="#FFFFFF"><span class="bodytext3">
-               <select name="location" id="location" onChange="ajaxlocationfunction(this.value);"  style="border: 1px solid #001E6A;">
-                 <option value="All">All</option>
-                  <?php
-						
-						$query1 = "select locationname,locationcode from master_location where status <> 'deleted' order by locationname";
-						$exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
-						while ($res1 = mysqli_fetch_array($exec1))
-						{
-						$res1location = $res1["locationname"];
-						$res1locationanum = $res1["locationcode"];
-						?>
-						<option value="<?php echo $res1locationanum; ?>" <?php if($location!='')if($location==$res1locationanum){echo "selected";}?>><?php echo $res1location; ?></option>
-						<?php
-						}
-						?>
-                  </select>
-              </span></td>
-              </tr>
-			    <tr>
-            <!--<tr>
-              <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">Patient Name</td>
-              <td colspan="4" align="left" valign="top"  bgcolor="#FFFFFF"><span class="bodytext3">
-                <input name="patient" type="text" id="patient" value="" size="50" autocomplete="off">
-              </span></td>
-              </tr>
-			    <!--<tr>
-              <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">Registration No</td>
-              <td colspan="4" align="left" valign="top"  bgcolor="#FFFFFF"><span class="bodytext3">
-                <input name="patientcode" type="text" id="patient" value="" size="50" autocomplete="off">
-              </span></td>
-              </tr>
-			   <tr>
-              <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">Visitcode</td>
-              <td colspan="4" align="left" valign="top"  bgcolor="#FFFFFF"><span class="bodytext3">
-                <input name="visitcode" type="text" id="visitcode" value="" size="50" autocomplete="off">
-              </span></td>
-              </tr>-->
-			  <tr>
-          <td width="136" align="left" valign="center"  
-                bgcolor="#ffffff" class="bodytext31"><strong> Date From </strong></td>
-          <td width="131" align="left" valign="center"  bgcolor="#ffffff" class="bodytext31"><input name="ADate1" id="ADate1" value="<?php echo $paymentreceiveddatefrom; ?>"  size="10"  readonly="readonly" onKeyDown="return disableEnterKey()" />
-			<img src="images2/cal.gif" onClick="javascript:NewCssCal('ADate1')" style="cursor:pointer"/>			</td>
-          <td width="76" align="left" valign="center"  bgcolor="#FFFFFF" class="style1"><span class="bodytext31"><strong> Date To </strong></span></td>
-          <td width="425" align="left" valign="center"  bgcolor="#ffffff"><span class="bodytext31">
-            <input name="ADate2" id="ADate2" value="<?php echo $paymentreceiveddateto; ?>"  size="10"  readonly="readonly" onKeyDown="return disableEnterKey()" />
-			<img src="images2/cal.gif" onClick="javascript:NewCssCal('ADate2')" style="cursor:pointer"/>
-		  </span></td>
-          </tr>
-			   <tr>
-              <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3"></td>
-              <td colspan="3" align="left" valign="top"  bgcolor="#FFFFFF">
-			  <input type="hidden" name="cbfrmflag1" value="cbfrmflag1">
-                  <input  type="submit" value="Search" name="Submit" />
-                  <!--<input name="resetbutton" type="reset" id="resetbutton"  value="Reset" /></td>-->
-            </tr>
-          </tbody>
-        </table>
-		</form>	
-<?php //} ?>
-<table width="1051" border="0" style="margin-left:30;">
-  <tr>
-    <td>&nbsp;</td>
-    <td colspan="2">&nbsp;</td>
-  </tr>
-  <tr><td>&nbsp;</td>
-       </tr>
-       
-       <?php
-	   
-	       if (isset($_REQUEST["cbfrmflag1"])) { $cbfrmflag1 = $_REQUEST["cbfrmflag1"]; } else { $cbfrmflag1 = ""; }
+            <form name="cbform1" method="post" action="departmentstatistics.php" class="search-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="location" class="form-label">Location</label>
+                        <select name="location" id="location" class="form-control" onChange="ajaxlocationfunction(this.value);">
+                            <option value="All">All</option>
+                            <?php
+                            $query1 = "select locationname,locationcode from master_location where status <> 'deleted' order by locationname";
+                            $exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
+                            while ($res1 = mysqli_fetch_array($exec1)) {
+                                $res1location = $res1["locationname"];
+                                $res1locationanum = $res1["locationcode"];
+                            ?>
+                                <option value="<?php echo $res1locationanum; ?>" <?php if($location!='')if($location==$res1locationanum){echo "selected";}?>><?php echo $res1location; ?></option>
+                            <?php } ?>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="ADate1" class="form-label">Date From</label>
+                        <input name="ADate1" id="ADate1" value="<?php echo $paymentreceiveddatefrom; ?>" class="form-control" readonly="readonly" onKeyDown="return disableEnterKey()" />
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="ADate2" class="form-label">Date To</label>
+                        <input name="ADate2" id="ADate2" value="<?php echo $paymentreceiveddateto; ?>" class="form-control" readonly="readonly" onKeyDown="return disableEnterKey()" />
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">&nbsp;</label>
+                        <div style="display: flex; gap: 0.5rem; align-items: center;">
+                            <img src="images2/cal.gif" onClick="javascript:NewCssCal('ADate1')" style="cursor:pointer" title="Select Date From"/>
+                            <img src="images2/cal.gif" onClick="javascript:NewCssCal('ADate2')" style="cursor:pointer" title="Select Date To"/>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <input type="hidden" name="cbfrmflag1" value="cbfrmflag1">
+                    <button type="submit" name="Submit" class="btn btn-primary">
+                        <i class="fas fa-search"></i> Search
+                    </button>
+                    <button type="reset" name="resetbutton" class="btn btn-outline" onclick="clearForm()">
+                        <i class="fas fa-undo"></i> Reset
+                    </button>
+                </div>
+            </form>
+        </div>
 
-		    if ($cbfrmflag1 == 'cbfrmflag1')
-
-			{
-				?>
-  <tr>
-    <td colspan="3"><table width="750" cellspacing="0" cellpadding="4px" border="0" style="font-size:medium;">
-      <tr bgcolor="#CCC">
-	  <td colspan="2" style="color: blue;"><strong>OP Departmental Statisctics</strong></td>
-      </tr>
-	  <tr bgcolor="#FFF">
-	  <td >Department</td>
-	  <td align="right" style="padding-right:8px">Count</td>
-      </tr>
+        <!-- Data Table Container -->
+        <div class="data-table-container">
+            <?php
+            if (isset($_REQUEST["cbfrmflag1"])) { $cbfrmflag1 = $_REQUEST["cbfrmflag1"]; } else { $cbfrmflag1 = ""; }
+            if ($cbfrmflag1 == 'cbfrmflag1') {
+            ?>
+                <table class="modern-table">
+                    <thead>
+                        <tr>
+                            <th>Department</th>
+                            <th>Count</th>
+                        </tr>
+                    </thead>
+                    <tbody>
       <?php
 	  
         
@@ -323,42 +335,32 @@ function fundatesearch()
 						$colorcode = 'bgcolor="#ecf0f5"';
 					}
 				?>
-			 <tr <?=$colorcode?>>
-			     <td ><?=$resdpt['department'];?></td>
-                 <?php if($walkpatient>0)
-				 {?>
-			     <td align="right" style="padding-right:8px"> <a href="view_deptstats.php?department_search=<?php echo $dpt; ?>&&location=<?php echo $location; ?>&&cbfrmflag1=<?php echo $cbfrmflag1; ?>&&ADate1=<?php echo $fromdate  ; ?>&&ADate2=<?php echo $todate; ?>" target="_blank"><strong><?= number_format($walkpatient);?></strong></a></td>
-                 <?php } else {?>
-                  <td align="right" style="padding-right:8px"><?= number_format($walkpatient);?></td>
-                  <?php } ?>
-		     </tr>
+                        <tr>
+                            <td><?=$resdpt['department'];?></td>
+                            <?php if($walkpatient>0) { ?>
+                                <td><a href="view_deptstats.php?department_search=<?php echo $dpt; ?>&&location=<?php echo $location; ?>&&cbfrmflag1=<?php echo $cbfrmflag1; ?>&&ADate1=<?php echo $fromdate; ?>&&ADate2=<?php echo $todate; ?>" target="_blank" class="btn btn-outline btn-sm"><?= number_format($walkpatient);?></a></td>
+                            <?php } else { ?>
+                                <td><?= number_format($walkpatient);?></td>
+                            <?php } ?>
+                        </tr>
 		     <?php
 			    $totalvisit +=$walkpatient; 
 			    //$totalvisit1 +=$walkpatient1; 
 			  ?>
 		 <?php } ?>
-	  <tr bgcolor='#ccc'>
-	  <td ><strong>Total :</strong></td>
-	  <td align="right" style="padding-right:8px"><?= number_format($totalvisit);?></td>
-      </tr>
-	  <tr >
-	  <td colspan="2">&nbsp;</td>
-      </tr>
-    </table></td>
-  
-     
-  <tr>
-    <td>&nbsp;</td>
-    <td colspan="2">&nbsp;</td>
-  </tr>
-</table>
+                        <tr style="background: var(--medstar-primary); color: white; font-weight: bold;">
+                            <td><strong>Total:</strong></td>
+                            <td><strong><?= number_format($totalvisit);?></strong></td>
+                        </tr>
+                    </tbody>
+                </table>
+            <?php } ?>
+        </div>
+    </div>
+</div>
 
-<?php
-			}
-?>
-<?php include ("includes/footer1.php"); ?>
-    <!-- Modern JavaScript -->
-    <script src="js/departmentstatistics-modern.js?v=<?php echo time(); ?>"></script>
+<!-- Modern JavaScript -->
+<script src="js/departmentstatistics-modern.js?v=<?php echo time(); ?>"></script>
 </body>
 </html>
 

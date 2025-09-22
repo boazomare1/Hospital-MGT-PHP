@@ -2,7 +2,7 @@
 function StateSuggestions() {
 this.states = 
 [
-"1#CASH ","2#DIRECT COMPANIES ","3#INSURANCE COMPANIES ","4#STAFF "];
+];
 }
 
 /**

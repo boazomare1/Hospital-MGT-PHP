@@ -109,6 +109,21 @@ if (isset($_REQUEST["frmflag2"])) { $frmflag2 = $_REQUEST["frmflag2"]; } else { 
 
 
 ?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doctor Remittance Report - MedStar</title>
+    
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <!-- Modern CSS -->
+    <link rel="stylesheet" href="css/doctor-remittance-modern.css?v=<?php echo time(); ?>">
+    
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
 <style type="text/css">
 
@@ -215,45 +230,112 @@ text-align:right;
 
 <script src="js/datetimepicker_css.js"></script>
 
+<!-- Modern JavaScript -->
+<script src="js/doctor-remittance-modern.js?v=<?php echo time(); ?>"></script>
+
 
 
 <body>
+    <!-- Hospital Header -->
+    <header class="hospital-header">
+        <h1 class="hospital-title">🏥 MedStar Hospital Management</h1>
+        <p class="hospital-subtitle">Advanced Healthcare Management Platform</p>
+    </header>
+
+    <!-- User Information Bar -->
+    <div class="user-info-bar">
+        <div class="user-welcome">
+            <span class="welcome-text">Welcome, <strong><?php echo htmlspecialchars($username); ?></strong></span>
+            <span class="location-info">📍 Company: <?php echo htmlspecialchars($companyname); ?></span>
+        </div>
+        <div class="user-actions">
+            <a href="mainmenu1.php" class="btn btn-outline">🏠 Main Menu</a>
+            <a href="logout.php" class="btn btn-outline">🚪 Logout</a>
+        </div>
+    </div>
+
+    <!-- Navigation Breadcrumb -->
+    <nav class="nav-breadcrumb">
+        <a href="mainmenu1.php">🏠 Home</a>
+        <span>→</span>
+        <span>Doctor Remittance Report</span>
+    </nav>
+
+    <!-- Floating Menu Toggle -->
+    <div id="menuToggle" class="floating-menu-toggle">
+        <i class="fas fa-bars"></i>
+    </div>
+
+    <!-- Main Container with Sidebar -->
+    <div class="main-container-with-sidebar">
+        <!-- Left Sidebar -->
+        <aside id="leftSidebar" class="left-sidebar">
+            <div class="sidebar-header">
+                <h3>Quick Navigation</h3>
+                <button id="sidebarToggle" class="sidebar-toggle">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <ul class="nav-list">
+                    <li class="nav-item">
+                        <a href="mainmenu1.php" class="nav-link">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="doctor_remittancereport.php" class="nav-link active">
+                            <i class="fas fa-money-bill-wave"></i>
+                            <span>Doctor Remittance</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="fulldrstatementdetail.php" class="nav-link">
+                            <i class="fas fa-file-invoice"></i>
+                            <span>Doctor Statement</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="doctorwiserevenuereport.php" class="nav-link">
+                            <i class="fas fa-chart-line"></i>
+                            <span>Doctor Revenue</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Alert Container -->
+            <div id="alertContainer">
+                <?php include ("includes/alertmessages1.php"); ?>
+            </div>
+
+            <!-- Page Header -->
+            <div class="page-header">
+                <div class="page-header-content">
+                    <h2>Doctor Remittance Report</h2>
+                    <p>Comprehensive remittance tracking and payment management for doctors with detailed transaction history.</p>
+                </div>
+                <div class="page-header-actions">
+                    <button type="button" class="btn btn-secondary" onclick="refreshPage()">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                    <button type="button" class="btn btn-outline" onclick="printPage()">
+                        <i class="fas fa-print"></i> Print
+                    </button>
+                </div>
+            </div>
 
 <table width="101%" border="0" cellspacing="0" cellpadding="2">
 
-  <tr>
 
-    <td colspan="10" bgcolor="#ecf0f5"><?php include ("includes/alertmessages1.php"); ?></td>
 
-  </tr>
 
-  <tr>
 
-    <td colspan="10" bgcolor="#ecf0f5"><?php include ("includes/title1.php"); ?></td>
-
-  </tr>
-
-  <tr>
-
-    <td colspan="10" bgcolor="#ecf0f5"><?php include ("includes/menu1.php"); ?></td>
-
-  </tr>
-
-  <tr>
-
-    <td colspan="10">&nbsp;</td>
-
-  </tr>
-
-  <tr>
-
-    <td width="1%">&nbsp;</td>
-
-    <td width="2%" valign="top"><?php //include ("includes/menu4.php"); ?>
-
-      &nbsp;</td>
-
-    <td width="97%" valign="top"><table width="116%" border="0" cellspacing="0" cellpadding="0">
 
       <tr>
 
@@ -263,71 +345,62 @@ text-align:right;
 
 		
 
+            <!-- Doctor Remittance Report Form Section -->
+            <div class="form-section">
+                <div class="form-header">
+                    <i class="fas fa-money-bill-wave form-icon"></i>
+                    <h3 class="form-title">Doctor Remittance Report Search</h3>
+                </div>
+
               <form name="cbform1" method="post" action="doctor_remittancereport.php">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="searchsuppliername" class="form-label">Search Doctor</label>
+                            <input name="searchsuppliername" type="text" id="searchsuppliername" 
+                                   value="<?php echo $searchsuppliername; ?>" 
+                                   class="form-input" autocomplete="off" 
+                                   placeholder="Enter doctor name to search..." />
+                            <input type="hidden" name="searchsuppliercode" onBlur="return suppliercodesearch1()" 
+                                   onKeyDown="return suppliercodesearch2()" id="searchsuppliercode" 
+                                   style="text-transform:uppercase" value="<?php echo $searchsuppliercode; ?>" />
+                        </div>
+                    </div>
 
-		<table width="800" border="0" align="left" cellpadding="4" cellspacing="0" bordercolor="#666666" id="AutoNumber3" style="border-collapse: collapse">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="ADate1" class="form-label">Date From</label>
+                            <div class="date-input-group">
+                                <input name="ADate1" id="ADate1" value="<?php echo $paymentreceiveddatefrom; ?>" 
+                                       class="form-input date-input" readonly="readonly" onKeyDown="return disableEnterKey()" />
+                                <img src="images2/cal.gif" onClick="javascript:NewCssCal('ADate1')" 
+                                     class="date-picker-icon" style="cursor:pointer"/>
+                            </div>
+                        </div>
 
-          <tbody>
+                        <div class="form-group">
+                            <label for="ADate2" class="form-label">Date To</label>
+                            <div class="date-input-group">
+                                <input name="ADate2" id="ADate2" value="<?php echo $paymentreceiveddateto; ?>" 
+                                       class="form-input date-input" readonly="readonly" onKeyDown="return disableEnterKey()" />
+                                <img src="images2/cal.gif" onClick="javascript:NewCssCal('ADate2')" 
+                                     class="date-picker-icon" style="cursor:pointer"/>
+                            </div>
+                        </div>
+                    </div>
 
-            <tr bgcolor="#011E6A">
-
-              <td colspan="4" bgcolor="#ecf0f5" class="bodytext3"><strong>Doctor Remittance Report </strong></td>
-
-              </tr>
-
-           <tr>
-
-              <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">Search Doctor </td>
-
-              <td width="82%" colspan="3" align="left" valign="top"  bgcolor="#FFFFFF"><span class="bodytext3">
-
-              <input name="searchsuppliername" type="text" id="searchsuppliername" value="<?php echo $searchsuppliername; ?>" size="50" autocomplete="off">
-
-              </span></td>
-
-           </tr>
-
-		   
-
-			  <tr>
-
-                      <td class="bodytext31" valign="center"  align="left" 
-
-                bgcolor="#FFFFFF"> Date From </td>
-
-                      <td width="30%" align="left" valign="center"  bgcolor="#FFFFFF" class="bodytext31"><input name="ADate1" id="ADate1" value="<?php echo $paymentreceiveddatefrom; ?>"  size="10"  readonly="readonly" onKeyDown="return disableEnterKey()" />
-
-                          <img src="images2/cal.gif" onClick="javascript:NewCssCal('ADate1')" style="cursor:pointer"/> </td>
-
-                      <td width="16%" align="left" valign="center"  bgcolor="#FFFFFF" class="bodytext31"> Date To </td>
-
-                      <td width="33%" align="left" valign="center"  bgcolor="#FFFFFF"><span class="bodytext31">
-
-                        <input name="ADate2" id="ADate2" value="<?php echo $paymentreceiveddateto; ?>"  size="10"  readonly="readonly" onKeyDown="return disableEnterKey()" />
-
-                        <img src="images2/cal.gif" onClick="javascript:NewCssCal('ADate2')" style="cursor:pointer"/> </span></td>
-
-                    </tr>	
-
-            <tr>
-
-              <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3"><input type="hidden" name="searchsuppliercode" onBlur="return suppliercodesearch1()" onKeyDown="return suppliercodesearch2()" id="searchsuppliercode" style="text-transform:uppercase" value="<?php echo $searchsuppliercode; ?>" size="20" /></td>
-
-              <td colspan="3" align="left" valign="top"  bgcolor="#FFFFFF">
-
+                    <div class="form-group">
 			  <input type="hidden" name="cbfrmflag1" value="cbfrmflag1">
 
-                  <input type="submit" onClick="return funcAccount();" value="Search" name="Submit" />
-
-                  <input name="resetbutton" type="reset" id="resetbutton" value="Reset" /></td>
-
-            </tr>
-
-          </tbody>
-
-        </table>
-
-		</form>		</td>
+                        <button type="submit" class="submit-btn" onClick="return funcAccount();">
+                            <i class="fas fa-search"></i>
+                            Search Remittances
+                        </button>
+                        <button name="resetbutton" type="reset" id="resetbutton" class="btn btn-secondary">
+                            <i class="fas fa-undo"></i> Reset
+                        </button>
+                    </div>
+                </form>
+            </div>
 
       </tr>
 
@@ -339,11 +412,21 @@ text-align:right;
 
        <tr>
 
-        <td><table id="AutoNumber3" style="BORDER-COLLAPSE: collapse" 
-
-            bordercolor="#666666" cellspacing="0" cellpadding="4" width="927" 
-
-            align="left" border="0">
+            <!-- Doctor Remittance Report Results Section -->
+            <div class="report-section">
+                <div class="report-header">
+                    <h3 class="report-title">Doctor Remittance Report Results</h3>
+                    <div class="report-actions">
+                        <button type="button" class="btn btn-outline" onclick="exportToExcel()">
+                            <i class="fas fa-file-excel"></i> Export Excel
+                        </button>
+                        <button type="button" class="btn btn-outline" onclick="exportToPDF()">
+                            <i class="fas fa-file-pdf"></i> Export PDF
+                        </button>
+                    </div>
+                </div>
+                
+                <table class="modern-table remittance-table" id="AutoNumber3">
 
           <tbody>
 
@@ -659,11 +742,10 @@ text-align:right;
 
 
 
-</table>
-
-<?php include ("includes/footer1.php"); ?>
-
+                </table>
+            </div>
+        </main>
+    </div>
 </body>
-
 </html>
 

@@ -171,6 +171,21 @@ if ($st == 'activate')
 
 
 ?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dose Measure Master - MedStar</title>
+    
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <!-- Modern CSS -->
+    <link rel="stylesheet" href="css/dose-measure-modern.css?v=<?php echo time(); ?>">
+    
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
 <style type="text/css">
 
@@ -286,307 +301,222 @@ function funcDeleteProductType(varNameAutoNumber)
 
 </script>
 
+<!-- Modern JavaScript -->
+<script src="js/dose-measure-modern.js?v=<?php echo time(); ?>"></script>
+
 <body>
-
-<table width="101%" border="0" cellspacing="0" cellpadding="2">
-
-  <tr>
-
-    <td colspan="10" bgcolor="#ecf0f5"><?php include ("includes/alertmessages1.php"); ?></td>
-
-  </tr>
-
-  <tr>
-
-    <td colspan="10" bgcolor="#ecf0f5"><?php include ("includes/title1.php"); ?></td>
-
-  </tr>
-
-  <tr>
-
-    <td colspan="10" bgcolor="#ecf0f5"><?php include ("includes/menu1.php"); ?></td>
-
-  </tr>
-
-  <tr>
-
-    <td colspan="10">&nbsp;</td>
-
-  </tr>
-
-  <tr>
-
-    <td width="1%">&nbsp;</td>
-
-    <td width="2%" valign="top"><?php //include ("includes/menu4.php"); ?>
-
-      &nbsp;</td>
-
-    <td width="97%" valign="top"><table width="100%" border="0" cellspacing="0" cellpadding="0">
-
-      <tr>
-
-        <td width="860"><table width="100%" border="0" cellspacing="0" cellpadding="0" class="tablebackgroundcolor1">
-
-            <tr>
-
-              <td><form name="form1" id="form1" method="post" action="dose_measure.php" onSubmit="return addsalutation1process1()">
-
-                  <table width="600" border="0" align="center" cellpadding="4" cellspacing="0" bordercolor="#666666" id="AutoNumber3" style="border-collapse: collapse">
-
-                    <tbody>
-                      <tr bgcolor="#011E6A">
-                        <td colspan="2" bgcolor="#ecf0f5" class="bodytext3"><strong>Dose Measure Master - Add New </strong></td>
-                      </tr>
-
-					  <tr>
-
-                        <td colspan="2" align="left" valign="middle"   
-
-						bgcolor="<?php if ($bgcolorcode == '') { echo '#FFFFFF'; } else if ($bgcolorcode == 'success') { echo '#FFBF00'; } else if ($bgcolorcode == 'failed') { echo '#AAFF00'; } ?>" class="bodytext3"><div align="left"><?php echo $errmsg; ?></div></td>
-
-                      </tr>
-
-                      <tr>
-
-                        <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3"><div align="right">Add New Dose Measure </div></td>
-
-                        <td align="left" valign="top"  bgcolor="#FFFFFF">
-
-						<input name="drug_inst" id="drug_inst" style="border: 1px solid #001E6A;" size="40" autocomplete="off" /></td>
-
-                      </tr>
-
-                  
-
-                      <tr>
-
-                        <td width="42%" align="left" valign="top"  bgcolor="#FFFFFF" class="bodytext3">&nbsp;</td>
-
-                        <td width="58%" align="left" valign="top"  bgcolor="#FFFFFF">
-
-						<input type="hidden" name="frmflag" value="addnew" />
-
-                            <input type="hidden" name="frmflag1" value="frmflag1" />
-
-                          <input type="submit" name="Submit" value="Submit" style="border: 1px solid #001E6A" /></td>
-
-                      </tr>
-
-                      <tr>
-
-                        <td align="middle" colspan="2" >&nbsp;</td>
-
-                      </tr>
-
-                    </tbody>
-
-                  </table>
-
-                <table width="600" border="0" align="center" cellpadding="4" cellspacing="0" bordercolor="#666666" id="AutoNumber3" style="border-collapse: collapse">
-
-                    <tbody>
-
-                      <tr bgcolor="#011E6A">
-
-                        <td colspan="2" bgcolor="#ecf0f5" class="bodytext3"><strong>Dose Measure Master - Existing List </strong></td>
-
-                       
-
-                        <td width="9%" bgcolor="#ecf0f5" class="bodytext3"><strong>Edit</strong></td>
-
-                      </tr>
-
-                      <?php
-
-	    $query1 = "select id,name from dose_measure where status='1' order by id desc ";
-
-		$exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-		while ($res1 = mysqli_fetch_array($exec1))
-
-		{
-
-		$drug_inst = $res1["name"];
-
-		$auto_number = $res1["id"];
-
-		
-
-		$colorloopcount = $colorloopcount + 1;
-
-		$showcolor = ($colorloopcount & 1); 
-
-		if ($showcolor == 0)
-
-		{
-
-			$colorcode = 'bgcolor="#CBDBFA"';
-
-		}
-
-		else
-
-		{
-
-			$colorcode = 'bgcolor="#ecf0f5"';
-
-		}
-
-		  
-
-		?>
-
-        <tr <?php echo $colorcode; ?>>
-
-                        <td width="6%" align="left" valign="top"  class="bodytext3">
-
-						<div align="center">
-
-						<a href="dose_measure.php?st=del&&anum=<?php echo $auto_number; ?>" onClick="return funcDeleteProductType('<?php  ?>')">
-
-						<img src="images/b_drop.png" width="16" height="16" border="0" /></a>						</div>						</td>
-
-                        <td width="39%" align="left" valign="top"  class="bodytext3"><?php echo $drug_inst; ?> </td>
-
-                      
-
-                        <td align="left" valign="top"  class="bodytext3">
-
-						<a href="edit_dose_measure.php?st=edit&&anum=<?php echo $auto_number; ?>" style="text-decoration:none">Edit</a></td>
-
-        </tr>
-
-                      <?php
-
-		}
-
-		?>
-
-           <tr>
-
-                        <td align="middle" colspan="4" >&nbsp;</td>
-
-                      </tr>
-
-                    </tbody>
-
-                  </table>
-
-                <table width="600" border="0" align="center" cellpadding="4" cellspacing="0" bordercolor="#666666" id="AutoNumber3" style="border-collapse: collapse">
-
-                    <tbody>
-
-                      <tr bgcolor="#011E6A">
-
-                        <td colspan="3" bgcolor="#ecf0f5" class="bodytext3"><strong>Dose Measure Master - Deleted </strong></td>
-
-                      </tr>
-
-                      <?php
-
-		
-
-	    $query1 = "select id,name from dose_measure where status = 0 order by id desc ";
-
-		$exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-		while ($res1 = mysqli_fetch_array($exec1))
-
-		{
-
-		$drug_inst = $res1['name'];
-
-		
-
-		$auto_number = $res1["id"];
-
-
-
-		$colorloopcount = $colorloopcount + 1;
-
-		$showcolor = ($colorloopcount & 1); 
-
-		if ($showcolor == 0)
-
-		{
-
-			$colorcode = 'bgcolor="#CBDBFA"';
-
-		}
-
-		else
-
-		{
-
-			$colorcode = 'bgcolor="#ecf0f5"';
-
-		}
-
-		?>
-
-        <tr <?php echo $colorcode; ?>>
-
-                        <td width="11%" align="left" valign="top"  class="bodytext3">
-
-						<a href="dose_measure.php?st=activate&&anum=<?php echo $auto_number; ?>" class="bodytext3">
-
-                          <div align="center" class="bodytext3">Activate</div>
-
-                        </a></td>
-
-                        <td width="35%" align="left" valign="top"  class="bodytext3"><?php echo $drug_inst; ?></td>
-
+    <!-- Hospital Header -->
+    <header class="hospital-header">
+        <h1 class="hospital-title">🏥 MedStar Hospital Management</h1>
+        <p class="hospital-subtitle">Advanced Healthcare Management Platform</p>
+    </header>
+
+    <!-- User Information Bar -->
+    <div class="user-info-bar">
+        <div class="user-welcome">
+            <span class="welcome-text">Welcome, <strong><?php echo htmlspecialchars($username); ?></strong></span>
+            <span class="location-info">📍 Company: <?php echo htmlspecialchars($companyname); ?></span>
+        </div>
+        <div class="user-actions">
+            <a href="mainmenu1.php" class="btn btn-outline">🏠 Main Menu</a>
+            <a href="logout.php" class="btn btn-outline">🚪 Logout</a>
+        </div>
+    </div>
+
+    <!-- Navigation Breadcrumb -->
+    <nav class="nav-breadcrumb">
+        <a href="mainmenu1.php">🏠 Home</a>
+        <span>→</span>
+        <span>Dose Measure Master</span>
+    </nav>
+
+    <!-- Floating Menu Toggle -->
+    <div id="menuToggle" class="floating-menu-toggle">
+        <i class="fas fa-bars"></i>
+    </div>
+
+    <!-- Main Container with Sidebar -->
+    <div class="main-container-with-sidebar">
+        <!-- Left Sidebar -->
+        <aside id="leftSidebar" class="left-sidebar">
+            <div class="sidebar-header">
+                <h3>Quick Navigation</h3>
+                <button id="sidebarToggle" class="sidebar-toggle">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <ul class="nav-list">
+                    <li class="nav-item">
+                        <a href="mainmenu1.php" class="nav-link">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="dose_measure.php" class="nav-link active">
+                            <i class="fas fa-pills"></i>
+                            <span>Dose Measure Master</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="drug_instruction.php" class="nav-link">
+                            <i class="fas fa-prescription-bottle"></i>
+                            <span>Drug Instructions</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="medicine_master.php" class="nav-link">
+                            <i class="fas fa-capsules"></i>
+                            <span>Medicine Master</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Alert Container -->
+            <div id="alertContainer">
+                <?php include ("includes/alertmessages1.php"); ?>
+            </div>
+
+            <!-- Page Header -->
+            <div class="page-header">
+                <div class="page-header-content">
+                    <h2>Dose Measure Master</h2>
+                    <p>Manage dose measurement units for medication administration and prescription management.</p>
+                </div>
+                <div class="page-header-actions">
+                    <button type="button" class="btn btn-secondary" onclick="refreshPage()">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                    <button type="button" class="btn btn-outline" onclick="printPage()">
+                        <i class="fas fa-print"></i> Print
+                    </button>
+                </div>
+            </div>
+
+            <!-- Add New Dose Measure Form Section -->
+            <div class="form-section">
+                <div class="form-header">
+                    <i class="fas fa-plus-circle form-icon"></i>
+                    <h3 class="form-title">Add New Dose Measure</h3>
+                </div>
+                
+                <form name="form1" id="form1" method="post" action="dose_measure.php" onSubmit="return addsalutation1process1()">
+                    <div class="form-group">
+                        <label for="drug_inst" class="form-label">Dose Measure Name</label>
+                        <input name="drug_inst" id="drug_inst" class="form-input" 
+                               placeholder="Enter dose measure (e.g., mg, ml, tablets)" 
+                               autocomplete="off" maxlength="100" />
+                    </div>
+
+                    <div class="form-group">
+                        <input type="hidden" name="frmflag" value="addnew" />
+                        <input type="hidden" name="frmflag1" value="frmflag1" />
                         
+                        <button type="submit" class="submit-btn">
+                            <i class="fas fa-save"></i>
+                            Add Dose Measure
+                        </button>
+                    </div>
+                </form>
+            </div>
 
-        </tr>
-
-                      <?php
-
-		}
-
-		?>
-
-                      <tr>
-
-                        <td align="middle" colspan="3" >&nbsp;</td>
-
-                      </tr>
-
+            <!-- Active Dose Measures Section -->
+            <div class="data-section">
+                <div class="data-header">
+                    <h3 class="data-title">Active Dose Measures</h3>
+                    <div class="data-actions">
+                        <span class="status-badge status-active">Active</span>
+                    </div>
+                </div>
+                
+                <table class="modern-table">
+                    <thead>
+                        <tr>
+                            <th>Actions</th>
+                            <th>Dose Measure Name</th>
+                            <th>Edit</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php
+                        $query1 = "select id,name from dose_measure where status='1' order by id desc ";
+                        $exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
+                        
+                        while ($res1 = mysqli_fetch_array($exec1)) {
+                            $drug_inst = $res1["name"];
+                            $auto_number = $res1["id"];
+                        ?>
+                        <tr>
+                            <td>
+                                <a href="dose_measure.php?st=del&&anum=<?php echo $auto_number; ?>" 
+                                   onClick="return funcDeleteProductType('<?php echo $auto_number; ?>')" 
+                                   class="action-btn action-btn-delete">
+                                    <i class="fas fa-trash"></i>
+                                    Delete
+                                </a>
+                            </td>
+                            <td><?php echo htmlspecialchars($drug_inst); ?></td>
+                            <td>
+                                <a href="edit_dose_measure.php?st=edit&&anum=<?php echo $auto_number; ?>" 
+                                   class="action-btn action-btn-edit">
+                                    <i class="fas fa-edit"></i>
+                                    Edit
+                                </a>
+                            </td>
+                        </tr>
+                        <?php } ?>
                     </tbody>
+                </table>
+            </div>
 
-                  </table>
-
-              </form>
-
-                </td>
-
-            </tr>
-
-            <tr>
-
-              <td>&nbsp;</td>
-
-            </tr>
-
-        </table></td>
-
-      </tr>
-
-      <tr>
-
-        <td>&nbsp;</td>
-
-      </tr>
-
-    </table>
-
-  </table>
-
-<?php include ("includes/footer1.php"); ?>
-
+            <!-- Deleted Dose Measures Section -->
+            <div class="data-section">
+                <div class="data-header">
+                    <h3 class="data-title">Deleted Dose Measures</h3>
+                    <div class="data-actions">
+                        <span class="status-badge status-inactive">Inactive</span>
+                    </div>
+                </div>
+                
+                <table class="modern-table">
+                    <thead>
+                        <tr>
+                            <th>Actions</th>
+                            <th>Dose Measure Name</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php
+                        $query1 = "select id,name from dose_measure where status = 0 order by id desc ";
+                        $exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
+                        
+                        while ($res1 = mysqli_fetch_array($exec1)) {
+                            $drug_inst = $res1['name'];
+                            $auto_number = $res1["id"];
+                        ?>
+                        <tr>
+                            <td>
+                                <a href="dose_measure.php?st=activate&&anum=<?php echo $auto_number; ?>" 
+                                   class="action-btn action-btn-activate">
+                                    <i class="fas fa-undo"></i>
+                                    Activate
+                                </a>
+                            </td>
+                            <td><?php echo htmlspecialchars($drug_inst); ?></td>
+                        </tr>
+                        <?php } ?>
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
 </body>
-
 </html>
 
 

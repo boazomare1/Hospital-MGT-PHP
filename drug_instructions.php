@@ -1,133 +1,88 @@
 <?php
-
 session_start();   
-
 include ("includes/loginverify.php");
-
 include ("db/db_connect.php");
+include ("includes/check_user_access.php");
 
 $username = $_SESSION["username"];
-
 $companyanum = $_SESSION["companyanum"];
-
 $companyname = $_SESSION["companyname"];
 
-
-
 $ipaddress = $_SERVER["REMOTE_ADDR"];
-
 $updatedatetime = date('Y-m-d H:i:s');
-// $updatedate = date('Y-m-d H:i:s');
-
 $errmsg = "";
-
 $bgcolorcode = "";
-
 $colorloopcount = "";
 
+// Handle form submission
+if (isset($_POST["frmflag1"])) { 
+    $frmflag1 = $_POST["frmflag1"]; 
+} else { 
+    $frmflag1 = ""; 
+}
 
-
-if (isset($_POST["frmflag1"])) { $frmflag1 = $_POST["frmflag1"]; } else { $frmflag1 = ""; }
-
-if ($frmflag1 == 'frmflag1')
-
-{
-
-
-
+if ($frmflag1 == 'frmflag1') {
 	$drug_inst = $_REQUEST["drug_inst"];
-
-	//$salutation = strtoupper($salutation);
-
 	$drug_inst = trim($drug_inst);
+    $length = strlen($drug_inst);
 
-	$length=strlen($drug_inst);
-
-	//echo $length;
-
-	if ($length<=100)
-
-	{
-		$drug_inst=strtolower($drug_inst);
-		$drug_inst=ucwords($drug_inst);
+    if ($length <= 100) {
+        $drug_inst = strtolower($drug_inst);
+        $drug_inst = ucwords($drug_inst);
+        
 	$query2 = "select id from drug_instructions where name = '$drug_inst'";
-
 	$exec2 = mysqli_query($GLOBALS["___mysqli_ston"], $query2) or die ("Error in Query2".mysqli_error($GLOBALS["___mysqli_ston"]));
-
 	$res2 = mysqli_num_rows($exec2);
 
-	if ($res2 == 0)
-
-	{
-
-		$query1 = "insert into drug_instructions ( `name`, `ipaddress`, `username`, `created_on`) 
-
-		values ('$drug_inst', '$ipaddress', '$username','$updatedatetime')";
-
+        if ($res2 == 0) {
+            $query1 = "insert into drug_instructions (`name`, `ipaddress`, `username`, `created_on`) values ('$drug_inst', '$ipaddress', '$username','$updatedatetime')";
 		$exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
-
 		$errmsg = "Success. New Drug Instruction was Created.";
-
 		$bgcolorcode = 'success';
-
-		
-
-	}
-
-	//exit();
-
-	else
-
-	{
-
+        } else {
 		$errmsg = "Failed. Drug Instruction Already Exists.";
-
 		$bgcolorcode = 'failed';
-
-	}
-
-	}
-
-	else
-
-	{
-
+        }
+    } else {
 		$errmsg = "Failed. Only 100 Characters Are Allowed.";
-
 		$bgcolorcode = 'failed';
-
-	}
-
-
-
+    }
 }
 
 
 
-if (isset($_REQUEST["st"])) { $st = $_REQUEST["st"]; } else { $st = ""; }
+// Handle delete action
+if (isset($_REQUEST["st"])) { 
+    $st = $_REQUEST["st"]; 
+} else { 
+    $st = ""; 
+}
 
-if ($st == 'del')
-
-{
-
+if ($st == 'del') {
 	$delanum = $_REQUEST["anum"];
-
 	$query3 = "update drug_instructions set status = '0' where id = '$delanum'";
-
 	$exec3 = mysqli_query($GLOBALS["___mysqli_ston"], $query3) or die ("Error in Query3".mysqli_error($GLOBALS["___mysqli_ston"]));
-
+    header("Location: drug_instructions.php?msg=deleted");
+    exit();
 }
 
-if ($st == 'activate')
-
-{
-
+if ($st == 'activate') {
 	$delanum = $_REQUEST["anum"];
-
 	$query3 = "update drug_instructions set status = '1' where id = '$delanum'";
-
 	$exec3 = mysqli_query($GLOBALS["___mysqli_ston"], $query3) or die ("Error in Query3".mysqli_error($GLOBALS["___mysqli_ston"]));
+    header("Location: drug_instructions.php?msg=activated");
+    exit();
+}
 
+// Check for URL messages
+if (isset($_GET['msg'])) {
+    if ($_GET['msg'] == 'deleted') {
+        $errmsg = "Drug instruction deleted successfully.";
+        $bgcolorcode = 'success';
+    } elseif ($_GET['msg'] == 'activated') {
+        $errmsg = "Drug instruction activated successfully.";
+        $bgcolorcode = 'success';
+    }
 }
 
 /*if ($st == 'default')
@@ -172,42 +127,21 @@ if ($st == 'activate')
 
 ?>
 
-<style type="text/css">
-
-<!--
-
-body {
-
-	margin-left: 0px;
-
-	margin-top: 0px;
-
-	background-color: #ecf0f5;
-
-}
-
-.bodytext3 {	FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3B3B3C; FONT-FAMILY: Tahoma; text-decoration:none
-
-}
-
--->
-
-</style>
-
-
-
-<style type="text/css">
-
-<!--
-
-.bodytext31 {FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3b3b3c; FONT-FAMILY: Tahoma
-
-}
-
--->
-
-</style>
-
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Drug Instructions Master - MedStar</title>
+    
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <!-- Modern CSS -->
+    <link rel="stylesheet" href="css/druginstructions-modern.css?v=<?php echo time(); ?>">
+    
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 
 <script language="javascript">
@@ -287,307 +221,354 @@ function funcDeleteProductType(varNameAutoNumber)
 </script>
 
 <body>
+    <!-- Hospital Header -->
+    <header class="hospital-header">
+        <h1 class="hospital-title">🏥 MedStar Hospital Management</h1>
+        <p class="hospital-subtitle">Advanced Healthcare Management Platform</p>
+    </header>
 
-<table width="101%" border="0" cellspacing="0" cellpadding="2">
+    <!-- User Information Bar -->
+    <div class="user-info-bar">
+        <div class="user-welcome">
+            <span class="welcome-text">Welcome, <strong><?php echo htmlspecialchars($username); ?></strong></span>
+            <span class="location-info">📍 Company: <?php echo htmlspecialchars($companyname); ?></span>
+        </div>
+        <div class="user-actions">
+            <a href="mainmenu1.php" class="btn btn-outline">🏠 Main Menu</a>
+            <a href="logout.php" class="btn btn-outline">🚪 Logout</a>
+        </div>
+    </div>
 
-  <tr>
+    <!-- Navigation Breadcrumb -->
+    <nav class="nav-breadcrumb">
+        <a href="mainmenu1.php">🏠 Home</a>
+        <span>→</span>
+        <span>Drug Instructions Master</span>
+    </nav>
 
-    <td colspan="10" bgcolor="#ecf0f5"><?php include ("includes/alertmessages1.php"); ?></td>
+    <!-- Floating Menu Toggle -->
+    <div id="menuToggle" class="floating-menu-toggle">
+        <i class="fas fa-bars"></i>
+    </div>
 
-  </tr>
+    <!-- Main Container with Sidebar -->
+    <div class="main-container-with-sidebar">
+        <!-- Left Sidebar -->
+        <aside id="leftSidebar" class="left-sidebar">
+            <div class="sidebar-header">
+                <h3>Quick Navigation</h3>
+                <button id="sidebarToggle" class="sidebar-toggle">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <ul class="nav-list">
+                    <li class="nav-item">
+                        <a href="mainmenu1.php" class="nav-link">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="labitem1master.php" class="nav-link">
+                            <i class="fas fa-flask"></i>
+                            <span>Lab Items</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="openingstockentry_master.php" class="nav-link">
+                            <i class="fas fa-boxes"></i>
+                            <span>Opening Stock</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="addward.php" class="nav-link">
+                            <i class="fas fa-bed"></i>
+                            <span>Wards</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="accountreceivableentrylist.php" class="nav-link">
+                            <i class="fas fa-receipt"></i>
+                            <span>Account Receivable</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="corporateoutstanding.php" class="nav-link">
+                            <i class="fas fa-building"></i>
+                            <span>Corporate Outstanding</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="accountstatement.php" class="nav-link">
+                            <i class="fas fa-file-invoice-dollar"></i>
+                            <span>Account Statement</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="addaccountsmain.php" class="nav-link">
+                            <i class="fas fa-chart-line"></i>
+                            <span>Accounts Main</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="addaccountssub.php" class="nav-link">
+                            <i class="fas fa-chart-pie"></i>
+                            <span>Accounts Sub Type</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="fixedasset_acquisition_report.php" class="nav-link">
+                            <i class="fas fa-building"></i>
+                            <span>Fixed Asset Acquisition</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="activeinpatientlist.php" class="nav-link">
+                            <i class="fas fa-bed"></i>
+                            <span>Active Inpatient List</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="activeusersreport.php" class="nav-link">
+                            <i class="fas fa-users"></i>
+                            <span>Active Users Report</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="chartofaccounts_upload.php" class="nav-link">
+                            <i class="fas fa-upload"></i>
+                            <span>Chart of Accounts Upload</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="chartaccountsmaindataimport.php" class="nav-link">
+                            <i class="fas fa-database"></i>
+                            <span>Chart of Accounts Main Import</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="chartaccountssubdataimport.php" class="nav-link">
+                            <i class="fas fa-database"></i>
+                            <span>Chart of Accounts Sub Import</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="addbloodgroup.php" class="nav-link">
+                            <i class="fas fa-tint"></i>
+                            <span>Blood Group Master</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="addfoodallergy1.php" class="nav-link">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <span>Food Allergy Master</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="addgenericname.php" class="nav-link">
+                            <i class="fas fa-pills"></i>
+                            <span>Generic Name Master</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="addpromotion.php" class="nav-link">
+                            <i class="fas fa-percentage"></i>
+                            <span>Promotion Master</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="addsalutation1.php" class="nav-link">
+                            <i class="fas fa-user-tie"></i>
+                            <span>Salutation Master</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="vat.php" class="nav-link">
+                            <i class="fas fa-receipt"></i>
+                            <span>VAT Master</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="drugcategoryissues.php" class="nav-link">
+                            <i class="fas fa-pills"></i>
+                            <span>Drug Category Issues</span>
+                        </a>
+                    </li>
+                    <li class="nav-item active">
+                        <a href="drug_instructions.php" class="nav-link">
+                            <i class="fas fa-prescription-bottle-alt"></i>
+                            <span>Drug Instructions</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
 
-  <tr>
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Alert Container -->
+            <div id="alertContainer">
+                <?php if (!empty($errmsg)): ?>
+                    <div class="alert alert-<?php echo $bgcolorcode === 'success' ? 'success' : ($bgcolorcode === 'failed' ? 'error' : 'info'); ?>">
+                        <i class="fas fa-<?php echo $bgcolorcode === 'success' ? 'check-circle' : ($bgcolorcode === 'failed' ? 'exclamation-triangle' : 'info-circle'); ?> alert-icon"></i>
+                        <span><?php echo htmlspecialchars($errmsg); ?></span>
+                    </div>
+                <?php endif; ?>
+            </div>
 
-    <td colspan="10" bgcolor="#ecf0f5"><?php include ("includes/title1.php"); ?></td>
+            <!-- Page Header -->
+            <div class="page-header">
+                <div class="page-header-content">
+                    <h2>Drug Instructions Master</h2>
+                    <p>Manage drug instructions and dosage guidelines for pharmacy operations.</p>
+                </div>
+                <div class="page-header-actions">
+                    <button type="button" class="btn btn-secondary" onclick="refreshPage()">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                    <button type="button" class="btn btn-outline" onclick="exportToExcel()">
+                        <i class="fas fa-download"></i> Export
+                    </button>
+                </div>
+            </div>
 
-  </tr>
+            <!-- Add Form Section -->
+            <div class="add-form-section">
+                <div class="add-form-header">
+                    <i class="fas fa-plus-circle add-form-icon"></i>
+                    <h3 class="add-form-title">Add New Drug Instruction</h3>
+                </div>
+                
+                <form id="drugInstructionsForm" name="form1" method="post" action="drug_instructions.php" class="add-form">
 
-  <tr>
+                    <div class="form-group">
+                        <label for="drug_inst" class="form-label">Drug Instruction</label>
+                        <input type="text" name="drug_inst" id="drug_inst" class="form-input" 
+                               placeholder="Enter drug instruction (e.g., Take with food, Take on empty stomach)" 
+                               maxlength="100" required>
+                        <small class="form-help">Maximum 100 characters allowed</small>
+                    </div>
 
-    <td colspan="10" bgcolor="#ecf0f5"><?php include ("includes/menu1.php"); ?></td>
+                    <div class="form-group">
+                        <button type="submit" id="submitBtn" class="submit-btn">
+                            <i class="fas fa-save"></i>
+                            Add Drug Instruction
+                        </button>
+                        <button type="button" class="btn btn-secondary" onclick="resetForm()">
+                            <i class="fas fa-undo"></i> Reset
+                        </button>
+                    </div>
 
-  </tr>
+                    <input type="hidden" name="frmflag1" value="frmflag1">
+                </form>
+            </div>
 
-  <tr>
+            <!-- Data Table Section -->
+            <div class="data-table-section">
+                <div class="data-table-header">
+                    <i class="fas fa-list data-table-icon"></i>
+                    <h3 class="data-table-title">Existing Drug Instructions</h3>
+                </div>
 
-    <td colspan="10">&nbsp;</td>
-
-  </tr>
-
-  <tr>
-
-    <td width="1%">&nbsp;</td>
-
-    <td width="2%" valign="top"><?php //include ("includes/menu4.php"); ?>
-
-      &nbsp;</td>
-
-    <td width="97%" valign="top"><table width="100%" border="0" cellspacing="0" cellpadding="0">
-
-      <tr>
-
-        <td width="860"><table width="100%" border="0" cellspacing="0" cellpadding="0" class="tablebackgroundcolor1">
-
-            <tr>
-
-              <td><form name="form1" id="form1" method="post" action="drug_instructions.php" onSubmit="return addsalutation1process1()">
-
-                  <table width="600" border="0" align="center" cellpadding="4" cellspacing="0" bordercolor="#666666" id="AutoNumber3" style="border-collapse: collapse">
-
-                    <tbody>
-                      <tr bgcolor="#011E6A">
-                        <td colspan="2" bgcolor="#ecf0f5" class="bodytext3"><strong>Drug Instructions Master - Add New </strong></td>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Actions</th>
+                            <th>Drug Instruction</th>
+                            <th>Edit</th>
                       </tr>
-
-					  <tr>
-
-                        <td colspan="2" align="left" valign="middle"   
-
-						bgcolor="<?php if ($bgcolorcode == '') { echo '#FFFFFF'; } else if ($bgcolorcode == 'success') { echo '#FFBF00'; } else if ($bgcolorcode == 'failed') { echo '#AAFF00'; } ?>" class="bodytext3"><div align="left"><?php echo $errmsg; ?></div></td>
-
-                      </tr>
-
-                      <tr>
-
-                        <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3"><div align="right">Add New Drug Instruction </div></td>
-
-                        <td align="left" valign="top"  bgcolor="#FFFFFF">
-
-						<input name="drug_inst" id="drug_inst" style="border: 1px solid #001E6A;" size="40" autocomplete="off"/></td>
-
-                      </tr>
-
-                  
-
-                      <tr>
-
-                        <td width="42%" align="left" valign="top"  bgcolor="#FFFFFF" class="bodytext3">&nbsp;</td>
-
-                        <td width="58%" align="left" valign="top"  bgcolor="#FFFFFF">
-
-						<input type="hidden" name="frmflag" value="addnew" />
-
-                            <input type="hidden" name="frmflag1" value="frmflag1" />
-
-                          <input type="submit" name="Submit" value="Submit" style="border: 1px solid #001E6A" /></td>
-
-                      </tr>
-
-                      <tr>
-
-                        <td align="middle" colspan="2" >&nbsp;</td>
-
-                      </tr>
-
-                    </tbody>
-
-                  </table>
-
-                <table width="600" border="0" align="center" cellpadding="4" cellspacing="0" bordercolor="#666666" id="AutoNumber3" style="border-collapse: collapse">
-
-                    <tbody>
-
-                      <tr bgcolor="#011E6A">
-
-                        <td colspan="2" bgcolor="#ecf0f5" class="bodytext3"><strong>Drug Instructions  Master - Existing List </strong></td>
-
-                       
-
-                        <td width="9%" bgcolor="#ecf0f5" class="bodytext3"><strong>Edit</strong></td>
-
-                      </tr>
-
+                    </thead>
+                    <tbody id="drugInstructionsTableBody">
                       <?php
-
-	    $query1 = "select id,name from drug_instructions where status='1' order by id desc ";
-
+                        $query1 = "select id,name from drug_instructions where status='1' order by id desc";
 		$exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
+                        $colorloopcount = 0;
 
-		while ($res1 = mysqli_fetch_array($exec1))
-
-		{
-
+                        while ($res1 = mysqli_fetch_array($exec1)) {
 		$drug_inst = $res1["name"];
-
 		$auto_number = $res1["id"];
-
-		
-
-		$colorloopcount = $colorloopcount + 1;
-
-		$showcolor = ($colorloopcount & 1); 
-
-		if ($showcolor == 0)
-
-		{
-
-			$colorcode = 'bgcolor="#CBDBFA"';
-
-		}
-
-		else
-
-		{
-
-			$colorcode = 'bgcolor="#ecf0f5"';
-
-		}
-
-		  
-
-		?>
-
-        <tr <?php echo $colorcode; ?>>
-
-                        <td width="6%" align="left" valign="top"  class="bodytext3">
-
-						<div align="center">
-
-						<a href="drug_instructions.php?st=del&&anum=<?php echo $auto_number; ?>" onClick="return funcDeleteProductType('<?php  ?>')">
-
-						<img src="images/b_drop.png" width="16" height="16" border="0" /></a>						</div>						</td>
-
-                        <td width="39%" align="left" valign="top"  class="bodytext3"><?php echo $drug_inst; ?> </td>
-
-                      
-
-                        <td align="left" valign="top"  class="bodytext3">
-
-						<a href="edit_drug_instructions.php?st=edit&&anum=<?php echo $auto_number; ?>" style="text-decoration:none">Edit</a></td>
-
+                            $colorloopcount++;
+                            ?>
+                            <tr>
+                                <td><?php echo $colorloopcount; ?></td>
+                                <td>
+                                    <div class="action-buttons">
+                                        <button class="action-btn delete" 
+                                                onclick="confirmDelete('<?php echo htmlspecialchars($drug_inst); ?>', '<?php echo $auto_number; ?>')"
+                                                title="Delete">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="instruction-text"><?php echo htmlspecialchars($drug_inst); ?></span>
+                                </td>
+                                <td>
+                                    <a href="edit_drug_instructions.php?st=edit&anum=<?php echo $auto_number; ?>" 
+                                       class="action-btn edit" title="Edit">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                </td>
         </tr>
-
                       <?php
-
-		}
-
-		?>
-
-           <tr>
-
-                        <td align="middle" colspan="4" >&nbsp;</td>
-
-                      </tr>
-
+                        }
+                        ?>
                     </tbody>
-
                   </table>
+            </div>
 
-                <table width="600" border="0" align="center" cellpadding="4" cellspacing="0" bordercolor="#666666" id="AutoNumber3" style="border-collapse: collapse">
+            <!-- Deleted Items Section -->
+            <div class="deleted-items-section">
+                <div class="deleted-items-header">
+                    <i class="fas fa-archive deleted-items-icon"></i>
+                    <h3 class="deleted-items-title">Deleted Drug Instructions</h3>
+                </div>
 
-                    <tbody>
-
-                      <tr bgcolor="#011E6A">
-
-                        <td colspan="3" bgcolor="#ecf0f5" class="bodytext3"><strong>Drug Instruction Master - Deleted </strong></td>
-
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Actions</th>
+                            <th>Drug Instruction</th>
                       </tr>
-
+                    </thead>
+                    <tbody id="deletedDrugInstructionsTableBody">
                       <?php
-
-		
-
-	    $query1 = "select id,name from drug_instructions where status = 0 order by id desc ";
-
+                        $query1 = "select id,name from drug_instructions where status = 0 order by id desc";
 		$exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
 
-		while ($res1 = mysqli_fetch_array($exec1))
-
-		{
-
+                        while ($res1 = mysqli_fetch_array($exec1)) {
 		$drug_inst = $res1['name'];
-
-		
-
 		$auto_number = $res1["id"];
-
-
-
-		$colorloopcount = $colorloopcount + 1;
-
-		$showcolor = ($colorloopcount & 1); 
-
-		if ($showcolor == 0)
-
-		{
-
-			$colorcode = 'bgcolor="#CBDBFA"';
-
-		}
-
-		else
-
-		{
-
-			$colorcode = 'bgcolor="#ecf0f5"';
-
-		}
-
-		?>
-
-        <tr <?php echo $colorcode; ?>>
-
-                        <td width="11%" align="left" valign="top"  class="bodytext3">
-
-						<a href="drug_instructions.php?st=activate&&anum=<?php echo $auto_number; ?>" class="bodytext3">
-
-                          <div align="center" class="bodytext3">Activate</div>
-
-                        </a></td>
-
-                        <td width="35%" align="left" valign="top"  class="bodytext3"><?php echo $drug_inst; ?></td>
-
-                        
-
+                            ?>
+                            <tr>
+                                <td>
+                                    <button class="action-btn activate" 
+                                            onclick="confirmActivate('<?php echo htmlspecialchars($drug_inst); ?>', '<?php echo $auto_number; ?>')"
+                                            title="Activate">
+                                        <i class="fas fa-undo"></i> Activate
+                                    </button>
+                                </td>
+                                <td>
+                                    <span class="instruction-text"><?php echo htmlspecialchars($drug_inst); ?></span>
+                                </td>
         </tr>
-
                       <?php
-
-		}
-
-		?>
-
-                      <tr>
-
-                        <td align="middle" colspan="3" >&nbsp;</td>
-
-                      </tr>
-
+                        }
+                        ?>
                     </tbody>
-
                   </table>
+            </div>
+        </main>
+    </div>
 
-              </form>
-
-                </td>
-
-            </tr>
-
-            <tr>
-
-              <td>&nbsp;</td>
-
-            </tr>
-
-        </table></td>
-
-      </tr>
-
-      <tr>
-
-        <td>&nbsp;</td>
-
-      </tr>
-
-    </table>
-
-  </table>
-
-<?php include ("includes/footer1.php"); ?>
-
+    <!-- Modern JavaScript -->
+    <script src="js/druginstructions-modern.js?v=<?php echo time(); ?>"></script>
 </body>
-
 </html>
+
 
 
 

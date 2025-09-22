@@ -2,11 +2,13 @@
 session_start();
 include ("includes/loginverify.php");
 include ("db/db_connect.php");
+include ("includes/check_user_access.php");
 error_reporting(0);
+
 $ipaddress = $_SERVER['REMOTE_ADDR'];
 $updatedatetime = date('Y-m-d H:i:s');
 $recorddate = date('Y-m-d');
-$recordtime= date('H:i:s');
+$recordtime = date('H:i:s');
 $username = $_SESSION['username'];
 $docno1 = $_SESSION['docno'];
 $companyanum = $_SESSION['companyanum'];
@@ -14,57 +16,37 @@ $companyname = $_SESSION['companyname'];
 $errmsg = "";
 $date = date('Ymd');
 $colorloopcount = '';
-$uniquecode=array();
-$duplicated=array();
-$uniquecode12=array();
-$main_array=array();
-$sub_array=array();
+$uniquecode = array();
+$duplicated = array();
+$uniquecode12 = array();
+$main_array = array();
+$sub_array = array();
 ini_set('display_errors',1);
+
 $query = "select * from login_locationdetails where username='$username' and docno='$docno1' order by locationname";
 $exec = mysqli_query($GLOBALS["___mysqli_ston"], $query) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
 $res = mysqli_fetch_array($exec);
-$locationname  = $res["locationname"];
+$locationname = $res["locationname"];
 $locationcode = $res["locationcode"];
- 
-$query018="select auto_number from master_location where locationcode='$locationcode'";
-$exc018=mysqli_query($GLOBALS["___mysqli_ston"], $query018);
-$res018=mysqli_fetch_array($exc018);
+
+$query018 = "select auto_number from master_location where locationcode='$locationcode'";
+$exc018 = mysqli_query($GLOBALS["___mysqli_ston"], $query018);
+$res018 = mysqli_fetch_array($exc018);
 $location_auto = $res018['auto_number'];
-//error_reporting(E_ALL);
-//To populate the autocompetelist_services1.js
+
+// Form processing
 $transactiondatefrom = date('Y-m-d');
 $transactiondateto = date('Y-m-d');
-if(isset($_POST['ADate1'])){$fromdate = $_POST['ADate1'];}else{$fromdate=$transactiondatefrom;}
-if(isset($_POST['ADate2'])){$todate = $_POST['ADate2'];}else{$todate=$transactiondateto;}
+if(isset($_POST['ADate1'])){$fromdate = $_POST['ADate1'];}else{$fromdate = $transactiondatefrom;}
+if(isset($_POST['ADate2'])){$todate = $_POST['ADate2'];}else{$todate = $transactiondateto;}
 if (isset($_REQUEST["frmflag1"])) { $frmflag1 = $_REQUEST["frmflag1"]; } else { $frmflag1 = ""; }
-//$frmflag1 = $_REQUEST['frmflag1'];
-if (isset($_REQUEST["lpodate"])) { $lpodate = $_REQUEST["lpodate"]; } else { $lpodate = ""; }
-$query = "select * from login_locationdetails where username='$username' and docno='$docno1' order by locationname";
-$exec = mysqli_query($GLOBALS["___mysqli_ston"], $query) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
-$res = mysqli_fetch_array($exec);
-$locationname  = $res["locationname"];
-$locationcode = $res["locationcode"];
+if (isset($_REQUEST["location"])) { $location = $_REQUEST["location"]; } else { $location = ""; }
+
 $query77 = "select job_title from master_employee where username = '$username'";
 $exec77 = mysqli_query($GLOBALS["___mysqli_ston"], $query77) or die ("Error in Query77".mysqli_error($GLOBALS["___mysqli_ston"]));
 $res77 = mysqli_fetch_array($exec77);
 $job_title = $res77['job_title'];
-if (isset($_REQUEST["frm1submit1"])) { $frm1submit1 = $_REQUEST["frm1submit1"]; } else { $frm1submit1 = ""; }
-if (isset($_REQUEST["location"])) { $location = $_REQUEST["location"]; } else { $location = ""; }
 
-?>
-<style type="text/css">
-<!--
-body {
-	margin-left: 0px;
-	margin-top: 0px;
-	background-color: #ecf0f5;
-}
-.bodytext3 {	FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3B3B3C; FONT-FAMILY: Tahoma
-}
--->
-</style>
-
-<?php
 function calculate_age($birthday)
 {
     $today = new DateTime();
@@ -83,398 +65,506 @@ function calculate_age($birthday)
     }
 }
 ?>
-<script src="js/jquery-1.11.1.min.js"></script>
-<link rel="stylesheet" type="text/css" href="css/autocomplete.css">
-<link rel="stylesheet" type="text/css" href="css/style.css">
-<script src="js/jquery.min-autocomplete.js"></script>
-<script src="js/jquery-ui.min.js"></script>
-<link href="css/datepickerstyle.css" rel="stylesheet" type="text/css" />
-<script type="text/javascript" src="js/adddate.js"></script>
-<script type="text/javascript" src="js/adddate2.js"></script>
-<style type="text/css">
-<!--
-.bodytext31 {FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3b3b3c; FONT-FAMILY: Tahoma
-}
-.style1 {FONT-WEIGHT: bold; FONT-SIZE: 11px; COLOR: #3b3b3c; FONT-FAMILY: Tahoma; }
--->
-</style>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>External Radiology PO Report - MedStar</title>
+    
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <!-- Modern CSS -->
+    <link rel="stylesheet" href="css/external-radiology-report-modern.css?v=<?php echo time(); ?>">
+    
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- Legacy CSS for datepicker -->
+    <link href="datepickerstyle.css" rel="stylesheet" type="text/css" />
+    
+    <!-- Legacy JavaScript -->
+    <script type="text/javascript" src="js/disablebackenterkey.js"></script>
+    <script type="text/javascript" src="js/adddate.js"></script>
+    <script type="text/javascript" src="js/adddate2.js"></script>
 </head>
-<!--<script type="text/javascript" src="js/autocomplete_supplier12.js"></script>
-<script type="text/javascript" src="js/autosuggest2supplier1.js"></script>-->
-<script type="text/javascript">
- $(function() {
-  getValidityDays();
-});
-function getValidityDays() {
-    var d1 = parseDate($('#todaydate').val());
-   // var d2 = parseDate($('#lpodate').val());
-    console.log(d1)
-    console.log('d2'+d2)
-    var oneDay = 24*60*60*1000;
-    var diff = 0;
-    if (d1 && d2) {
-  
-      diff = Math.round(Math.abs((d2.getTime() - d1.getTime())/(oneDay)));
-      console.log('diff'+diff);
-    }
-    //$('#validityperiod').val(diff);
-}
-function parseDate(input) {
-  var parts = input.match(/(\d+)/g);
-  // new Date(year, month [, date [, hours[, minutes[, seconds[, ms]]]]])
-  return new Date(parts[0], parts[1]-1, parts[2]); // months are 0-based
-}
-function validcheck()
-{
-/*externallabvalue();	
-if(document.getElementById("searchsuppliername").value == '')
-{
-alert("Please Select External Lab");
-document.getElementById("searchsuppliername").focus();
-return false;
-}*/
-}
-</script>
-<link rel="stylesheet" type="text/css" href="css/autosuggest.css" />        
-<script type="text/javascript" src="js/disablebackenterkey.js"></script>
-<script src="js/datetimepicker_css.js"></script>
 <body>
-<table width="110%" border="0" cellspacing="0" cellpadding="2">
-  <tr>
-    <td colspan="10" bgcolor="#ecf0f5"><?php include ("includes/alertmessages1.php"); ?></td>
-  </tr>
-  <tr>
-    <td colspan="10" bgcolor="#ecf0f5"><?php include ("includes/title1.php"); ?></td>
-  </tr>
-  <tr>
-    <td colspan="10" bgcolor="#ecf0f5"><?php include ("includes/menu1.php"); ?></td>
-  </tr>
-  <tr>
-    <td colspan="10">&nbsp;</td>
-  </tr>
-  <tr>
-    <td width="1%" rowspan="3">&nbsp;</td>
-    <td width="2%" rowspan="3" valign="top"><?php //include ("includes/menu4.php"); ?>
-      &nbsp;</td>
-    <td valign="top"><table width="98%" border="0" cellspacing="0" cellpadding="0">
-      <tr>
-        <td>
-		
-			<form name="drugs" action="externalradpo_report.php" method="post" onKeyDown="return disableEnterKey()" onSubmit="">
-	<table id="AutoNumber3" style="BORDER-COLLAPSE: collapse" 
-            bordercolor="#666666" cellspacing="0" cellpadding="4" width="70%" 
-            align="left" border="0">
-      <tbody id="foo">
-        <tr>
-          <td colspan="6" bgcolor="#ecf0f5" class="bodytext31"><strong>External Lab Report</strong></td>
-          </tr>
-        
-        <script language="javascript">
-function disableEnterKey()
-{
-	//alert ("Back Key Press");
-	if (event.keyCode==8) 
-	{
-		event.keyCode=0; 
-		return event.keyCode 
-		return false;
-	}
-	
-	var key;
-	if(window.event)
-	{
-		key = window.event.keyCode;     //IE
-	}
-	else
-	{
-		key = e.which;     //firefox
-	}
-	
-	if(key == 13) // if enter key press
-	{
-		//alert ("Enter Key Press2");
-		return false;
-	}
-	else
-	{
-		return true;
-	}
-	
-}
-</script>
-        
-					 <tr>
-          <td width="110" align="left" valign="center"  
-                bgcolor="#ffffff" class="bodytext31"><strong> Date From </strong></td>
-          <td width="156" align="left" valign="center"  bgcolor="#ffffff" class="bodytext31"><input name="ADate1" id="ADate1" value="<?php echo $transactiondatefrom; ?>"  size="10"  readonly="readonly" onKeyDown="return disableEnterKey()" />
-			<img src="images2/cal.gif" onClick="javascript:NewCssCal('ADate1')" style="cursor:pointer"/>			</td>
-          <td width="94" align="left" valign="center"  bgcolor="#ffffff" class="bodytext31"><span class="style1"><strong>Date To</strong></span></td>
-          <td width="122" align="left" valign="center"  bgcolor="#ffffff" class="bodytext31"><input name="ADate2" id="ADate2" value="<?php echo $transactiondateto; ?>"  size="10"  readonly="readonly" onKeyDown="return disableEnterKey()" />
-		  <span class="bodytext31"><img src="images2/cal.gif" onClick="javascript:NewCssCal('ADate2')" style="cursor:pointer"/>
-		  </span></td>
-         
-          </tr>
-          
-          <tr>
+    <!-- Hospital Header -->
+    <header class="hospital-header">
+        <h1 class="hospital-title">🏥 MedStar Hospital Management</h1>
+        <p class="hospital-subtitle">Advanced Healthcare Management Platform</p>
+    </header>
 
-<td width="10%" align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">Location</td>
+    <!-- User Information Bar -->
+    <div class="user-info-bar">
+        <div class="user-welcome">
+            <span class="welcome-text">Welcome, <strong><?php echo htmlspecialchars($username); ?></strong></span>
+            <span class="location-info">📍 Company: <?php echo htmlspecialchars($companyname); ?></span>
+        </div>
+        <div class="user-actions">
+            <a href="mainmenu1.php" class="btn btn-outline">🏠 Main Menu</a>
+            <a href="logout.php" class="btn btn-outline">🚪 Logout</a>
+        </div>
+    </div>
 
-<td width="30%" align="left" valign="top"  bgcolor="#FFFFFF"><span class="bodytext3">
+    <!-- Navigation Breadcrumb -->
+    <nav class="nav-breadcrumb">
+        <a href="mainmenu1.php">🏠 Home</a>
+        <span>→</span>
+        <span>External Radiology PO Report</span>
+    </nav>
 
-<select name="location" id="location">
+    <!-- Floating Menu Toggle -->
+    <div id="menuToggle" class="floating-menu-toggle">
+        <i class="fas fa-bars"></i>
+    </div>
 
-<option value="All">All</option>
+    <!-- Main Container with Sidebar -->
+    <div class="main-container-with-sidebar">
+        <!-- Left Sidebar -->
+        <aside id="leftSidebar" class="left-sidebar">
+            <div class="sidebar-header">
+                <h3>Quick Navigation</h3>
+                <button id="sidebarToggle" class="sidebar-toggle">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <ul class="nav-list">
+                    <li class="nav-item">
+                        <a href="mainmenu1.php" class="nav-link">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="addemployeecategory.php" class="nav-link">
+                            <i class="fas fa-user-tag"></i>
+                            <span>Employee Category</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="addemployeedesignation.php" class="nav-link">
+                            <i class="fas fa-id-badge"></i>
+                            <span>Employee Designation</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="addemployeeinfo.php" class="nav-link">
+                            <i class="fas fa-user-plus"></i>
+                            <span>Add Employee</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="editemployeeinfo1.php" class="nav-link">
+                            <i class="fas fa-user-edit"></i>
+                            <span>Edit Employee</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="employeelist1.php" class="nav-link">
+                            <i class="fas fa-list"></i>
+                            <span>Employee List</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="employeepayrollreport1.php" class="nav-link">
+                            <i class="fas fa-file-invoice-dollar"></i>
+                            <span>Payroll Report</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="addinterfacemachine.php" class="nav-link">
+                            <i class="fas fa-desktop"></i>
+                            <span>Interface Machine</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="expenseentry2.php" class="nav-link">
+                            <i class="fas fa-receipt"></i>
+                            <span>Expense Entry</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="expirydtupdate.php" class="nav-link">
+                            <i class="fas fa-calendar-times"></i>
+                            <span>Expiry Update</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="stockreportbyexpirydate1.php" class="nav-link">
+                            <i class="fas fa-boxes"></i>
+                            <span>Stock Report</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="externallabpo_report.php" class="nav-link">
+                            <i class="fas fa-flask"></i>
+                            <span>External Lab Report</span>
+                        </a>
+                    </li>
+                    <li class="nav-item active">
+                        <a href="externalradpo_report.php" class="nav-link">
+                            <i class="fas fa-x-ray"></i>
+                            <span>External Radiology Report</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
 
-<?php
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Page Header -->
+            <div class="page-header">
+                <h1 class="page-title">🏥 External Radiology PO Report</h1>
+                <div class="page-actions">
+                    <button class="btn btn-primary" onclick="refreshPage()">
+                        <i class="fas fa-sync-alt"></i>
+                        Refresh
+                    </button>
+                </div>
+            </div>
 
+            <!-- Alert Container -->
+            <div id="alertContainer"></div>
 
-
-$query1 = "select * from master_location where status='' order by locationname";
-
-$exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-$loccode=array();
-
-while ($res1 = mysqli_fetch_array($exec1))
-
-{
-
-$locationname = $res1["locationname"];
-
-$locationcode = $res1["locationcode"];
-
-
-
-?>
-
-<option value="<?php echo $locationcode; ?>" <?php if($location!='')if($location==$locationcode){echo "selected";}?>><?php echo $locationname; ?></option>
-
-<?php
-
-} 
-
-?>
-
-
-
-</select>
-
-</span></td>
-
-<td width="30%" align="left" valign="top"  bgcolor="#FFFFFF"></td>
-<td width="30%" align="left" valign="top"  bgcolor="#FFFFFF"></td>
-</tr>
-
-					
-        <tr>
-          <td class="bodytext31" valign="center"  align="left" bgcolor="#ffffff"><input type="hidden" name="medicinecode" id="medicinecode" style="border: 1px solid #001E6A; text-align:left" onKeyDown="return disableEnterKey()" value="<?php echo $medicinecode; ?>" size="10" readonly /></td>
-          <td colspan="3" align="left" valign="center"  bgcolor="#ffffff" class="bodytext31">
-		  <strong><!--Item Code :--> <?php //echo $medicinecode; ?>
-		  <input type="hidden" name="cbfrmflag1" value="cbfrmflag1">
-		  <input  type="submit" value="Search" name="Submit" />
-		  <input name="resetbutton" type="reset" id="resetbutton" value="Reset" />
-		  <input type="hidden" name="frmflag1" value="frmflag1" id="frmflag1">
-		  </strong></td>
-		  
-		  
-		  <?php 
-      //$default_lpo_date = date('Y-m-d', strtotime('+1 month'));
-      $default_lpo_date = date('Y-m-d', strtotime("+60 days"));
-      ?>    
-      
-           
-</tr>
-        </tr>
-      </tbody>
-    </table>
-    </form>		
-	</td>
-      </tr>
-      <tr>
-        <td>&nbsp;</td>
-      </tr>
-      <tr>
-        <td>
-		<form name="form1" id="form1" method="post" action="externalradpo_report.php" onSubmit="return validcheck()">	
-		<table id="AutoNumber3" style="BORDER-COLLAPSE: collapse" 
-            bordercolor="#666666" cellspacing="0" cellpadding="4" width="90%"
-            align="left" border="0">
-          <tbody>
-		  <?php
-		  if (isset($_REQUEST["frmflag1"])) { $frmflag1 = $_REQUEST["frmflag1"]; } else { $frmflag1 = ""; }
-//$frmflag1 = $_REQUEST['frmflag1'];
-if ($frmflag1 == 'frmflag1')
-{
-$externallabsupplier = $_REQUEST['searchsuppliername'];
-		  ?>
-		 
-		  <tr>
-		     
-		      <td width="23" align="left" valign="center"  
-                bgcolor="#ffffff" class="bodytext31"><div align="left"><strong>Sno</strong></div></td>
-				<td width="74" align="left" valign="center"  
-                bgcolor="#ffffff" class="bodytext31"><div align="left"><strong>Date</strong></div></td>
-              <td width="177" align="left" valign="center"  
-                bgcolor="#ffffff" class="bodytext31"><strong>Patient Name</strong></td>
-              <td width="75" align="left" valign="center"  
-                bgcolor="#ffffff" class="bodytext31"><strong>Reg No</strong></td>
-              <td width="77" align="left" valign="center"  
-                bgcolor="#ffffff" class="bodytext31"><div align="left"><strong>Visit No</strong></div></td>
-                 <td width="77" align="left" valign="center"  
-                bgcolor="#ffffff" class="bodytext31"><div align="left"><strong>PO No</strong></div></td>
-              <td width="58" align="left" valign="center"  
-                bgcolor="#ffffff" class="bodytext31"><div align="left"><strong>Age</strong></div></td>
-				 <td width="74" align="left" valign="center"  
-                bgcolor="#ffffff" class="bodytext31"><div align="left"><strong>Gender</strong></div></td>
-				 <td width="74" align="left" valign="center"  
-                bgcolor="#ffffff" class="bodytext31"><div align="left"><strong>Sample Id</strong></div></td>
-				 <td width="229" align="left" valign="center"  
-                bgcolor="#ffffff" class="bodytext31"><div align="left"><strong>Test Name</strong></div></td>
-				
-				<td width="140" align="left" valign="center"  
-                bgcolor="#ffffff" class="bodytext31"><div align="left"><strong>Supplier</strong></div></td>
-				 <td width="90" align="left" valign="center"  
-                bgcolor="#ffffff" class="bodytext31"><div align="center"><strong>Rate</strong></div></td>
-				
-				<td width="90" align="left" valign="center"  
-                bgcolor="#ffffff" class="bodytext31"><div align="center"><strong>Tax%</strong></div></td>
-				
-				<td width="90" align="left" valign="center"  
-                bgcolor="#ffffff" class="bodytext31"><div align="center"><strong>Amount</strong></div></td>
-             </tr>
-				<?php
-				
-$sno=0;
-$sno1=0;
-if($location=='All')
-{
-    $query7 = "(select auto_number as auto_number,docnumber as docnumber,patientname as patientname,patientcode as patientcode,patientvisitcode as patientvisitcode,consultationdate as recorddate,radiologyitemname as itemname,radiologyitemcode as itemcode,'' as sampleid,'' as billnumber,'consultation_radiology' as tablename from consultation_radiology where exclude = 'yes'  and externalack='1'  and  consultationdate between '$fromdate' and '$todate') 
- union all
-( select auto_number as auto_number,docnumber as docnumber,patientname as patientname,patientcode as patientcode,patientvisitcode as patientvisitcode,consultationdate as recorddate,radiologyitemname as itemname,radiologyitemcode as itemcode,'' as sampleid,'' as billnumber,'ipconsultation_radiology' as tablename from ipconsultation_radiology where exclude = 'yes'  and externalack='1' and  consultationdate between '$fromdate' and '$todate') order by recorddate desc";
-}
-else
-{
-	 $query7 = "(select auto_number as auto_number,docnumber as docnumber,patientname as patientname,patientcode as patientcode,patientvisitcode as patientvisitcode,consultationdate as recorddate,radiologyitemname as itemname,radiologyitemcode as itemcode,'' as sampleid,'' as billnumber,'consultation_radiology' as tablename from consultation_radiology where exclude = 'yes'  and externalack='1'  and  consultationdate between '$fromdate' and '$todate' and locationcode='$locationcode') 
- union all
-( select auto_number as auto_number,docnumber as docnumber,patientname as patientname,patientcode as patientcode,patientvisitcode as patientvisitcode,consultationdate as recorddate,radiologyitemname as itemname,radiologyitemcode as itemcode,'' as sampleid,'' as billnumber,'ipconsultation_radiology' as tablename from ipconsultation_radiology where exclude = 'yes'  and externalack='1' and  consultationdate between '$fromdate' and '$todate' and locationcode='$locationcode') order by recorddate desc";
-}
-$exec7 = mysqli_query($GLOBALS["___mysqli_ston"], $query7) or die(mysqli_error($GLOBALS["___mysqli_ston"]));
-$num7 = mysqli_num_rows($exec7);
-							
-while($res7 = mysqli_fetch_array($exec7))
-{
-$res7auto_number= $res7['auto_number'];
-$res7docnumber = $res7['docnumber'];
-$patientname6 = $res7['patientname'];
-$regno = $res7['patientcode'];
-$visitno = $res7['patientvisitcode'];
-$billdate6 = $res7['recorddate'];
-$test = $res7['itemname'];
-$itemcode = $res7['itemcode'];
-$sampleid = $res7['sampleid'];
-$billnumber2 = $res7['billnumber'];
-$res7tablename = $res7['tablename'];
-
-  $query70 = "select * from manual_lpo where sample_autono = '$res7auto_number' and sample_table ='$res7tablename' ";
-$exec70 = mysqli_query($GLOBALS["___mysqli_ston"], $query70) or die(mysqli_error($GLOBALS["___mysqli_ston"]));
-$res70 = mysqli_fetch_array($exec70);
-$suppliername = $res70['suppliername'];
-$quantity = $res70['quantity'];
-$rate_val = $res70['rate'];
-$totalamount= $res70['totalamount'];
-$itemtaxpercentage= $res70['itemtaxpercentage'];
-$purchaseindentdocno= $res70['billnumber'];
-
-$query751 = "select * from master_customer where customercode = '$regno' ";
-$exec751 = mysqli_query($GLOBALS["___mysqli_ston"], $query751) or die(mysqli_error($GLOBALS["___mysqli_ston"]));
-$res751 = mysqli_fetch_array($exec751);
-$dob = $res751['dateofbirth'];
-$age = calculate_age($dob);
-$gender = $res751['gender'];
-
-$query68="select * from master_lab where itemcode='$itemcode' and status <> 'deleted'";
-$exec68=mysqli_query($GLOBALS["___mysqli_ston"], $query68);
-$res68=mysqli_fetch_array($exec68);
-$externallab = $res68['externallab'];
-
-$sno=$sno+1;
-$sno1=$sno1+1;
-$colorloopcount = $colorloopcount + 1;
-				$showcolor = ($colorloopcount & 1); 
-				if ($showcolor == 0)
-				{
-					//echo "if";
-					$colorcode = 'bgcolor="#CBDBFA"';
-				}
-				else
-				{
-					//echo "else";
-					$colorcode = 'bgcolor="#ecf0f5"';
-				}
-				?>
-				 <tr <?php echo $colorcode; ?>>
-             
-              <td align="left" valign="center"  class="bodytext31"><?php echo $sno; ?></td>
-				 <td align="left" valign="center"    class="bodytext31"><div align="left"><?php echo $billdate6; ?></div>
-				
-				 </td>
-              <td align="left" valign="center"    class="bodytext31"><div align="left"><?php echo $patientname6; ?></div></td>
-				<td align="left" valign="center"   class="bodytext31"><div align="left"><?php echo $regno; ?></div>
-				
-				</td>
-              <td align="left" valign="center"   class="bodytext31"><div align="left"><?php echo $visitno; ?></div>
-              
-              </td>
-              <td align="left" valign="center"   class="bodytext31"><div align="left"><?php echo $purchaseindentdocno; ?></div>
-			
-			  </td>
-             	 <td align="left" valign="center"  class="bodytext31"><div align="left"><?php echo $age; ?></div>
-				
-				 </td>
-				 <td align="left" valign="center"   class="bodytext31"><div align="left"><?php echo $gender; ?></div>
-			
-				 </td>
-				 
-				 <td align="left" valign="center"   class="bodytext31"><div align="left"><?php echo $res7docnumber; ?></div>
-				
-				 </td>
-				 <td align="left" valign="center"   class="bodytext31"><div align="left"><?php echo $test; ?>
-				 
-				 </div></td>
-				 <td align="left" valign="center"  class="bodytext31" size="20"><?php echo $suppliername; ?></td>
-							
-			 <td align="right" valign="center"   class="bodytext31"><?php echo $rate_val; ?></td>
-				
-			 <td class="bodytext31" valign="center"  align="right" ><?php echo $itemtaxpercentage; ?></td>
-		     <td class="bodytext31" valign="center"  align="right" ><?php echo number_format($totalamount, 2, '.', ','); ?></td>
-				</tr>
-				<?php
-				}
-				?>
+            <!-- Search Form -->
+            <div class="search-container">
+                <div class="section-header">
+                    <i class="fas fa-search"></i>
+                    <h3>Search Radiology Report</h3>
+                </div>
                 
-				<tr>
-       
-      </tr>
-	  <?php
-	  }
-	  ?>
-    <!--  <tr>
-       <td class="bodytext31" valign="center"  align="right" colspan="13"><a href="print_externallabpo_report.php?fromdate=<?php echo $fromdate; ?>&&todate=<?php echo $todate ?>&&locationcode=<?php echo $location ?>"target="_blank"  ><img height="25" width="25" src="images25\pdfdownload.jpg"></a></td>
-       </tr>-->
-		  </tbody>
-		  </table>
-		  </form></td>
-      </tr>
-	  
-      
-    </table>    
-  <tr>
-    <td valign="top">    
-  <tr>
-    <td width="97%" valign="top">    
-</table>
-<script>
-</script>
-<?php include ("includes/footer1.php"); ?>
+                <form name="drugs" action="externalradpo_report.php" method="post" onKeyDown="return disableEnterKey()">
+                    <div class="search-form">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="ADate1" class="form-label required">Date From</label>
+                                <input name="ADate1" id="ADate1" value="<?php echo $transactiondatefrom; ?>" 
+                                       class="form-input datepicker-input" readonly="readonly" onKeyDown="return disableEnterKey()" />
+                                <img src="images2/cal.gif" onClick="javascript:NewCssCal('ADate1')" style="cursor:pointer" class="datepicker-icon"/>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="ADate2" class="form-label required">Date To</label>
+                                <input name="ADate2" id="ADate2" value="<?php echo $transactiondateto; ?>" 
+                                       class="form-input datepicker-input" readonly="readonly" onKeyDown="return disableEnterKey()" />
+                                <img src="images2/cal.gif" onClick="javascript:NewCssCal('ADate2')" style="cursor:pointer" class="datepicker-icon"/>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="location" class="form-label">Location</label>
+                                <select name="location" id="location" class="form-select">
+                                    <option value="All">All Locations</option>
+                                    <?php
+                                    $query1 = "select * from master_location where status='' order by locationname";
+                                    $exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
+                                    while ($res1 = mysqli_fetch_array($exec1)) {
+                                        $locationname = $res1["locationname"];
+                                        $locationcode = $res1["locationcode"];
+                                    ?>
+                                    <option value="<?php echo $locationcode; ?>" <?php if($location!='')if($location==$locationcode){echo "selected";}?>><?php echo $locationname; ?></option>
+                                    <?php } ?>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="form-actions">
+                            <input type="hidden" name="cbfrmflag1" value="cbfrmflag1">
+                            <input type="hidden" name="frmflag1" value="frmflag1" id="frmflag1">
+                            <button type="submit" name="Submit" class="btn btn-primary">
+                                <i class="fas fa-search"></i>
+                                Search Report
+                            </button>
+                            <button type="reset" name="resetbutton" id="resetbutton" class="btn btn-secondary">
+                                <i class="fas fa-times"></i>
+                                Reset
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Report Results -->
+            <?php if ($frmflag1 == 'frmflag1'): ?>
+            <div class="report-container">
+                <div class="report-header">
+                    <div class="report-title">
+                        <i class="fas fa-file-medical-alt"></i>
+                        <h3>External Radiology PO Report Results</h3>
+                    </div>
+                    <div class="report-actions">
+                        <button class="btn btn-success" onclick="exportReport()">
+                            <i class="fas fa-file-excel"></i>
+                            Export CSV
+                        </button>
+                        <button class="btn btn-info" onclick="printReport()">
+                            <i class="fas fa-print"></i>
+                            Print Report
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Report Summary -->
+                <div class="report-summary">
+                    <div class="summary-card">
+                        <div class="summary-icon">
+                            <i class="fas fa-calendar-alt"></i>
+                        </div>
+                        <div class="summary-content">
+                            <span class="summary-label">Date Range</span>
+                            <span class="summary-value"><?php echo date('M d, Y', strtotime($fromdate)); ?> - <?php echo date('M d, Y', strtotime($todate)); ?></span>
+                        </div>
+                    </div>
+                    
+                    <div class="summary-card">
+                        <div class="summary-icon">
+                            <i class="fas fa-map-marker-alt"></i>
+                        </div>
+                        <div class="summary-content">
+                            <span class="summary-label">Location</span>
+                            <span class="summary-value"><?php echo ($location == 'All') ? 'All Locations' : $location; ?></span>
+                        </div>
+                    </div>
+                    
+                    <div class="summary-card">
+                        <div class="summary-icon">
+                            <i class="fas fa-x-ray"></i>
+                        </div>
+                        <div class="summary-content">
+                            <span class="summary-label">Total Tests</span>
+                            <span class="summary-value"><?php 
+                                if($location=='All') {
+                                    $countquery = "(select count(*) as total from consultation_radiology where exclude = 'yes' and externalack='1' and consultationdate between '$fromdate' and '$todate') + (select count(*) as total from ipconsultation_radiology where exclude = 'yes' and externalack='1' and consultationdate between '$fromdate' and '$todate')";
+                                } else {
+                                    $countquery = "(select count(*) as total from consultation_radiology where exclude = 'yes' and externalack='1' and consultationdate between '$fromdate' and '$todate' and locationcode='$locationcode') + (select count(*) as total from ipconsultation_radiology where exclude = 'yes' and externalack='1' and consultationdate between '$fromdate' and '$todate' and locationcode='$locationcode')";
+                                }
+                                $countexec = mysqli_query($GLOBALS["___mysqli_ston"], $countquery);
+                                $countres = mysqli_fetch_array($countexec);
+                                echo $countres['total'];
+                            ?></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Results Table -->
+                <div class="table-container">
+                    <table class="data-table" id="externalRadiologyReportTable">
+                        <thead>
+                            <tr>
+                                <th class="sortable" data-sort="sno">S.No</th>
+                                <th class="sortable" data-sort="date">Date</th>
+                                <th class="sortable" data-sort="patient-name">Patient Name</th>
+                                <th class="sortable" data-sort="reg-no">Reg No</th>
+                                <th class="sortable" data-sort="visit-no">Visit No</th>
+                                <th class="sortable" data-sort="po-no">PO No</th>
+                                <th class="sortable" data-sort="age">Age</th>
+                                <th class="sortable" data-sort="gender">Gender</th>
+                                <th class="sortable" data-sort="sample-id">Sample Id</th>
+                                <th class="sortable" data-sort="test-name">Test Name</th>
+                                <th class="sortable" data-sort="supplier">Supplier</th>
+                                <th class="sortable" data-sort="rate">Rate</th>
+                                <th class="sortable" data-sort="tax">Tax%</th>
+                                <th class="sortable" data-sort="amount">Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php
+                            $sno = 0;
+                            $sno1 = 0;
+                            if($location == 'All') {
+                                $query7 = "(select auto_number as auto_number,docnumber as docnumber,patientname as patientname,patientcode as patientcode,patientvisitcode as patientvisitcode,consultationdate as recorddate,radiologyitemname as itemname,radiologyitemcode as itemcode,'' as sampleid,'' as billnumber,'consultation_radiology' as tablename from consultation_radiology where exclude = 'yes' and externalack='1' and consultationdate between '$fromdate' and '$todate') 
+                                union all
+                                ( select auto_number as auto_number,docnumber as docnumber,patientname as patientname,patientcode as patientcode,patientvisitcode as patientvisitcode,consultationdate as recorddate,radiologyitemname as itemname,radiologyitemcode as itemcode,'' as sampleid,'' as billnumber,'ipconsultation_radiology' as tablename from ipconsultation_radiology where exclude = 'yes' and externalack='1' and consultationdate between '$fromdate' and '$todate') order by recorddate desc";
+                            } else {
+                                $query7 = "(select auto_number as auto_number,docnumber as docnumber,patientname as patientname,patientcode as patientcode,patientvisitcode as patientvisitcode,consultationdate as recorddate,radiologyitemname as itemname,radiologyitemcode as itemcode,'' as sampleid,'' as billnumber,'consultation_radiology' as tablename from consultation_radiology where exclude = 'yes' and externalack='1' and consultationdate between '$fromdate' and '$todate' and locationcode='$locationcode') 
+                                union all
+                                ( select auto_number as auto_number,docnumber as docnumber,patientname as patientname,patientcode as patientcode,patientvisitcode as patientvisitcode,consultationdate as recorddate,radiologyitemname as itemname,radiologyitemcode as itemcode,'' as sampleid,'' as billnumber,'ipconsultation_radiology' as tablename from ipconsultation_radiology where exclude = 'yes' and externalack='1' and consultationdate between '$fromdate' and '$todate' and locationcode='$locationcode') order by recorddate desc";
+                            }
+                            $exec7 = mysqli_query($GLOBALS["___mysqli_ston"], $query7) or die(mysqli_error($GLOBALS["___mysqli_ston"]));
+                            $num7 = mysqli_num_rows($exec7);
+                            
+                            if ($num7 > 0) {
+                                while($res7 = mysqli_fetch_array($exec7)) {
+                                    $res7auto_number = $res7['auto_number'];
+                                    $res7docnumber = $res7['docnumber'];
+                                    $patientname6 = $res7['patientname'];
+                                    $regno = $res7['patientcode'];
+                                    $visitno = $res7['patientvisitcode'];
+                                    $billdate6 = $res7['recorddate'];
+                                    $test = $res7['itemname'];
+                                    $itemcode = $res7['itemcode'];
+                                    $sampleid = $res7['sampleid'];
+                                    $billnumber2 = $res7['billnumber'];
+                                    $res7tablename = $res7['tablename'];
+
+                                    $query70 = "select * from manual_lpo where sample_autono = '$res7auto_number' and sample_table ='$res7tablename' ";
+                                    $exec70 = mysqli_query($GLOBALS["___mysqli_ston"], $query70) or die(mysqli_error($GLOBALS["___mysqli_ston"]));
+                                    $res70 = mysqli_fetch_array($exec70);
+                                    $suppliername = $res70['suppliername'];
+                                    $quantity = $res70['quantity'];
+                                    $rate_val = $res70['rate'];
+                                    $totalamount = $res70['totalamount'];
+                                    $itemtaxpercentage = $res70['itemtaxpercentage'];
+                                    $purchaseindentdocno = $res70['billnumber'];
+
+                                    $query751 = "select * from master_customer where customercode = '$regno' ";
+                                    $exec751 = mysqli_query($GLOBALS["___mysqli_ston"], $query751) or die(mysqli_error($GLOBALS["___mysqli_ston"]));
+                                    $res751 = mysqli_fetch_array($exec751);
+                                    $dob = $res751['dateofbirth'];
+                                    $age = calculate_age($dob);
+                                    $gender = $res751['gender'];
+
+                                    $query68 = "select * from master_lab where itemcode='$itemcode' and status <> 'deleted'";
+                                    $exec68 = mysqli_query($GLOBALS["___mysqli_ston"], $query68);
+                                    $res68 = mysqli_fetch_array($exec68);
+                                    $externallab = $res68['externallab'];
+
+                                    $sno = $sno + 1;
+                                    $sno1 = $sno1 + 1;
+                                    $colorloopcount = $colorloopcount + 1;
+                                    $showcolor = ($colorloopcount & 1);
+                            ?>
+                            <tr class="<?php echo ($showcolor == 0) ? 'even' : 'odd'; ?>">
+                                <td class="sno-cell"><?php echo $sno; ?></td>
+                                <td class="date-cell"><?php echo $billdate6; ?></td>
+                                <td class="patient-name"><?php echo htmlspecialchars($patientname6); ?></td>
+                                <td class="reg-no"><?php echo $regno; ?></td>
+                                <td class="visit-no"><?php echo $visitno; ?></td>
+                                <td class="po-no"><?php echo $purchaseindentdocno; ?></td>
+                                <td class="age-cell"><?php echo $age; ?></td>
+                                <td class="gender-cell"><?php echo $gender; ?></td>
+                                <td class="sample-id"><?php echo $res7docnumber; ?></td>
+                                <td class="test-name"><?php echo htmlspecialchars($test); ?></td>
+                                <td class="supplier"><?php echo htmlspecialchars($suppliername); ?></td>
+                                <td class="rate-cell"><?php echo number_format($rate_val, 2); ?></td>
+                                <td class="tax-cell"><?php echo $itemtaxpercentage; ?></td>
+                                <td class="amount-cell"><?php echo number_format($totalamount, 2); ?></td>
+                            </tr>
+                            <?php
+                                }
+                            } else {
+                            ?>
+                            <tr>
+                                <td colspan="14" class="no-data">
+                                    <div class="no-data-content">
+                                        <i class="fas fa-search"></i>
+                                        <h4>No Data Found</h4>
+                                        <p>No external radiology PO records found for the selected criteria.</p>
+                                    </div>
+                                </td>
+                            </tr>
+                            <?php } ?>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Table Summary -->
+                <div class="table-summary">
+                    <div class="summary-item">
+                        <i class="fas fa-list"></i>
+                        <span>Total Records: <?php echo $sno; ?></span>
+                    </div>
+                </div>
+            </div>
+            <?php endif; ?>
+        </main>
+    </div>
+
+    <!-- Modern JavaScript -->
+    <script src="js/external-radiology-report-modern.js?v=<?php echo time(); ?>"></script>
+
+    <!-- Legacy JavaScript -->
+    <script type="text/javascript">
+        function disableEnterKey() {
+            if (event.keyCode == 8) {
+                event.keyCode = 0; 
+                return event.keyCode 
+                return false;
+            }
+            
+            var key;
+            if(window.event) {
+                key = window.event.keyCode;
+            } else {
+                key = e.which;
+            }
+            
+            if(key == 13) {
+                return false;
+            } else {
+                return true;
+            }
+        }
+
+        function getValidityDays() {
+            var d1 = parseDate($('#todaydate').val());
+            console.log(d1);
+            var oneDay = 24*60*60*1000;
+            var diff = 0;
+            if (d1 && d2) {
+                diff = Math.round(Math.abs((d2.getTime() - d1.getTime())/(oneDay)));
+                console.log('diff'+diff);
+            }
+        }
+
+        function parseDate(input) {
+            var parts = input.match(/(\d+)/g);
+            return new Date(parts[0], parts[1]-1, parts[2]);
+        }
+
+        function validcheck() {
+            return true;
+        }
+
+        function refreshPage() {
+            window.location.reload();
+        }
+
+        function exportReport() {
+            const fromdate = document.querySelector('input[name="ADate1"]').value;
+            const todate = document.querySelector('input[name="ADate2"]').value;
+            const location = document.querySelector('select[name="location"]').value;
+            
+            if (!fromdate || !todate) {
+                alert('Please select date range before exporting');
+                return;
+            }
+            
+            const table = document.getElementById('externalRadiologyReportTable');
+            if (!table) {
+                alert('No data to export');
+                return;
+            }
+            
+            let csvContent = 'S.No,Date,Patient Name,Reg No,Visit No,PO No,Age,Gender,Sample Id,Test Name,Supplier,Rate,Tax%,Amount\n';
+            
+            const rows = table.querySelectorAll('tbody tr');
+            rows.forEach(function(row) {
+                const cells = row.querySelectorAll('td');
+                if (cells.length > 1 && !row.querySelector('.no-data')) {
+                    const rowData = Array.from(cells).map(cell => `"${cell.textContent.trim()}"`);
+                    csvContent += rowData.join(',') + '\n';
+                }
+            });
+            
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'external_radiology_po_report.csv';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+        }
+
+        function printReport() {
+            window.print();
+        }
+    </script>
 </body>
 </html>

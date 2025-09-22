@@ -1,42 +1,32 @@
 <?php
-
 session_start();
 
 include ("includes/loginverify.php");
-
 include ("db/db_connect.php");
 
-
-
+// Initialize variables
 $ipaddress = $_SERVER['REMOTE_ADDR'];
-
 $updatedatetime = date('Y-m-d H:i:s');
-$updatedate= date('Y-m-d');
-
+$updatedate = date('Y-m-d');
 $username = $_SESSION['username'];
-
 $companyanum = $_SESSION['companyanum'];
-
 $companyname = $_SESSION['companyname'];
-
 $errmsg = '';
-
 $bgcolorcode = '';
 
+// Get location details
 $docno = $_SESSION['docno'];
 $query = "select * from login_locationdetails where username='$username' and docno='$docno' order by locationname";
 $exec = mysqli_query($GLOBALS["___mysqli_ston"], $query) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
 $res = mysqli_fetch_array($exec);
 
-	
-	 $locationname1  = $res["locationname"];
-	  $locationcode123 = $res["locationcode"];
-	  $locationcode = $res["locationcode"];
-	 $res12locationanum = $res["auto_number"];
+$locationname1 = $res["locationname"];
+$locationcode123 = $res["locationcode"];
+$locationcode = $res["locationcode"];
+$res12locationanum = $res["auto_number"];
 
-
-
-if (isset($_REQUEST["frmflag1"])) { $frmflag1 = $_REQUEST["frmflag1"]; } else { $frmflag1 = ""; }
+// Handle form submission
+$frmflag1 = isset($_REQUEST["frmflag1"]) ? $_REQUEST["frmflag1"] : "";
 
 //$frmflag1 = $_REQUEST['frmflag1'];
 
@@ -262,30 +252,15 @@ if(!empty($_FILES['upload_file']))
 
 
 
-if (isset($_REQUEST["upload"])) { $upload = $_REQUEST["upload"]; } else { $upload = ""; }
+// Handle upload status messages
+$upload = isset($_REQUEST["upload"]) ? $_REQUEST["upload"] : "";
 
-//$upload = $_REQUEST['upload'];
-
-//echo $upload;
-
-if ($upload == 'success')
-
-{
-
-	$errmsg = "File Upload Completed.";
-
-	$bgcolorcode = 'success';
-
-}
-
-if ($upload == 'failed')
-
-{
-
-	$errmsg = "File Upload Failed. Make Sure You Are Uploading TAB Delimited File.";
-
-	$bgcolorcode = 'failed';
-
+if ($upload == 'success') {
+    $errmsg = "File Upload Completed Successfully!";
+    $bgcolorcode = 'success';
+} elseif ($upload == 'failed') {
+    $errmsg = "File Upload Failed. Please ensure you are uploading a valid Excel file.";
+    $bgcolorcode = 'failed';
 }
 
 
@@ -294,239 +269,249 @@ if ($upload == 'failed')
 
 ?>
 
-<style type="text/css">
-
-<!--
-
-body {
-
-	margin-left: 0px;
-
-	margin-top: 0px;
-
-	background-color: #ecf0f5;
-
-}
-
-.bodytext3 {	FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3B3B3C; FONT-FAMILY: Tahoma
-
-}
-
--->
-
-</style>
-
-<link href="datepickerstyle.css" rel="stylesheet" type="text/css" />
-
-<style type="text/css">
-
-<!--
-
-.bodytext31 {FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3b3b3c; FONT-FAMILY: Tahoma; text-decoration:none;
-
-}
-
-.bodytext3 {FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3b3b3c; FONT-FAMILY: Tahoma; text-decoration:none;
-
-}
-
--->
-
-</style>
-
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doctors Upload - MedStar</title>
+    
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <!-- Modern CSS -->
+    <link rel="stylesheet" href="css/doctors-upload-modern.css?v=<?php echo time(); ?>">
+    
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- Date Picker CSS -->
+    <link href="css/datepickerstyle.css" rel="stylesheet" type="text/css" />
+    
+    <script type="text/javascript">
+    function dataimport1verify() {
+        if (document.getElementById("upload_file").value == "") {
+            alert("Please Select The File To Proceed.");
+            return false;
+        }
+        
+        // Show loading overlay
+        showLoadingOverlay();
+        return true;
+    }
+    
+    function showLoadingOverlay() {
+        const overlay = document.createElement('div');
+        overlay.id = 'loadingOverlay';
+        overlay.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        `;
+        
+        const content = document.createElement('div');
+        content.style.cssText = `
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        `;
+        
+        content.innerHTML = `
+            <div style="margin-bottom: 1rem;">
+                <i class="fas fa-spinner fa-spin" style="font-size: 2rem; color: #1e40af;"></i>
+            </div>
+            <p style="margin: 0; font-weight: 600;">Processing File Upload...</p>
+            <p style="margin: 0.5rem 0 0 0; font-size: 0.9rem; color: #666;">Please wait while we import the doctor data.</p>
+        `;
+        
+        overlay.appendChild(content);
+        document.body.appendChild(overlay);
+    }
+    </script>
+    
+    <!-- Modern JavaScript -->
+    <script src="js/doctors-upload-modern.js?v=<?php echo time(); ?>"></script>
 </head>
 
-<script language="javascript">
-
-
-
-function dataimport1verify()
-
-{
-
-	if (document.getElementById("upload_file").value == "")
-
-	{
-
-		alert ("Please Select The File To Proceed.");
-
-		return false;
-
-	}
-
-}
-
-
-
-</script>
-
 <body>
+    <!-- Hospital Header -->
+    <header class="hospital-header">
+        <h1 class="hospital-title">🏥 MedStar Hospital Management</h1>
+        <p class="hospital-subtitle">Advanced Healthcare Management Platform</p>
+    </header>
 
-<table width="101%" border="0" cellspacing="0" cellpadding="2">
+    <!-- User Information Bar -->
+    <div class="user-info-bar">
+        <div class="user-welcome">
+            <span class="welcome-text">Welcome, <strong><?php echo htmlspecialchars($username); ?></strong></span>
+            <span class="location-info">📍 Company: <?php echo htmlspecialchars($companyname); ?></span>
+        </div>
+        <div class="user-actions">
+            <a href="mainmenu1.php" class="btn btn-outline">🏠 Main Menu</a>
+            <a href="logout.php" class="btn btn-outline">🚪 Logout</a>
+        </div>
+    </div>
 
-  <tr>
+    <!-- Navigation Breadcrumb -->
+    <nav class="nav-breadcrumb">
+        <a href="mainmenu1.php">🏠 Home</a>
+        <span>→</span>
+        <span>Doctors Upload</span>
+    </nav>
 
-    <td colspan="10" bgcolor="#ecf0f5"><?php include ("includes/alertmessages1.php"); ?></td>
+    <!-- Floating Menu Toggle -->
+    <div id="menuToggle" class="floating-menu-toggle">
+        <i class="fas fa-bars"></i>
+    </div>
 
-  </tr>
+    <!-- Main Container with Sidebar -->
+    <div class="main-container-with-sidebar">
+        <!-- Left Sidebar -->
+        <aside id="leftSidebar" class="left-sidebar">
+            <div class="sidebar-header">
+                <h3>Quick Navigation</h3>
+                <button id="sidebarToggle" class="sidebar-toggle">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <ul class="nav-list">
+                    <li class="nav-item">
+                        <a href="mainmenu1.php" class="nav-link">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="doctors_upload.php" class="nav-link active">
+                            <i class="fas fa-upload"></i>
+                            <span>Doctors Upload</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="doctorsactivityreport.php" class="nav-link">
+                            <i class="fas fa-user-md"></i>
+                            <span>Doctor Activity Report</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="doctorpaymententry.php" class="nav-link">
+                            <i class="fas fa-credit-card"></i>
+                            <span>Doctor Payment Entry</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
 
-  <tr>
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Alert Container -->
+            <div id="alertContainer">
+                <?php if (!empty($errmsg)): ?>
+                    <div class="alert alert-<?php echo $bgcolorcode === 'success' ? 'success' : ($bgcolorcode === 'failed' ? 'error' : 'info'); ?>">
+                        <i class="fas fa-<?php echo $bgcolorcode === 'success' ? 'check-circle' : ($bgcolorcode === 'failed' ? 'exclamation-triangle' : 'info-circle'); ?> alert-icon"></i>
+                        <span><?php echo htmlspecialchars($errmsg); ?></span>
+                    </div>
+                <?php endif; ?>
+            </div>
 
-    <td colspan="10" bgcolor="#ecf0f5"><?php include ("includes/title1.php"); ?></td>
+            <!-- Page Header -->
+            <div class="page-header">
+                <div class="page-header-content">
+                    <h2>Doctors Upload</h2>
+                    <p>Import doctor information from Excel files with comprehensive data validation and processing.</p>
+                </div>
+                <div class="page-header-actions">
+                    <button type="button" class="btn btn-secondary" onclick="refreshPage()">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                    <button type="button" class="btn btn-outline" onclick="viewSampleFile()">
+                        <i class="fas fa-download"></i> Sample File
+                    </button>
+                </div>
+            </div>
 
-  </tr>
+            <!-- Upload Form Section -->
+            <div class="upload-form-section">
+                <div class="upload-form-header">
+                    <i class="fas fa-upload upload-form-icon"></i>
+                    <h3 class="upload-form-title">Doctor Data Upload</h3>
+                </div>
+                
+                <form method="post" enctype="multipart/form-data" name="form1" id="form1" onSubmit="return dataimport1verify()" class="upload-form">
 
-  <tr>
+                    <!-- Sample File Download -->
+                    <div class="sample-file-section">
+                        <div class="sample-file-header">
+                            <i class="fas fa-download sample-file-icon"></i>
+                            <h4>Sample File Download</h4>
+                        </div>
+                        <div class="sample-file-content">
+                            <p>Download the sample Excel file to understand the required format for doctor data upload.</p>
+                            <a href="sample_excels/doctors_upload_sample.xls" class="btn btn-outline" target="_blank">
+                                <i class="fas fa-file-excel"></i>
+                                Download Sample File
+                            </a>
+                        </div>
+                    </div>
 
-    <td colspan="10" bgcolor="#ecf0f5"><?php include ("includes/menu1.php"); ?></td>
+                    <!-- File Upload Section -->
+                    <div class="file-upload-section">
+                        <div class="form-group">
+                            <label for="upload_file" class="form-label">Select Excel File to Upload</label>
+                            <div class="file-input-wrapper">
+                                <input name="upload_file" id="upload_file" type="file" accept=".xls,.xlsx" class="file-input" required>
+                                <div class="file-input-display">
+                                    <i class="fas fa-cloud-upload-alt"></i>
+                                    <span class="file-input-text">Choose Excel file or drag and drop here</span>
+                                    <span class="file-input-hint">Supports .xls and .xlsx files</span>
+                                </div>
+                            </div>
+                        </div>
 
-  </tr>
+                        <!-- File Requirements -->
+                        <div class="file-requirements">
+                            <h5>File Requirements:</h5>
+                            <ul>
+                                <li><i class="fas fa-check"></i> Excel format (.xls or .xlsx)</li>
+                                <li><i class="fas fa-check"></i> Must include columns: Doctor Code, Doctor Name, Department, OP DR SHARE, IP DR SHARE</li>
+                                <li><i class="fas fa-check"></i> First row should contain column headers</li>
+                                <li><i class="fas fa-check"></i> Maximum file size: 10MB</li>
+                            </ul>
+                        </div>
 
-  <tr>
-
-    <td colspan="10">&nbsp;</td>
-
-  </tr>
-
-  <tr>
-
-    <td width="1%">&nbsp;</td>
-
-    <td width="2%" valign="top"><?php //include ("includes/menu4.php"); ?>
-
-      &nbsp;</td>
-
-    <td width="97%" valign="top"><table width="100%" border="0" cellspacing="0" cellpadding="0">
-
-      <tr>
-
-        <td width="860"><table width="100%" border="0" cellspacing="0" cellpadding="0" class="tablebackgroundcolor1">
-
-            <tr>
-
-              <td>
-              	<form  method="post" enctype="multipart/form-data" name="form1" id="form1" onSubmit="return dataimport1verify()">
-
-                  <table width="800" border="0" align="center" cellpadding="4" cellspacing="0" bordercolor="#666666" id="AutoNumber3" style="border-collapse: collapse">
-
-                    <tbody>
-
-                      <tr bgcolor="#011E6A">
-
-                        <td colspan="2" bgcolor="#ecf0f5" class="bodytext3"><strong>Doctors Upload :  </strong></td>
-
-                      </tr>
-
-                      <tr>
-
-                        <td colspan="2" align="left" valign="middle"   bgcolor="<?php if ($bgcolorcode == '') { echo '#FFFFFF'; } else if ($bgcolorcode == 'success') { echo '#FFBF00'; } else if ($bgcolorcode == 'failed') { echo '#AAFF00'; } ?>" class="bodytext3"><div align="left"><?php echo $errmsg; ?></div></td>
-
-                      </tr>
-
-                      <!-- <tr>
-
-                        <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">&nbsp;</td>
-
-                        <td align="left" valign="top"  bgcolor="#FFFFFF"><span class="bodytext3"><strong>Please Note: </strong></span></td>
-
-                      </tr>
-
-                      <tr>
-
-                        <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">&nbsp;</td>
-
-                        <td align="left" valign="top"  bgcolor="#FFFFFF"><span class="bodytext3"><strong>Only TAB Delimited Files Are Accepted. </strong></span></td>
-
-                      </tr>
-
-                      <tr>
-
-                        <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">&nbsp;</td>
-
-                        <td align="left" valign="top"  bgcolor="#FFFFFF"><span class="bodytext3"><strong>Please Do Not Try To Import Any Other File Format. </strong></span></td>
-
-                      </tr> -->
-
-                      <tr>
-                        <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">&nbsp;</td>
-                        <td align="left" valign="top"  bgcolor="#FFFFFF">
-						<span class="bodytext3"><strong>Download The Sample File Here.</strong></span></td>
-                      </tr>
-
-                      <tr>
-                        <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">&nbsp;</td>
-                        <td align="left" valign="top"  bgcolor="#FFFFFF"><span class="bodytext3">
-                          <a href="sample_excels/doctors_upload_sample.xls" class="bodytext3"><span class="bodytext3" style="color: red; text-decoration: underline;"><strong>Click Here for Sample Excel File...</strong></span></a></td>
-                      </tr>
-                      <tr>
-                      	<td colspan="2" align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">&nbsp;</td>
-                      </tr>
-
-                     
-                      <tr>
-
-                        <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">Select File To Import Data: </td>
-
-                        <td align="left" valign="top"  bgcolor="#FFFFFF">
-
-						<input name="upload_file" id="upload_file" type="file" size="50" style="border: 1px solid #001E6A"></td>
-
-                      </tr>
-
-                      <tr>
-
-                        <td width="36%" align="left" valign="top"  bgcolor="#FFFFFF" class="bodytext3">&nbsp;</td>
-
-                        <td width="64%" align="left" valign="top"  bgcolor="#FFFFFF">
-
-						<input type="hidden" name="frmflag" value="addnew" />
-
+                        <!-- Form Actions -->
+                        <div class="form-actions">
+                            <input type="hidden" name="frmflag" value="addnew" />
                             <input type="hidden" name="frmflag1" value="frmflag1" />
-
-                          <input type="submit" name="Submit" value="Proceed To Data Import" style="border: 1px solid #001E6A" />                        </td>
-
-                      </tr>
-
-                      <tr>
-
-                        <td align="middle" colspan="2" >&nbsp;</td>
-
-                      </tr>
-
-                    </tbody>
-
-                  </table>
-
-				  </form>
-
-                </td>
-
-            </tr>
-
-            <tr>
-
-              <td>&nbsp;</td>
-
-            </tr>
-
-        </table></td>
-
-      </tr>
-
-      <tr>
-
-        <td>&nbsp;</td>
-
-      </tr>
-
-    </table>
-
-  </table>
-
-<?php include ("includes/footer1.php"); ?>
+                            
+                            <button type="submit" class="submit-btn">
+                                <i class="fas fa-upload"></i>
+                                Upload and Process Data
+                            </button>
+                            
+                            <button type="button" class="btn btn-secondary" onclick="resetForm()">
+                                <i class="fas fa-undo"></i> Reset
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </main>
+    </div>
 
 </body>
-
 </html>
 
 

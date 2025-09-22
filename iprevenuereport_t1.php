@@ -134,6 +134,21 @@ if (isset($_REQUEST["ADate2"])) { $todate=$ADate2 = $_REQUEST["ADate2"]; } else 
 
 
 ?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IP Revenue Report - MedStar</title>
+    
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <!-- Modern CSS -->
+    <link rel="stylesheet" href="css/ip-revenue-report-modern.css?v=<?php echo time(); ?>">
+    
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
 <style type="text/css">
 
@@ -255,35 +270,108 @@ function cbsuppliername1()
 
 <script src="js/datetimepicker_css.js"></script>
 
-
+<!-- Modern JavaScript -->
+<script src="js/ip-revenue-report-modern.js?v=<?php echo time(); ?>"></script>
 
 <body>
+    <!-- Hospital Header -->
+    <header class="hospital-header">
+        <h1 class="hospital-title">🏥 MedStar Hospital Management</h1>
+        <p class="hospital-subtitle">Advanced Healthcare Management Platform</p>
+    </header>
 
-<table width="1900" border="0" cellspacing="0" cellpadding="2">
+    <!-- User Information Bar -->
+    <div class="user-info-bar">
+        <div class="user-welcome">
+            <span class="welcome-text">Welcome, <strong><?php echo htmlspecialchars($username); ?></strong></span>
+            <span class="location-info">📍 Company: <?php echo htmlspecialchars($companyname); ?></span>
+        </div>
+        <div class="user-actions">
+            <a href="mainmenu1.php" class="btn btn-outline">🏠 Main Menu</a>
+            <a href="logout.php" class="btn btn-outline">🚪 Logout</a>
+        </div>
+    </div>
 
-  <tr>
+    <!-- Navigation Breadcrumb -->
+    <nav class="nav-breadcrumb">
+        <a href="mainmenu1.php">🏠 Home</a>
+        <span>→</span>
+        <span>IP Revenue Report</span>
+    </nav>
 
-    <td colspan="9" bgcolor="#ecf0f5"><?php include ("includes/alertmessages1.php"); ?></td>
+    <!-- Floating Menu Toggle -->
+    <div id="menuToggle" class="floating-menu-toggle">
+        <i class="fas fa-bars"></i>
+    </div>
 
-  </tr>
+    <!-- Main Container with Sidebar -->
+    <div class="main-container-with-sidebar">
+        <!-- Left Sidebar -->
+        <aside id="leftSidebar" class="left-sidebar">
+            <div class="sidebar-header">
+                <h3>Quick Navigation</h3>
+                <button id="sidebarToggle" class="sidebar-toggle">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <ul class="nav-list">
+                    <li class="nav-item">
+                        <a href="mainmenu1.php" class="nav-link">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="iprevenuereport_t1.php" class="nav-link active">
+                            <i class="fas fa-chart-line"></i>
+                            <span>IP Revenue Report</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="oprevenuereport_t1.php" class="nav-link">
+                            <i class="fas fa-user-md"></i>
+                            <span>OP Revenue Report</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="doctorwiserevenuereport.php" class="nav-link">
+                            <i class="fas fa-stethoscope"></i>
+                            <span>Doctor Revenue Report</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
 
-  <tr>
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Alert Container -->
+            <div id="alertContainer">
+                <?php include ("includes/alertmessages1.php"); ?>
+            </div>
 
-    <td colspan="9" bgcolor="#ecf0f5"><?php include ("includes/title1.php"); ?></td>
+            <!-- Page Header -->
+            <div class="page-header">
+                <div class="page-header-content">
+                    <h2>IP Revenue Report</h2>
+                    <p>Comprehensive revenue analysis for Inpatient services with detailed breakdown by payment types and service categories.</p>
+                </div>
+                <div class="page-header-actions">
+                    <button type="button" class="btn btn-secondary" onclick="refreshPage()">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                    <button type="button" class="btn btn-outline" onclick="printPage()">
+                        <i class="fas fa-print"></i> Print
+                    </button>
+                </div>
+            </div>
 
-  </tr>
 
-  <tr>
 
-    <td colspan="9" bgcolor="#ecf0f5"><?php include ("includes/menu1.php"); ?></td>
 
-  </tr>
 
-  <tr>
-
-    <td colspan="9">&nbsp;</td>
-
-  </tr>
 
   
 
@@ -295,207 +383,108 @@ function cbsuppliername1()
 
 
 
-    <td width="1%">&nbsp;</td>
 
-    <td width="99%" valign="top"><table width="116%" border="0" cellspacing="0" cellpadding="0">
-
-    
-
-       <td width="860">
-
-		<form name="cbform1" method="post" action="iprevenuereport_t1.php">
-
-          <!--TABLE FOR OP/IP REVENUE REPORT -->
-
-           <table width="600" border="0" align="left" cellpadding="4" cellspacing="0" bordercolor="#666666" id="AutoNumber3" style="border-collapse: collapse">
-
-             <tbody>
-
-             <tr bgcolor="#011E6A">
-
-                 <td colspan="2" bgcolor="#ecf0f5" class="bodytext3"><strong>IP Revenue Report </strong></td>
-
-             <!--<td colspan="2" bgcolor="#ecf0f5" class="bodytext3"><?php //echo $errmgs; ?>&nbsp;</td>-->
-
-                 <td colspan="2" align="right" bgcolor="#ecf0f5" class="bodytext3" id="ajaxlocation"><strong> Location </strong>
-
-                      <?php
-
-						if ($location!='')
-
-						{
-
-						$query12 = "select locationname from master_location where locationcode='$location' order by locationname";
-
-						$exec12 = mysqli_query($GLOBALS["___mysqli_ston"], $query12) or die ("Error in Query12".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-						$res12 = mysqli_fetch_array($exec12);
-
-						
-
-						echo $res1location = $res12["locationname"];
-
-						//echo $location;
-
-						}
-
-						else
-
-						{
-
-						$query1 = "select locationname from login_locationdetails where username='$username' and docno='$docno' group by locationname order by locationname";
-
-						$exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-						$res1 = mysqli_fetch_array($exec1);
-
-						
-
-						echo $res1location = $res1["locationname"];
-
-						//$res1locationanum = $res1["locationcode"];
-
-						}
-
-						?>
-
-			     </td> 
-
-             </tr>
-
-             <tr>
-
-                 <td class="bodytext31" valign="center"  align="left" bgcolor="#FFFFFF"> <strong>Date From</strong> </td>
-
-                 <td width="30%" align="left" valign="center"  bgcolor="#FFFFFF" class="bodytext31"><input name="ADate1" id="ADate1" value="<?php echo $paymentreceiveddatefrom; ?>"  size="10"  readonly="readonly" onKeyDown="return disableEnterKey()" /><img src="images2/cal.gif" onClick="javascript:NewCssCal('ADate1')" style="cursor:pointer"/></td>
-
-                 <td width="16%" align="left" valign="center"  bgcolor="#FFFFFF" class="bodytext31"><strong> Date To</strong> </td>
-
-                 <td width="33%" align="left" valign="center"  bgcolor="#FFFFFF"><span class="bodytext31">
-
-                    <input name="ADate2" id="ADate2" value="<?php echo $paymentreceiveddateto; ?>"  size="10"  readonly="readonly" onKeyDown="return disableEnterKey()" />
-
-                    <img src="images2/cal.gif" onClick="javascript:NewCssCal('ADate2')" style="cursor:pointer"/> </span>
-
-                 </td>
-
-             </tr>
-
-			 <tr>
-
-  			   <td width="10%" align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">Location</td>
-
-               <td width="30%" align="left" valign="top"  bgcolor="#FFFFFF">
-
-               	<span class="bodytext3">
-
-			    <select name="location" id="location">
-
-                    <?php
-
-						$query1="select locationcode,locationname from master_employeelocation where username ='$username' group by locationcode order by locationname ";
-
-						$exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-						$loccode=array();
-
-						while ($res1 = mysqli_fetch_array($exec1))
-
-						{
-
-							$locationname = $res1["locationname"];
-
-							$locationcode = $res1["locationcode"];
-
-						?>
-
-						 <option value="<?php echo $locationcode; ?>" <?php if($location!='')if($location==$locationcode){echo "selected";}?>><?php echo $locationname; ?></option>
-
-						<?php
-
-						} 
-
-						?>
-
-                </select></span>
-
-               </td>
-
-			    <td width="10%" align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">Ward</td>
-
-              <td width="30%" align="left" valign="top"  bgcolor="#FFFFFF"><span class="bodytext3">
-
-                <select name="ward" id="ward">
-
-						<option value="" selected="selected"> All</option>
-
-						  <?php 
-
-		  $query = "select * from login_locationdetails where username='$username' and docno='$docno' order by locationname"; 
-
-           $exec = mysqli_query($GLOBALS["___mysqli_ston"], $query) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-          $res = mysqli_fetch_array($exec);
-
-			
-
-	 		$locationname  = $res["locationnanum"]; 
-
-	 		$locationcode2 = $res["locationcode"];
-
-			
-
-						  $query78 = "select * from master_ward where  locationcode='$locationcode2' and recordstatus=''";
-
-						  $exec78 = mysqli_query($GLOBALS["___mysqli_ston"], $query78) or die(mysqli_error($GLOBALS["___mysqli_ston"]));
-
-						  while($res78 = mysqli_fetch_array($exec78))
-
-						  {
-
-						  $wardanum = $res78['auto_number'];
-
-						  $wardname = $res78['ward'];
-
-						    ?>
-
-                          <option value="<?php echo $wardanum; ?>"><?php echo $wardname; ?></option>
-
-						  <?php
-
-						  }
-
-			
-
-                          ?>
-
-                      </select>
-
-              </span></td>
-
-			 </tr>
-
-			 <tr>
-
-               <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">&nbsp;</td>
-
-               <td colspan="3" align="left" valign="top"  bgcolor="#FFFFFF"><input type="hidden" name="cbfrmflag1" value="cbfrmflag1">
-
-                 	<input  type="submit" value="Search" name="Submit" />
-
-                    <input name="resetbutton" type="reset" id="resetbutton" value="Reset" />
-
-               </td>
-
-             </tr>
-
-            </tbody>
-
-           </table>
-
-           <!--ENDS OP/IP REVENUE REPORT-->
-
-           </form>		
+            <!-- IP Revenue Report Form Section -->
+            <div class="form-section">
+                <div class="form-header">
+                    <i class="fas fa-chart-line form-icon"></i>
+                    <h3 class="form-title">IP Revenue Report Search</h3>
+                    <div class="form-header-info" id="ajaxlocation">
+                        <strong>Location: </strong>
+                        <?php
+                        if ($location!='') {
+                            $query12 = "select locationname from master_location where locationcode='$location' order by locationname";
+                            $exec12 = mysqli_query($GLOBALS["___mysqli_ston"], $query12) or die ("Error in Query12".mysqli_error($GLOBALS["___mysqli_ston"]));
+                            $res12 = mysqli_fetch_array($exec12);
+                            echo $res1location = $res12["locationname"];
+                        } else {
+                            $query1 = "select locationname from login_locationdetails where username='$username' and docno='$docno' group by locationname order by locationname";
+                            $exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
+                            $res1 = mysqli_fetch_array($exec1);
+                            echo $res1location = $res1["locationname"];
+                        }
+                        ?>
+                    </div>
+                </div>
+                
+                <form name="cbform1" method="post" action="iprevenuereport_t1.php">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="ADate1" class="form-label">Date From</label>
+                            <div class="date-input-group">
+                                <input name="ADate1" id="ADate1" value="<?php echo $paymentreceiveddatefrom; ?>" 
+                                       class="form-input date-input" readonly="readonly" onKeyDown="return disableEnterKey()" />
+                                <img src="images2/cal.gif" onClick="javascript:NewCssCal('ADate1')" 
+                                     class="date-picker-icon" style="cursor:pointer"/>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="ADate2" class="form-label">Date To</label>
+                            <div class="date-input-group">
+                                <input name="ADate2" id="ADate2" value="<?php echo $paymentreceiveddateto; ?>" 
+                                       class="form-input date-input" readonly="readonly" onKeyDown="return disableEnterKey()" />
+                                <img src="images2/cal.gif" onClick="javascript:NewCssCal('ADate2')" 
+                                     class="date-picker-icon" style="cursor:pointer"/>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="location" class="form-label">Location</label>
+                            <select name="location" id="location" onChange="ajaxlocationfunction(this.value);" class="form-input">
+                                <?php
+                                $query1="select locationcode,locationname from master_employeelocation where username ='$username' group by locationcode order by locationname ";
+                                $exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
+                                $loccode=array();
+                                while ($res1 = mysqli_fetch_array($exec1)) {
+                                    $locationname = $res1["locationname"];
+                                    $locationcode = $res1["locationcode"];
+                                ?>
+                                <option value="<?php echo $locationcode; ?>" <?php if($location!='')if($location==$locationcode){echo "selected";}?>>
+                                    <?php echo $locationname; ?>
+                                </option>
+                                <?php } ?>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="ward" class="form-label">Ward</label>
+                            <select name="ward" id="ward" class="form-input">
+                                <option value="" selected="selected">All</option>
+                                <?php 
+                                $query = "select * from login_locationdetails where username='$username' and docno='$docno' order by locationname"; 
+                                $exec = mysqli_query($GLOBALS["___mysqli_ston"], $query) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
+                                $res = mysqli_fetch_array($exec);
+                                $locationname  = $res["locationnanum"]; 
+                                $locationcode2 = $res["locationcode"];
+                                
+                                $query78 = "select * from master_ward where  locationcode='$locationcode2' and recordstatus=''";
+                                $exec78 = mysqli_query($GLOBALS["___mysqli_ston"], $query78) or die(mysqli_error($GLOBALS["___mysqli_ston"]));
+                                while($res78 = mysqli_fetch_array($exec78)) {
+                                    $wardanum = $res78['auto_number'];
+                                    $wardname = $res78['ward'];
+                                ?>
+                                <option value="<?php echo $wardanum; ?>"><?php echo $wardname; ?></option>
+                                <?php } ?>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <input type="hidden" name="cbfrmflag1" value="cbfrmflag1">
+                        
+                        <button type="submit" class="submit-btn">
+                            <i class="fas fa-search"></i>
+                            Generate Report
+                        </button>
+                        <button name="resetbutton" type="reset" id="resetbutton" class="btn btn-secondary">
+                            <i class="fas fa-undo"></i> Reset
+                        </button>
+                    </div>
+                </form>
+            </div>		
 
         </td>
 
@@ -561,21 +550,29 @@ function cbsuppliername1()
 
    <tr>
 
-      <td>
-
-         <!--TABLE FOR IP REVENUE REPORT-->
-
-        <table width="auto" id="AutoNumber3" style="BORDER-COLLAPSE: collapse"  bordercolor="#666666" cellspacing="0" cellpadding="4"  align="left" border="0">
+            <!-- IP Revenue Report Results Section -->
+            <div class="report-section">
+                <div class="report-header">
+                    <h3 class="report-title">IP Revenue Report Results</h3>
+                    <div class="report-actions">
+                        <button type="button" class="btn btn-outline" onclick="exportToExcel()">
+                            <i class="fas fa-file-excel"></i> Export Excel
+                        </button>
+                        <button type="button" class="btn btn-outline" onclick="exportToPDF()">
+                            <i class="fas fa-file-pdf"></i> Export PDF
+                        </button>
+                    </div>
+                </div>
+                
+                <table class="modern-table revenue-table" id="AutoNumber3">
 
           <tbody>
 
             <tr>
 
-             <td colspan="15" bgcolor="#ecf0f5" class="bodytext3"><strong>Ip Renenue  &nbsp; From &nbsp;<?php echo date('d-M-Y',strtotime($ADate1)); ?> To <?php echo date('d-M-Y',strtotime($ADate2)); ?> </strong></td>
+             <td colspan="15" class="table-header"><strong>IP Revenue Report - From <?php echo date('d-M-Y',strtotime($ADate1)); ?> To <?php echo date('d-M-Y',strtotime($ADate2)); ?></strong></td>
 
-              <!--<td width="10%" bgcolor="#ecf0f5" class="bodytext31">Ip Renenue</td>-->
-
-              <td colspan="10" bgcolor="#ecf0f5" class="bodytext31">
+              <td colspan="10" class="table-header">
 
               <?php
 
@@ -1860,13 +1857,6 @@ $totalprivatedoctoramount=0;
 
         </table>
 
-      </td>
-
-   </tr> 
-
-   
-
-   
 
    
 
@@ -1878,13 +1868,6 @@ $totalprivatedoctoramount=0;
 
    
 
-    <tr>
-
-               	<td colspan="7" style="border-color: light-grey;"><br></td>
-
-               </tr>
-
-		<tr>
 
 
 
@@ -1894,23 +1877,29 @@ $totalprivatedoctoramount=0;
 
    
 
-       <td width="860">	   
-
-			   
-
-         <!--TABLE FOR IP REVENUE REPORT-->
-
-        <table width="auto" id="AutoNumber3" style="BORDER-COLLAPSE: collapse"  bordercolor="#666666" cellspacing="0" cellpadding="4"  align="left" border="0">
+            <!-- IP Revenue Report Results Section -->
+            <div class="report-section">
+                <div class="report-header">
+                    <h3 class="report-title">IP Revenue Report Results</h3>
+                    <div class="report-actions">
+                        <button type="button" class="btn btn-outline" onclick="exportToExcel()">
+                            <i class="fas fa-file-excel"></i> Export Excel
+                        </button>
+                        <button type="button" class="btn btn-outline" onclick="exportToPDF()">
+                            <i class="fas fa-file-pdf"></i> Export PDF
+                        </button>
+                    </div>
+                </div>
+                
+                <table class="modern-table revenue-table" id="AutoNumber3">
 
           <tbody>
 
             <tr>
 
-             <td colspan="15" bgcolor="#ecf0f5" class="bodytext3"><strong>Ip unfinalized Renenue  &nbsp; From &nbsp;<?php echo date('d-M-Y',strtotime($ADate1)); ?> To <?php echo date('d-M-Y',strtotime($ADate2)); ?> </strong></td>
+             <td colspan="15" class="table-header"><strong>IP Unfinalized Revenue - From <?php echo date('d-M-Y',strtotime($ADate1)); ?> To <?php echo date('d-M-Y',strtotime($ADate2)); ?></strong></td>
 
-              <!--<td width="10%" bgcolor="#ecf0f5" class="bodytext31">Ip Renenue</td>-->
-
-              <td colspan="10" bgcolor="#ecf0f5" class="bodytext31">
+              <td colspan="10" class="table-header">
 
               <?php
 
@@ -4031,27 +4020,10 @@ $depbalance = "0.00";
           </tbody>
 
         </table>
-
-   
-
-	  
-
-   </td>
-
-   </tr>
-
-   
-
-   
-
-    
-
-</table></table>
-
-<?php include ("includes/footer1.php"); ?>
-
+            </div>
+        </main>
+    </div>
 </body>
-
 </html>
 
 

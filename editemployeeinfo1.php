@@ -1,11 +1,12 @@
 <?php
 session_start();
-include ("includes/loginverify.php"); //to prevent indefinite loop, loginverify is disabled.
-//echo $menu_id;
-include ("includes/check_user_access.php");
-if (!isset($_SESSION["username"])) header ("location:index.php");
+include ("includes/loginverify.php");
 include ("db/db_connect.php");
+include ("includes/check_user_access.php");
 $username = $_SESSION['username'];
+$companyanum = $_SESSION["companyanum"];
+$companyname = $_SESSION["companyname"];
+$companycode = $_SESSION["companycode"];
 $docno = $_SESSION['docno'];
 $ipaddress = $_SERVER["REMOTE_ADDR"];
 $updatedatetime = date('Y-m-d H:i:s');
@@ -448,22 +449,30 @@ if($frmflag12 == 'frmflag12')
 }	
 
 ?>
-<style type="text/css">
-<!--
-body {
-	margin-left: 0px;
-	margin-top: 0px;
-	background-color: #ecf0f5;
-}
-.bodytext3 {	FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3B3B3C; FONT-FAMILY: Tahoma
-}
--->
-</style>
-<link href="datepickerstyle.css" rel="stylesheet" type="text/css" />
-<link rel="stylesheet" type="text/css" href="css/autosuggest.css" /> 
-<script type="text/javascript" src="js/disablebackenterkey.js"></script>
-<script type="text/javascript" src="js/autosuggestemployeereportsearch1.js"></script>
-<script type="text/javascript" src="js/autocomplete_jobdescription2.js"></script>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Employee Information - MedStar</title>
+    
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <!-- Modern CSS -->
+    <link rel="stylesheet" href="css/edit-employee-info-modern.css?v=<?php echo time(); ?>">
+    
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- Legacy CSS for datepicker -->
+    <link href="datepickerstyle.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="css/autosuggest.css" />
+    
+    <!-- Legacy JavaScript -->
+    <script type="text/javascript" src="js/disablebackenterkey.js"></script>
+    <script type="text/javascript" src="js/autosuggestemployeereportsearch1.js"></script>
+    <script type="text/javascript" src="js/autocomplete_jobdescription2.js"></script>
 <script language="javascript">
 
 window.onload = function () 
@@ -885,75 +894,181 @@ function validatenumerics(key) {
 //<!-- End, Added by Kenique 15 Aug 2018 for leave days -->
 </script>
 <script src="js/datetimepicker_css.js"></script>
+</head>
 <body>
-<table width="103%" border="0" cellspacing="0" cellpadding="2">
-  <tr>
-    <td colspan="10" bgcolor="#ecf0f5"><?php include ("includes/alertmessages1.php"); ?></td>
-  </tr>
-  <tr>
-    <td colspan="10" bgcolor="#ecf0f5"><?php include ("includes/title1.php"); ?></td>
-  </tr>
-  <tr>
-    <td colspan="10" bgcolor="#ecf0f5"><?php include ("includes/menu1.php"); 	//	include ("includes/menu2.php"); ?>	</td>
-  </tr>
-  <tr>
-    <td colspan="10">&nbsp;</td>
-  </tr>
-  <tr>
-    <td width="1%">&nbsp;</td>
-    <td width="2%" valign="top">&nbsp;</td>
-    <td width="97%" valign="top">
-		 <form name="form2" id="form2" method="post" onKeyDown="return disableEnterKey()" action="editemployeeinfo1.php" onSubmit="return from1submit1()" >
-	<table width="900" border="0" align="left" cellpadding="4" cellspacing="0" bordercolor="#666666" id="AutoNumber3" style="border-collapse: collapse">
-	<tbody>
-	<tr bgcolor="#CBDBFA">
-	<td colspan="30" align="left" class="bodytext3"><strong>Search Employee</strong></td>
-	</tr>
-	<tr>
-	<td width="95" align="left" class="bodytext3">Search Employee</td>
-	<td colspan="4" align="left" class="bodytext3">
-	<input type="hidden" name="autobuildemployee" id="autobuildemployee">
-	<input type="hidden" name="searchemployeecode" id="searchemployeecode">
-	<input type="text" name="searchemployee" id="searchemployee" autocomplete="off" value="<?php echo $searchemployee; ?>" size="50" style="border:solid 1px #001E6A;"></td>
-	</tr>
-	<tr>
-		<td align="left">&nbsp;</td>
-	<td width="560" align="left" class="bodytext3">
-	<input type="hidden" name="frmflag12" id="frmflag12" value="frmflag12">
-	<input type="submit" name="Search" value="Submit" style="border:solid 1px #001E6A;"></td>
-	</tr>
-	<tr>
-	<td align="left" colspan="5">&nbsp;</td>
-	</td>
-	</tbody>
-	</table>
-	</form>
-	</td>
-	</tr>
-	<tr>
-    <td width="1%">&nbsp;</td>
-    <td width="2%" valign="top">&nbsp;</td>
-    <td width="97%" valign="top">
-  <?php
-  if($frmflag12 == 'frmflag12')
-  {
-  ?>
-      	  <form name="form1" id="form1" method="post" onKeyDown="return disableEnterKey()" action="editemployeeinfo1.php" onSubmit="return process1()" enctype="multipart/form-data">
-      <table width="100%" border="0" cellspacing="0" cellpadding="0">
-        <tr>
-          <td width="860"><table width="900" border="0" align="left" cellpadding="4" cellspacing="0" bordercolor="#666666" id="AutoNumber3" style="border-collapse: collapse">
-            <tbody>
-              <tr bgcolor="#011E6A">
-                <td bgcolor="#ecf0f5" class="bodytext3" colspan="2"><strong>Employee - Edit </strong></td>
-                <!--<td colspan="2" bgcolor="#ecf0f5" class="bodytext3"><?php echo $errmgs; ?>&nbsp;</td>-->
-                <td bgcolor="#ecf0f5" class="bodytext3" colspan="2">* Indicated Mandatory Fields. </td>
-              </tr>
-			  <?php
-			  if($errmsg != ''){ ?>
-              <tr>
-                <td colspan="8" align="left" valign="middle"  bgcolor="<?php if ($errmsg == '') { echo '#FFFFFF'; } else { echo '#AAFF00'; } ?>" class="bodytext3"><?php echo $errmsg;?>&nbsp;</td>
-              </tr>
-			  <?php } ?>
+    <!-- Hospital Header -->
+    <header class="hospital-header">
+        <h1 class="hospital-title">🏥 MedStar Hospital Management</h1>
+        <p class="hospital-subtitle">Advanced Healthcare Management Platform</p>
+    </header>
+    
+    <!-- User Information Bar -->
+    <div class="user-info-bar">
+        <div class="user-welcome">
+            <span class="welcome-text">Welcome, <strong><?php echo htmlspecialchars($username); ?></strong></span>
+            <span class="location-info">📍 Company: <?php echo htmlspecialchars($companyname); ?></span>
+        </div>
+        <div class="user-actions">
+            <a href="mainmenu1.php" class="btn btn-outline">🏠 Main Menu</a>
+            <a href="logout.php" class="btn btn-outline">🚪 Logout</a>
+        </div>
+    </div>
+    
+    <!-- Navigation Breadcrumb -->
+    <nav class="nav-breadcrumb">
+        <a href="mainmenu1.php">🏠 Home</a>
+        <span>→</span>
+        <a href="employee_master.php">Employee Master</a>
+        <span>→</span>
+        <span>Edit Employee Information</span>
+    </nav>
+    
+    <!-- Floating Menu Toggle -->
+    <div id="menuToggle" class="floating-menu-toggle">
+        <i class="fas fa-bars"></i>
+    </div>
+    
+    <!-- Main Container with Sidebar -->
+    <div class="main-container-with-sidebar">
+        <!-- Left Sidebar -->
+        <aside id="leftSidebar" class="left-sidebar">
+            <div class="sidebar-header">
+                <h3>Quick Navigation</h3>
+                <button id="sidebarToggle" class="sidebar-toggle">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <ul class="nav-list">
+                    <li class="nav-item">
+                        <a href="mainmenu1.php" class="nav-link">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="employee_master.php" class="nav-link">
+                            <i class="fas fa-users"></i>
+                            <span>Employee Master</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="addemployeeinfo.php" class="nav-link">
+                            <i class="fas fa-user-plus"></i>
+                            <span>Add Employee</span>
+                        </a>
+                    </li>
+                    <li class="nav-item active">
+                        <a href="editemployeeinfo1.php" class="nav-link">
+                            <i class="fas fa-user-edit"></i>
+                            <span>Edit Employee</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="addemployeecategory.php" class="nav-link">
+                            <i class="fas fa-tags"></i>
+                            <span>Employee Categories</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="addemployeedesignation.php" class="nav-link">
+                            <i class="fas fa-id-badge"></i>
+                            <span>Employee Designations</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+        
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Alert Container -->
+            <div id="alertContainer">
+                <?php if (!empty($errmsg)): ?>
+                    <div class="alert alert-<?php echo $errmsg == 'Success. New Employee Updated.' ? 'success' : 'error'; ?>">
+                        <i class="fas fa-<?php echo $errmsg == 'Success. New Employee Updated.' ? 'check-circle' : 'exclamation-triangle'; ?> alert-icon"></i>
+                        <span><?php echo htmlspecialchars($errmsg); ?></span>
+                    </div>
+                <?php endif; ?>
+            </div>
+
+            <!-- Page Header -->
+            <div class="page-header">
+                <div class="page-header-content">
+                    <h2>Edit Employee Information</h2>
+                    <p>Update employee details and personal information.</p>
+                </div>
+                <div class="page-header-actions">
+                    <button type="button" class="btn btn-secondary" onclick="refreshPage()">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                    <button type="button" class="btn btn-outline" onclick="clearSearchForm()">
+                        <i class="fas fa-search"></i> New Search
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Search Employee Section -->
+            <div class="search-container">
+                <div class="section-header">
+                    <i class="fas fa-search"></i>
+                    <h3>Search Employee</h3>
+                </div>
+                
+                <form name="form2" id="form2" method="post" action="editemployeeinfo1.php" onSubmit="return from1submit1()">
+                    <div class="search-form">
+                        <div class="search-input-group">
+                            <label for="searchemployee" class="search-label">Employee Name or Code</label>
+                            <input type="hidden" name="autobuildemployee" id="autobuildemployee">
+                            <input type="hidden" name="searchemployeecode" id="searchemployeecode">
+                            <input type="text" name="searchemployee" id="searchemployee" autocomplete="off" 
+                                   value="<?php echo htmlspecialchars($searchemployee); ?>" 
+                                   class="search-input" placeholder="Type employee name or code...">
+                        </div>
+                        <div class="form-actions">
+                            <input type="hidden" name="frmflag12" id="frmflag12" value="frmflag12">
+                            <button type="submit" name="Search" class="btn btn-primary">
+                                <i class="fas fa-search"></i>
+                                Search Employee
+                            </button>
+                            <button type="button" class="btn btn-secondary" onclick="clearSearchForm()">
+                                <i class="fas fa-times"></i>
+                                Clear
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            
+            <?php if($frmflag12 == 'frmflag12'): ?>
+            <!-- Edit Employee Form -->
+            <form name="form1" id="form1" method="post" action="editemployeeinfo1.php" onSubmit="return process1()" enctype="multipart/form-data">
+                <!-- Basic Information Section -->
+                <div class="form-section">
+                    <div class="section-header">
+                        <i class="fas fa-user"></i>
+                        <h3>Basic Information</h3>
+                        <span class="form-help">* Indicates mandatory fields</span>
+                    </div>
+                    
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="employeename" class="form-label required">Employee Name</label>
+                            <input type="text" name="employeename" id="employeename" value="<?php echo htmlspecialchars($employeename); ?>" class="form-input" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="employeecode" class="form-label">Employee Code</label>
+                            <input type="text" name="employeecode" id="employeecode" value="<?php echo htmlspecialchars($employeecode); ?>" class="form-input" readonly style="background-color: #f8f9fa;">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="payrollno" class="form-label">Payroll Number</label>
+                            <input type="text" name="payrollno" id="payrollno" value="<?php echo htmlspecialchars($payrollno); ?>" class="form-input">
+                        </div>
+                    </div>
+                </div>
               <tr>
 			  <td width="155" align="left" class="bodytext3 style2">*Employee Name</td>
 			  <td width="261" align="left" class="bodytext3"><input type="text" name="employeename" id="employeename" value="<?php echo $employeename; ?>" size="35" style="border:solid 1px #001E6A;"></td>
@@ -1600,16 +1715,181 @@ function validatenumerics(key) {
           <td>&nbsp;</td>
         </tr>
     </table>
-    <?php
-	}
-	?>
 	</form>
-<script language="javascript">
-
-
-</script>
-    </table>
-<?php include ("includes/footer1.php"); ?>
+            <?php endif; ?>
+            
+            <!-- Modern JavaScript -->
+            <script src="js/edit-employee-info-modern.js?v=<?php echo time(); ?>"></script>
+        </main>
+    </div>
+    
+    <!-- Legacy JavaScript for compatibility -->
+    <script language="javascript">
+        // Legacy functions preserved for compatibility
+        window.onload = function () {
+            var oTextbox = new AutoSuggestControl(document.getElementById("searchemployee"), new StateSuggestions());
+        }
+        
+        function process1backkeypress1() {
+            if (event.keyCode==8) {
+                event.keyCode=0; 
+                return event.keyCode 
+                return false;
+            }
+        }
+        
+        function WindowRedirect() {
+            window.location = "editemployeeinfo1.php";
+        }
+        
+        function Process1() {
+            return validateForm();
+        }
+        
+        function funcDeleteCategory() {
+            return confirm('Are you sure you want to delete this Category?');
+        }
+        
+        function Process1() {
+            if(document.getElementById("employeename").value == "") {
+                alert("Enter Employeename");
+                document.getElementById("employeename").focus();
+                return false;
+            }
+            
+            if(document.getElementById("gender").value == "") {
+                alert("Select Gender");
+                document.getElementById("gender").focus();
+                return false;
+            }
+            
+            if(document.getElementById("mobile").value == "") {
+                alert("Enter Mobile Number");
+                document.getElementById("mobile").focus();
+                return false;
+            }
+            
+            if(document.getElementById("department").value == "") {
+                alert("Enter Department");
+                document.getElementById("department").focus();
+                return false;
+            }
+            
+            if(document.getElementById("passportnumber").value == "") {
+                alert("Enter National ID / Passport No");
+                document.getElementById("passportnumber").focus();
+                return false;
+            }
+            
+            var varcategory = document.getElementById("category").value;
+            
+            if(varcategory =='Permanent' || varcategory =='Contract' || varcategory =='MCK  Stationing' ){
+                if(document.getElementById("pinno").value == "") {
+                    alert("Enter PIN No");
+                    document.getElementById("pinno").focus();
+                    return false;
+                }
+                
+                if(document.getElementById("nssf").value == "") {
+                    alert("Enter NSSF");
+                    document.getElementById("nssf").focus();
+                    return false;
+                }
+                
+                if(document.getElementById("nhif").value == "") {
+                    alert("Enter NHIF");
+                    document.getElementById("nhif").focus();
+                    return false;
+                }
+                
+                if(document.getElementById("bankname").value == "") {
+                    alert("Enter Bankname");
+                    document.getElementById("bankname").focus();
+                    return false;
+                }
+                
+                if(document.getElementById("accountnumber").value == "") {
+                    alert("Enter Account Number");
+                    document.getElementById("accountnumber").focus();
+                    return false;
+                }
+            }
+            
+            if(varcategory =='Casual' || varcategory =='Locum'){
+                if(document.getElementById("pinno").value == "") {
+                    alert("Enter PIN No");
+                    document.getElementById("pinno").focus();
+                    return false;
+                }
+                
+                if(document.getElementById("bankname").value == "") {
+                    alert("Enter Bankname");
+                    document.getElementById("bankname").focus();
+                    return false;
+                }
+                
+                if(document.getElementById("accountnumber").value == "") {
+                    alert("Enter Account Number");
+                    document.getElementById("accountnumber").focus();
+                    return false;
+                }
+            }
+        }
+        
+        function fncemptype() {
+            if(document.getElementById("employeetype").value != ""){
+                document.getElementById("onemptype").style.display="";
+            } else {
+                document.getElementById("onemptype").style.display="none";
+            }
+        }
+        
+        function fncempemploymentstatus() {
+            if(document.getElementById("employmentstatus").value != "" && document.getElementById("employmentstatus").value != "Alive"){
+                document.getElementById("onempstatus").style.display="";
+            } else {
+                document.getElementById("onempstatus").style.display="none";
+            }
+        }
+        
+        function from1submit1() {
+            if(document.getElementById("searchemployee").value == "") {
+                alert("Please Select Employee");
+                document.getElementById("searchemployee").focus();
+                return false;		
+            }
+        }
+        
+        function changeImage(org) {
+            var original=org;
+            var image = document.getElementById('userphoto');
+            if (image.src.match("default.gif")) {
+                image.src =org;
+            }
+        }
+        
+        function funcshownames(inputid,tagid) {
+            document.getElementById(tagid).innerHTML = '';
+            var varhtm='';
+            var inp = document.getElementById(inputid);
+            for (var i = 0; i < inp.files.length; ++i) {
+                var name = inp.files.item(i).name;
+                varhtm=varhtm+'<tr><td>'+(i+1)+'</td><td colspan="2">'+name+'</td></tr>';
+            }
+            document.getElementById(tagid).innerHTML = varhtm;
+        }
+        
+        function DeptUnitBuild() {
+            // Department unit building logic will be handled by modern JS
+        }
+        
+        function validatenumerics(key) {
+            var keycode = (key.which) ? key.which : key.keyCode;
+            if (keycode > 31 && (keycode < 48 || keycode > 57)) {
+                return false;
+            } else return true;
+        }
+    </script>
 </body>
 </html>
 

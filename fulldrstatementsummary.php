@@ -2,25 +2,31 @@
 session_start();
 include ("includes/loginverify.php");
 include ("db/db_connect.php");
+
+// Initialize variables
 $ipaddress = $_SERVER['REMOTE_ADDR'];
 $updatedatetime = date('Y-m-d');
 $username = $_SESSION['username'];
 $docno = $_SESSION['docno']; 
 $companyanum = $_SESSION['companyanum'];
 $companyname = $_SESSION['companyname'];
+
+// Set default date ranges
 $paymentreceiveddatefrom = date('Y-m-d', strtotime('-1 month'));
 $paymentreceiveddateto = date('Y-m-d');
 $transactiondatefrom = date('Y-m-d', strtotime('-1 month'));
 $transactiondateto = date('Y-m-d');
-$billnumbers=array();
-$billnumbers1=array();
-$billnumbers11=array();
-$billnumbers2=array();
-$billnumbers3=array();
-$billnumbers4=array();
-$billnumbers5=array();
-$totalvisitcodes='';
-$totalbillnumbers='';
+
+// Initialize arrays and variables
+$billnumbers = array();
+$billnumbers1 = array();
+$billnumbers11 = array();
+$billnumbers2 = array();
+$billnumbers3 = array();
+$billnumbers4 = array();
+$billnumbers5 = array();
+$totalvisitcodes = '';
+$totalbillnumbers = '';
 $errmsg = "";
 $banum = "1";
 $supplieranum = "";
@@ -33,7 +39,7 @@ $totalat = '0.00';
 $searchsuppliername = "";
 $cbsuppliername = "";
 $snocount = "";
-$colorloopcount="";
+$colorloopcount = "";
 $range = "";
 $arraysuppliername = '';
 $arraysuppliercode = '';	
@@ -45,28 +51,42 @@ $totalamount120 = 0;
 $totalamount180 = 0;
 $totalamountgreater = 0;
 		  
-$docno = $_SESSION['docno'];
-$query01="select locationcode from login_locationdetails where username='$username' and docno='$docno'";
-$exe01=mysqli_query($GLOBALS["___mysqli_ston"], $query01);
-$res01=mysqli_fetch_array($exe01);
- $locationcode=$res01['locationcode'];
+// Get location code
+$query01 = "select locationcode from login_locationdetails where username='$username' and docno='$docno'";
+$exe01 = mysqli_query($GLOBALS["___mysqli_ston"], $query01);
+$res01 = mysqli_fetch_array($exe01);
+$locationcode = $res01['locationcode'];
+
 include ("autocompletebuild_doctor1.php");
-$location =isset( $_REQUEST['location'])?$_REQUEST['location']:'';
-if (isset($_REQUEST["searchsuppliername"])) { $searchsuppliername = $_REQUEST["searchsuppliername"]; } else { $searchsuppliername = ""; }
-if (isset($_REQUEST["searchsuppliercode"])) {  $searchsuppliercode = $_REQUEST["searchsuppliercode"]; } else { $searchsuppliercode = ""; }
-$searchsuppliername1=explode('#',$searchsuppliername);
-$searchsuppliername=trim($searchsuppliername1[0]);
-if (isset($_REQUEST["ADate1"])) { $ADate1 = $_REQUEST["ADate1"]; } else { $ADate1 = date('Y-m-d'); }
-$paymentreceiveddatefrom=$ADate1;
-//echo $ADate1;
-if (isset($_REQUEST["ADate2"])) { $ADate2 = $_REQUEST["ADate2"]; } else { $ADate2 = date('Y-m-d'); }
-$paymentreceiveddateto=$ADate2;
-//echo $amount;
-if (isset($_REQUEST["cbfrmflag2"])) { $cbfrmflag2 = $_REQUEST["cbfrmflag2"]; } else { $cbfrmflag2 = ""; }
-//$cbfrmflag2 = $_REQUEST['cbfrmflag2'];
-if (isset($_REQUEST["frmflag2"])) { $frmflag2 = $_REQUEST["frmflag2"]; } else { $frmflag2 = ""; }
-//$frmflag2 = $_POST['frmflag2'];
+
+// Handle form parameters
+$location = isset($_REQUEST['location']) ? $_REQUEST['location'] : '';
+$searchsuppliername = isset($_REQUEST["searchsuppliername"]) ? $_REQUEST["searchsuppliername"] : "";
+$searchsuppliercode = isset($_REQUEST["searchsuppliercode"]) ? $_REQUEST["searchsuppliercode"] : "";
+
+// Process supplier name
+$searchsuppliername1 = explode('#', $searchsuppliername);
+$searchsuppliername = trim($searchsuppliername1[0]);
+
+// Handle date parameters
+$ADate1 = isset($_REQUEST["ADate1"]) ? $_REQUEST["ADate1"] : date('Y-m-d');
+$ADate2 = isset($_REQUEST["ADate2"]) ? $_REQUEST["ADate2"] : date('Y-m-d');
+$paymentreceiveddatefrom = $ADate1;
+$paymentreceiveddateto = $ADate2;
+
+// Handle form flags
+$cbfrmflag2 = isset($_REQUEST["cbfrmflag2"]) ? $_REQUEST["cbfrmflag2"] : "";
+$frmflag2 = isset($_REQUEST["frmflag2"]) ? $_REQUEST["frmflag2"] : "";
 ?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doctor Statement Summary - MedStar</title>
+    
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <style type="text/css">
 th {
             background-color: #ffffff;
@@ -84,6 +104,12 @@ body {
 }
 -->
 </style>
+<!-- Modern CSS -->
+<link rel="stylesheet" href="css/doctor-statement-summary-modern.css?v=<?php echo time(); ?>">
+
+<!-- Font Awesome for icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
 <link href="css/datepickerstyle.css" rel="stylesheet" type="text/css" />
 <script type="text/javascript" src="js/adddate.js"></script>
 <script type="text/javascript" src="js/adddate2.js"></script>
@@ -142,130 +168,214 @@ text-align:right;
 </style>
 </head>
 <script src="js/datetimepicker_css.js"></script>
+
+<!-- Modern JavaScript -->
+<script src="js/doctor-statement-summary-modern.js?v=<?php echo time(); ?>"></script>
 <body>
-<table width="101%" border="0" cellspacing="0" cellpadding="2">
-  <tr>
-    <td colspan="10" bgcolor="#ecf0f5"><?php include ("includes/alertmessages1.php"); ?></td>
-  </tr>
-  <tr>
-    <td colspan="10" bgcolor="#ecf0f5"><?php include ("includes/title1.php"); ?></td>
-  </tr>
-  <tr>
-    <td colspan="10" bgcolor="#ecf0f5"><?php include ("includes/menu1.php"); ?></td>
-  </tr>
-  <tr>
-    <td colspan="10">&nbsp;</td>
-  </tr>
-  <tr>
-    <td width="1%">&nbsp;</td>
-    <td width="2%" valign="top"><?php //include ("includes/menu4.php"); ?>
-      &nbsp;</td>
-    <td width="97%" valign="top"><table width="auto" border="0" cellspacing="0" cellpadding="0">
-      <tr>
-        <td width="860">
-		
-		
-              <form name="cbform1" method="post" action="">
-		<table width="800" border="0" align="left" cellpadding="4" cellspacing="0" bordercolor="#666666" id="AutoNumber3" style="border-collapse: collapse">
-          <tbody>
-            <tr bgcolor="#011E6A">
-              <td colspan="4" bgcolor="#ecf0f5" class="bodytext3"><strong>Doctor Wise Summary Statement</strong></td>
-              </tr>
-           <tr>
-              <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">Search Doctor </td>
-              <td width="82%" colspan="3" align="left" valign="top"  bgcolor="#FFFFFF"><span class="bodytext3">
-              <input name="searchsuppliername" type="text" id="searchsuppliername" value="<?php echo $searchsuppliername; ?>" size="50" autocomplete="off">
-              </span></td>
-           </tr>
-		   
-			  <tr>
-                      <td class="bodytext31" valign="center"  align="left" 
-                bgcolor="#FFFFFF"> Date From </td>
-                      <td width="30%" align="left" valign="center"  bgcolor="#FFFFFF" class="bodytext31"><input name="ADate1" id="ADate1" value="<?php echo $paymentreceiveddatefrom; ?>"  size="10"  readonly="readonly" onKeyDown="return disableEnterKey()" />
-                          <img src="images2/cal.gif" onClick="javascript:NewCssCal('ADate1')" style="cursor:pointer"/> </td>
-                      <td width="16%" align="left" valign="center"  bgcolor="#FFFFFF" class="bodytext31"> Date To </td>
-                      <td width="33%" align="left" valign="center"  bgcolor="#FFFFFF"><span class="bodytext31">
-                        <input name="ADate2" id="ADate2" value="<?php echo $paymentreceiveddateto; ?>"  size="10"  readonly="readonly" onKeyDown="return disableEnterKey()" />
-                        <img src="images2/cal.gif" onClick="javascript:NewCssCal('ADate2')" style="cursor:pointer"/> </span></td>
-                    </tr>
+    <!-- Hospital Header -->
+    <header class="hospital-header">
+        <h1 class="hospital-title">🏥 MedStar Hospital Management</h1>
+        <p class="hospital-subtitle">Advanced Healthcare Management Platform</p>
+    </header>
+
+    <!-- User Information Bar -->
+    <div class="user-info-bar">
+        <div class="user-welcome">
+            <span class="welcome-text">Welcome, <strong><?php echo htmlspecialchars($username); ?></strong></span>
+            <span class="location-info">📍 Company: <?php echo htmlspecialchars($companyname); ?></span>
+        </div>
+        <div class="user-actions">
+            <a href="mainmenu1.php" class="btn btn-outline">🏠 Main Menu</a>
+            <a href="logout.php" class="btn btn-outline">🚪 Logout</a>
+        </div>
+    </div>
+
+    <!-- Navigation Breadcrumb -->
+    <nav class="nav-breadcrumb">
+        <a href="mainmenu1.php">🏠 Home</a>
+        <span>→</span>
+        <span>Doctor Statement Summary</span>
+    </nav>
+
+    <!-- Floating Menu Toggle -->
+    <div id="menuToggle" class="floating-menu-toggle">
+        <i class="fas fa-bars"></i>
+    </div>
+
+    <!-- Main Container with Sidebar -->
+    <div class="main-container-with-sidebar">
+        <!-- Left Sidebar -->
+        <aside id="leftSidebar" class="left-sidebar">
+            <div class="sidebar-header">
+                <h3>Quick Navigation</h3>
+                <button id="sidebarToggle" class="sidebar-toggle">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <ul class="nav-list">
+                    <li class="nav-item">
+                        <a href="mainmenu1.php" class="nav-link">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="fulldrstatementsummary.php" class="nav-link active">
+                            <i class="fas fa-file-invoice-dollar"></i>
+                            <span>Doctor Statement Summary</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="fulldrstatementdetail_summary.php" class="nav-link">
+                            <i class="fas fa-file-invoice"></i>
+                            <span>Doctor Statement Detail</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="doctorpaymententry.php" class="nav-link">
+                            <i class="fas fa-credit-card"></i>
+                            <span>Doctor Payment Entry</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Alert Container -->
+            <div id="alertContainer">
+                <?php if (!empty($errmsg)): ?>
+                    <div class="alert alert-<?php echo $bgcolorcode === 'success' ? 'success' : ($bgcolorcode === 'failed' ? 'error' : 'info'); ?>">
+                        <i class="fas fa-<?php echo $bgcolorcode === 'success' ? 'check-circle' : ($bgcolorcode === 'failed' ? 'exclamation-triangle' : 'info-circle'); ?> alert-icon"></i>
+                        <span><?php echo htmlspecialchars($errmsg); ?></span>
+                    </div>
+                <?php endif; ?>
+            </div>
+
+            <!-- Page Header -->
+            <div class="page-header">
+                <div class="page-header-content">
+                    <h2>Doctor Statement Summary</h2>
+                    <p>Comprehensive aging analysis of doctor accounts with detailed outstanding amounts by aging periods.</p>
+                </div>
+                <div class="page-header-actions">
+                    <button type="button" class="btn btn-secondary" onclick="refreshPage()">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                    <button type="button" class="btn btn-outline" onclick="exportToExcel()">
+                        <i class="fas fa-file-excel"></i> Export Excel
+                    </button>
+                </div>
+            </div>
+            <!-- Search Form Section -->
+            <div class="search-form-section">
+                <div class="search-form-header">
+                    <i class="fas fa-file-invoice-dollar search-form-icon"></i>
+                    <h3 class="search-form-title">Doctor Statement Summary Search</h3>
+                </div>
+                
+                <form name="cbform1" method="post" action="" class="search-form">
+                    <div class="form-group">
+                        <label for="searchsuppliername" class="form-label">Search Doctor</label>
+                        <input name="searchsuppliername" type="text" id="searchsuppliername" 
+                               value="<?php echo htmlspecialchars($searchsuppliername); ?>" 
+                               class="form-input" placeholder="Type doctor name to search..." autocomplete="off">
+                    </div>
                     
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="ADate1" class="form-label">Date From</label>
+                            <div class="date-input-group">
+                                <input name="ADate1" id="ADate1" value="<?php echo $paymentreceiveddatefrom; ?>" 
+                                       class="form-input date-input" readonly="readonly" onKeyDown="return disableEnterKey()" />
+                                <img src="images2/cal.gif" onClick="javascript:NewCssCal('ADate1')" 
+                                     class="date-picker-icon" style="cursor:pointer"/>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="ADate2" class="form-label">Date To</label>
+                            <div class="date-input-group">
+                                <input name="ADate2" id="ADate2" value="<?php echo $paymentreceiveddateto; ?>" 
+                                       class="form-input date-input" readonly="readonly" onKeyDown="return disableEnterKey()" />
+                                <img src="images2/cal.gif" onClick="javascript:NewCssCal('ADate2')" 
+                                     class="date-picker-icon" style="cursor:pointer"/>
+                            </div>
+                        </div>
+                    </div>
                     
-                    <tr>
-              <td bgcolor="#FFFFFF" class="bodytext3">Location</td>
-               <td width="18%" colspan="1" align="left" valign="top"  bgcolor="#FFFFFF">
-                        <select name="location" id="location">
+                    <div class="form-group">
+                        <label for="location" class="form-label">Location</label>
+                        <select name="location" id="location" class="form-input">
                         <option value="All">All</option>
                   <?php
-						
-						$query = "select * from master_employeelocation where username='$username'  group by locationcode order by locationname";
+                            $query = "select * from master_employeelocation where username='$username' group by locationcode order by locationname";
 						$exec = mysqli_query($GLOBALS["___mysqli_ston"], $query) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
-						while ($res = mysqli_fetch_array($exec))
-						{
+                            while ($res = mysqli_fetch_array($exec)) {
 						$locationname = $res["locationname"];
 						$locationcode = $res["locationcode"];
 						?>
-						<option value="<?php echo $locationcode; ?>" <?php if($location!=''){if($location == $locationcode){echo "selected";}}?>><?php echo $locationname; ?></option>
+                                <option value="<?php echo $locationcode; ?>" <?php if($location!=''){if($location == $locationcode){echo "selected";}}?>>
+                                    <?php echo $locationname; ?>
+                                </option>
 						<?php
 						}
 						?>
-                  </select></td>
+                        </select>
+                    </div>
   
-              <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3"><input type="hidden" name="searchsuppliercode" onBlur="return suppliercodesearch1()" onKeyDown="return suppliercodesearch2()" id="searchsuppliercode" style="text-transform:uppercase" value="<?php echo $searchsuppliercode; ?>" /></td>
-              <td colspan="3" align="left" valign="top"  bgcolor="#FFFFFF">
+                    <div class="form-actions">
+                        <input type="hidden" name="searchsuppliercode" onBlur="return suppliercodesearch1()" onKeyDown="return suppliercodesearch2()" id="searchsuppliercode" style="text-transform:uppercase" value="<?php echo $searchsuppliercode; ?>" />
 			  <input type="hidden" name="cbfrmflag1" value="cbfrmflag1">
-                  <input type="submit"  value="Search" name="Submit" />
-                  <input name="resetbutton" type="reset" id="resetbutton" value="Reset" /></td>
-            </tr>
-          </tbody>
-        </table>
-		</form>		</td>
-      </tr>
-      <tr>
-        <td>&nbsp;</td>
-      </tr>
-       <tr>
-        <td>
-        	<table id="AutoNumber3" style="BORDER-COLLAPSE: collapse" 
-            bordercolor="#666666" cellspacing="0" cellpadding="4" width="1200" 
-            align="left" border="0">
-          <tbody>
-            <tr>
-              <td width="4%" bgcolor="#ecf0f5" class="bodytext31">&nbsp;</td>
-              <td colspan="14" bgcolor="#ecf0f5" class="bodytext31">
+                        
+                        <button type="submit" class="submit-btn">
+                            <i class="fas fa-search"></i>
+                            Generate Summary
+                        </button>
+                        
+                        <button type="button" class="btn btn-secondary" onclick="resetForm()">
+                            <i class="fas fa-undo"></i> Reset
+                        </button>
+                    </div>
+                </form>
+            </div>
+            <!-- Results Section -->
               	<?php
 				if (isset($_REQUEST["cbfrmflag1"])) { $cbfrmflag1 = $_REQUEST["cbfrmflag1"]; } else { $cbfrmflag1 = ""; }
-				//$cbfrmflag1 = $_REQUEST['cbfrmflag1'];
-				
-				?>
-				  </td> <!-- <td class="bodytext31" valign="top" bgcolor="#ecf0f5" align="left"> 
-                 <a target="_blank" href="print_doctorstatement.php?code=<?php echo $searchsuppliercode;?>&&ADate1=<?php echo $ADate1; ?>&&ADate2=<?php echo $ADate2; ?>&&suppliername=<?php  echo $searchsuppliername;?>&&locationcode1=<?=$locationcode?>"> <img src="images/pdfdownload.jpg" width="30" height="30"></a> 
-                </td>  -->
+            ?>
+            
+            <?php if ($cbfrmflag1 == 'cbfrmflag1') { ?>
+            <div class="results-section">
+                <div class="results-header">
+                    <h3>Doctor Statement Summary Results</h3>
+                    <div class="results-actions">
+                        <a href="fulldrstatementsummary_excel.php?cbfrmflag1=cbfrmflag1&&ADate1=<?php echo $ADate1; ?>&&ADate2=<?php echo $ADate2; ?>&&searchsuppliercode=<?php echo $searchsuppliercode; ?>&&searchsuppliername=<?php echo $searchsuppliername; ?>&&locationcode=<?php echo $location; ?>" class="btn btn-outline">
+                            <i class="fas fa-file-excel"></i> Export Excel
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="table-container">
+                    <table class="modern-table">
+                        <thead>
+                            <tr>
+                                <th>No.</th>
+                                <th>Doctor</th>
+                                <th>Total Amount</th>
+                                <th>30 Days</th>
+                                <th>60 Days</th>
+                                <th>90 Days</th>
+                                <th>120 Days</th>
+                                <th>180 Days</th>
+                                <th>180+ Days</th>
             </tr>
-            <tr>
-              <th width="10%" class="bodytext31" valign="center"  align="left" 
-                bgcolor="#ffffff"><strong>No.</strong></th>
-              <th width="20%" align="left" valign="center"  
-                bgcolor="#ffffff" class="bodytext31"><div align="left"><strong>Doctor</strong></div></th>
-              <th width="10%" align="right" valign="center"  
-                bgcolor="#ffffff" class="bodytext31"><strong> Total Amount	 </strong></th>
-                <th width="10%" align="right" valign="center"  
-                bgcolor="#ffffff" class="bodytext31"><strong> 30 days</strong></th>
-                 <th width="10%" align="right" valign="center"  
-                bgcolor="#ffffff" class="bodytext31"><strong> 60 days </strong></th>
-                 <th width="10%" align="right" valign="center"  
-                bgcolor="#ffffff" class="bodytext31"><strong> 90 days</strong></th>
-              <th width="10%" align="right" valign="center"  
-                bgcolor="#ffffff" class="bodytext31"><div align="right"><strong>120 days</strong></div></th>
-              <th width="10%" align="right" valign="right"  
-                bgcolor="#ffffff" class="bodytext31"><div align="right"><strong>180 days</strong></div></th>
-				<th width="10%" align="right" valign="center"  
-                bgcolor="#ffffff" class="bodytext31"><div align="right"><strong>180+ days</strong></div></th>
-				
-            </tr>
+                        </thead>
+                        <tbody>
             <?php 
-            if (isset($_REQUEST["cbfrmflag1"])) { $cbfrmflag1 = $_REQUEST["cbfrmflag1"]; } else { $cbfrmflag1 = ""; }
-			if ($cbfrmflag1 == 'cbfrmflag1')
-			{
+			if ($cbfrmflag1 == 'cbfrmflag1') {
 				$colorcode = "";
 				$openingcreditamount = 0;
 				$openingdebittamount = 0;
@@ -755,26 +865,16 @@ if($fulltotal1>0){
 				$colorcode = 'bgcolor="#ecf0f5"';
 			}
 			?>
-			 <tr <?php  echo $colorcode; ?>>
-              <td class="bodytext31" valign="center"  align="left"><?php  echo $snocount_main; ?></td>
-               <td class="bodytext31" valign="center"  align="left"><?php  echo $doctorname; ?></td>
-             
-               <td class="bodytext31" valign="center"  align="right">
-                <div class="bodytext31"><?php echo number_format($fulltotal1,2,'.',','); ?></div></td>
-              <td class="bodytext31" valign="center"  align="right">
-                <div class="bodytext31"> <?php echo number_format($fulltotalamount301,2,'.',','); ?></div></td>
-                 <td class="bodytext31" valign="center"  align="right">
-                <div class="bodytext31"><?php echo number_format($fulltotalamount601,2,'.',','); ?></div></td>
-                 <td class="bodytext31" valign="center"  align="right">
-                <div class="bodytext31"><?php echo number_format($fulltotalamount901,2,'.',','); ?></div></td>
-                 <td class="bodytext31" valign="center"  align="right">
-                <div class="bodytext31"><?php echo number_format($fulltotalamount1201,2,'.',','); ?></div></td>
-              <td class="bodytext31" valign="center"  align="right">
-			 <?php echo number_format($fulltotalamount1801,2,'.',','); ?></td>
-              <td class="bodytext31" valign="center"  align="right">
-			    <div align="right"><?php echo number_format($fulltotalamountgreater1,2,'.',','); ?></div></td>
-			
-               
+                            <tr class="<?php echo $showcolor == 0 ? 'even-row' : 'odd-row'; ?>">
+                                <td><?php echo $snocount_main; ?></td>
+                                <td><?php echo htmlspecialchars($doctorname); ?></td>
+                                <td class="text-right"><?php echo number_format($fulltotal1,2,'.',','); ?></td>
+                                <td class="text-right"><?php echo number_format($fulltotalamount301,2,'.',','); ?></td>
+                                <td class="text-right"><?php echo number_format($fulltotalamount601,2,'.',','); ?></td>
+                                <td class="text-right"><?php echo number_format($fulltotalamount901,2,'.',','); ?></td>
+                                <td class="text-right"><?php echo number_format($fulltotalamount1201,2,'.',','); ?></td>
+                                <td class="text-right"><?php echo number_format($fulltotalamount1801,2,'.',','); ?></td>
+                                <td class="text-right"><?php echo number_format($fulltotalamountgreater1,2,'.',','); ?></td>
            </tr>
 			<?php 
 }
@@ -792,38 +892,26 @@ $fulltotalamountgreater1=0;
 			$totalamount120=0;
 			$totalamount180=0;
 			$totalamountgreater=0;
-			} ?>
-         <tr <?php  echo $colorcode; ?>>
-              
-         	<td class="bodytext31" valign="center"  align="left"></td>
-               <td class="bodytext31" valign="center"  align="left"><strong>Total</strong></td>
-             
-               <td class="bodytext31" valign="center"  align="right">
-                <div class="bodytext31"><strong><?php echo number_format($fulltotal,2,'.',','); ?></strong></div></td>
-              <td class="bodytext31" valign="center"  align="right">
-                <div class="bodytext31"> <strong><?php echo number_format($fulltotalamount30,2,'.',','); ?></strong></div></td>
-                 <td class="bodytext31" valign="center"  align="right">
-                <div class="bodytext31"><strong><?php echo number_format($fulltotalamount60,2,'.',','); ?></strong></div></td>
-                 <td class="bodytext31" valign="center"  align="right">
-                <div class="bodytext31"><strong><?php echo number_format($fulltotalamount90,2,'.',','); ?></strong></div></td>
-                 <td class="bodytext31" valign="center"  align="right">
-                <div class="bodytext31"><strong><?php echo number_format($fulltotalamount120,2,'.',','); ?></strong></div></td>
-              <td class="bodytext31" valign="center"  align="right">
-			 <strong><?php echo number_format($fulltotalamount180,2,'.',','); ?></strong></td>
-              <td class="bodytext31" valign="center"  align="right">
-			    <div align="right"><strong><?php echo number_format($fulltotalamountgreater,2,'.',','); ?></strong></div></td>
-           </tr>
-           <tr>
-			<?php
-			
-				$urlpath = "cbfrmflag1=cbfrmflag1&&ADate1=$ADate1&&ADate2=$ADate2&&searchsuppliercode=$suppliercode&&searchsuppliername=$suppliername&&locationcode=$location";
-			
+			}
 			?>
-			 <td colspan="7"></td>
-		   	 <td colspan="2" class="bodytext31" valign="center"  align="right"><a href="fulldrstatementsummary_excel.php?<?php echo $urlpath; ?>"><img  width="40" height="40" src="images/excel-xls-icon.png" style="cursor:pointer;"></a>
-          </td>
+                            <tr class="totals-row">
+                                <td></td>
+                                <td><strong>TOTALS</strong></td>
+                                <td class="text-right"><strong><?php echo number_format($fulltotal,2,'.',','); ?></strong></td>
+                                <td class="text-right"><strong><?php echo number_format($fulltotalamount30,2,'.',','); ?></strong></td>
+                                <td class="text-right"><strong><?php echo number_format($fulltotalamount60,2,'.',','); ?></strong></td>
+                                <td class="text-right"><strong><?php echo number_format($fulltotalamount90,2,'.',','); ?></strong></td>
+                                <td class="text-right"><strong><?php echo number_format($fulltotalamount120,2,'.',','); ?></strong></td>
+                                <td class="text-right"><strong><?php echo number_format($fulltotalamount180,2,'.',','); ?></strong></td>
+                                <td class="text-right"><strong><?php echo number_format($fulltotalamountgreater,2,'.',','); ?></strong></td>
 			</tr>    
        </tbody>
 			  </table>
-<?php }
-?>
+                </div>
+            </div>
+            <?php } ?>
+        </main>
+    </div>
+</body>
+</html>
+            <?php } ?>

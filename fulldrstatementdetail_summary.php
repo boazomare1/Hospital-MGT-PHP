@@ -2,26 +2,22 @@
 session_start();
 include ("includes/loginverify.php");
 include ("db/db_connect.php");
-$ipaddress = $_SERVER['REMOTE_ADDR'];
-$updatedatetime = date('Y-m-d');
-$username = $_SESSION['username'];
-$docno = $_SESSION['docno']; 
-$companyanum = $_SESSION['companyanum'];
-$companyname = $_SESSION['companyname'];
+
+$username = $_SESSION["username"];
+$companyanum = $_SESSION["companyanum"];
+$companyname = $_SESSION["companyname"];
+
+$ipaddress = $_SERVER["REMOTE_ADDR"];
+$updatedatetime = date('Y-m-d H:i:s');
+$errmsg = "";
+$bgcolorcode = "";
+
+// Initialize variables
 $paymentreceiveddatefrom = date('Y-m-d', strtotime('-1 month'));
 $paymentreceiveddateto = date('Y-m-d');
 $transactiondatefrom = date('Y-m-d', strtotime('-1 month'));
 $transactiondateto = date('Y-m-d');
-$billnumbers=array();
-$billnumbers1=array();
-$billnumbers11=array();
-$billnumbers2=array();
-$billnumbers3=array();
-$billnumbers4=array();
-$billnumbers5=array();
-$totalvisitcodes='';
-$totalbillnumbers='';
-$errmsg = "";
+$docno = $_SESSION['docno']; 
 $banum = "1";
 $supplieranum = "";
 $custid = "";
@@ -31,161 +27,223 @@ $openingbalance = "0.00";
 $searchsuppliername = "";
 $cbsuppliername = "";
 $snocount = "";
-$colorloopcount="";
+$colorloopcount = "";
 $range = "";
 $arraysuppliername = '';
 $arraysuppliercode = '';	
 $totalatret = 0.00;
 $totalamountgreater = 0;
+
+// Initialize arrays
+$billnumbers = array();
+$billnumbers1 = array();
+$billnumbers11 = array();
+$billnumbers2 = array();
+$billnumbers3 = array();
+$billnumbers4 = array();
+$billnumbers5 = array();
+$totalvisitcodes = '';
+$totalbillnumbers = '';
 		  
-$docno = $_SESSION['docno'];
-$query01="select locationcode from login_locationdetails where username='$username' and docno='$docno'";
-$exe01=mysqli_query($GLOBALS["___mysqli_ston"], $query01);
-$res01=mysqli_fetch_array($exe01);
- $locationcode=$res01['locationcode'];
+// Get location details
+$query01 = "select locationcode from login_locationdetails where username='$username' and docno='$docno'";
+$exe01 = mysqli_query($GLOBALS["___mysqli_ston"], $query01);
+$res01 = mysqli_fetch_array($exe01);
+$locationcode = $res01['locationcode'];
+
+// Include autocomplete for doctor search
 include ("autocompletebuild_doctor1.php");
-if (isset($_REQUEST["searchsuppliername"])) { $searchsuppliername = $_REQUEST["searchsuppliername"]; } else { $searchsuppliername = ""; }
-if (isset($_REQUEST["searchsuppliercode"])) {  $searchsuppliercode = $_REQUEST["searchsuppliercode"]; } else { $searchsuppliercode = ""; }
-$searchsuppliername1=explode('#',$searchsuppliername);
-$searchsuppliername=trim($searchsuppliername1[0]);
-if (isset($_REQUEST["location"])) { $location = $_REQUEST["location"]; } else { $location = ''; }
-if (isset($_REQUEST["ADate1"])) { $ADate1 = $_REQUEST["ADate1"]; } else { $ADate1 = date('Y-m-d'); }
-$paymentreceiveddatefrom=$ADate1;
-//echo $ADate1;
-if (isset($_REQUEST["ADate2"])) { $ADate2 = $_REQUEST["ADate2"]; } else { $ADate2 = date('Y-m-d'); }
-$paymentreceiveddateto=$ADate2;
-//echo $amount;
-if (isset($_REQUEST["cbfrmflag2"])) { $cbfrmflag2 = $_REQUEST["cbfrmflag2"]; } else { $cbfrmflag2 = ""; }
-//$cbfrmflag2 = $_REQUEST['cbfrmflag2'];
-if (isset($_REQUEST["frmflag2"])) { $frmflag2 = $_REQUEST["frmflag2"]; } else { $frmflag2 = ""; }
-//$frmflag2 = $_POST['frmflag2'];
+
+// Handle form parameters
+$searchsuppliername = isset($_REQUEST["searchsuppliername"]) ? $_REQUEST["searchsuppliername"] : "";
+$searchsuppliercode = isset($_REQUEST["searchsuppliercode"]) ? $_REQUEST["searchsuppliercode"] : "";
+$location = isset($_REQUEST["location"]) ? $_REQUEST["location"] : '';
+$cbfrmflag2 = isset($_REQUEST["cbfrmflag2"]) ? $_REQUEST["cbfrmflag2"] : "";
+$frmflag2 = isset($_REQUEST["frmflag2"]) ? $_REQUEST["frmflag2"] : "";
+
+// Process supplier name
+if ($searchsuppliername) {
+    $searchsuppliername1 = explode('#', $searchsuppliername);
+    $searchsuppliername = trim($searchsuppliername1[0]);
+}
+
+// Handle date parameters
+$ADate1 = isset($_REQUEST["ADate1"]) ? $_REQUEST["ADate1"] : date('Y-m-d');
+$ADate2 = isset($_REQUEST["ADate2"]) ? $_REQUEST["ADate2"] : date('Y-m-d');
+$paymentreceiveddatefrom = $ADate1;
+$paymentreceiveddateto = $ADate2;
 ?>
-<style type="text/css">
-th {
-            background-color: #ffffff;
-            position: sticky;
-            top: 0;
-            z-index: 1;
-        }
-.bodytext31:hover { font-size:14px; }
-<!--
-body {
-	margin-left: 0px;
-	margin-top: 0px;
-	background-color: #ecf0f5;
-}
-.bodytext3 {	FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3B3B3C; FONT-FAMILY: Tahoma
-}
--->
-</style>
-<link href="css/datepickerstyle.css" rel="stylesheet" type="text/css" />
-<script type="text/javascript" src="js/adddate.js"></script>
-<script type="text/javascript" src="js/adddate2.js"></script>
-<script>
-/*function funcAccount()
-{
-if((document.getElementById("searchsuppliername").value == "")||(document.getElementById("searchsuppliername").value == " "))
-{
-alert('Please Select Doctor.');
-return false;
-}
-}*/
-</script>
-<script type="text/javascript" src="js/autocomplete_doctor.js"></script>
-<script type="text/javascript" src="js/autosuggestdoctor_stmt.js"></script>
-<script type="text/javascript">
-	window.onload = function () 
-{
-	var oTextbox = new AutoSuggestControl(document.getElementById("searchsuppliername"), new StateSuggestions());        
-}
-function coasearch(varCallFrom)
-{
-	var varCallFrom = varCallFrom;
-	
-	window.open("showinvoice.php?callfrom="+varCallFrom,"Window2",'toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=1,width=750,height=350,left=100,top=100');
-	//window.open("message_popup.php?anum="+anum,"Window1",'toolbar=0,scrollbars=0,location=0,statusbar=0,menubar=0,resizable=1,width=200,height=400,left=312,top=84');
-}
-function coasearch1(varCallFrom1)
-{
-	var varCallFrom1 = varCallFrom1;
-	
-	window.open("showwthinvoice.php?callfrom1="+varCallFrom1,"Window2",'toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=1,width=750,height=350,left=100,top=100');
-	//window.open("message_popup.php?anum="+anum,"Window1",'toolbar=0,scrollbars=0,location=0,statusbar=0,menubar=0,resizable=1,width=200,height=400,left=312,top=84');
-}
-function showsub(subtypeano)
-{
-	 // alert(subtypeano);
-		if(document.getElementById('hide'+subtypeano) != null)
-		{
-			if(document.getElementById('hide'+subtypeano).style.display == 'none')
-			{
-			document.getElementById('hide'+subtypeano).style.display = '';
-			}
-			else
-			{
-			document.getElementById('hide'+subtypeano).style.display = 'none';
-			}
-		}
-}
-</script>
-<link rel="stylesheet" type="text/css" href="css/autosuggest.css" />        
-<style type="text/css">
-<!--
-.bodytext3 {FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3b3b3c; FONT-FAMILY: Tahoma; text-decoration:none
-}
-.bodytext31 {FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3b3b3c; FONT-FAMILY: Tahoma; text-decoration:none
-}
-.bodytext311 {FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3b3b3c; FONT-FAMILY: Tahoma; text-decoration:none
-}
--->
-.bal
-{
-border-style:none;
-background:none;
-text-align:right;
-}
-.bali
-{
-text-align:right;
-}
-</style>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doctor Statement Detail Summary - MedStar</title>
+    
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <!-- Modern CSS -->
+    <link rel="stylesheet" href="css/doctor-statement-modern.css?v=<?php echo time(); ?>">
+    
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- Date Picker CSS -->
+    <link href="css/datepickerstyle.css" rel="stylesheet" type="text/css" />
+    
+    <!-- jQuery UI for autocomplete -->
+    <link href="js/jquery-ui.css" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="css/autosuggest.css" />
+    
+    <!-- Scripts -->
+    <script type="text/javascript" src="js/adddate.js"></script>
+    <script type="text/javascript" src="js/adddate2.js"></script>
+    <script type="text/javascript" src="js/autocomplete_doctor.js"></script>
+    <script type="text/javascript" src="js/autosuggestdoctor_stmt.js"></script>
+    <script type="text/javascript">
+    window.onload = function () {
+        var oTextbox = new AutoSuggestControl(document.getElementById("searchsuppliername"), new StateSuggestions());        
+    }
+    function coasearch(varCallFrom) {
+        var varCallFrom = varCallFrom;
+        window.open("showinvoice.php?callfrom="+varCallFrom,"Window2",'toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=1,width=750,height=350,left=100,top=100');
+    }
+    
+    function coasearch1(varCallFrom1) {
+        var varCallFrom1 = varCallFrom1;
+        window.open("showwthinvoice.php?callfrom1="+varCallFrom1,"Window2",'toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=1,width=750,height=350,left=100,top=100');
+    }
+    
+    function showsub(subtypeano) {
+        if(document.getElementById('hide'+subtypeano) != null) {
+            if(document.getElementById('hide'+subtypeano).style.display == 'none') {
+                document.getElementById('hide'+subtypeano).style.display = '';
+            } else {
+                document.getElementById('hide'+subtypeano).style.display = 'none';
+            }
+        }
+    }
+    </script>
+    <script src="js/datetimepicker_css.js"></script>
+    
+    <!-- Modern JavaScript -->
+    <script src="js/doctor-statement-modern.js?v=<?php echo time(); ?>"></script>
 </head>
-<script src="js/datetimepicker_css.js"></script>
+
 <body>
-<table width="101%" border="0" cellspacing="0" cellpadding="2">
-  <tr>
-    <td colspan="10" bgcolor="#ecf0f5"><?php include ("includes/alertmessages1.php"); ?></td>
-  </tr>
-  <tr>
-    <td colspan="10" bgcolor="#ecf0f5"><?php include ("includes/title1.php"); ?></td>
-  </tr>
-  <tr>
-    <td colspan="10" bgcolor="#ecf0f5"><?php include ("includes/menu1.php"); ?></td>
-  </tr>
-  <tr>
-    <td colspan="10">&nbsp;</td>
-  </tr>
-  <tr>
-    <td width="1%">&nbsp;</td>
-    <td width="2%" valign="top"><?php //include ("includes/menu4.php"); ?>
-      &nbsp;</td>
-    <td width="97%" valign="top"><table width="auto" border="0" cellspacing="0" cellpadding="0">
-      <tr>
-        <td width="860">
-		
-		
-              <form name="cbform1" method="post" action=" ">
-		<table width="800" border="0" align="left" cellpadding="4" cellspacing="0" bordercolor="#666666" id="AutoNumber3" style="border-collapse: collapse">
-          <tbody>
-            <tr bgcolor="#011E6A">
-              <td colspan="4" bgcolor="#ecf0f5" class="bodytext3"><strong>Doctor Wise Detailed-Summary Statement</strong></td>
-              </tr>
-           <tr>
-              <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">Search Doctor </td>
-              <td width="82%" colspan="3" align="left" valign="top"  bgcolor="#FFFFFF"><span class="bodytext3">
-              <input name="searchsuppliername" type="text" id="searchsuppliername" value="<?php echo $searchsuppliername; ?>" size="50" autocomplete="off">
-              </span></td>
-           </tr>
+    <!-- Hospital Header -->
+    <header class="hospital-header">
+        <h1 class="hospital-title">🏥 MedStar Hospital Management</h1>
+        <p class="hospital-subtitle">Advanced Healthcare Management Platform</p>
+    </header>
+
+    <!-- User Information Bar -->
+    <div class="user-info-bar">
+        <div class="user-welcome">
+            <span class="welcome-text">Welcome, <strong><?php echo htmlspecialchars($username); ?></strong></span>
+            <span class="location-info">📍 Company: <?php echo htmlspecialchars($companyname); ?></span>
+        </div>
+        <div class="user-actions">
+            <a href="mainmenu1.php" class="btn btn-outline">🏠 Main Menu</a>
+            <a href="logout.php" class="btn btn-outline">🚪 Logout</a>
+        </div>
+    </div>
+
+    <!-- Navigation Breadcrumb -->
+    <nav class="nav-breadcrumb">
+        <a href="mainmenu1.php">🏠 Home</a>
+        <span>→</span>
+        <span>Doctor Statement Detail Summary</span>
+    </nav>
+
+    <!-- Floating Menu Toggle -->
+    <div id="menuToggle" class="floating-menu-toggle">
+        <i class="fas fa-bars"></i>
+    </div>
+
+    <!-- Main Container with Sidebar -->
+    <div class="main-container-with-sidebar">
+        <!-- Left Sidebar -->
+        <aside id="leftSidebar" class="left-sidebar">
+            <div class="sidebar-header">
+                <h3>Quick Navigation</h3>
+                <button id="sidebarToggle" class="sidebar-toggle">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <ul class="nav-list">
+                    <li class="nav-item">
+                        <a href="mainmenu1.php" class="nav-link">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="fulldrstatementdetail_summary.php" class="nav-link active">
+                            <i class="fas fa-file-invoice"></i>
+                            <span>Doctor Statement Summary</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="doctorsactivityreport.php" class="nav-link">
+                            <i class="fas fa-user-md"></i>
+                            <span>Doctor Activity Report</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="doctorpaymententry.php" class="nav-link">
+                            <i class="fas fa-credit-card"></i>
+                            <span>Doctor Payment Entry</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Alert Container -->
+            <div id="alertContainer">
+                <?php if (!empty($errmsg)): ?>
+                    <div class="alert alert-<?php echo $bgcolorcode === 'success' ? 'success' : ($bgcolorcode === 'failed' ? 'error' : 'info'); ?>">
+                        <i class="fas fa-<?php echo $bgcolorcode === 'success' ? 'check-circle' : ($bgcolorcode === 'failed' ? 'exclamation-triangle' : 'info-circle'); ?> alert-icon"></i>
+                        <span><?php echo htmlspecialchars($errmsg); ?></span>
+                    </div>
+                <?php endif; ?>
+            </div>
+
+            <!-- Page Header -->
+            <div class="page-header">
+                <div class="page-header-content">
+                    <h2>Doctor Statement Detail Summary</h2>
+                    <p>Comprehensive doctor-wise detailed summary statement with aging analysis and payment tracking.</p>
+                </div>
+                <div class="page-header-actions">
+                    <button type="button" class="btn btn-secondary" onclick="refreshPage()">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                    <button type="button" class="btn btn-outline" onclick="exportToExcel()">
+                        <i class="fas fa-file-excel"></i> Export Excel
+                    </button>
+                </div>
+            </div>
+            <!-- Search Form Section -->
+            <div class="search-form-section">
+                <div class="search-form-header">
+                    <i class="fas fa-user-md search-form-icon"></i>
+                    <h3 class="search-form-title">Doctor Statement Search</h3>
+                </div>
+                
+                <form name="cbform1" method="post" action="" class="search-form">
+                    <div class="form-group">
+                        <label for="searchsuppliername" class="form-label">Search Doctor</label>
+                        <input name="searchsuppliername" type="text" id="searchsuppliername" 
+                               value="<?php echo htmlspecialchars($searchsuppliername); ?>" 
+                               class="form-input" placeholder="Type doctor name to search..." autocomplete="off">
+                    </div>
 <?php
            	if(isset($_REQUEST['ADate1'])){
            			$paymentreceiveddatefrom=$_REQUEST['ADate1'];
@@ -193,116 +251,110 @@ text-align:right;
            	}
            ?>
 		   
-			  <tr>
-                      <td class="bodytext31" valign="center"  align="left" 
-                bgcolor="#FFFFFF"> Date From </td>
-                      <td width="30%" align="left" valign="center"  bgcolor="#FFFFFF" class="bodytext31"><input name="ADate1" id="ADate1" value="<?php echo $paymentreceiveddatefrom; ?>"  size="10"  readonly="readonly" onKeyDown="return disableEnterKey()" />
-                          <img src="images2/cal.gif" onClick="javascript:NewCssCal('ADate1')" style="cursor:pointer"/> </td>
-                      <td width="16%" align="left" valign="center"  bgcolor="#FFFFFF" class="bodytext31"> Date To </td>
-                      <td width="33%" align="left" valign="center"  bgcolor="#FFFFFF"><span class="bodytext31">
-                        <input name="ADate2" id="ADate2" value="<?php echo $paymentreceiveddateto; ?>"  size="10"  readonly="readonly" onKeyDown="return disableEnterKey()" />
-                        <img src="images2/cal.gif" onClick="javascript:NewCssCal('ADate2')" style="cursor:pointer"/> </span></td>
-                    </tr>	
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="ADate1" class="form-label">Date From</label>
+                            <div class="date-input-group">
+                                <input name="ADate1" id="ADate1" value="<?php echo $paymentreceiveddatefrom; ?>" 
+                                       class="form-input date-input" readonly="readonly" onKeyDown="return disableEnterKey()" />
+                                <img src="images2/cal.gif" onClick="javascript:NewCssCal('ADate1')" 
+                                     class="date-picker-icon" style="cursor:pointer"/>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="ADate2" class="form-label">Date To</label>
+                            <div class="date-input-group">
+                                <input name="ADate2" id="ADate2" value="<?php echo $paymentreceiveddateto; ?>" 
+                                       class="form-input date-input" readonly="readonly" onKeyDown="return disableEnterKey()" />
+                                <img src="images2/cal.gif" onClick="javascript:NewCssCal('ADate2')" 
+                                     class="date-picker-icon" style="cursor:pointer"/>
+                            </div>
+                        </div>
+                    </div>	
 					
-					<tr>
-           
-			  <td width="10%" align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">Location</td>
-              <td width="30%" align="left" valign="top"  bgcolor="#FFFFFF"><span class="bodytext3">
-			 
-				 <select name="location" id="location" onChange="ajaxlocationfunction(this.value);">
-                  <option value="All">All</option>
-                    <?php
-						
-						$query1 = "select locationname,locationcode from master_location  order by auto_number desc";
-						$exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
-						$loccode=array();
-						while ($res1 = mysqli_fetch_array($exec1))
-						{
-						$locationname = $res1["locationname"];
-						$locationcode = $res1["locationcode"];
-						
-						?>
-						 <option value="<?php echo $locationcode; ?>" <?php if($location!='')if($location==$locationcode){echo "selected";}?>><?php echo $locationname; ?></option>
-						<?php
-						} 
-						?>
-                      </select>
-					 
-              </span></td>
-			   <td width="10%" align="left" colspan="2" valign="middle"  bgcolor="#FFFFFF" class="bodytext3"></td>
-			  </tr>
-            <tr>
-              <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3"><input type="hidden" name="searchsuppliercode" onBlur="return suppliercodesearch1()" onKeyDown="return suppliercodesearch2()" id="searchsuppliercode" style="text-transform:uppercase" value="<?php echo $searchsuppliercode; ?>" size="20" /></td>
-              <td colspan="3" align="left" valign="top"  bgcolor="#FFFFFF">
-			  <input type="hidden" name="cbfrmflag1" value="cbfrmflag1">
-                  <input type="submit"  value="Search" name="Submit" />
-                  <input name="resetbutton" type="reset" id="resetbutton" value="Reset" /></td>
-            </tr>
-          </tbody>
-        </table>
-		</form>		</td>
-      </tr>
-      <tr>
-        <td>&nbsp;</td>
-      </tr>
-       <tr>
-        <td>
-        	<table id="AutoNumber3" style="BORDER-COLLAPSE: collapse" 
-            bordercolor="#666666" cellspacing="0" cellpadding="4" width="1200" 
-            align="left" border="0">
-          <tbody>
-            <tr>
-              <td width="4%" bgcolor="#ecf0f5" class="bodytext31">&nbsp;</td>
-              <td colspan="18" bgcolor="#ecf0f5" class="bodytext31">
-              	<?php
-				if (isset($_REQUEST["cbfrmflag1"])) { $cbfrmflag1 = $_REQUEST["cbfrmflag1"]; } else { $cbfrmflag1 = ""; }
-				//$cbfrmflag1 = $_REQUEST['cbfrmflag1'];
-				
-				?>
-				  </td> <!-- <td class="bodytext31" valign="top" bgcolor="#ecf0f5" align="left"> 
-                 <a target="_blank" href="print_doctorstatement.php?code=<?php echo $searchsuppliercode;?>&&ADate1=<?php echo $ADate1; ?>&&ADate2=<?php echo $ADate2; ?>&&suppliername=<?php  echo $searchsuppliername;?>&&locationcode1=<?=$locationcode?>"> <img src="images/pdfdownload.jpg" width="30" height="30"></a> 
-                </td>  -->
-            </tr>
-            <tr>
-              <th class="bodytext31" valign="center"  align="left" 
-                bgcolor="#ffffff"><strong>No.</strong></th>
-              <th width="15%" align="left" valign="center"  
-                bgcolor="#ffffff" class="bodytext31" ><div align="left"><strong>Doctor</strong></div></th>
-                  <th width="15%" align="left" valign="center"  
-                bgcolor="#ffffff" class="bodytext31" ><div align="left"><strong>Patient</strong></div></th>
-              <th width="9%" align="left" valign="center"  
-                bgcolor="#ffffff" class="bodytext31"><strong> Bill No.	 </strong></th>
-                <th width="15%" align="left" valign="center"  
-                bgcolor="#ffffff" class="bodytext31"><strong> Account	 </strong></th>
-                   <th width="9%" align="left" valign="center"  
-                bgcolor="#ffffff" class="bodytext31"><strong> Bill Date	 </strong></th>
-                <th width="9%" align="left" valign="center"  
-                bgcolor="#ffffff" class="bodytext31"><strong> Bill Type	 </strong></th>
-                 <th width="9%" align="left" valign="center"  
-                bgcolor="#ffffff" class="bodytext31"><strong>Alloted </strong></th>
-                 <th width="3%" align="right" valign="center"  
-                bgcolor="#ffffff" class="bodytext31"><strong> Org. Bill</strong></th>
-				 <th width="6%" align="right" valign="center"  
-                bgcolor="#ffffff" class="bodytext31"><strong> Percentage </strong></th>
-				
-				<th width="6%" align="right" valign="center"  
-                bgcolor="#ffffff" class="bodytext31"><strong>Doc. Share</strong></th>
-                 <th width="6%" align="right" valign="center"  
-                bgcolor="#ffffff" class="bodytext31"><strong> Bal. Amt</strong></th>
-                <th width="6%" align="right" valign="center"  
-                bgcolor="#ffffff" class="bodytext31"><strong> 30 days</strong></th>
-                 <th width="6%" align="right" valign="center"  
-                bgcolor="#ffffff" class="bodytext31"><strong> 60 days </strong></th>
-                 <th width="6%" align="right" valign="center"  
-                bgcolor="#ffffff" class="bodytext31"><strong> 90 days</strong></th>
-              <th width="6%" align="right" valign="center"  
-                bgcolor="#ffffff" class="bodytext31"><div align="right"><strong>120 days</strong></div></th>
-              <th width="6%" align="left" valign="right"  
-                bgcolor="#ffffff" class="bodytext31"><div align="right"><strong>180 days</strong></div></th>
-				<th width="6%" align="left" valign="center"  
-                bgcolor="#ffffff" class="bodytext31"><div align="center"><strong>180+ days</strong></div></th>
-				
-            </tr>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="location" class="form-label">Location</label>
+                            <select name="location" id="location" onChange="ajaxlocationfunction(this.value);" class="form-input">
+                                <option value="All">All</option>
+                                <?php
+                                $query1 = "select locationname,locationcode from master_location  order by auto_number desc";
+                                $exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
+                                $loccode=array();
+                                while ($res1 = mysqli_fetch_array($exec1))
+                                {
+                                $locationname = $res1["locationname"];
+                                $locationcode = $res1["locationcode"];
+                                
+                                ?>
+                                 <option value="<?php echo $locationcode; ?>" <?php if($location!='')if($location==$locationcode){echo "selected";}?>><?php echo $locationname; ?></option>
+                                <?php
+                                } 
+                                ?>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <!-- Empty space for layout balance -->
+                        </div>
+                    </div>
+                    <div class="form-actions">
+                        <input type="hidden" name="searchsuppliercode" onBlur="return suppliercodesearch1()" onKeyDown="return suppliercodesearch2()" id="searchsuppliercode" style="text-transform:uppercase" value="<?php echo $searchsuppliercode; ?>" size="20" />
+                        <input type="hidden" name="cbfrmflag1" value="cbfrmflag1">
+                        
+                        <button type="submit" class="submit-btn">
+                            <i class="fas fa-search"></i>
+                            Search Statement
+                        </button>
+                        
+                        <button type="button" class="btn btn-secondary" onclick="resetForm()">
+                            <i class="fas fa-undo"></i> Reset
+                        </button>
+                    </div>
+                </form>
+            </div>
+            <!-- Results Section -->
+            <?php
+            if (isset($_REQUEST["cbfrmflag1"])) { $cbfrmflag1 = $_REQUEST["cbfrmflag1"]; } else { $cbfrmflag1 = ""; }
+            ?>
+            
+            <?php if ($cbfrmflag1 == 'cbfrmflag1'): ?>
+            <div class="results-section">
+                <div class="results-header">
+                    <h3>Doctor Statement Results</h3>
+                    <div class="results-actions">
+                        <a target="_blank" href="print_doctorstatement.php?code=<?php echo $searchsuppliercode;?>&&ADate1=<?php echo $ADate1; ?>&&ADate2=<?php echo $ADate2; ?>&&suppliername=<?php  echo $searchsuppliername;?>&&locationcode1=<?=$locationcode?>" class="btn btn-outline">
+                            <i class="fas fa-file-pdf"></i> Print PDF
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="table-container">
+                    <table class="modern-table">
+                        <thead>
+                            <tr>
+                                <th>No.</th>
+                                <th>Doctor</th>
+                                <th>Patient</th>
+                                <th>Bill No.</th>
+                                <th>Account</th>
+                                <th>Bill Date</th>
+                                <th>Bill Type</th>
+                                <th>Alloted</th>
+                                <th>Org. Bill</th>
+                                <th>Percentage</th>
+                                <th>Doc. Share</th>
+                                <th>Bal. Amt</th>
+                                <th>30 days</th>
+                                <th>60 days</th>
+                                <th>90 days</th>
+                                <th>120 days</th>
+                                <th>180 days</th>
+                                <th>180+ days</th>
+                            </tr>
+                        </thead>
+                        <tbody>
             <?php 
             if (isset($_REQUEST["cbfrmflag1"])) { $cbfrmflag1 = $_REQUEST["cbfrmflag1"]; } else { $cbfrmflag1 = ""; }
 			if ($cbfrmflag1 == 'cbfrmflag1')
@@ -1384,3 +1436,12 @@ function getsubtype($visitcode,$visittype='')
 	return $subtypename;
 }
 ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <?php endif; ?>
+        </main>
+    </div>
+</body>
+</html>

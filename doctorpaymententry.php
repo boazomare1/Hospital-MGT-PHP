@@ -3,18 +3,21 @@ session_start();
 error_reporting(0);
 include ("includes/loginverify.php");
 include ("db/db_connect.php");
-//echo $menu_id;
 include ("includes/check_user_access.php");
-$ipaddress = $_SERVER['REMOTE_ADDR'];
-$updatedatetime = date('Y-m-d');
-$username = $_SESSION['username'];
-$companyanum = $_SESSION['companyanum'];
-$companyname = $_SESSION['companyname'];
+
+$username = $_SESSION["username"];
+$companyanum = $_SESSION["companyanum"];
+$companyname = $_SESSION["companyname"];
+
+$ipaddress = $_SERVER["REMOTE_ADDR"];
+$updatedatetime = date('Y-m-d H:i:s');
+$errmsg = "";
+$bgcolorcode = "";
+
+// Initialize variables
 $transactiondatefrom = date('Y-m-d', strtotime('-1 month'));
 $transactiondateto = date('Y-m-d');
-ob_start();
 $docno1 = $_SESSION['docno'];
-$errmsg = "";
 $banum = "1";
 $supplieranum = "";
 $custid = "";
@@ -24,66 +27,69 @@ $openingbalance = "0.00";
 $searchsuppliername = "";
 $cbsuppliername = "";
 $billnumberprefix = "";
-$username_auto_number="";
-$queryuser="select employeename,auto_number from master_employee where username='$username'";
+$username_auto_number = "";
+
+// Get user details
+$queryuser = "select employeename,auto_number from master_employee where username='$username'";
 $execuser = mysqli_query($GLOBALS["___mysqli_ston"], $queryuser) or die ("Error in queryuser".mysqli_error($GLOBALS["___mysqli_ston"]));
 if($resuser = mysqli_fetch_array($execuser)){
- $username_auto_number=$resuser['auto_number'];
+    $username_auto_number = $resuser['auto_number'];
 }
-//This include updatation takes too long to load for hunge items database.
+
+// Include autocomplete for doctor search
 include ("autocompletebuild_doctor.php");
-if (isset($_REQUEST["canum"])) { $getcanum = $_REQUEST["canum"]; } else { $getcanum = ""; }
-if (isset($_REQUEST["cbsuppliername"])) { $cbsuppliername = $_REQUEST["cbsuppliername"]; } else { $cbsuppliername = ""; }
-if (isset($_REQUEST["billnumbercode"])) { $billnumbercode = $_REQUEST["billnumbercode"]; } else { $billnumbercode = ""; }
-$locationdetails="select locationcode from login_locationdetails where username='$username' and docno='$docno1'";
-$exeloc=mysqli_query($GLOBALS["___mysqli_ston"], $locationdetails);
-$resloc=mysqli_fetch_array($exeloc);
-$locationcode=$resloc['locationcode'];
-//$getcanum = $_GET['canum'];
-if ($getcanum != '')
-{
-	$query4 = "select * from master_supplier where auto_number = '$getcanum'";
-	$exec4 = mysqli_query($GLOBALS["___mysqli_ston"], $query4) or die ("Error in Query4".mysqli_error($GLOBALS["___mysqli_ston"]));
-	$res4 = mysqli_fetch_array($exec4);
-	$cbsuppliername = $res4['suppliername'];
-	$suppliername = $res4['suppliername'];
+// Handle form parameters
+$getcanum = isset($_REQUEST["canum"]) ? $_REQUEST["canum"] : "";
+$cbsuppliername = isset($_REQUEST["cbsuppliername"]) ? $_REQUEST["cbsuppliername"] : "";
+$billnumbercode = isset($_REQUEST["billnumbercode"]) ? $_REQUEST["billnumbercode"] : "";
+
+// Get location details
+$locationdetails = "select locationcode from login_locationdetails where username='$username' and docno='$docno1'";
+$exeloc = mysqli_query($GLOBALS["___mysqli_ston"], $locationdetails);
+$resloc = mysqli_fetch_array($exeloc);
+$locationcode = $resloc['locationcode'];
+
+// Handle supplier selection
+if ($getcanum != '') {
+    $query4 = "select * from master_supplier where auto_number = '$getcanum'";
+    $exec4 = mysqli_query($GLOBALS["___mysqli_ston"], $query4) or die ("Error in Query4".mysqli_error($GLOBALS["___mysqli_ston"]));
+    $res4 = mysqli_fetch_array($exec4);
+    $cbsuppliername = $res4['suppliername'];
+    $suppliername = $res4['suppliername'];
 }
-if (isset($_REQUEST["cbfrmflag1"])) { $cbfrmflag1 = $_REQUEST["cbfrmflag1"]; } else { $cbfrmflag1 = ""; }
-if (isset($_REQUEST["searchsuppliercode"])) { $searchsuppliercode = $_REQUEST["searchsuppliercode"]; } else { $searchsuppliercode = ""; }
-//$cbfrmflag1 = $_POST['cbfrmflag1'];
-if ($cbfrmflag1 == 'cbfrmflag1')
-{
-	$searchsuppliername = $_POST['searchsuppliername'];
-	if ($searchsuppliername != '')
-	{
-		$arraysupplier = explode("#", $searchsuppliername);
-		$arraysuppliername = $arraysupplier[0];
-		$arraysuppliername = trim($arraysuppliername);
-		$arraysuppliercode = $arraysupplier[1];
-		
-		$query1 = "select * from master_supplier where suppliercode = '$arraysuppliercode'";
-		$exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
-		$res1 = mysqli_fetch_array($exec1);
-		$supplieranum = $res1['auto_number'];
-		$openingbalance = $res1['openingbalance'];
-		$cbsuppliername = $arraysuppliername;
-		$suppliername = $arraysuppliername;
-		$doctorcode = $arraysuppliercode;
-	}
-	else
-	{
-		$cbsuppliername = $_REQUEST['cbsuppliername'];
-		$cbsuppliername = strtoupper($cbsuppliername);
-		$suppliername = $_REQUEST['cbsuppliername'];
-		$suppliername = strtoupper($suppliername);
-	}
-	//$transactiondatefrom = $_REQUEST['ADate1'];
-	//$transactiondateto = $_REQUEST['ADate2'];
+// Handle form flags and parameters
+$cbfrmflag1 = isset($_REQUEST["cbfrmflag1"]) ? $_REQUEST["cbfrmflag1"] : "";
+$searchsuppliercode = isset($_REQUEST["searchsuppliercode"]) ? $_REQUEST["searchsuppliercode"] : "";
+
+// Handle doctor search form submission
+if ($cbfrmflag1 == 'cbfrmflag1') {
+    $searchsuppliername = $_POST['searchsuppliername'];
+    if ($searchsuppliername != '') {
+        $arraysupplier = explode("#", $searchsuppliername);
+        $arraysuppliername = $arraysupplier[0];
+        $arraysuppliername = trim($arraysuppliername);
+        $arraysuppliercode = $arraysupplier[1];
+        
+        $query1 = "select * from master_supplier where suppliercode = '$arraysuppliercode'";
+        $exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
+        $res1 = mysqli_fetch_array($exec1);
+        $supplieranum = $res1['auto_number'];
+        $openingbalance = $res1['openingbalance'];
+        $cbsuppliername = $arraysuppliername;
+        $suppliername = $arraysuppliername;
+        $doctorcode = $arraysuppliercode;
+    } else {
+        $cbsuppliername = $_REQUEST['cbsuppliername'];
+        $cbsuppliername = strtoupper($cbsuppliername);
+        $suppliername = $_REQUEST['cbsuppliername'];
+        $suppliername = strtoupper($suppliername);
+    }
 }
-if (isset($_REQUEST["cbfrmflag2"])) { $cbfrmflag2 = $_REQUEST["cbfrmflag2"]; } else { $cbfrmflag2 = ""; }
-//$cbfrmflag2 = $_REQUEST['cbfrmflag2'];
-if (isset($_REQUEST["frmflag2"])) { $frmflag2 = $_REQUEST["frmflag2"]; } else { $frmflag2 = ""; }
-//$frmflag2 = $_POST['frmflag2'];
+// Handle payment form submission
+$cbfrmflag2 = isset($_REQUEST["cbfrmflag2"]) ? $_REQUEST["cbfrmflag2"] : "";
+$frmflag2 = isset($_REQUEST["frmflag2"]) ? $_REQUEST["frmflag2"] : "";
+
+// Process payment entry
 if ($frmflag2 == 'frmflag2')
 {
 			$query3 = "select * from master_company where companystatus = 'Active'";
@@ -639,15 +645,15 @@ if($username_auto_number!=""){
 		exit;
 		
 }
-if (isset($_REQUEST["st"])) { $st = $_REQUEST["st"]; } else { $st = ""; }
-//$st = $_REQUEST['st'];
-if ($st == '1')
-{
-	$errmsg = "Success. Payment Entry Update Completed.";
+// Handle success/error messages
+$st = isset($_REQUEST["st"]) ? $_REQUEST["st"] : "";
+if ($st == '1') {
+    $errmsg = "Success. Payment Entry Update Completed.";
+    $bgcolorcode = 'success';
 }
-if ($st == '2')
-{
-	$errmsg = "Failed. Payment Entry Not Completed.";
+if ($st == '2') {
+    $errmsg = "Failed. Payment Entry Not Completed.";
+    $bgcolorcode = 'failed';
 }
 if(isset($_REQUEST['docno'])) { $docno = $_REQUEST['docno']; } else { $docno = ''; }
 if($docno != "") { ?>
@@ -657,65 +663,59 @@ window.open("print_doctorremittances.php?docno=<?php echo $docno; ?>","OriginalW
 <?php
 }
 ?>
-<style type="text/css">
-<!--
-body {
-	margin-left: 0px;
-	margin-top: 0px;
-	background-color: #ecf0f5;
-}
-.bodytext3 {	FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3B3B3C; FONT-FAMILY: Tahoma
-}
--->
-</style>
-
-<script src="js/jquery-1.11.1.min.js"></script>
-<script src="js/jquery.min-autocomplete.js"></script>
-<script src="js/jquery-ui.min.js"></script>
-<link href="css/datepickerstyle.css" rel="stylesheet" type="text/css" />
-<script type="text/javascript" src="js/adddate.js"></script>
-<script type="text/javascript" src="js/adddate2.js"></script>
-<script language="javascript">
-function amountcheck()
-{
-}
-</script>
-<script type="text/javascript" src="js/autocomplete_doctor.js"></script>
-<script type="text/javascript" src="js/autosuggestdoctor.js"></script>
-<script type="text/javascript">
-window.onload = function () 
-{
-	var oTextbox = new AutoSuggestControl(document.getElementById("searchsuppliername"), new StateSuggestions());        
-}
-function disableEnterKey(varPassed)
-{
-	//alert ("Back Key Press");
-	if (event.keyCode==8) 
-	{
-		event.keyCode=0; 
-		return event.keyCode 
-		return false;
-	}
-	
-	var key;
-	if(window.event)
-	{
-		key = window.event.keyCode;     //IE
-	}
-	else
-	{
-		key = e.which;     //firefox
-	}
-	if(key == 13) // if enter key press
-	{
-		//alert ("Enter Key Press2");
-		return false;
-	}
-	else
-	{
-		return true;
-	}
-}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doctor Payment Entry - MedStar</title>
+    
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <!-- Modern CSS -->
+    <link rel="stylesheet" href="css/doctor-payment-modern.css?v=<?php echo time(); ?>">
+    
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- Date Picker CSS -->
+    <link href="css/datepickerstyle.css" rel="stylesheet" type="text/css" />
+    
+    <!-- jQuery UI for autocomplete -->
+    <link href="js/jquery-ui.css" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="css/autosuggest.css" />
+    
+    <!-- Scripts -->
+    <script src="js/jquery.min-autocomplete.js"></script>
+    <script src="js/jquery-ui.min.js"></script>
+    <script type="text/javascript" src="js/adddate.js"></script>
+    <script type="text/javascript" src="js/adddate2.js"></script>
+    <script type="text/javascript" src="js/autocomplete_doctor.js"></script>
+    <script type="text/javascript" src="js/autosuggestdoctor.js"></script>
+    <script type="text/javascript">
+    window.onload = function () {
+        var oTextbox = new AutoSuggestControl(document.getElementById("searchsuppliername"), new StateSuggestions());        
+    }
+    function disableEnterKey(varPassed) {
+        if (event.keyCode==8) {
+            event.keyCode=0; 
+            return event.keyCode 
+            return false;
+        }
+        
+        var key;
+        if(window.event) {
+            key = window.event.keyCode;     //IE
+        } else {
+            key = e.which;     //firefox
+        }
+        if(key == 13) { // if enter key press
+            return false;
+        } else {
+            return true;
+        }
+    }
 function process1backkeypress1()
 {
 	//alert ("Back Key Press");
@@ -1150,310 +1150,386 @@ $exec769 = mysqli_query($GLOBALS["___mysqli_ston"], $query769) or die(mysqli_err
 $res769 = mysqli_fetch_array($exec769);
 $onlinecoa = $res769['code'];
 ?>
-<link rel="stylesheet" type="text/css" href="css/autosuggest.css" />        
-<style type="text/css">
-<!--
-.bodytext3 {FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3b3b3c; FONT-FAMILY: Tahoma; text-decoration:none
-}
-.bodytext31 {FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3b3b3c; FONT-FAMILY: Tahoma; text-decoration:none
-}
-.bodytext311 {FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3b3b3c; FONT-FAMILY: Tahoma; text-decoration:none
-}
--->
-.bal
-{
-border-style:none;
-background:none;
-text-align:right;
-}
-.bali
-{
-text-align:right;
-}
-.imgloader { background-color:#FFFFFF; }
-#imgloader1 {
-    position: absolute;
-    top: 158px;
-    left: 487px;
-    width: 28%;
-    height: 24%;
-}
-</style>
+    <script src="js/datepicker_doctor.js"></script>
 </head>
-<!--<script src="js/datetimepicker_css.js"></script>-->
-<script src="js/datepicker_doctor.js"></script>
+
 <body>
-<div align="center" class="imgloader" id="imgloader" style="display:none;">
-<div align="center" class="imgloader" id="imgloader1" style="display:;">
-<p style="text-align:center;"><strong>Saving <br><br> Please Wait...</strong></p>
-<img src="images/ajaxloader.gif">
-</div>
-</div>
-<table width="101%" border="0" cellspacing="0" cellpadding="2">
-  <tr>
-    <td colspan="10" bgcolor="#ecf0f5"><?php include ("includes/alertmessages1.php"); ?></td>
-  </tr>
-  <tr>
-    <td colspan="10" bgcolor="#ecf0f5"><?php include ("includes/title1.php"); ?></td>
-  </tr>
-  <tr>
-    <td colspan="10" bgcolor="#ecf0f5"><?php include ("includes/menu1.php"); ?></td>
-  </tr>
-  <tr>
-    <td colspan="10">&nbsp;</td>
-  </tr>
-  <tr>
-    <td width="1%">&nbsp;</td>
-    <td width="2%" valign="top"><?php //include ("includes/menu4.php"); ?>
-      &nbsp;</td>
-    <td width="97%" valign="top"><table width="116%" border="0" cellspacing="0" cellpadding="0">
-      <tr>
-        <td width="860">
-		
-		
-              <form name="cbform1" method="post" action="doctorpaymententry.php">
-		<table width="800" border="0" align="left" cellpadding="4" cellspacing="0" bordercolor="#666666" id="AutoNumber3" style="border-collapse: collapse">
-          <tbody>
-            <tr bgcolor="#011E6A">
-              <td colspan="4" bgcolor="#ecf0f5" class="bodytext3"><strong>Payment Entry     - Select Doctor </strong></td>
-              </tr>
-            <!--<tr>
-              <td colspan="4" align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">
-			  <input name="printreceipt1" type="reset" id="printreceipt1" onClick="return funcPrintReceipt1()" style="border: 1px solid #001E6A" value="Print Receipt - Previous Payment Entry" /> 
-                *To Print Other Receipts Please Go To Menu:	Reports	-&gt; Payments Given 
-				</td>
-              </tr>-->
-            <tr>
-              <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">Search Doctor </td>
-              <td width="82%" colspan="3" align="left" valign="top"  bgcolor="#FFFFFF"><span class="bodytext3">
-                <input name="searchsuppliername" type="text" id="searchsuppliername" style="border: 1px solid #001E6A;" value="<?php echo $searchsuppliername; ?>" size="50" autocomplete="off">
-              </span></td>
-              </tr>
-            <tr>
-              <td width="18%"  align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3"> Doctor </td>
-              <td colspan="3" align="left" valign="top"  bgcolor="#FFFFFF">
-			  <input value="<?php echo $cbsuppliername; ?>" name="cbsuppliername" type="text" id="cbsuppliername" onKeyDown="return disableEnterKey()" onKeyUp="return FillDoctor()" size="50" style="border: 1px solid #001E6A; text-transform:uppercase;" <?php if($searchsuppliername != "") { ?> readonly <?php } ?>></td>
-              </tr>
-            <tr>
-              <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3"><input type="hidden" name="searchsuppliercode" onBlur="return suppliercodesearch1()" onKeyDown="return suppliercodesearch2()" id="searchsuppliercode" style="border: 1px solid #001E6A; text-transform:uppercase" value="<?php if($searchsuppliercode != '') { echo $searchsuppliercode; } else { echo '04-4602'; } ?>" size="20" /></td>
-              <td colspan="3" align="left" valign="top"  bgcolor="#FFFFFF">
-			  <input type="hidden" name="cbfrmflag1" value="cbfrmflag1">
-                  <input  style="border: 1px solid #001E6A" type="hidden" value="Search" name="Submit" />
-                  <input name="resetbutton" type="hidden" id="resetbutton"  style="border: 1px solid #001E6A" value="Reset" /></td>
-            </tr>
-          </tbody>
-        </table>
-		</form>		</td>
-      </tr>
-      <tr>
-        <td>&nbsp;</td>
-      </tr>
-      
-      <tr>
-        <td>&nbsp;</td>
-      </tr>
-      
-      <tr>
-        <td>&nbsp;</td>
-      </tr>
-      <tr>
-        <td>
-		
-		<?php
-		if (isset($_REQUEST["cbfrmflag1"])) { $cbfrmflag1 = $_REQUEST["cbfrmflag1"]; } else { $cbfrmflag1 = ""; }
-		if ($cbfrmflag1 == 'cbfrmflag1')
-		{
-			$searchsuppliername = $_POST['searchsuppliername'];
-			
-	if ($searchsuppliername != '')
-	{
-		$arraysupplier = explode("#", $searchsuppliername);
-		$arraysuppliername = $arraysupplier[0];
-		$arraysuppliername = trim($arraysuppliername);
-		$arraysuppliercode = $arraysupplier[1];
-		
-		$query1 = "select * from master_doctor where doctorcode = '$arraysuppliercode'";
-		$exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
-		$res1 = mysqli_fetch_array($exec1);
-		$supplieranum = $res1['auto_number'];
-		$openingbalance = $res1['openingbalance'];
-		//echo $openingbalance;
-		$cbsuppliername = $arraysuppliername;
-		$suppliername = $arraysuppliername;
-	}
-	else
-	{
-		$cbsuppliername = $_REQUEST['cbsuppliername'];
-		$suppliername = $_REQUEST['cbsuppliername']; 
-	}
-	}
+    <!-- Loading Overlay -->
+    <div id="imgloader" class="loading-overlay" style="display:none;">
+        <div class="loading-content">
+            <div class="loading-spinner">
+                <i class="fas fa-spinner fa-spin"></i>
+            </div>
+            <p><strong>Saving Payment Entry</strong></p>
+            <p>Please Wait...</p>
+        </div>
+    </div>
 
-	/////////////////// fro checking the docotor is there any advance payment entry with pending!=0;
-	$total_pendingamount=0;
-	$query2 = "select * from advance_payment_entry where ledger_code='$arraysuppliercode' and transactionmodule = 'PAYMENT'  and recordstatus<>'deleted'  group by docno order by auto_number desc ";
-			  $exec2 = mysqli_query($GLOBALS["___mysqli_ston"], $query2) or die ("Error in Query2".mysqli_error($GLOBALS["___mysqli_ston"]));
-			  $num2 = mysqli_num_rows($exec2);
-			  while ($res2 = mysqli_fetch_array($exec2))
-			  {
-			 	  $totalamount = $res2['transactionamount'];
-			 	  $transactiondate = $res2['transactiondate'];
-				  $docno = $res2['docno'];
-				  $transactionmode = $res2['transactionmode'];
-				  $bankcode=$res2['bankcode'];
-				  $bankname=$res2['bankname'];
-				  $docname = $res2['ledger_name'];
-				  // ------ for total amountallocated for the doc-----------
-				$query_adp = "SELECT sum(transactionamount) as transactionamount FROM `advance_payment_allocation` WHERE   docno='$docno'  and recordstatus='allocated'  ";
-				$exec_adp = mysqli_query($GLOBALS["___mysqli_ston"], $query_adp) or die ("Error in Query_adp".mysqli_error($GLOBALS["___mysqli_ston"]));
-				$num_adp=mysqli_num_rows($exec_adp);
-				// while($res_adp = mysql_fetch_array($exec_adp)){
-				$res_adp = mysqli_fetch_array($exec_adp);
-				$total_adp_transactioamount = $res_adp['transactionamount'];
+    <!-- Hospital Header -->
+    <header class="hospital-header">
+        <h1 class="hospital-title">🏥 MedStar Hospital Management</h1>
+        <p class="hospital-subtitle">Advanced Healthcare Management Platform</p>
+    </header>
 
-				$pending_amount_doc=$totalamount-$total_adp_transactioamount;	
+    <!-- User Information Bar -->
+    <div class="user-info-bar">
+        <div class="user-welcome">
+            <span class="welcome-text">Welcome, <strong><?php echo htmlspecialchars($username); ?></strong></span>
+            <span class="location-info">📍 Company: <?php echo htmlspecialchars($companyname); ?></span>
+        </div>
+        <div class="user-actions">
+            <a href="mainmenu1.php" class="btn btn-outline">🏠 Main Menu</a>
+            <a href="logout.php" class="btn btn-outline">🚪 Logout</a>
+        </div>
+    </div>
 
-				$total_pendingamount+=$pending_amount_doc;
-			}				
-			// echo $total_pendingamount;
-			if($total_pendingamount>0){ 
+    <!-- Navigation Breadcrumb -->
+    <nav class="nav-breadcrumb">
+        <a href="mainmenu1.php">🏠 Home</a>
+        <span>→</span>
+        <span>Doctor Payment Entry</span>
+    </nav>
 
-					?>
-					<h4 style='color: red; font-family: "Times New Roman", Times, serif; '><b>Doctor has Advance Payments and Please allocate the same against invoices to process the payment!</b></h4>
-					<?php
-					// exit;
-					}
-			// ------ for total amountallocated for the doc-----------		
-	/////////////////// fro checking the docotor is there any advance payment entry with pending!=0
-		 ?>
-		
-				<form name="form1" id="form1" method="post" action="doctorpaymententry.php?cbfrmflag1=<?php echo $cbfrmflag1; ?>" onSubmit="return paymententry1process1()">
-			  <table width="800" border="0" align="left" cellpadding="4" cellspacing="0" bordercolor="#666666" id="AutoNumber3" style="border-collapse: collapse">
-                <tbody>
-                  <tr bgcolor="#011E6A">
-                    <td colspan="2" bgcolor="#ecf0f5" class="bodytext3"><strong>Payment  Entry - Details </strong></td>
-					<input type="hidden" name="searchsuppliercode1" id="searchsuppliercode1" style="border: 1px solid #001E6A; text-transform:uppercase" value="<?php if($searchsuppliercode != '') { echo $searchsuppliercode; } else { echo '04-4602'; } ?>" size="20" />
-					<input type="hidden" name="searchsuppliername1" id="searchsuppliername1" style="border: 1px solid #001E6A; text-transform:uppercase" value="" size="20" />
-                    <!--<td colspan="2" bgcolor="#ecf0f5" class="bodytext3"><?php echo $errmgs; ?>&nbsp;</td>-->
-                    <td bgcolor="#ecf0f5" class="bodytext3" colspan="1">
-					<strong>Opening Balance : </strong></td><td bgcolor="#ecf0f5" class="bodytext3"><?php echo $openingbalance; ?></td>
-                  </tr>
-                  <tr>
-                    <td colspan="8" align="left" valign="middle"  bgcolor="<?php if ($errmsg == '') { echo '#FFFFFF'; } else { echo '#FFFF00'; } ?>" class="bodytext3"><?php echo $errmsg;?>&nbsp;</td>
-                  </tr>
-                  <tr>
-                    <td width="17%" align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">Total Pending Amount </td>
-                    <td width="29%" align="left" valign="top"  bgcolor="#FFFFFF">
-					<input name="pendingamount" id="pendingamount" style="border: 1px solid #001E6A; text-align:right" value="<?php echo $openingbalance; ?>"  size="20" readonly onKeyDown="return disableEnterKey()" />
-					<input name="pendingamounthidden" id="pendingamounthidden" type="hidden" value="<?php echo $openingbalance; ?>"  size="20" readonly onKeyDown="return disableEnterKey()" />					</td>
-                    <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">Entry Date (YYYY-MM-DD) </td>
-                    <td align="left" valign="top"  bgcolor="#FFFFFF">
-					<input name="paymententrydate" id="paymententrydate" value="<?php echo  date('Y-m-d') ?>" style="border: 1px solid #001E6A" value=""  readonly="readonly" onKeyDown="return disableEnterKey()" size="20" />
-					
-					<img src="images2/cal.gif" onClick="javascript:NewCssCal('paymententrydate','','','','','','past','','<?=$updatedatetime;?>')" style="cursor:pointer"/></td>
-					<!-- <img src="images2/cal.gif" onClick="javascript:NewCssCal('paymententrydate')" style="cursor:pointer"/></td> -->
-               <input type="hidden" name="cashcoa" value="<?php echo $cashcoa; ?>">
-				<input type="hidden" name="chequecoa" value="<?php echo $chequecoa; ?>">
-				<input type="hidden" name="mpesacoa" value="<?php echo $mpesacoa; ?>">
-				<input type="hidden" name="cardcoa" value="<?php echo $cardcoa; ?>">
-				<input type="hidden" name="onlinecoa" value="<?php echo $onlinecoa; ?>">
-				<input type="hidden" name="doctorcode" value="<?php echo $doctorcode; ?>">
-	
-			      </tr>
-                  <tr>
-                    <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">Payment Amount </td>
-                    <td align="left" valign="top"  bgcolor="#FFFFFF">
-					<input name="paymentamount" id="paymentamount" style="border: 1px solid #001E6A; text-align:right" value="0.00"  size="20" <?php if($searchsuppliername != "") { ?> readonly <?php } ?> onKeyUp="return FillNetpay()" /></td>
-                    <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">Payment Mode </td>
-                    <td align="left" valign="top"  bgcolor="#FFFFFF">
-					<select name="paymentmode" id="paymentmode" style="width: 130px;">
-                        <option value="" selected="selected">SELECT</option>
-                        <option value="CHEQUE">CHEQUE</option>
-                        <option value="CASH">CASH</option>
-                        <option value="MPESA">MPESA</option>
-                        <option value="ONLINE">ONLINE</option>
-                        <option value="WRITEOFF">ADJUSTMENT</option>
-                    </select></td>
-                  </tr>
-				   <tr>
-                    <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">Select Applicable WHT </td>
-                    <td align="left" valign="top"  bgcolor="#FFFFFF">
-					<select id="taxanum" name="taxanum" onChange="return netpayablecalc()">
-                          <option value="">Select Tax</option>
-                          <?php
-						$query1 = "select * from master_withholding_tax where record_status = '1' order by auto_number";
-						$exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
-						while ($res1 = mysqli_fetch_array($exec1))
-						{
-						$res1taxname = $res1["name"];
-						$res1taxpercent = $res1["tax_percent"];
-						$res1anum = $res1["auto_number"];
-						?>
-                          <option value="<?php echo $res1anum; ?>"><?php echo $res1taxname.' ( '.$res1taxpercent.'% ) '; ?></option>
-                          <?php
-						}
-						?>
-                        </select></td>
-                    <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">Tax Amount </td>
-                    <td align="left" valign="top"  bgcolor="#FFFFFF"><input name="taxamount" id="taxamount" style="border: 1px solid #001E6A; text-align:right"  size="20" readonly/></td>
-                  </tr>
-				  <tr>
-				  <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">Net Payable </td>
-                    <td align="left" valign="top"  bgcolor="#FFFFFF"><input name="netpayable" id="netpayable" style="border: 1px solid #001E6A; text-align:right" value="0.00"  size="20" readonly/></td>
-                  <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">&nbsp;</td>
-				   <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">&nbsp;</td>
-				  </tr>
-                  <tr>
-                    <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">Cheque/Mpesa Number </td>
-                    <td align="left" valign="top"  bgcolor="#FFFFFF">
-					<input name="chequenumber" id="chequenumber" style="border: 1px solid #001E6A" value=""  size="20"  autocomplete="off" /></td>
-                    <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">Bank Name </td>
-					<input type="hidden" name="bankbranch" id="bankbranch">
-                    <td align="left" valign="top"  bgcolor="#FFFFFF"><select name="bankname" id="bankname">
-					<option value="">Select Bank</option>
-					<?php 
-					$querybankname = "select * from master_bank where bankstatus <> 'deleted'";
-					$execbankname = mysqli_query($GLOBALS["___mysqli_ston"], $querybankname) or die ("Error in Query3".mysqli_error($GLOBALS["___mysqli_ston"]));
-					while($resbankname = mysqli_fetch_array($execbankname))
-					{?>
-						<option value="<?php echo $resbankname['bankcode'].'||'.$resbankname['bankname']; ?>"><?php echo $resbankname['bankname'];?></option>
-					<?php
-					}
-					?>
-					</select></td>
-                  </tr>
-                  <tr>
-                    <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">Payment Date </td>
-                    <td align="left" valign="top"  bgcolor="#FFFFFF"><input name="ADate1" id="ADate1" style="border: 1px solid #001E6A" value=""  size="20"  readonly="readonly" onKeyDown="return disableEnterKey()"/>
-					<img src="images2/cal.gif" onClick="javascript:NewCssCal('ADate1','','','','','','past','','<?=$updatedatetime;?>')" style="cursor:pointer"/>
-					<!-- <img src="images2/cal.gif" onClick="javascript:NewCssCal('ADate1')" style="cursor:pointer"/> -->
-				    </td>
-                    <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">Remarks</td>
-                    <td align="left" valign="top"  bgcolor="#FFFFFF"><input name="remarks" id="remarks" style="border: 1px solid #001E6A" value=""  size="20"  autocomplete="off" /></td>
-                  </tr>
+    <!-- Floating Menu Toggle -->
+    <div id="menuToggle" class="floating-menu-toggle">
+        <i class="fas fa-bars"></i>
+    </div>
 
-                   <tr>
-                  	<td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">Bank Charges</td>
-                    <td align="left" valign="top"  bgcolor="#FFFFFF">
-					<input name="bankcharges" id="bankcharges" style="border: 1px solid #001E6A; text-align:right" value="0.00"  size="20" oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');" onKeyUp="bankCharges()"  autocomplete="off" />
-					<!-- onBlur="return fixed_value()" onFocus="return cashentryonfocus12()"   -->
-					</td>
-					<td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">&nbsp;&nbsp;</td>
-                    <td align="left" valign="top"  bgcolor="#FFFFFF">&nbsp;&nbsp;</td>
-                  </tr>
+    <!-- Main Container with Sidebar -->
+    <div class="main-container-with-sidebar">
+        <!-- Left Sidebar -->
+        <aside id="leftSidebar" class="left-sidebar">
+            <div class="sidebar-header">
+                <h3>Quick Navigation</h3>
+                <button id="sidebarToggle" class="sidebar-toggle">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <ul class="nav-list">
+                    <li class="nav-item">
+                        <a href="mainmenu1.php" class="nav-link">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="doctorpaymententry.php" class="nav-link active">
+                            <i class="fas fa-credit-card"></i>
+                            <span>Doctor Payment Entry</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="doctorsactivityreport.php" class="nav-link">
+                            <i class="fas fa-user-md"></i>
+                            <span>Doctor Activity Report</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="activeusersreport.php" class="nav-link">
+                            <i class="fas fa-users"></i>
+                            <span>Active Users Report</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
 
-                  <tr>
-                    <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">&nbsp;</td>
-                    <td align="left" valign="top"  bgcolor="#FFFFFF">&nbsp;</td>
-                    <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">&nbsp;</td>
-                    <td align="left" valign="top"  bgcolor="#FFFFFF"><font color="#000000" size="1" face="Verdana, Arial, Helvetica, sans-serif">
-                      <input type="hidden" name="cbfrmflag2" value="<?php echo $supplieranum; ?>">
-                      <input type="hidden" name="frmflag2" value="frmflag2">
-                      <input name="Submit" type="submit"  id="form1button"  value="Save Payment" class="button" onClick="return amountcheck()" style="border: 1px solid #001E6A"/>
-                    </font></td>
-                  </tr>
-                </tbody>
-              </table>
-			 	</td>
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Alert Container -->
+            <div id="alertContainer">
+                <?php if (!empty($errmsg)): ?>
+                    <div class="alert alert-<?php echo $bgcolorcode === 'success' ? 'success' : ($bgcolorcode === 'failed' ? 'error' : 'info'); ?>">
+                        <i class="fas fa-<?php echo $bgcolorcode === 'success' ? 'check-circle' : ($bgcolorcode === 'failed' ? 'exclamation-triangle' : 'info-circle'); ?> alert-icon"></i>
+                        <span><?php echo htmlspecialchars($errmsg); ?></span>
+                    </div>
+                <?php endif; ?>
+            </div>
+
+            <!-- Page Header -->
+            <div class="page-header">
+                <div class="page-header-content">
+                    <h2>Doctor Payment Entry</h2>
+                    <p>Process and record doctor payments with comprehensive tracking and validation.</p>
+                </div>
+                <div class="page-header-actions">
+                    <button type="button" class="btn btn-secondary" onclick="refreshPage()">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                    <button type="button" class="btn btn-outline" onclick="printReceipt()">
+                        <i class="fas fa-print"></i> Print Receipt
+                    </button>
+                </div>
+            </div>
+            <!-- Doctor Search Form Section -->
+            <div class="search-form-section">
+                <div class="search-form-header">
+                    <i class="fas fa-user-md search-form-icon"></i>
+                    <h3 class="search-form-title">Select Doctor</h3>
+                </div>
+                
+                <form name="cbform1" method="post" action="doctorpaymententry.php" class="search-form">
+                    <div class="form-group">
+                        <label for="searchsuppliername" class="form-label">Search Doctor</label>
+                        <input name="searchsuppliername" type="text" id="searchsuppliername" 
+                               value="<?php echo htmlspecialchars($searchsuppliername); ?>" 
+                               class="form-input" placeholder="Type doctor name to search..." autocomplete="off">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="cbsuppliername" class="form-label">Doctor Name</label>
+                        <input value="<?php echo htmlspecialchars($cbsuppliername); ?>" 
+                               name="cbsuppliername" type="text" id="cbsuppliername" 
+                               onKeyDown="return disableEnterKey()" onKeyUp="return FillDoctor()" 
+                               class="form-input" placeholder="Doctor name will appear here..." 
+                               <?php if($searchsuppliername != "") { ?> readonly <?php } ?>>
+                    </div>
+
+                    <div class="form-group">
+                        <input type="hidden" name="searchsuppliercode" onBlur="return suppliercodesearch1()" 
+                               onKeyDown="return suppliercodesearch2()" id="searchsuppliercode" 
+                               value="<?php if($searchsuppliercode != '') { echo $searchsuppliercode; } else { echo '04-4602'; } ?>" />
+                        <input type="hidden" name="cbfrmflag1" value="cbfrmflag1">
+                        
+                        <button type="submit" class="submit-btn">
+                            <i class="fas fa-search"></i>
+                            Search Doctor
+                        </button>
+                        <button type="button" class="btn btn-secondary" onclick="resetForm()">
+                            <i class="fas fa-undo"></i> Reset
+                        </button>
+                    </div>
+                </form>
+            </div>
+            <?php
+            // Handle doctor selection and advance payment check
+            if (isset($_REQUEST["cbfrmflag1"])) { $cbfrmflag1 = $_REQUEST["cbfrmflag1"]; } else { $cbfrmflag1 = ""; }
+            if ($cbfrmflag1 == 'cbfrmflag1') {
+                $searchsuppliername = $_POST['searchsuppliername'];
+                
+                if ($searchsuppliername != '') {
+                    $arraysupplier = explode("#", $searchsuppliername);
+                    $arraysuppliername = $arraysupplier[0];
+                    $arraysuppliername = trim($arraysuppliername);
+                    $arraysuppliercode = $arraysupplier[1];
+                    
+                    $query1 = "select * from master_doctor where doctorcode = '$arraysuppliercode'";
+                    $exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
+                    $res1 = mysqli_fetch_array($exec1);
+                    $supplieranum = $res1['auto_number'];
+                    $openingbalance = $res1['openingbalance'];
+                    $cbsuppliername = $arraysuppliername;
+                    $suppliername = $arraysuppliername;
+                } else {
+                    $cbsuppliername = $_REQUEST['cbsuppliername'];
+                    $suppliername = $_REQUEST['cbsuppliername']; 
+                }
+            }
+
+            // Check for advance payments
+            $total_pendingamount = 0;
+            if (isset($arraysuppliercode)) {
+                $query2 = "select * from advance_payment_entry where ledger_code='$arraysuppliercode' and transactionmodule = 'PAYMENT' and recordstatus<>'deleted' group by docno order by auto_number desc";
+                $exec2 = mysqli_query($GLOBALS["___mysqli_ston"], $query2) or die ("Error in Query2".mysqli_error($GLOBALS["___mysqli_ston"]));
+                $num2 = mysqli_num_rows($exec2);
+                while ($res2 = mysqli_fetch_array($exec2)) {
+                    $totalamount = $res2['transactionamount'];
+                    $transactiondate = $res2['transactiondate'];
+                    $docno = $res2['docno'];
+                    $transactionmode = $res2['transactionmode'];
+                    $bankcode = $res2['bankcode'];
+                    $bankname = $res2['bankname'];
+                    $docname = $res2['ledger_name'];
+                    
+                    $query_adp = "SELECT sum(transactionamount) as transactionamount FROM `advance_payment_allocation` WHERE docno='$docno' and recordstatus='allocated'";
+                    $exec_adp = mysqli_query($GLOBALS["___mysqli_ston"], $query_adp) or die ("Error in Query_adp".mysqli_error($GLOBALS["___mysqli_ston"]));
+                    $num_adp = mysqli_num_rows($exec_adp);
+                    $res_adp = mysqli_fetch_array($exec_adp);
+                    $total_adp_transactioamount = $res_adp['transactionamount'];
+                    $pending_amount_doc = $totalamount - $total_adp_transactioamount;
+                    $total_pendingamount += $pending_amount_doc;
+                }
+                
+                if($total_pendingamount > 0) { ?>
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle alert-icon"></i>
+                        <span><strong>Doctor has Advance Payments!</strong> Please allocate the same against invoices to process the payment.</span>
+                    </div>
+                <?php }
+            }
+            ?>
+
+            <!-- Payment Entry Form Section -->
+            <?php if ($cbfrmflag1 == 'cbfrmflag1'): ?>
+            <div class="payment-form-section">
+                <div class="payment-form-header">
+                    <i class="fas fa-credit-card payment-form-icon"></i>
+                    <h3 class="payment-form-title">Payment Entry Details</h3>
+                    <div class="opening-balance">
+                        <span class="balance-label">Opening Balance:</span>
+                        <span class="balance-value"><?php echo number_format($openingbalance, 2); ?></span>
+                    </div>
+                </div>
+                
+                <form name="form1" id="form1" method="post" action="doctorpaymententry.php?cbfrmflag1=<?php echo $cbfrmflag1; ?>" onSubmit="return paymententry1process1()" class="payment-form">
+                    <input type="hidden" name="searchsuppliercode1" id="searchsuppliercode1" value="<?php if($searchsuppliercode != '') { echo $searchsuppliercode; } else { echo '04-4602'; } ?>" />
+                    <input type="hidden" name="searchsuppliername1" id="searchsuppliername1" value="" />
+                    <input type="hidden" name="cashcoa" value="<?php echo $cashcoa; ?>">
+                    <input type="hidden" name="chequecoa" value="<?php echo $chequecoa; ?>">
+                    <input type="hidden" name="mpesacoa" value="<?php echo $mpesacoa; ?>">
+                    <input type="hidden" name="cardcoa" value="<?php echo $cardcoa; ?>">
+                    <input type="hidden" name="onlinecoa" value="<?php echo $onlinecoa; ?>">
+                    <input type="hidden" name="doctorcode" value="<?php echo $doctorcode; ?>">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="pendingamount" class="form-label">Total Pending Amount</label>
+                            <input name="pendingamount" id="pendingamount" class="form-input amount-input" 
+                                   value="<?php echo $openingbalance; ?>" readonly onKeyDown="return disableEnterKey()" />
+                            <input name="pendingamounthidden" id="pendingamounthidden" type="hidden" 
+                                   value="<?php echo $openingbalance; ?>" />
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="paymententrydate" class="form-label">Entry Date</label>
+                            <div class="date-input-group">
+                                <input name="paymententrydate" id="paymententrydate" 
+                                       value="<?php echo date('Y-m-d'); ?>" class="form-input date-input" 
+                                       readonly="readonly" onKeyDown="return disableEnterKey()" />
+                                <img src="images2/cal.gif" onClick="javascript:NewCssCal('paymententrydate','','','','','','past','','<?=$updatedatetime;?>')" 
+                                     class="date-picker-icon" style="cursor:pointer"/>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="paymentamount" class="form-label">Payment Amount</label>
+                            <input name="paymentamount" id="paymentamount" class="form-input amount-input" 
+                                   value="0.00" <?php if($searchsuppliername != "") { ?> readonly <?php } ?> 
+                                   onKeyUp="return FillNetpay()" />
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="paymentmode" class="form-label">Payment Mode</label>
+                            <select name="paymentmode" id="paymentmode" class="form-input">
+                                <option value="" selected="selected">Select Payment Mode</option>
+                                <option value="CHEQUE">CHEQUE</option>
+                                <option value="CASH">CASH</option>
+                                <option value="MPESA">MPESA</option>
+                                <option value="ONLINE">ONLINE</option>
+                                <option value="WRITEOFF">ADJUSTMENT</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="taxanum" class="form-label">Select Applicable WHT</label>
+                            <select id="taxanum" name="taxanum" onChange="return netpayablecalc()" class="form-input">
+                                <option value="">Select Tax</option>
+                                <?php
+                                $query1 = "select * from master_withholding_tax where record_status = '1' order by auto_number";
+                                $exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
+                                while ($res1 = mysqli_fetch_array($exec1)) {
+                                    $res1taxname = $res1["name"];
+                                    $res1taxpercent = $res1["tax_percent"];
+                                    $res1anum = $res1["auto_number"];
+                                    ?>
+                                    <option value="<?php echo $res1anum; ?>"><?php echo $res1taxname.' ( '.$res1taxpercent.'% ) '; ?></option>
+                                    <?php
+                                }
+                                ?>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="taxamount" class="form-label">Tax Amount</label>
+                            <input name="taxamount" id="taxamount" class="form-input amount-input" readonly/>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="netpayable" class="form-label">Net Payable</label>
+                            <input name="netpayable" id="netpayable" class="form-input amount-input" value="0.00" readonly/>
+                        </div>
+                        
+                        <div class="form-group">
+                            <!-- Empty space for layout balance -->
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="chequenumber" class="form-label">Cheque/Mpesa Number</label>
+                            <input name="chequenumber" id="chequenumber" class="form-input" 
+                                   value="" autocomplete="off" placeholder="Enter cheque or mpesa number" />
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="bankname" class="form-label">Bank Name</label>
+                            <select name="bankname" id="bankname" class="form-input">
+                                <option value="">Select Bank</option>
+                                <?php 
+                                $querybankname = "select * from master_bank where bankstatus <> 'deleted'";
+                                $execbankname = mysqli_query($GLOBALS["___mysqli_ston"], $querybankname) or die ("Error in Query3".mysqli_error($GLOBALS["___mysqli_ston"]));
+                                while($resbankname = mysqli_fetch_array($execbankname)) { ?>
+                                    <option value="<?php echo $resbankname['bankcode'].'||'.$resbankname['bankname']; ?>">
+                                        <?php echo $resbankname['bankname']; ?>
+                                    </option>
+                                <?php } ?>
+                            </select>
+                            <input type="hidden" name="bankbranch" id="bankbranch">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="ADate1" class="form-label">Payment Date</label>
+                            <div class="date-input-group">
+                                <input name="ADate1" id="ADate1" class="form-input date-input" 
+                                       value="" readonly="readonly" onKeyDown="return disableEnterKey()" />
+                                <img src="images2/cal.gif" onClick="javascript:NewCssCal('ADate1','','','','','','past','','<?=$updatedatetime;?>')" 
+                                     class="date-picker-icon" style="cursor:pointer"/>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="remarks" class="form-label">Remarks</label>
+                            <input name="remarks" id="remarks" class="form-input" 
+                                   value="" autocomplete="off" placeholder="Enter payment remarks" />
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="bankcharges" class="form-label">Bank Charges</label>
+                            <input name="bankcharges" id="bankcharges" class="form-input amount-input" 
+                                   value="0.00" oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');" 
+                                   onKeyUp="bankCharges()" autocomplete="off" />
+                        </div>
+                        
+                        <div class="form-group">
+                            <!-- Empty space for layout balance -->
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <input type="hidden" name="cbfrmflag2" value="<?php echo $supplieranum; ?>">
+                        <input type="hidden" name="frmflag2" value="frmflag2">
+                        
+                        <button type="submit" id="form1button" class="submit-btn" onClick="return amountcheck()">
+                            <i class="fas fa-save"></i>
+                            Save Payment
+                        </button>
+                        
+                        <button type="button" class="btn btn-secondary" onclick="resetPaymentForm()">
+                            <i class="fas fa-undo"></i> Reset
+                        </button>
+                    </div>
+                </form>
+            </div>
+            <?php endif; ?>
 				
       </tr>
       <tr>
@@ -2021,24 +2097,14 @@ if ($cbfrmflag1 == 'cbfrmflag1')
 			</tr>
           </tbody>
         </table>
-<?php
-}
-?>	
-			</td>
-      </tr>
-      <tr>
-        <td>&nbsp;</td>
-      </tr>
-      <tr>
-        <td>&nbsp;</td>
-      </tr>
-      <tr>
-        <td>&nbsp;</td>
-      </tr>
-	  
-	  </form>
-    </table>
-  </table>
-<?php include ("includes/footer1.php"); ?>
+            <?php
+            }
+            ?>
+
+        </main>
+    </div>
+
+    <!-- Modern JavaScript -->
+    <script src="js/doctor-payment-modern.js?v=<?php echo time(); ?>"></script>
 </body>
 </html>

@@ -108,99 +108,42 @@ function clean($string) {
 
 ?>
 
-<style type="text/css">
-.bodytext31:hover { font-size:14px; }
-
-<!--
-
-body {
-
-  margin-left: 0px;
-
-  margin-top: 0px;
-
-  background-color: #ecf0f5;
-
-}
-
-.bodytext3 {  FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3B3B3C; FONT-FAMILY: Tahoma
-
-}
-
--->
-
-</style>
-
-
-
-<script type="text/javascript" src="js/adddate.js"></script>
-
-<script type="text/javascript" src="js/adddate2.js"></script>
-
-<script src="js/datetimepicker_css.js"></script>
-
-
-
-<!--<script type="text/javascript" src="js/autocomplete_customer2.js"></script>
-
-<script type="text/javascript" src="js/autosuggestcustomer.js"></script>-->
-
-<script type="text/javascript">
-
-window.onload = function () 
-
-{
-
-  var oTextbox = new AutoSuggestControl(document.getElementById("searchsuppliername"), new StateSuggestions());        
-
-}
-
-</script>
-
-<link rel="stylesheet" type="text/css" href="css/autosuggest.css" />        
-
-<style type="text/css">
-
-<!--
-
-.bodytext3 {FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3b3b3c; FONT-FAMILY: Tahoma; text-decoration:none
-
-}
-
-.bodytext31 {FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3b3b3c; FONT-FAMILY: Tahoma; text-decoration:none
-
-}
-
-.bodytext311 {FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3b3b3c; FONT-FAMILY: Tahoma; text-decoration:none
-
-}
-
--->
-
-.bal
-
-{
-
-border-style:none;
-
-background:none;
-
-text-align:right;
-
-}
-
-.bali
-
-{
-
-text-align:right;
-
-}
-
-</style>
-
-
-
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doctor Wise Revenue Report - MedStar</title>
+    
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <!-- Modern CSS -->
+    <link rel="stylesheet" href="css/doctor-revenue-modern.css?v=<?php echo time(); ?>">
+    
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- Date Picker CSS -->
+    <link href="css/datepickerstyle.css" rel="stylesheet" type="text/css" />
+    
+    <!-- jQuery UI for autocomplete -->
+    <link href="js/jquery-ui.css" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="css/autosuggest.css" />
+    
+    <!-- Scripts -->
+    <script type="text/javascript" src="js/adddate.js"></script>
+    <script type="text/javascript" src="js/adddate2.js"></script>
+    <script src="js/datetimepicker_css.js"></script>
+    
+    <script type="text/javascript">
+    window.onload = function () {
+        var oTextbox = new AutoSuggestControl(document.getElementById("searchsuppliername"), new StateSuggestions());        
+    }
+    </script>
+    
+    <!-- Modern JavaScript -->
+    <script src="js/doctor-revenue-modern.js?v=<?php echo time(); ?>"></script>
 </head>
 
 
@@ -210,210 +153,199 @@ text-align:right;
 
 
 <body>
+    <!-- Hospital Header -->
+    <header class="hospital-header">
+        <h1 class="hospital-title">🏥 MedStar Hospital Management</h1>
+        <p class="hospital-subtitle">Advanced Healthcare Management Platform</p>
+    </header>
+
+    <!-- User Information Bar -->
+    <div class="user-info-bar">
+        <div class="user-welcome">
+            <span class="welcome-text">Welcome, <strong><?php echo htmlspecialchars($username); ?></strong></span>
+            <span class="location-info">📍 Company: <?php echo htmlspecialchars($companyname); ?></span>
+        </div>
+        <div class="user-actions">
+            <a href="mainmenu1.php" class="btn btn-outline">🏠 Main Menu</a>
+            <a href="logout.php" class="btn btn-outline">🚪 Logout</a>
+        </div>
+    </div>
+
+    <!-- Navigation Breadcrumb -->
+    <nav class="nav-breadcrumb">
+        <a href="mainmenu1.php">🏠 Home</a>
+        <span>→</span>
+        <span>Doctor Wise Revenue Report</span>
+    </nav>
+
+    <!-- Floating Menu Toggle -->
+    <div id="menuToggle" class="floating-menu-toggle">
+        <i class="fas fa-bars"></i>
+    </div>
+
+    <!-- Main Container with Sidebar -->
+    <div class="main-container-with-sidebar">
+        <!-- Left Sidebar -->
+        <aside id="leftSidebar" class="left-sidebar">
+            <div class="sidebar-header">
+                <h3>Quick Navigation</h3>
+                <button id="sidebarToggle" class="sidebar-toggle">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <ul class="nav-list">
+                    <li class="nav-item">
+                        <a href="mainmenu1.php" class="nav-link">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="doctorwiserevenuereport.php" class="nav-link active">
+                            <i class="fas fa-chart-line"></i>
+                            <span>Doctor Revenue Report</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="doctorsactivityreport.php" class="nav-link">
+                            <i class="fas fa-user-md"></i>
+                            <span>Doctor Activity Report</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="doctorpaymententry.php" class="nav-link">
+                            <i class="fas fa-credit-card"></i>
+                            <span>Doctor Payment Entry</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Alert Container -->
+            <div id="alertContainer">
+                <?php if (!empty($errmsg)): ?>
+                    <div class="alert alert-<?php echo $bgcolorcode === 'success' ? 'success' : ($bgcolorcode === 'failed' ? 'error' : 'info'); ?>">
+                        <i class="fas fa-<?php echo $bgcolorcode === 'success' ? 'check-circle' : ($bgcolorcode === 'failed' ? 'exclamation-triangle' : 'info-circle'); ?> alert-icon"></i>
+                        <span><?php echo htmlspecialchars($errmsg); ?></span>
+                    </div>
+                <?php endif; ?>
+            </div>
+
+            <!-- Page Header -->
+            <div class="page-header">
+                <div class="page-header-content">
+                    <h2>Doctor Wise Revenue Report</h2>
+                    <p>Comprehensive revenue analysis by doctor with detailed OPD and IPD performance metrics.</p>
+                </div>
+                <div class="page-header-actions">
+                    <button type="button" class="btn btn-secondary" onclick="refreshPage()">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                    <button type="button" class="btn btn-outline" onclick="exportToExcel()">
+                        <i class="fas fa-file-excel"></i> Export Excel
+                    </button>
+                </div>
+            </div>
+
+            <!-- Search Form Section -->
+            <div class="search-form-section">
+                <div class="search-form-header">
+                    <i class="fas fa-chart-line search-form-icon"></i>
+                    <h3 class="search-form-title">Revenue Report Search</h3>
+                </div>
+                
+                <form name="cbform1" method="post" action="doctorwiserevenuereport.php" class="search-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="ADate1" class="form-label">Date From</label>
+                            <div class="date-input-group">
+                                <input name="ADate1" id="ADate1" value="<?php echo $paymentreceiveddatefrom; ?>" 
+                                       class="form-input date-input" readonly="readonly" onKeyDown="return disableEnterKey()" />
+                                <img src="images2/cal.gif" onClick="javascript:NewCssCal('ADate1')" 
+                                     class="date-picker-icon" style="cursor:pointer"/>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="ADate2" class="form-label">Date To</label>
+                            <div class="date-input-group">
+                                <input name="ADate2" id="ADate2" value="<?php echo $paymentreceiveddateto; ?>" 
+                                       class="form-input date-input" readonly="readonly" onKeyDown="return disableEnterKey()" />
+                                <img src="images2/cal.gif" onClick="javascript:NewCssCal('ADate2')" 
+                                     class="date-picker-icon" style="cursor:pointer"/>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <input type="hidden" name="cbfrmflag1" value="cbfrmflag1">
+                        
+                        <button type="submit" class="submit-btn">
+                            <i class="fas fa-search"></i>
+                            Generate Report
+                        </button>
+                        
+                        <button type="button" class="btn btn-secondary" onclick="resetForm()">
+                            <i class="fas fa-undo"></i> Reset
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Results Section -->
+            <?php if(isset($_POST['Submit'])): ?>
+            <div class="results-section">
+                <div class="results-header">
+                    <h3>Revenue Report Results</h3>
+                    <div class="results-actions">
+                        <a target="_blank" href="print_doctorwiserevenuexls.php?cbfrmflag1=cbfrmflag1&&ADate1=<?php echo $ADate1; ?>&&ADate2=<?php echo $ADate2; ?>" class="btn btn-outline">
+                            <i class="fas fa-file-excel"></i> Export Excel
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="report-info">
+                    <div class="location-info">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <span><strong>
+                        <?php 
+                        $query451 = "select * from `master_location`";
+                        $exec451 = mysqli_query($GLOBALS["___mysqli_ston"], $query451) or die(mysqli_error($GLOBALS["___mysqli_ston"]));
+                        $row2 = array();
+                        while ($row2[] = mysqli_fetch_assoc($exec451)){
+                            $locationcode = $row2[0]['auto_number'];
+                            echo "Location: " . $row2[0]['locationname'];
+                        }
+                        ?>
+                        </strong></span>
+                    </div>
+                </div>
+                
+                <div class="table-container">
+                    <table class="modern-table">
+                        <thead>
+                            <tr>
+                                <th>No.</th>
+                                <th>Doctor</th>
+                                <th>Speciality</th>
+                                <th>OPD</th>
+                                <th>IPD</th>
+                                <th>Total</th>
+                                <th>OPD Volume</th>
+                                <th>Avg. OPD Revenue</th>
+                                <th>IPD Volume</th>
+                                <th>Avg. IPD Revenue</th>
+                                <th>Admission</th>
+                                <th>OP to IP Conversion</th>
+                            </tr>
+                        </thead>
+                        <tbody>
 
-<table width="101%" border="0" cellspacing="0" cellpadding="2">
-
-  <tr>
-
-    <td colspan="10" bgcolor="#ecf0f5"><?php include ("includes/alertmessages1.php"); ?></td>
-
-  </tr>
-
-  <tr>
-
-    <td colspan="10" bgcolor="#ecf0f5"><?php include ("includes/title1.php"); ?></td>
-
-  </tr>
-
-  <tr>
-
-    <td colspan="10" bgcolor="#ecf0f5"><?php include ("includes/menu1.php"); ?></td>
-
-  </tr>
-
-  <tr>
-
-    <td colspan="10">&nbsp;</td>
-
-  </tr>
-
-  <tr>
-
-    <td width="1%">&nbsp;</td>
-
-    <td width="2%" valign="top"><?php //include ("includes/menu4.php"); ?>
-
-      &nbsp;</td>
-
-    <td width="97%" valign="top"><table width="116%" border="0" cellspacing="0" cellpadding="0">
-
-      <tr>
-
-        <td width="860">
-
-    <form name="cbform1" method="post" action="doctorwiserevenuereport.php">
-
-    <table width="634" border="0" align="left" cellpadding="4" cellspacing="0" bordercolor="#666666" id="AutoNumber3" style="border-collapse: collapse">
-
-          <tbody>
-
-            <tr bgcolor="#011E6A">
-
-              <td colspan="4" bgcolor="#ecf0f5" class="bodytext3"><strong>Doctorwise Revenue</strong></td>
-
-             </tr>
-
-             <tr>
-
-                      <td class="bodytext31" valign="center"  align="left" 
-
-                bgcolor="#FFFFFF"> Date From </td>
-
-                      <td width="30%" align="left" valign="center"  bgcolor="#FFFFFF" class="bodytext31"><input name="ADate1" id="ADate1" value="<?php echo $paymentreceiveddatefrom; ?>"  size="10"  readonly="readonly" onKeyDown="return disableEnterKey()" />
-
-                          <img src="images2/cal.gif" onClick="javascript:NewCssCal('ADate1')" style="cursor:pointer"/> </td>
-
-                      <td width="16%" align="left" valign="center"  bgcolor="#FFFFFF" class="bodytext31"> Date To </td>
-
-                      <td width="33%" align="left" valign="center"  bgcolor="#FFFFFF"><span class="bodytext31">
-
-                        <input name="ADate2" id="ADate2" value="<?php echo $paymentreceiveddateto; ?>"  size="10"  readonly="readonly" onKeyDown="return disableEnterKey()" />
-
-                        <img src="images2/cal.gif" onClick="javascript:NewCssCal('ADate2')" style="cursor:pointer"/> </span></td>
-
-                  </tr> 
-
-                  <tr>
-
-                <td align="left" valign="top"  bgcolor="#FFFFFF"></td>
-
-                <td colspan="3" align="left" valign="top"  bgcolor="#FFFFFF">
-
-                    <input type="hidden" name="cbfrmflag1" value="cbfrmflag1">
-
-                    <input type="submit" value="Search" name="Submit" />
-
-                    <input name="resetbutton" type="reset" id="resetbutton"  value="Reset" /></td>
-
-              </tr>
-
-          </tbody>
-
-        </table>
-
-    </form>   </td>
-
-      </tr>
-
-      <tr>
-
-        <td>&nbsp;</td>
-
-      </tr>
-
-       <tr>
-
-        <td><table id="AutoNumber3" style="BORDER-COLLAPSE: collapse" bordercolor="#666666" cellspacing="0" cellpadding="4" width="1286" 
-
-            align="left" border="0">
-
-      <tbody>
-
-        <tr>
-
-        <?php 
-
-        if(isset($_POST['Submit'])){
-
-        ?>
-
-          <td class="bodytext31" valign="center"  align="left" colspan="2"> 
-
-           <!-- <a target="_blank" href="print_doctorwiserevenue.php?cbfrmflag1=cbfrmflag1&&ADate1=<?php echo $ADate1; ?>&&ADate2=<?php echo $ADate2; ?>"><img src="images/pdfdownload.jpg" width="30" height="30"></a> -->
-
-           <a target="_blank" href="print_doctorwiserevenuexls.php?cbfrmflag1=cbfrmflag1&&ADate1=<?php echo $ADate1; ?>&&ADate2=<?php echo $ADate2; ?>"><img src="images/excel-xls-icon.png" width="30" height="30"></a>
-
-          </td>
-
-        </tr>
-
-            <tr>
-
-            <td colspan="2" bgcolor="#ecf0f5" class="bodytext31"><span class="bodytext311"><strong>
-
-            <?php 
-
-              $query451 = "select * from `master_location`";
-
-              $exec451 = mysqli_query($GLOBALS["___mysqli_ston"], $query451) or die(mysqli_error($GLOBALS["___mysqli_ston"]));
-
-              $row2 = array();
-
-              while ($row2[] = mysqli_fetch_assoc($exec451)){
-
-                $locationcode = $row2[0]['auto_number'];
-
-                echo "Location: " . $row2[0]['locationname'];
-
-              }
-
-            ?></strong></span></td>
-
-            <td colspan="10" bgcolor="#ecf0f5" class="bodytext31"><span class="bodytext311">
-
-          </tr>
-
-          <tr>
-
-          <td width="2%" align="left" valign="center"  
-
-            bgcolor="#ffffff" class="bodytext31"><div align="left"><strong>NO.</strong></div></td>
-
-          <td width="15%" align="left" valign="center"  
-
-            bgcolor="#ffffff" class="bodytext31"><div align="left"><strong>DOCTOR</strong></div></td>
-
-          <td width="15%" align="left" valign="center"  
-
-            bgcolor="#ffffff" class="bodytext31"><div align="left"><strong>SPECIALITY</strong></div></td>
-
-          <td width="6%" align="left" valign="center"  
-
-            bgcolor="#ffffff" class="bodytext31"><div align="right"><strong>OPD</strong></div></td>
-
-          <td width="6%" align="left" valign="center"  
-
-            bgcolor="#ffffff" class="bodytext31"><div align="right"><strong>IPD</strong></div></td>
-
-          <td width="6%" align="left" valign="center"  
-
-            bgcolor="#ffffff" class="bodytext31"><div align="right"><strong>TOTAL</strong></div></td>
-
-          <td width="6%" align="left" valign="center"  
-
-            bgcolor="#ffffff" class="bodytext31"><div align="right"><strong>OPD VOLUME</strong></div></td>
-
-          <td width="6%" align="left" valign="center"  
-
-            bgcolor="#ffffff" class="bodytext31"><div align="right"><strong>AVG. OPD REVENUE</strong></div></td>
-
-          <td width="6%" align="left" valign="center"  
-
-            bgcolor="#ffffff" class="bodytext31"><div align="right"><strong>IPD VOLUME</strong></div></td>
-
-          <td width="6%" align="left" valign="center"  
-
-            bgcolor="#ffffff" class="bodytext31"><div align="right"><strong>AVG. IPD REVENUE</strong></div></td>
-
-          <td width="6%" align="left" valign="center"  
-
-            bgcolor="#ffffff" class="bodytext31"><div align="right"><strong>ADMISSION</strong></div></td> 
-
-          <td width="6%" align="left" valign="center"  
-
-            bgcolor="#ffffff" class="bodytext31"><div align="right"><strong>OP to IP CONVERSION</strong></div></td> 
-
-        </tr>
 
         <?php
 
@@ -1182,33 +1114,20 @@ text-align:right;
 
 
 
-        <tr <?php echo $colorcode; ?>>
-
-          <td class="bodytext31" valign="center" align="left"><?php echo $snocount; ?></td>
-
-          <td class="bodytext31" valign="center" align="left"><?php echo $employeename; ?></td>
-
-          <td class="bodytext31" valign="center" align="left"><?php echo $speciality; ?></td>
-
-          <td class="bodytext31" valign="center" align="right"><?php echo number_format($opdamount,2); ?></td>
-
-          <td class="bodytext31" valign="center" align="right"><?php echo number_format($ipdamount,2); ?></td>
-
-          <td class="bodytext31" valign="center" align="right"><?php echo number_format($rowtot,2); ?></td>
-
-          <td class="bodytext31" valign="center" align="right"><?php echo number_format($opdvolume); ?></td>
-
-          <td class="bodytext31" valign="center" align="right"><?php echo number_format($avgopdrevenue,2); ?></td>
-
-          <td class="bodytext31" valign="center" align="right"><?php echo number_format($ipdvolume); ?></td>
-
-          <td class="bodytext31" valign="center" align="right"><?php echo number_format($avgipdrevenue,2); ?></td>
-
-          <td class="bodytext31" valign="center" align="right"><?php echo number_format($admission); ?></td>
-
-          <td class="bodytext31" valign="center" align="right"><?php echo number_format($opipconversion,2)."%"; ?></td>
-
-        </tr>
+                            <tr class="<?php echo $showcolor == 0 ? 'even-row' : 'odd-row'; ?>">
+                                <td><?php echo $snocount; ?></td>
+                                <td><?php echo htmlspecialchars($employeename); ?></td>
+                                <td><?php echo htmlspecialchars($speciality); ?></td>
+                                <td class="text-right"><?php echo number_format($opdamount,2); ?></td>
+                                <td class="text-right"><?php echo number_format($ipdamount,2); ?></td>
+                                <td class="text-right"><?php echo number_format($rowtot,2); ?></td>
+                                <td class="text-right"><?php echo number_format($opdvolume); ?></td>
+                                <td class="text-right"><?php echo number_format($avgopdrevenue,2); ?></td>
+                                <td class="text-right"><?php echo number_format($ipdvolume); ?></td>
+                                <td class="text-right"><?php echo number_format($avgipdrevenue,2); ?></td>
+                                <td class="text-right"><?php echo number_format($admission); ?></td>
+                                <td class="text-right"><?php echo number_format($opipconversion,2)."%"; ?></td>
+                            </tr>
 
 
 
@@ -2050,33 +1969,20 @@ text-align:right;
 
 
 
-        <tr <?php echo $colorcode; ?>>
-
-          <td class="bodytext31" valign="center" align="left"><?php echo $snocount; ?></td>
-
-          <td class="bodytext31" valign="center" align="left">WALKINS</td>
-
-          <td class="bodytext31" valign="center" align="left">WALKINS</td>
-
-          <td class="bodytext31" valign="center" align="right"><?php echo number_format($opdamount,2); ?></td>
-
-          <td class="bodytext31" valign="center" align="right"><?php echo number_format($ipdamount,2); ?></td>
-
-          <td class="bodytext31" valign="center" align="right"><?php echo number_format($rowtot,2); ?></td>
-
-          <td class="bodytext31" valign="center" align="right"><?php echo number_format($opdvolume); ?></td>
-
-          <td class="bodytext31" valign="center" align="right"><?php echo number_format($avgopdrevenue,2); ?></td>
-
-          <td class="bodytext31" valign="center" align="right"><?php echo number_format($ipdvolume); ?></td>
-
-          <td class="bodytext31" valign="center" align="right"><?php echo number_format($avgipdrevenue,2); ?></td>
-
-          <td class="bodytext31" valign="center" align="right"><?php echo number_format($admission); ?></td>
-
-          <td class="bodytext31" valign="center" align="right"><?php echo number_format($opipconversion,2)."%"; ?></td>
-
-        </tr>
+                            <tr class="walkins-row">
+                                <td><?php echo $snocount; ?></td>
+                                <td><strong>WALKINS</strong></td>
+                                <td><strong>WALKINS</strong></td>
+                                <td class="text-right"><?php echo number_format($opdamount,2); ?></td>
+                                <td class="text-right"><?php echo number_format($ipdamount,2); ?></td>
+                                <td class="text-right"><?php echo number_format($rowtot,2); ?></td>
+                                <td class="text-right"><?php echo number_format($opdvolume); ?></td>
+                                <td class="text-right"><?php echo number_format($avgopdrevenue,2); ?></td>
+                                <td class="text-right"><?php echo number_format($ipdvolume); ?></td>
+                                <td class="text-right"><?php echo number_format($avgipdrevenue,2); ?></td>
+                                <td class="text-right"><?php echo number_format($admission); ?></td>
+                                <td class="text-right"><?php echo number_format($opipconversion,2)."%"; ?></td>
+                            </tr>
 
         <?php 
 
@@ -2122,49 +2028,28 @@ text-align:right;
 
         ?>
 
-        <tr bgcolor="#ecf0f5">
+                            <tr class="totals-row">
+                                <td></td>
+                                <td></td>
+                                <td><strong>TOTALS</strong></td>
+                                <td class="text-right"><strong><?php echo number_format($sumopdamount,2); ?></strong></td>
+                                <td class="text-right"><strong><?php echo number_format($sumipdamount,2); ?></strong></td>
+                                <td class="text-right"><strong><?php echo number_format($sumrowtot,2); ?></strong></td>
+                                <td class="text-right"><strong><?php echo number_format($sumopdvolume); ?></strong></td>
+                                <td class="text-right"><strong><?php echo number_format($sumvagopdrevenue,2); ?></strong></td>
+                                <td class="text-right"><strong><?php echo number_format($sumipdvolume); ?></strong></td>
+                                <td class="text-right"><strong><?php echo number_format($sumavdipdrevenue,2); ?></strong></td>
+                                <td class="text-right"><strong><?php echo number_format($sumadmission); ?></strong></td>
+                                <td class="text-right"><strong><?php echo number_format($sumopipconversion,2)."%"; ?></strong></td>
+                            </tr>
 
-          <td class="bodytext31" valign="center" align="left">&nbsp;</td>
-
-          <td class="bodytext31" valign="center" align="left">&nbsp;</td>
-
-          <td class="bodytext31" valign="center" align="left">&nbsp;</td>
-
-          <td class="bodytext31" valign="center" align="right"><strong><?php echo number_format($sumopdamount,2); ?></strong></td>
-
-          <td class="bodytext31" valign="center" align="right"><strong><?php echo number_format($sumipdamount,2); ?></strong></td>
-
-          <td class="bodytext31" valign="center" align="right"><strong><?php echo number_format($sumrowtot,2); ?></strong></td>
-
-          <td class="bodytext31" valign="center" align="right"><strong><?php echo number_format($sumopdvolume); ?></strong></td>
-
-          <td class="bodytext31" valign="center" align="right"><strong><?php echo number_format($sumvagopdrevenue,2); ?></strong></td>
-
-          <td class="bodytext31" valign="center" align="right"><strong><?php echo number_format($sumipdvolume); ?></strong></td>
-
-          <td class="bodytext31" valign="center" align="right"><strong><?php echo number_format($sumavdipdrevenue,2); ?></strong></td>
-
-          <td class="bodytext31" valign="center" align="right"><strong><?php echo number_format($sumadmission); ?></strong></td>
-
-          <td class="bodytext31" valign="center" align="right"><strong><?php echo number_format($sumopipconversion,2)."%"; ?></strong></td>
-
-        </tr>
-
-        </tbody>
-
-        </table></td>
-
-      </tr>
-
-    <?php } ?>
-
-    </table>
-
-</table>
-
-<?php include ("includes/footer1.php"); ?>
-
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <?php endif; ?>
+        </main>
+    </div>
 </body>
-
 </html>
 

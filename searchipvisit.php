@@ -1,3 +1,588 @@
-<?phpsession_start();include ("includes/loginverify.php");include ("db/db_connect.php");//echo $menu_id;include ("includes/check_user_access.php");
-$ipaddress = $_SERVER['REMOTE_ADDR'];$updatedatetime = date('Y-m-d');$username = $_SESSION['username'];$docno = $_SESSION['docno'];$companyanum = $_SESSION['companyanum'];$companyname = $_SESSION['companyname'];$transactiondatefrom = date('Y-m-d', strtotime('-1 month'));$transactiondateto = date('Y-m-d');$location =isset( $_REQUEST['location'])?$_REQUEST['location']:'';	$errmsg = "";$banum = "1";$supplieranum = "";$custid = "";$custname = "";$balanceamount = "0.00";$openingbalance = "0.00";$searchsuppliername = "";$cbsuppliername = "";//This include updatation takes too long to load for hunge items database.if (isset($_REQUEST["canum"])) { $getcanum = $_REQUEST["canum"]; } else { $getcanum = ""; }//$getcanum = $_GET['canum'];if ($getcanum != ''){	$query4 = "select * from master_supplier where auto_number = '$getcanum'  and locationcode='$locationcode'";	$exec4 = mysqli_query($GLOBALS["___mysqli_ston"], $query4) or die ("Error in Query4".mysqli_error($GLOBALS["___mysqli_ston"]));	$res4 = mysqli_fetch_array($exec4);	$cbsuppliername = $res4['suppliername'];	$suppliername = $res4['suppliername'];}if (isset($_REQUEST["st"])) { $st = $_REQUEST["st"]; } else { $st = ""; }//$st = $_REQUEST['st'];if ($st == '1'){	$errmsg = "Success. Payment Entry Update Completed.";}if ($st == '2'){	$errmsg = "Failed. Payment Entry Not Completed.";}?><style type="text/css"><!--body {	margin-left: 0px;	margin-top: 0px;	background-color: #ecf0f5;}.bodytext3 {	FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3B3B3C; FONT-FAMILY: Tahoma}--></style><link href="css/datepickerstyle.css" rel="stylesheet" type="text/css" /><script type="text/javascript" src="js/adddate.js"></script><script type="text/javascript" src="js/adddate2.js"></script><script language="javascript">function ajaxlocationfunction(val){ if (window.XMLHttpRequest)					  {// code for IE7+, Firefox, Chrome, Opera, Safari					  xmlhttp=new XMLHttpRequest();					  }					else					  {// code for IE6, IE5					  xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");					  }					xmlhttp.onreadystatechange=function()					  {					  if (xmlhttp.readyState==4 && xmlhttp.status==200)						{						document.getElementById("ajaxlocation").innerHTML=xmlhttp.responseText;						}					  }					xmlhttp.open("GET","ajax/ajaxgetlocationname.php?loccode="+val,true);					xmlhttp.send();}					//ajax to get location which is selected ends herefunction cbsuppliername1(){	document.cbform1.submit();}</script><script type="text/javascript">function disableEnterKey(varPassed){	//alert ("Back Key Press");	if (event.keyCode==8) 	{		event.keyCode=0; 		return event.keyCode 		return false;	}		var key;	if(window.event)	{		key = window.event.keyCode;     //IE	}	else	{		key = e.which;     //firefox	}	if(key == 13) // if enter key press	{		//alert ("Enter Key Press2");		return false;	}	else	{		return true;	}}function process1backkeypress1(){	//alert ("Back Key Press");	if (event.keyCode==8) 	{		event.keyCode=0; 		return event.keyCode 		return false;	}}function disableEnterKey(){	//alert ("Back Key Press");	if (event.keyCode==8) 	{		event.keyCode=0; 		return event.keyCode 		return false;	}		var key;	if(window.event)	{		key = window.event.keyCode;     //IE	}	else	{		key = e.which;     //firefox	}		if(key == 13) // if enter key press	{		return false;	}	else	{		return true;	}}function paymententry1process2(){	if (document.getElementById("cbfrmflag1").value == "")	{		alert ("Search Bill Number Cannot Be Empty.");		document.getElementById("cbfrmflag1").focus();		document.getElementById("cbfrmflag1").value = "<?php echo $cbfrmflag1; ?>";		return false;	}}function funcPrintReceipt1(){	//window.open("print_bill1.php?printsource=billpage&&billautonumber="+varBillAutoNumber+"&&companyanum="+varBillCompanyAnum+"&&title1="+varTitleHeader+"&&copy1="+varPrintHeader+"&&billnumber="+varBillNumber+"","OriginalWindow<?php echo $banum; ?>",'width=722,height=950,toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=1,resizable=1,left=25,top=25');	window.open("print_payment_receipt1.php","OriginalWindow<?php echo $banum; ?>",'width=722,height=950,toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=1,resizable=1,left=25,top=25');}</script><link rel="stylesheet" type="text/css" href="css/autosuggest.css" />        <style type="text/css"><!--.bodytext3 {FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3b3b3c; FONT-FAMILY: Tahoma; text-decoration:none}.bodytext31 {FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3b3b3c; FONT-FAMILY: Tahoma; text-decoration:none}.bodytext311 {FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3b3b3c; FONT-FAMILY: Tahoma; text-decoration:none}-->.bal{border-style:none;background:none;text-align:right;}.bali{text-align:right;}.pagination{ float:right; }</style></head><script src="js/datetimepicker_css.js"></script><body><table width="101%" border="0" cellspacing="0" cellpadding="2">  <tr>    <td colspan="10" bgcolor="#ecf0f5"><?php include ("includes/alertmessages1.php"); ?></td>  </tr>  <tr>    <td colspan="10" bgcolor="#ecf0f5"><?php include ("includes/title1.php"); ?></td>  </tr>  <tr>    <td colspan="10" bgcolor="#ecf0f5"><?php include ("includes/menu1.php"); ?></td>  </tr>  <tr>    <td colspan="10">&nbsp;</td>  </tr>  <tr>    <td width="1%">&nbsp;</td>    <td width="2%" valign="top"><?php //include ("includes/menu4.php"); ?>      &nbsp;</td>    <td width="97%" valign="top"><table width="116%" border="0" cellspacing="0" cellpadding="0">      <tr>        <td width="860">				              <form name="cbform1" method="post" action="searchipvisit.php">		<table width="800" border="0" align="left" cellpadding="4" cellspacing="0" bordercolor="#666666" id="AutoNumber3" style="border-collapse: collapse">          <tbody>            <tr bgcolor="#011E6A">              <td colspan="2" bgcolor="#ecf0f5" class="bodytext3"><strong>Edit IP Visit Details </strong></td>               <td colspan="2" align="right" bgcolor="#ecf0f5" class="bodytext3" id="ajaxlocation"><strong> Location </strong>                                           <?php												if ($location!='')						{						$query12 = "select locationname from master_location where locationcode='$location' order by locationname";						$exec12 = mysqli_query($GLOBALS["___mysqli_ston"], $query12) or die ("Error in Query12".mysqli_error($GLOBALS["___mysqli_ston"]));						$res12 = mysqli_fetch_array($exec12);												echo $res1location = $res12["locationname"];						//echo $location;						}						else						{						$query1 = "select locationname from login_locationdetails where username='$username' and docno='$docno' group by locationname order by locationname";						$exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));						$res1 = mysqli_fetch_array($exec1);												echo $res1location = $res1["locationname"];						//$res1locationanum = $res1["locationcode"];						}						?>												                                    </td>              </tr>                                				<tr>                <td width="14%" align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3"><span class="bodytext32">Location   *</span></td>                <td width="38%" align="left" colspan="3" valign="middle"  bgcolor="#FFFFFF">                <select name="location" id="location" onChange="ajaxlocationfunction(this.value);"  style="border: 1px solid #001E6A;">                  <?php												$query1 = "select * from login_locationdetails where username='$username' and docno='$docno' group by locationname order by locationname";						$exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));						while ($res1 = mysqli_fetch_array($exec1))						{						$locationname = $res1["locationname"];						$locationcode = $res1["locationcode"];						?>						<option value="<?php echo $locationcode; ?>" <?php if($location!=''){if($location == $locationcode){echo "selected";}}?>><?php echo $locationname; ?></option>						<?php						}						?>                  </select>                </td>				</tr>            <tr>              <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">Patient Name</td>              <td width="82%" colspan="3" align="left" valign="top"  bgcolor="#FFFFFF"><span class="bodytext3">                <input name="patient" type="text" id="patient" value="" size="50" autocomplete="off">              </span></td>              </tr>			    <tr>              <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">Registration No</td>              <td width="82%" colspan="3" align="left" valign="top"  bgcolor="#FFFFFF"><span class="bodytext3">                <input name="patientcode" type="text" id="patient" value="" size="50" autocomplete="off">              </span></td>              </tr>			   <tr>              <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">Visitcode</td>              <td width="82%" colspan="3" align="left" valign="top"  bgcolor="#FFFFFF"><span class="bodytext3">                <input name="visitcode" type="text" id="visitcode" value="" size="50" autocomplete="off">              </span></td>              </tr>			  <tr>          <td width="76" align="left" valign="center"                  bgcolor="#ffffff" class="bodytext31"><strong> Date From </strong></td>          <td width="123" align="left" valign="center"  bgcolor="#ffffff" class="bodytext31"><input name="ADate1" id="ADate1" value="<?php echo $transactiondatefrom; ?>"  size="10"  readonly="readonly" onKeyDown="return disableEnterKey()" />			<img src="images2/cal.gif" onClick="javascript:NewCssCal('ADate1')" style="cursor:pointer"/>			</td>          <td width="51" align="left" valign="center"  bgcolor="#FFFFFF" class="style1"><span class="bodytext31"><strong> Date To </strong></span></td>          <td width="129" align="left" valign="center"  bgcolor="#ffffff"><span class="bodytext31">            <input name="ADate2" id="ADate2" value="<?php echo $transactiondateto; ?>"  size="10"  readonly="readonly" onKeyDown="return disableEnterKey()" />			<img src="images2/cal.gif" onClick="javascript:NewCssCal('ADate2')" style="cursor:pointer"/>		  </span></td>          </tr>			   <tr>              <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3"></td>              <td colspan="3" align="left" valign="top"  bgcolor="#FFFFFF">			  <input type="hidden" name="cbfrmflag1" value="cbfrmflag1">                  <input  type="submit" value="Search" name="Submit" />                  <input name="resetbutton" type="reset" id="resetbutton"  value="Reset" /></td>            </tr>          </tbody>        </table>		</form>		</td>      </tr>      <tr>        <td>&nbsp;</td>      </tr>            <tr>        <td>&nbsp;</td>      </tr>            <tr>        <td>&nbsp;</td>      </tr>            <tr>        <td>&nbsp;</td>      </tr>	  <?php	$colorloopcount=0;	$sno=0;if (isset($_REQUEST["cbfrmflag1"])) { $cbfrmflag1 = $_REQUEST["cbfrmflag1"]; } else { $cbfrmflag1 = ""; }//$cbfrmflag1 = $_POST['cbfrmflag1'];if ($cbfrmflag1 == 'cbfrmflag1' || isset($_REQUEST['page'])){	if(isset($_POST['location'])){$_POST['location'] = $_POST['location'];}	$searchlocationcode = $_POST['location'];	if(isset($_POST['patient'])){$_SESSION['ippatient'] = $_POST['patient'];}	$searchpatient = $_SESSION['ippatient'];	if(isset($_POST['patientcode'])){$_SESSION['ippatientcode'] = $_POST['patientcode'];}	$searchpatientcode=$_SESSION['ippatientcode'];	if(isset($_POST['visitcode'])){$_SESSION['ipvisitcode'] = $_POST['visitcode'];}	$searchvisitcode = $_SESSION['ipvisitcode'];	if(isset($_POST['ADate1'])){$_SESSION['ipADate1'] = $_POST['ADate1'];}	$fromdate=$_SESSION['ipADate1'];	if(isset($_POST['ADate2'])){$_SESSION['ipADate2'] = $_POST['ADate2'];}	$todate=$_SESSION['ipADate2'];	//echo $searchpatient;		//$transactiondatefrom = $_REQUEST['ADate1'];	//$transactiondateto = $_REQUEST['ADate2'];	?>	  <tr>        <td>			<form name="form1" id="form1" method="post" action="searchipvisit.php">			<table id="AutoNumber3" style="BORDER-COLLAPSE: collapse"             bordercolor="#666666" cellspacing="0" cellpadding="4" width="100%"             align="left" border="0">          <tbody>             <tr>				 <td colspan="15"  bgcolor="#ecf0f5" class="bodytext31">				      <?php //error_reporting(0);																				// How many adjacent pages should be shown on each side?							$adjacents = 3;														/* 							   First get total number of rows in data table. 							   If you have a WHERE clause in your query, make sure you mirror it here.							*/							$query111 = "select * from master_ipvisitentry where  locationcode='$searchlocationcode' and patientfullname like '%$searchpatient%' and patientcode like '%$searchpatientcode%' and visitcode like '%$searchvisitcode%' and consultationdate between '$fromdate' and '$todate'order by auto_number desc";							$exec111 = mysqli_query($GLOBALS["___mysqli_ston"], $query111) or die ("Error in Query111".mysqli_error($GLOBALS["___mysqli_ston"]));							$res111 = mysqli_fetch_array($exec111);							$total_pages = mysqli_num_rows($exec111);																			/*$query = "SELECT * FROM $tbl_name";							$total_pages = mysql_fetch_array(mysql_query($query));							echo $numrow = mysql_num_rows($total_pages);*/														/* Setup vars for query. */							$targetpage = $_SERVER['PHP_SELF']; 	//your file name  (the name of this file)							$limit = 50; 								//how many items to show per page							if(isset($_REQUEST['page'])){ $page=$_REQUEST['page'];} else { $page="";}							if($page) 								$start = ($page - 1) * $limit; 			//first item to display on this page							else								$start = 0;								//if no page var is given, set start to 0														/* Setup page vars for display. */							if ($page == 0) $page = 1;					//if no page var is given, default to 1.							$prev = $page - 1;							//previous page is page - 1							$next = $page + 1;							//next page is page + 1							$lastpage = ceil($total_pages/$limit);		//lastpage is = total pages / items per page, rounded up.							$lpm1 = $lastpage - 1;						//last page minus 1														/* 								Now we apply our rules and draw the pagination object. 								We're actually saving the code to a variable in case we want to draw it more than once.							*/							$pagination = "";							if($lastpage >= 1)							{									$pagination .= "<div class=\"pagination\">";								//previous button								if ($page > 1) 									$pagination.= "<a href=\"$targetpage?page=$prev\" style='color:#3b3b3c;'>previous</a>";								else									$pagination.= "<span class=\"disabled\" style='color:#3b3b3c;'>previous</span>";																	//pages									if ($lastpage < 7 + ($adjacents * 2))	//not enough pages to bother breaking it up								{										for ($counter = 1; $counter <= $lastpage; $counter++)									{										if ($counter == $page)											$pagination.= "<span class=\"current\" style='margin:0 0 0 2px; color:#3b3b3c;'>$counter</span>";										else											$pagination.= "<a href=\"$targetpage?page=$counter\" style='margin:0 0 0 2px; color:#3b3b3c;'>$counter</a>";														}								}								elseif($lastpage > 5 + ($adjacents * 2))	//enough pages to hide some								{									//close to beginning; only hide later pages									if($page < 1 + ($adjacents * 2))											{										for ($counter = 1; $counter < 4 + ($adjacents * 2); $counter++)										{											if ($counter == $page)												$pagination.= "<span class=\"current\" style='margin:0 0 0 2px;' color:#3b3b3c;>$counter</span>";											else												$pagination.= "<a href=\"$targetpage?page=$counter\" style='margin:0 0 0 2px; color:#3b3b3c;'>$counter</a>";															}										$pagination.= "...";										$pagination.= "<a href=\"$targetpage?page=$lpm1\"style='margin:0 0 0 2px; color:#3b3b3c;'>$lpm1</a>";										$pagination.= "<a href=\"$targetpage?page=$lastpage\"style='margin:0 0 0 2px; color:#3b3b3c;'>$lastpage</a>";											}									//in middle; hide some front and some back									elseif($lastpage - ($adjacents * 2) > $page && $page > ($adjacents * 2))									{										$pagination.= "<a href=\"$targetpage?page=1\" style='margin:0 0 0 2px; color:#3b3b3c;'>1</a>";										$pagination.= "<a href=\"$targetpage?page=2\" style='margin:0 0 0 2px; color:#3b3b3c;'>2</a>";										$pagination.= "...";										for ($counter = $page - $adjacents; $counter <= $page + $adjacents; $counter++)										{											if ($counter == $page)												$pagination.= "<span class=\"current\" style='margin:0 0 0 2px; color:#3b3b3c;'>$counter</span>";											else												$pagination.= "<a href=\"$targetpage?page=$counter\" style='margin:0 0 0 2px; color:#3b3b3c;'>$counter</a>";															}										$pagination.= "...";										$pagination.= "<a href=\"$targetpage?page=$lpm1\" style='margin:0 0 0 2px; color:#3b3b3c;'>$lpm1</a>";										$pagination.= "<a href=\"$targetpage?page=$lastpage\" style='margin:0 0 0 2px; color:#3b3b3c;'>$lastpage</a>";											}									//close to end; only hide early pages									else									{										$pagination.= "<a href=\"$targetpage?page=1\" style='margin:0 0 0 2px; color:#3b3b3c;'>1</a>";										$pagination.= "<a href=\"$targetpage?page=2\" style='margin:0 0 0 2px; color:#3b3b3c;'>2</a>";										$pagination.= "...";										for ($counter = $lastpage - (2 + ($adjacents * 2)); $counter <= $lastpage; $counter++)										{											if ($counter == $page)												$pagination.= "<span class=\"current\" style='margin:0 0 0 2px; color:#3b3b3c;'>$counter</span>";											else												$pagination.= "<a href=\"$targetpage?page=$counter\" style='margin:0 0 0 2px; color:#3b3b3c;'>$counter</a>";															}									}								}																//next button								if ($page < $counter - 1) 									$pagination.= "<a href=\"$targetpage?page=$next\" style='margin:0 0 0 2px; color:#3b3b3c;'>next</a>";								else									$pagination.= "<span class=\"disabled\" style='margin:0 0 0 2px; color:#3b3b3c;'>next</span>";								echo $pagination.= "</div>\n";									}												?>				 </td>			 </tr>           <tr>                <td class="bodytext31" valign="center"  align="left"                 bgcolor="#ffffff"><strong>No.</strong></td>                <td align="left" valign="center"                  bgcolor="#ffffff" class="bodytext31"><div align="center"><strong>Print</strong></div></td>                <td align="left" valign="center"                  bgcolor="#ffffff" class="bodytext31"><div align="center"><strong>Edit</strong></div></td>				 <td align="left" valign="center"                  bgcolor="#ffffff" class="bodytext31"><strong>User name</strong></td>                <td align="left" valign="center"                  bgcolor="#ffffff" class="bodytext31"><strong>Reg Code</strong></td>				  <td align="left" valign="center"                  bgcolor="#ffffff" class="bodytext31"><strong>Visit Code</strong></td>				<td align="left" valign="center"                  bgcolor="#ffffff" class="bodytext31"><strong>IP File No</strong></td>					  <td align="left" valign="center"                  bgcolor="#ffffff" class="bodytext31"><strong>OP Date</strong></td>							        <td class="bodytext31" valign="center"  align="left"                 bgcolor="#ffffff"><div align="left"><strong>Patient Name </strong></div></td>               <td align="left" valign="center"                  bgcolor="#ffffff" class="bodytext31"><div align="left"><strong>Type</strong></div></td>                <td align="left" valign="center"                  bgcolor="#ffffff" class="bodytext31"><div align="left"><strong>Sub Type </strong></div></td>                <td  align="left" valign="center"                 bgcolor="#ffffff" class="bodytext31"><strong>Bill Type </strong></td>                <td  align="left" valign="center"                 bgcolor="#ffffff" class="bodytext31"><div align="left"><strong>Account Name</strong></div></td>                 <td class="bodytext31" align="left" valign="center"                 bgcolor="#ffffff"><strong>Age</strong></td>                <td  align="left" valign="center"                 bgcolor="#ffffff" class="bodytext31"><div align="left"><strong>Gender</strong></div></td>                      <td class="bodytext31" valign="center"  align="left"                 bgcolor="#ffffff"><div align="left"><strong>                  <!--OpeningBalance-->                  NationaID Number</strong> </div></td>                 </tr>			  <?php             $query2 = "select * from master_ipvisitentry where  locationcode='$searchlocationcode'  and patientfullname like '%$searchpatient%' and patientcode like '%$searchpatientcode%' and visitcode like '%$searchvisitcode%' and consultationdate between '$fromdate' and '$todate'order by auto_number desc LIMIT $start , $limit";			  $exec2 = mysqli_query($GLOBALS["___mysqli_ston"], $query2) or die ("Error in Query2".mysqli_error($GLOBALS["___mysqli_ston"]));			  $num2 = mysqli_num_rows($exec2);			 // echo $num2;			  while ($res2 = mysqli_fetch_array($exec2))			  {			  $res2customercode = $res2['patientcode'];			  $res2visitcode = $res2['visitcode'];			  $res2customeranum = $res2['auto_number'];			  $res2customername = $res2['patientfullname'];			  $res2customercode = $res2['patientcode'];			  $consultationdate = $res2['consultationdate'];			  $username=$res2['username'];			  $query34 = "select * from master_customer where  customercode='$res2customercode'";			  $exec34 = mysqli_query($GLOBALS["___mysqli_ston"], $query34) or die(mysqli_error($GLOBALS["___mysqli_ston"]));			  $res34 = mysqli_fetch_array($exec34);			  $res2age = $res34['age'];			  $res2gender = $res34['gender'];			  $res2nationalidnumber = $res34['nationalidnumber'];			  //$res2contactperson1 = $res2['contactperson1'];			  $paymenttypeanum = $res2['paymenttype'];			   $mrdno = $res2['mrdno'];			  			  $query3 = "select * from master_paymenttype where auto_number = '$paymenttypeanum'";			  $exec3 = mysqli_query($GLOBALS["___mysqli_ston"], $query3) or die ("Error in Query5".mysqli_error($GLOBALS["___mysqli_ston"]));			  $res3 = mysqli_fetch_array($exec3);			  $res3paymenttype = $res3['paymenttype'];			  			  $subtypeanum = $res2['subtype'];			    $scheme_id = $res2['scheme_id'];			  $query4 = "select * from master_subtype where  auto_number = '$subtypeanum'";			  $exec4 = mysqli_query($GLOBALS["___mysqli_ston"], $query4) or die ("Error in Query5".mysqli_error($GLOBALS["___mysqli_ston"]));			  $res4 = mysqli_fetch_array($exec4);			  $res4subtype = $res4['subtype'];			  $res2billtype = $res2['billtype'];			  $accountnameanum = $res2['accountname'];	          $query5 = "select * from master_accountname where   auto_number = '$accountnameanum'";			  $exec5 = mysqli_query($GLOBALS["___mysqli_ston"], $query5) or die ("Error in Query5".mysqli_error($GLOBALS["___mysqli_ston"]));			  $res5 = mysqli_fetch_array($exec5);			  //$res5accountname = $res5['accountname'];$query_sc = "select * from master_planname where scheme_id = '$scheme_id'";	$exec_sc = mysqli_query($GLOBALS["___mysqli_ston"], $query_sc) or die ("Error in query_sc".mysqli_error($GLOBALS["___mysqli_ston"]));	$res_sc = mysqli_fetch_array($exec_sc);	//$plannameanum = $res4['auto_number'];	$res5accountname = $res_sc['scheme_name'];
-			  $res2accountexpirydate = $res2['accountexpirydate'];			  $plannameanum = $res2['planname'];			  $query6 = "select * from master_planname where  locationcode='$searchlocationcode'  and auto_number = '$plannameanum'";			  $exec6 = mysqli_query($GLOBALS["___mysqli_ston"], $query6) or die ("Error in Query6".mysqli_error($GLOBALS["___mysqli_ston"]));			  $res6 = mysqli_fetch_array($exec6);			  $res6planname = $res6['planname'];			  			    $res2consultingdoctor = $res2['consultingdoctor'];			  $query201 = "select * from master_doctor where  locationcode='$searchlocationcode'  and doctorcode = '$res2consultingdoctor'";			  $exec201 = mysqli_query($GLOBALS["___mysqli_ston"], $query201) or die ("Error in Query201".mysqli_error($GLOBALS["___mysqli_ston"]));			  $res201 = mysqli_fetch_array($exec201);			  $res2consultingdoctor = $res201['doctorname'];			  			  //$query3 = "select * from master_patientadmission where patientcode = '$res2customercode' order by auto_number desc limit 0, 1";			  //$exec3 = mysql_query($query3) or die ("Error in Query3".mysql_error());			  //$res3 = mysql_fetch_array($exec3);			  //$res3ipnumber = $res3['ipnumber'];			  $res3ipnumber = '';			  			  $colorloopcount = $colorloopcount + 1;			  $showcolor = ($colorloopcount & 1); 			  $colorcode = '';				if ($showcolor == 0)				{					//echo "if";					$colorcode = 'bgcolor="#CBDBFA"';				}				else				{					//echo "else";					$colorcode = 'bgcolor="#ecf0f5"';				}			  ?>              <tr <?php echo $colorcode; ?>>                <td class="bodytext31" valign="center"  align="left"><?php echo $colorloopcount; ?></td>                <td  align="left" valign="center" class="bodytext31">				<div align="center"><strong><a target="_blank" href="print_opvisit_label.php?patientcode=<?php echo $res2customercode; ?>">Print</a></strong></div></td>                <td class="bodytext31" valign="center"  align="left">				<div align="center">				<!--<a href="editpatient1.php?customercode=<?php echo $res2customercode; ?>" class="bodytext3">-->				<a href="editipvisitentry.php?patientcode=<?php echo $res2customercode; ?>&&visitcode=<?php echo $res2visitcode; ?>" class="bodytext3">				<span class="bodytext3">Edit</span>				</a>				</div>				</td>				    <td  align="left" valign="center" class="bodytext31"><div class="bodytext31">                    <div align="left"><span class="bodytext32"><?php echo $username; ?></span></div>                </div></td>                <td  align="left" valign="center" class="bodytext31"><div class="bodytext31">                    <div align="left"><span class="bodytext32"><?php echo $res2customercode; ?></span></div>                </div></td>				  <td  align="left" valign="center" class="bodytext31"><div class="bodytext31">                    <div align="left"><span class="bodytext32"><?php echo $res2visitcode; ?></span></div>                </div></td>				<td  align="left" valign="center" class="bodytext31" ><div class="bodytext31">                    <div align="left"><span class="bodytext32 style1" ><strong><?php echo $mrdno; ?></strong></span></div>                </div></td>					  <td  align="left" valign="center" class="bodytext31"><div class="bodytext31">                    <div align="left"><span class="bodytext32"><?php echo $consultationdate; ?></span></div>                </div></td>                              <td class="bodytext31" valign="center"  align="left">				  <div align="left"><?php echo $res2customername; ?></div></td>                           <td  align="left" valign="center" class="bodytext31"><div class="bodytext31">                    <div align="left"> <span class="bodytext3"> <?php echo $res3paymenttype; ?> </span> </div>                </div></td>                <td class="bodytext31" valign="center"  align="left">                <div class="bodytext31">                  <div align="left">				  <span class="bodytext3">				  <?php echo $res4subtype; //.' ('.$res2customercode.')'; ?>				  </span>				  </div>                </div>				</td>                <td  align="left" valign="center" class="bodytext31"><div align="left"> <?php echo $res2billtype; ?></div></td>                <td  align="left" valign="center" class="bodytext31"><div align="left"> <?php echo $res5accountname; ?></div></td>                  <td class="bodytext31" valign="center"  align="left">				  <div align="left"><?php echo $res2age; ?></div></td>                <td  align="left" valign="center" class="bodytext31"><div align="left"><?php echo $res2gender; ?></div></td>                    <td class="bodytext31" valign="center"  align="left"><?php echo $res2nationalidnumber; ?></td>                    </tr>			  <?php			  }			  //}			  ?>              <tr>                     <td class="bodytext31" valign="center"  align="left"                 bgcolor="#ecf0f5">&nbsp;</td>				            <td class="bodytext31" valign="center"  align="left"                 bgcolor="#ecf0f5">&nbsp;</td>				<td class="bodytext31" valign="center"  align="left"                 bgcolor="#ecf0f5">&nbsp;</td>                        <td class="bodytext31" valign="center"  align="left"                 bgcolor="#ecf0f5">&nbsp;</td>				  <td class="bodytext31" valign="center"  align="left"                 bgcolor="#ecf0f5">&nbsp;</td>                  <td class="bodytext31" valign="center"  align="left"                 bgcolor="#ecf0f5">&nbsp;</td>                <td class="bodytext31" valign="center"  align="left"                 bgcolor="#ecf0f5">&nbsp;</td>                <td class="bodytext31" valign="center"  align="left"                 bgcolor="#ecf0f5">&nbsp;</td>                <td class="bodytext31" valign="center"  align="left"                 bgcolor="#ecf0f5">&nbsp;</td>                <td class="bodytext31" valign="center"  align="left"                 bgcolor="#ecf0f5">&nbsp;</td>                <td class="bodytext31" valign="center"  align="left"                 bgcolor="#ecf0f5">&nbsp;</td>                <td class="bodytext31" valign="center"  align="left"                 bgcolor="#ecf0f5">&nbsp;</td>                <td class="bodytext31" valign="center"  align="left"                 bgcolor="#ecf0f5">&nbsp;</td>                <td class="bodytext31" valign="center"  align="left"                 bgcolor="#ecf0f5">&nbsp;</td>                <td class="bodytext31" valign="center"  align="left"                 bgcolor="#ecf0f5">&nbsp;</td>                <td class="bodytext31" valign="center"  align="left"                 bgcolor="#ecf0f5">&nbsp;</td>           	</tr>			          </tbody>        </table><?php}?>							 </form>						</td>      </tr>      <tr>        <td>&nbsp;</td>      </tr>      <tr>        <td>&nbsp;</td>      </tr>      <tr>        <td>&nbsp;</td>      </tr>	  	     </table>  </table><?php include ("includes/footer1.php"); ?></body></html>
+<?php
+session_start();
+include ("includes/loginverify.php");
+include ("db/db_connect.php");
+include ("includes/check_user_access.php");
+
+$ipaddress = $_SERVER['REMOTE_ADDR'];
+$updatedatetime = date('Y-m-d');
+$username = $_SESSION['username'];
+$docno = $_SESSION['docno'];
+$companyanum = $_SESSION['companyanum'];
+$companyname = $_SESSION['companyname'];
+$transactiondatefrom = date('Y-m-d', strtotime('-1 month'));
+$transactiondateto = date('Y-m-d');
+$location = isset($_REQUEST['location']) ? $_REQUEST['location'] : '';
+
+$errmsg = "";
+$banum = "1";
+$supplieranum = "";
+$custid = "";
+$custname = "";
+$balanceamount = "0.00";
+$openingbalance = "0.00";
+$searchsuppliername = "";
+$cbsuppliername = "";
+
+// Handle supplier selection
+if (isset($_REQUEST["canum"])) { 
+    $getcanum = $_REQUEST["canum"]; 
+} else { 
+    $getcanum = ""; 
+}
+
+if ($getcanum != '') {
+    $query4 = "select * from master_supplier where auto_number = '$getcanum' and locationcode='$locationcode'";
+    $exec4 = mysqli_query($GLOBALS["___mysqli_ston"], $query4) or die ("Error in Query4".mysqli_error($GLOBALS["___mysqli_ston"]));
+    $res4 = mysqli_fetch_array($exec4);
+    $cbsuppliername = $res4['suppliername'];
+    $suppliername = $res4['suppliername'];
+}
+
+// Handle status messages
+if (isset($_REQUEST["st"])) { 
+    $st = $_REQUEST["st"]; 
+} else { 
+    $st = ""; 
+}
+
+if ($st == '1') {
+    $errmsg = "Success. Payment Entry Update Completed.";
+    $bgcolorcode = 'success';
+} elseif ($st == '2') {
+    $errmsg = "Failed. Payment Entry Not Completed.";
+    $bgcolorcode = 'failed';
+} else {
+    $bgcolorcode = '';
+}
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search IP Visit - MedStar</title>
+    
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <!-- Modern CSS -->
+    <link rel="stylesheet" href="css/ip-visit-search-modern.css?v=<?php echo time(); ?>">
+    
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- Date Picker CSS -->
+    <link href="css/datepickerstyle.css" rel="stylesheet" type="text/css" />
+    
+    <!-- Date Picker Scripts -->
+    <script type="text/javascript" src="js/adddate.js"></script>
+    <script type="text/javascript" src="js/adddate2.js"></script>
+    <script src="js/datetimepicker_css.js"></script>
+</head>
+<body>
+    <!-- Hospital Header -->
+    <header class="hospital-header">
+        <h1 class="hospital-title">🏥 MedStar Hospital Management</h1>
+        <p class="hospital-subtitle">Advanced Healthcare Management Platform</p>
+    </header>
+
+    <!-- User Information Bar -->
+    <div class="user-info-bar">
+        <div class="user-welcome">
+            <span class="welcome-text">Welcome, <strong><?php echo htmlspecialchars($username); ?></strong></span>
+            <span class="location-info">📍 Company: <?php echo htmlspecialchars($companyname); ?></span>
+        </div>
+        <div class="user-actions">
+            <a href="mainmenu1.php" class="btn btn-outline">🏠 Main Menu</a>
+            <a href="logout.php" class="btn btn-outline">🚪 Logout</a>
+        </div>
+    </div>
+
+    <!-- Navigation Breadcrumb -->
+    <nav class="nav-breadcrumb">
+        <a href="mainmenu1.php">🏠 Home</a>
+        <span>→</span>
+        <span>Patient Management</span>
+        <span>→</span>
+        <span>Search IP Visit</span>
+    </nav>
+
+    <!-- Floating Menu Toggle -->
+    <div id="menuToggle" class="floating-menu-toggle">
+        <i class="fas fa-bars"></i>
+    </div>
+
+    <!-- Main Container with Sidebar -->
+    <div class="main-container-with-sidebar">
+        <!-- Left Sidebar -->
+        <aside id="leftSidebar" class="left-sidebar">
+            <div class="sidebar-header">
+                <h3>Quick Navigation</h3>
+                <button id="sidebarToggle" class="sidebar-toggle">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <ul class="nav-list">
+                    <li class="nav-item">
+                        <a href="mainmenu1.php" class="nav-link">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="addpatient1.php" class="nav-link">
+                            <i class="fas fa-user-plus"></i>
+                            <span>Add Patient</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="patient_list.php" class="nav-link">
+                            <i class="fas fa-users"></i>
+                            <span>Patient List</span>
+                        </a>
+                    </li>
+                    <li class="nav-item active">
+                        <a href="searchipvisit.php" class="nav-link">
+                            <i class="fas fa-search"></i>
+                            <span>Search IP Visit</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="searchopvisit.php" class="nav-link">
+                            <i class="fas fa-search"></i>
+                            <span>Search OP Visit</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="addipvisitentry.php" class="nav-link">
+                            <i class="fas fa-hospital"></i>
+                            <span>Add IP Visit</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="addopvisitentry.php" class="nav-link">
+                            <i class="fas fa-stethoscope"></i>
+                            <span>Add OP Visit</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="addpatientadmission.php" class="nav-link">
+                            <i class="fas fa-bed"></i>
+                            <span>Patient Admission</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Alert Container -->
+            <div id="alertContainer">
+                <?php if (!empty($errmsg)): ?>
+                    <div class="alert alert-<?php echo $bgcolorcode === 'success' ? 'success' : ($bgcolorcode === 'failed' ? 'error' : 'info'); ?>">
+                        <i class="fas fa-<?php echo $bgcolorcode === 'success' ? 'check-circle' : ($bgcolorcode === 'failed' ? 'exclamation-triangle' : 'info-circle'); ?> alert-icon"></i>
+                        <span><?php echo htmlspecialchars($errmsg); ?></span>
+                    </div>
+                <?php endif; ?>
+            </div>
+
+            <!-- Page Header -->
+            <div class="page-header">
+                <div class="page-header-content">
+                    <h2>Search IP Visit Details</h2>
+                    <p>Search and manage Inpatient (IP) visit records with advanced filtering options.</p>
+                </div>
+                <div class="page-header-actions">
+                    <button type="button" class="btn btn-secondary" onclick="refreshPage()">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                    <button type="button" class="btn btn-outline" onclick="exportToExcel()">
+                        <i class="fas fa-download"></i> Export
+                    </button>
+                </div>
+            </div>
+
+            <!-- Search Form Section -->
+            <div class="search-form-section">
+                <div class="search-form-header">
+                    <i class="fas fa-search search-form-icon"></i>
+                    <h3 class="search-form-title">Search IP Visit Records</h3>
+                    <div class="location-display" id="ajaxlocation">
+                        <span class="location-label">📍 Location:</span>
+                        <span class="location-name">
+                            <?php
+                            if ($location != '') {
+                                $query12 = "select locationname from master_location where locationcode='$location' order by locationname";
+                                $exec12 = mysqli_query($GLOBALS["___mysqli_ston"], $query12) or die ("Error in Query12".mysqli_error($GLOBALS["___mysqli_ston"]));
+                                $res12 = mysqli_fetch_array($exec12);
+                                echo $res1location = $res12["locationname"];
+                            } else {
+                                $query1 = "select locationname from login_locationdetails where username='$username' and docno='$docno' group by locationname order by locationname";
+                                $exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
+                                $res1 = mysqli_fetch_array($exec1);
+                                echo $res1location = $res1["locationname"];
+                            }
+                            ?>
+                        </span>
+                    </div>
+                </div>
+                
+                <form name="cbform1" method="post" action="searchipvisit.php" class="search-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="location" class="form-label">Location *</label>
+                            <select name="location" id="location" class="form-input" onChange="ajaxlocationfunction(this.value);">
+                                <?php
+                                $query1 = "select * from login_locationdetails where username='$username' and docno='$docno' group by locationname order by locationname";
+                                $exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
+                                while ($res1 = mysqli_fetch_array($exec1)) {
+                                    $locationname = $res1["locationname"];
+                                    $locationcode = $res1["locationcode"];
+                                    ?>
+                                    <option value="<?php echo $locationcode; ?>" <?php if($location != '') { if($location == $locationcode) { echo "selected"; } } ?>><?php echo $locationname; ?></option>
+                                    <?php
+                                }
+                                ?>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="patient" class="form-label">Patient Name</label>
+                            <input name="patient" type="text" id="patient" class="form-input" value="" placeholder="Enter patient name..." autocomplete="off">
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="patientcode" class="form-label">Registration No</label>
+                            <input name="patientcode" type="text" id="patientcode" class="form-input" value="" placeholder="Enter registration number..." autocomplete="off">
+                        </div>
+                        <div class="form-group">
+                            <label for="visitcode" class="form-label">Visit Code</label>
+                            <input name="visitcode" type="text" id="visitcode" class="form-input" value="" placeholder="Enter visit code..." autocomplete="off">
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="ADate1" class="form-label">Date From</label>
+                            <div class="date-input-wrapper">
+                                <input name="ADate1" id="ADate1" class="form-input date-input" value="<?php echo $transactiondatefrom; ?>" readonly="readonly" onKeyDown="return disableEnterKey()" />
+                                <i class="fas fa-calendar-alt date-picker-icon" onClick="javascript:NewCssCal('ADate1')"></i>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="ADate2" class="form-label">Date To</label>
+                            <div class="date-input-wrapper">
+                                <input name="ADate2" id="ADate2" class="form-input date-input" value="<?php echo $transactiondateto; ?>" readonly="readonly" onKeyDown="return disableEnterKey()" />
+                                <i class="fas fa-calendar-alt date-picker-icon" onClick="javascript:NewCssCal('ADate2')"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="submit" name="Submit" class="btn btn-primary">
+                            <i class="fas fa-search"></i> Search Records
+                        </button>
+                        <button type="reset" name="resetbutton" class="btn btn-secondary">
+                            <i class="fas fa-undo"></i> Reset
+                        </button>
+                    </div>
+                    
+                    <input type="hidden" name="cbfrmflag1" value="cbfrmflag1">
+                </form>
+            </div>
+
+            <!-- Results Section -->
+            <?php
+            $colorloopcount = 0;
+            $sno = 0;
+            if (isset($_REQUEST["cbfrmflag1"])) { 
+                $cbfrmflag1 = $_REQUEST["cbfrmflag1"]; 
+            } else { 
+                $cbfrmflag1 = ""; 
+            }
+            
+            if ($cbfrmflag1 == 'cbfrmflag1' || isset($_REQUEST['page'])) {
+                if(isset($_POST['location'])) { $_POST['location'] = $_POST['location']; }
+                $searchlocationcode = $_POST['location'];
+                if(isset($_POST['patient'])) { $_SESSION['ippatient'] = $_POST['patient']; }
+                $searchpatient = $_SESSION['ippatient'];
+                if(isset($_POST['patientcode'])) { $_SESSION['ippatientcode'] = $_POST['patientcode']; }
+                $searchpatientcode = $_SESSION['ippatientcode'];
+                if(isset($_POST['visitcode'])) { $_SESSION['ipvisitcode'] = $_POST['visitcode']; }
+                $searchvisitcode = $_SESSION['ipvisitcode'];
+                if(isset($_POST['ADate1'])) { $_SESSION['ipADate1'] = $_POST['ADate1']; }
+                $fromdate = $_SESSION['ipADate1'];
+                if(isset($_POST['ADate2'])) { $_SESSION['ipADate2'] = $_POST['ADate2']; }
+                $todate = $_SESSION['ipADate2'];
+            ?>
+            
+            <div class="results-section">
+                <div class="results-header">
+                    <i class="fas fa-list results-icon"></i>
+                    <h3 class="results-title">IP Visit Records</h3>
+                    <div class="results-info">
+                        <span class="results-count">Found records matching your search criteria</span>
+                    </div>
+                </div>
+                
+                <!-- Pagination -->
+                <div class="pagination-container">
+                    <?php
+                    // Pagination logic
+                    $adjacents = 3;
+                    $query111 = "select * from master_ipvisitentry where locationcode='$searchlocationcode' and patientfullname like '%$searchpatient%' and patientcode like '%$searchpatientcode%' and visitcode like '%$searchvisitcode%' and consultationdate between '$fromdate' and '$todate' order by auto_number desc";
+                    $exec111 = mysqli_query($GLOBALS["___mysqli_ston"], $query111) or die ("Error in Query111".mysqli_error($GLOBALS["___mysqli_ston"]));
+                    $total_pages = mysqli_num_rows($exec111);
+                    
+                    $targetpage = $_SERVER['PHP_SELF'];
+                    $limit = 50;
+                    if(isset($_REQUEST['page'])) { $page = $_REQUEST['page']; } else { $page = ""; }
+                    if($page) 
+                        $start = ($page - 1) * $limit;
+                    else
+                        $start = 0;
+                    
+                    if ($page == 0) $page = 1;
+                    $prev = $page - 1;
+                    $next = $page + 1;
+                    $lastpage = ceil($total_pages/$limit);
+                    $lpm1 = $lastpage - 1;
+                    
+                    $pagination = "";
+                    if($lastpage >= 1) {
+                        $pagination .= "<div class=\"pagination\">";
+                        // Previous button
+                        if ($page > 1) 
+                            $pagination .= "<a href=\"$targetpage?page=$prev\" class=\"pagination-link\">Previous</a>";
+                        else
+                            $pagination .= "<span class=\"pagination-disabled\">Previous</span>";
+                        
+                        // Pages
+                        if ($lastpage < 7 + ($adjacents * 2)) {
+                            for ($counter = 1; $counter <= $lastpage; $counter++) {
+                                if ($counter == $page)
+                                    $pagination .= "<span class=\"pagination-current\">$counter</span>";
+                                else
+                                    $pagination .= "<a href=\"$targetpage?page=$counter\" class=\"pagination-link\">$counter</a>";
+                            }
+                        } elseif($lastpage > 5 + ($adjacents * 2)) {
+                            if($page < 1 + ($adjacents * 2)) {
+                                for ($counter = 1; $counter < 4 + ($adjacents * 2); $counter++) {
+                                    if ($counter == $page)
+                                        $pagination .= "<span class=\"pagination-current\">$counter</span>";
+                                    else
+                                        $pagination .= "<a href=\"$targetpage?page=$counter\" class=\"pagination-link\">$counter</a>";
+                                }
+                                $pagination .= "<span class=\"pagination-ellipsis\">...</span>";
+                                $pagination .= "<a href=\"$targetpage?page=$lpm1\" class=\"pagination-link\">$lpm1</a>";
+                                $pagination .= "<a href=\"$targetpage?page=$lastpage\" class=\"pagination-link\">$lastpage</a>";
+                            } elseif($lastpage - ($adjacents * 2) > $page && $page > ($adjacents * 2)) {
+                                $pagination .= "<a href=\"$targetpage?page=1\" class=\"pagination-link\">1</a>";
+                                $pagination .= "<a href=\"$targetpage?page=2\" class=\"pagination-link\">2</a>";
+                                $pagination .= "<span class=\"pagination-ellipsis\">...</span>";
+                                for ($counter = $page - $adjacents; $counter <= $page + $adjacents; $counter++) {
+                                    if ($counter == $page)
+                                        $pagination .= "<span class=\"pagination-current\">$counter</span>";
+                                    else
+                                        $pagination .= "<a href=\"$targetpage?page=$counter\" class=\"pagination-link\">$counter</a>";
+                                }
+                                $pagination .= "<span class=\"pagination-ellipsis\">...</span>";
+                                $pagination .= "<a href=\"$targetpage?page=$lpm1\" class=\"pagination-link\">$lpm1</a>";
+                                $pagination .= "<a href=\"$targetpage?page=$lastpage\" class=\"pagination-link\">$lastpage</a>";
+                            } else {
+                                $pagination .= "<a href=\"$targetpage?page=1\" class=\"pagination-link\">1</a>";
+                                $pagination .= "<a href=\"$targetpage?page=2\" class=\"pagination-link\">2</a>";
+                                $pagination .= "<span class=\"pagination-ellipsis\">...</span>";
+                                for ($counter = $lastpage - (2 + ($adjacents * 2)); $counter <= $lastpage; $counter++) {
+                                    if ($counter == $page)
+                                        $pagination .= "<span class=\"pagination-current\">$counter</span>";
+                                    else
+                                        $pagination .= "<a href=\"$targetpage?page=$counter\" class=\"pagination-link\">$counter</a>";
+                                }
+                            }
+                        }
+                        
+                        // Next button
+                        if ($page < $counter - 1) 
+                            $pagination .= "<a href=\"$targetpage?page=$next\" class=\"pagination-link\">Next</a>";
+                        else
+                            $pagination .= "<span class=\"pagination-disabled\">Next</span>";
+                        echo $pagination .= "</div>";
+                    }
+                    ?>
+                </div>
+                
+                <!-- Data Table -->
+                <div class="data-table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>No.</th>
+                                <th>Print</th>
+                                <th>Edit</th>
+                                <th>User Name</th>
+                                <th>Reg Code</th>
+                                <th>Visit Code</th>
+                                <th>IP File No</th>
+                                <th>OP Date</th>
+                                <th>Patient Name</th>
+                                <th>Type</th>
+                                <th>Sub Type</th>
+                                <th>Bill Type</th>
+                                <th>Account Name</th>
+                                <th>Age</th>
+                                <th>Gender</th>
+                                <th>National ID</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php
+                            $query2 = "select * from master_ipvisitentry where locationcode='$searchlocationcode' and patientfullname like '%$searchpatient%' and patientcode like '%$searchpatientcode%' and visitcode like '%$searchvisitcode%' and consultationdate between '$fromdate' and '$todate' order by auto_number desc LIMIT $start , $limit";
+                            $exec2 = mysqli_query($GLOBALS["___mysqli_ston"], $query2) or die ("Error in Query2".mysqli_error($GLOBALS["___mysqli_ston"]));
+                            $num2 = mysqli_num_rows($exec2);
+                            
+                            while ($res2 = mysqli_fetch_array($exec2)) {
+                                $res2customercode = $res2['patientcode'];
+                                $res2visitcode = $res2['visitcode'];
+                                $res2customeranum = $res2['auto_number'];
+                                $res2customername = $res2['patientfullname'];
+                                $consultationdate = $res2['consultationdate'];
+                                $username = $res2['username'];
+                                
+                                $query34 = "select * from master_customer where customercode='$res2customercode'";
+                                $exec34 = mysqli_query($GLOBALS["___mysqli_ston"], $query34) or die(mysqli_error($GLOBALS["___mysqli_ston"]));
+                                $res34 = mysqli_fetch_array($exec34);
+                                $res2age = $res34['age'];
+                                $res2gender = $res34['gender'];
+                                $res2nationalidnumber = $res34['nationalidnumber'];
+                                
+                                $paymenttypeanum = $res2['paymenttype'];
+                                $mrdno = $res2['mrdno'];
+                                
+                                $query3 = "select * from master_paymenttype where auto_number = '$paymenttypeanum'";
+                                $exec3 = mysqli_query($GLOBALS["___mysqli_ston"], $query3) or die ("Error in Query5".mysqli_error($GLOBALS["___mysqli_ston"]));
+                                $res3 = mysqli_fetch_array($exec3);
+                                $res3paymenttype = $res3['paymenttype'];
+                                
+                                $subtypeanum = $res2['subtype'];
+                                $scheme_id = $res2['scheme_id'];
+                                $query4 = "select * from master_subtype where auto_number = '$subtypeanum'";
+                                $exec4 = mysqli_query($GLOBALS["___mysqli_ston"], $query4) or die ("Error in Query5".mysqli_error($GLOBALS["___mysqli_ston"]));
+                                $res4 = mysqli_fetch_array($exec4);
+                                $res4subtype = $res4['subtype'];
+                                $res2billtype = $res2['billtype'];
+                                
+                                $accountnameanum = $res2['accountname'];
+                                $query5 = "select * from master_accountname where auto_number = '$accountnameanum'";
+                                $exec5 = mysqli_query($GLOBALS["___mysqli_ston"], $query5) or die ("Error in Query5".mysqli_error($GLOBALS["___mysqli_ston"]));
+                                $res5 = mysqli_fetch_array($exec5);
+                                
+                                $query_sc = "select * from master_planname where scheme_id = '$scheme_id'";
+                                $exec_sc = mysqli_query($GLOBALS["___mysqli_ston"], $query_sc) or die ("Error in query_sc".mysqli_error($GLOBALS["___mysqli_ston"]));
+                                $res_sc = mysqli_fetch_array($exec_sc);
+                                $res5accountname = $res_sc['scheme_name'];
+                                
+                                $colorloopcount = $colorloopcount + 1;
+                                $showcolor = ($colorloopcount & 1);
+                                $colorcode = ($showcolor == 0) ? 'even' : 'odd';
+                                ?>
+                                <tr class="<?php echo $colorcode; ?>">
+                                    <td><?php echo $colorloopcount; ?></td>
+                                    <td>
+                                        <a href="print_opvisit_label.php?patientcode=<?php echo $res2customercode; ?>" 
+                                           target="_blank" class="action-btn print" title="Print">
+                                            <i class="fas fa-print"></i>
+                                        </a>
+                                    </td>
+                                    <td>
+                                        <a href="editipvisitentry.php?patientcode=<?php echo $res2customercode; ?>&visitcode=<?php echo $res2visitcode; ?>" 
+                                           class="action-btn edit" title="Edit">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                    </td>
+                                    <td><?php echo htmlspecialchars($username); ?></td>
+                                    <td>
+                                        <span class="patient-code-badge"><?php echo htmlspecialchars($res2customercode); ?></span>
+                                    </td>
+                                    <td>
+                                        <span class="visit-code-badge"><?php echo htmlspecialchars($res2visitcode); ?></span>
+                                    </td>
+                                    <td>
+                                        <span class="ip-file-badge"><?php echo htmlspecialchars($mrdno); ?></span>
+                                    </td>
+                                    <td><?php echo $consultationdate; ?></td>
+                                    <td class="patient-name"><?php echo htmlspecialchars($res2customername); ?></td>
+                                    <td>
+                                        <span class="type-badge"><?php echo htmlspecialchars($res3paymenttype); ?></span>
+                                    </td>
+                                    <td>
+                                        <span class="subtype-badge"><?php echo htmlspecialchars($res4subtype); ?></span>
+                                    </td>
+                                    <td><?php echo htmlspecialchars($res2billtype); ?></td>
+                                    <td><?php echo htmlspecialchars($res5accountname); ?></td>
+                                    <td><?php echo htmlspecialchars($res2age); ?></td>
+                                    <td>
+                                        <span class="gender-badge gender-<?php echo strtolower($res2gender); ?>">
+                                            <?php echo htmlspecialchars($res2gender); ?>
+                                        </span>
+                                    </td>
+                                    <td><?php echo htmlspecialchars($res2nationalidnumber); ?></td>
+                                </tr>
+                                <?php
+                            }
+                            ?>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- Bottom Pagination -->
+                <div class="pagination-container pagination-bottom">
+                    <?php echo $pagination; ?>
+                </div>
+            </div>
+            <?php } ?>
+        </main>
+    </div>
+
+    <!-- Modern JavaScript -->
+    <script src="js/ip-visit-search-modern.js?v=<?php echo time(); ?>"></script>
+    
+    <!-- Legacy JavaScript -->
+    <script>
+    function ajaxlocationfunction(val) {
+        if (window.XMLHttpRequest) {
+            xmlhttp = new XMLHttpRequest();
+        } else {
+            xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
+        }
+        xmlhttp.onreadystatechange = function() {
+            if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+                document.getElementById("ajaxlocation").innerHTML = xmlhttp.responseText;
+            }
+        }
+        xmlhttp.open("GET", "ajax/ajaxgetlocationname.php?loccode=" + val, true);
+        xmlhttp.send();
+    }
+    
+    function disableEnterKey() {
+        var key;
+        if(window.event) {
+            key = window.event.keyCode;
+        } else {
+            key = e.which;
+        }
+        if(key == 13) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+    </script>
+</body>
+</html>

@@ -1,9 +1,18 @@
 <?php
+// Inpatient Billing - Modernized Version
 session_start();
-include ("includes/loginverify.php");
-include ("db/db_connect.php");
-//echo $menu_id;
-include ("includes/check_user_access.php");
+
+// Error reporting
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
+// Include required files
+include("includes/loginverify.php");
+include("db/db_connect.php");
+include("includes/check_user_access.php");
+include("autocompletebuild_customeripbilling.php");
+
+// Initialize variables
 $ipaddress = $_SERVER['REMOTE_ADDR'];
 $updatedatetime = date('Y-m-d');
 $username = $_SESSION['username'];
@@ -12,9 +21,13 @@ $companyanum = $_SESSION['companyanum'];
 $companyname = $_SESSION['companyname'];
 $transactiondatefrom = date('Y-m-d', strtotime('-1 month'));
 $transactiondateto = date('Y-m-d');
-$location =isset( $_REQUEST['location'])?$_REQUEST['location']:'';
 
+// Location handling
+$location = isset($_REQUEST['location']) ? $_REQUEST['location'] : '';
+
+// Initialize other variables
 $errmsg = "";
+$bgcolorcode = "";
 $banum = "1";
 $supplieranum = "";
 $custid = "";
@@ -24,31 +37,70 @@ $openingbalance = "0.00";
 $searchsuppliername = "";
 $cbsuppliername = "";
 
-if (isset($_REQUEST["canum"])) { $getcanum = $_REQUEST["canum"]; } else { $getcanum = ""; }
-if (isset($_REQUEST["cbfrmflag2"])) { $cbfrmflag2 = $_REQUEST["cbfrmflag2"]; } else { $cbfrmflag2 = ""; }
-//$cbfrmflag2 = $_REQUEST['cbfrmflag2'];
-if (isset($_REQUEST["frmflag2"])) { $frmflag2 = $_REQUEST["frmflag2"]; } else { $frmflag2 = ""; }
-//$frmflag2 = $_POST['frmflag2'];
-include ("autocompletebuild_customeripbilling.php");
+// Request parameter handling
+if (isset($_REQUEST["canum"])) { 
+    $getcanum = $_REQUEST["canum"]; 
+} else { 
+    $getcanum = ""; 
+}
+
+if (isset($_REQUEST["cbfrmflag2"])) { 
+    $cbfrmflag2 = $_REQUEST["cbfrmflag2"]; 
+} else { 
+    $cbfrmflag2 = ""; 
+}
+
+if (isset($_REQUEST["frmflag2"])) { 
+    $frmflag2 = $_REQUEST["frmflag2"]; 
+} else { 
+    $frmflag2 = ""; 
+}
+
+// Form processing and error handling
+if (isset($_REQUEST["cbfrmflag1"]) && $_REQUEST["cbfrmflag1"] == 'cbfrmflag1') {
+    $searchpatient = isset($_POST['customer']) ? $_POST['customer'] : '';
+    $searchlocation = isset($_POST['location']) ? $_POST['location'] : '';
+    
+    if (empty($searchlocation)) {
+        $errmsg = "Please select a location.";
+        $bgcolorcode = "failed";
+    } elseif (empty($searchpatient)) {
+        $errmsg = "Please enter a patient name, registration number, or visit code to search.";
+        $bgcolorcode = "failed";
+    } else {
+        $errmsg = "Search completed successfully.";
+        $bgcolorcode = "success";
+    }
+}
 ?>
-<style type="text/css">
-<!--
-body {
-	margin-left: 0px;
-	margin-top: 0px;
-	background-color: #ecf0f5;
-}
-.bodytext3 {	FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3B3B3C; FONT-FAMILY: Tahoma
-}
--->
-</style>
-<link href="css/datepickerstyle.css" rel="stylesheet" type="text/css" />
-<script type="text/javascript" src="js/adddate.js"></script>
-<script type="text/javascript" src="js/adddate2.js"></script>
-<script type="text/javascript" src="ckeditor1/ckeditor.js"></script>
-<?php include ("js/dropdownlistipbilling.php"); ?>
-<script type="text/javascript" src="js/autosuggestipbilling.js"></script> <!-- For searching customer -->
-<script type="text/javascript" src="js/autocomplete_customeripbilling.js"></script>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inpatient Billing - MedStar</title>
+    
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <!-- Modern CSS -->
+    <link rel="stylesheet" href="css/ipbilling-modern.css?v=<?php echo time(); ?>">
+    
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- Legacy CSS for compatibility -->
+    <link href="css/datepickerstyle.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="css/autosuggest.css" />
+    
+    <!-- Legacy JavaScript -->
+    <script type="text/javascript" src="js/adddate.js"></script>
+    <script type="text/javascript" src="js/adddate2.js"></script>
+    <script type="text/javascript" src="ckeditor1/ckeditor.js"></script>
+    <?php include ("js/dropdownlistipbilling.php"); ?>
+    <script type="text/javascript" src="js/autosuggestipbilling.js"></script>
+    <script type="text/javascript" src="js/autocomplete_customeripbilling.js"></script>
+</head>
 <script>	
 <?php 
 if (isset($_REQUEST["ipbillnumber"])) { $ipbillnumbers = $_REQUEST["ipbillnumber"]; } else { $ipbillnumbers = ""; }
@@ -242,159 +294,251 @@ var loc_get = "<?php echo $_REQUEST['loc']; ?>";
 <script src="js/datetimepicker_css.js"></script>
 
 <body onLoad="return funcOnLoadBodyFunctionCall()">
-<table width="101%" border="0" cellspacing="0" cellpadding="2">
-  <tr>
-    <td colspan="10" bgcolor="#ecf0f5"><?php include ("includes/alertmessages1.php"); ?></td>
-  </tr>
-  <tr>
-    <td colspan="10" bgcolor="#ecf0f5"><?php include ("includes/title1.php"); ?></td>
-  </tr>
-  <tr>
-    <td colspan="10" bgcolor="#ecf0f5"><?php include ("includes/menu1.php"); ?></td>
-  </tr>
-  <tr>
-    <td colspan="10">&nbsp;</td>
-  </tr>
-  <tr>
-    <td width="1%">&nbsp;</td>
-    <td width="2%" valign="top"><?php //include ("includes/menu4.php"); ?>
-      &nbsp;</td>
-    <td width="97%" valign="top"><table width="116%" border="0" cellspacing="0" cellpadding="0">
-      <tr>
-        <td width="860">
-		
-		
-              <form name="cbform1" method="post" action="ipbilling.php">
-		<table width="800" border="0" align="left" cellpadding="4" cellspacing="0" bordercolor="#666666" id="AutoNumber3" style="border-collapse: collapse">
-          <tbody>
-            <tr bgcolor="#011E6A">
-              <td colspan="1" bgcolor="#ecf0f5" class="bodytext3"><strong>IP Billing </strong></td>
-              <td colspan="2" align="right" bgcolor="#ecf0f5" class="bodytext3" id="ajaxlocation"><strong> Location </strong>
-             
+    <!-- Loading Overlay -->
+    <div id="imgloader" class="loading-overlay" style="display:none;">
+        <div class="loading-content">
+            <div class="loading-spinner">
+                <i class="fas fa-spinner fa-spin"></i>
+            </div>
+            <p><strong>Processing Billing Request</strong></p>
+            <p>Please be patient...</p>
+        </div>
+    </div>
+
+    <!-- Hospital Header -->
+    <header class="hospital-header">
+        <h1 class="hospital-title">🏥 MedStar Hospital Management</h1>
+        <p class="hospital-subtitle">Advanced Healthcare Management Platform</p>
+    </header>
+
+    <!-- User Information Bar -->
+    <div class="user-info-bar">
+        <div class="user-welcome">
+            <span class="welcome-text">Welcome, <strong><?php echo htmlspecialchars($username); ?></strong></span>
+            <span class="location-info">📍 Company: <?php echo htmlspecialchars($companyname); ?></span>
+        </div>
+        <div class="user-actions">
+            <a href="mainmenu1.php" class="btn btn-outline">🏠 Main Menu</a>
+            <a href="logout.php" class="btn btn-outline">🚪 Logout</a>
+        </div>
+    </div>
+
+    <!-- Navigation Breadcrumb -->
+    <nav class="nav-breadcrumb">
+        <a href="mainmenu1.php">🏠 Home</a>
+        <span>→</span>
+        <span>Inpatient Billing</span>
+    </nav>
+
+    <!-- Floating Menu Toggle -->
+    <div id="menuToggle" class="floating-menu-toggle">
+        <i class="fas fa-bars"></i>
+    </div>
+
+    <!-- Main Container with Sidebar -->
+    <div class="main-container-with-sidebar">
+        <!-- Left Sidebar -->
+        <aside id="leftSidebar" class="left-sidebar">
+            <div class="sidebar-header">
+                <h3>Quick Navigation</h3>
+                <button id="sidebarToggle" class="sidebar-toggle">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+            </div>
             
-                  <?php
-						
-						if ($location!='')
-						{
-						$query12 = "select locationname from master_location where locationcode='$location' order by locationname";
-						$exec12 = mysqli_query($GLOBALS["___mysqli_ston"], $query12) or die ("Error in Query12".mysqli_error($GLOBALS["___mysqli_ston"]));
-						$res12 = mysqli_fetch_array($exec12);
-						
-						echo $res1location = $res12["locationname"];
-						//echo $location;
-						}
-						else
-						{
-						$query1 = "select locationname from login_locationdetails where username='$username' and docno='$docno' group by locationname order by locationname";
-						$exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
-						$res1 = mysqli_fetch_array($exec1);
-						
-						echo $res1location = $res1["locationname"];
-						//$res1locationanum = $res1["locationcode"];
-						}
-						?>
-						
-						
-                  
-                  </td>
+            <nav class="sidebar-nav">
+                <ul class="nav-list">
+                    <li class="nav-item">
+                        <a href="mainmenu1.php" class="nav-link">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="activeinpatientlist.php" class="nav-link">
+                            <i class="fas fa-bed"></i>
+                            <span>Active Inpatient List</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="ipaccountwiselist.php" class="nav-link">
+                            <i class="fas fa-file-medical-alt"></i>
+                            <span>IP Account Wise List</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="ipadmissionlist_tat.php" class="nav-link">
+                            <i class="fas fa-clock"></i>
+                            <span>IP Admission TAT</span>
+                        </a>
+                    </li>
+                    <li class="nav-item active">
+                        <a href="ipbilling.php" class="nav-link">
+                            <i class="fas fa-receipt"></i>
+                            <span>IP Billing</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="internalreferallist.php" class="nav-link">
+                            <i class="fas fa-exchange-alt"></i>
+                            <span>Internal Referral List</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="accountreceivableentrylist.php" class="nav-link">
+                            <i class="fas fa-file-invoice-dollar"></i>
+                            <span>Account Receivable</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
 
-              </tr>
-          <tr>
-          				  <td align="left" valign="middle"  bgcolor="#ecf0f5" class="bodytext3">Location</td>
-				  <td width="14%" align="left" valign="middle"  bgcolor="#ecf0f5">
-                  <select name="location" id="location"  onChange="ajaxlocationfunction(this.value);" style="border: 1px solid #001E6A;">
-                  <?php
-						
-						$query1 = "select * from login_locationdetails where username='$username' and docno='$docno' group by locationname order by locationname";
-						$exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
-						while ($res1 = mysqli_fetch_array($exec1))
-						{
-						$locationname = $res1["locationname"];
-						$locationcode = $res1["locationcode"];
-						?>
-						<option value="<?php echo $locationcode; ?>" <?php if($location!=''){if($location == $locationcode){echo "selected";}}?>><?php echo $locationname; ?></option>
-						<?php
-						}
-						?>
-                  </select>
-                  </td>
-				  </tr>
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Alert Container -->
+            <div id="alertContainer">
+                <?php if (!empty($errmsg)): ?>
+                    <div class="alert alert-<?php echo $bgcolorcode === 'success' ? 'success' : ($bgcolorcode === 'failed' ? 'error' : 'info'); ?>">
+                        <i class="fas fa-<?php echo $bgcolorcode === 'success' ? 'check-circle' : ($bgcolorcode === 'failed' ? 'exclamation-triangle' : 'info-circle'); ?> alert-icon"></i>
+                        <span><?php echo htmlspecialchars($errmsg); ?></span>
+                    </div>
+                <?php endif; ?>
+            </div>
 
-           <tr>
-				  <td align="left" valign="middle"  bgcolor="#ecf0f5" class="bodytext3">Patient Search </td>
-				  <td colspan="6" align="left" valign="middle"  bgcolor="#ecf0f5">
-				  <input name="customer" id="customer" size="60" autocomplete="off">
-				  <input name="customercode" id="customercode" value="" type="hidden">
-				<input type="hidden" name="recordstatus" id="recordstatus">
-				  <input type="hidden" name="billnumbercode" id="billnumbercode" value="<?php echo $billnumbercode; ?>" readonly style="border: 1px solid #001E6A;"></td>
-				
-             
-              <td width="20%" align="left" valign="top"  bgcolor="#ecf0f5"><input type="hidden" name="cbfrmflag1" value="cbfrmflag1">
-                  <input   type="submit" value="Search" name="Submit" onClick="return funcvalidcheck();"/>
-            </td>
-            </tr>
-			    
-             </tbody>
-        </table>
-		</form>		</td>
-      </tr>
-      <tr>
-        <td>&nbsp;</td>
-      </tr>
-      <tr>
-        <td>&nbsp;</td>
-      </tr>
-      
-	  <form name="form11" id="form11" method="post" action="ipbilling.php">	
-	  <tr>
-        <td>
-	
-		
-<?php
-	$colorloopcount=0;
-	$sno=0;
-if (isset($_REQUEST["cbfrmflag1"])) { $cbfrmflag1 = $_REQUEST["cbfrmflag1"]; } else { $cbfrmflag1 = ""; }
-//$cbfrmflag1 = $_POST['cbfrmflag1'];
-if ($cbfrmflag1 == 'cbfrmflag1')
-{
+            <!-- Page Header -->
+            <div class="page-header">
+                <div class="page-header-content">
+                    <h2>Inpatient Billing</h2>
+                    <p>Search and manage billing for inpatient services, deposits, and final invoices.</p>
+                </div>
+                <div class="page-header-actions">
+                    <button type="button" class="btn btn-secondary" onclick="refreshPage()">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                    <button type="button" class="btn btn-outline" onclick="exportToExcel()">
+                        <i class="fas fa-download"></i> Export
+                    </button>
+                </div>
+            <!-- Search Form Section -->
+            <div class="search-form-section">
+                <div class="form-header">
+                    <i class="fas fa-search form-icon"></i>
+                    <h3 class="form-title">Patient Billing Search</h3>
+                </div>
+                
+                <div class="form-info">
+                    <div class="info-item">
+                        <strong>Current Location:</strong> 
+                        <span class="location-name" id="ajaxlocation">
+                            <?php
+                            if ($location != '') {
+                                $query12 = "select locationname from master_location where locationcode='$location' order by locationname";
+                                $exec12 = mysqli_query($GLOBALS["___mysqli_ston"], $query12) or die ("Error in Query12".mysqli_error($GLOBALS["___mysqli_ston"]));
+                                $res12 = mysqli_fetch_array($exec12);
+                                echo $res1location = $res12["locationname"];
+                            } else {
+                                $query1 = "select locationname from login_locationdetails where username='$username' and docno='$docno' group by locationname order by locationname";
+                                $exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
+                                $res1 = mysqli_fetch_array($exec1);
+                                echo $res1location = $res1["locationname"];
+                            }
+                            ?>
+                        </span>
+                    </div>
+                </div>
+                
+                <form name="cbform1" method="post" action="ipbilling.php" class="search-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="location" class="form-label">Location</label>
+                            <select name="location" id="location" class="form-select" onChange="ajaxlocationfunction(this.value);">
+                                <?php
+                                $query1 = "select * from login_locationdetails where username='$username' and docno='$docno' group by locationname order by locationname";
+                                $exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
+                                while ($res1 = mysqli_fetch_array($exec1)) {
+                                    $locationname = $res1["locationname"];
+                                    $locationcode = $res1["locationcode"];
+                                ?>
+                                    <option value="<?php echo $locationcode; ?>" <?php if($location != '' && $location == $locationcode) echo "selected"; ?>>
+                                        <?php echo $locationname; ?>
+                                    </option>
+                                <?php } ?>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="customer" class="form-label">Patient Search</label>
+                            <input name="customer" id="customer" class="form-input" 
+                                   placeholder="Search by patient name, registration number, or visit code..." 
+                                   autocomplete="off">
+                            <input name="customercode" id="customercode" value="" type="hidden">
+                            <input type="hidden" name="recordstatus" id="recordstatus">
+                            <input type="hidden" name="billnumbercode" id="billnumbercode" value="<?php echo isset($billnumbercode) ? $billnumbercode : ''; ?>">
+                        </div>
+                        
+                        <div class="form-group form-group-submit">
+                            <input type="hidden" name="cbfrmflag1" value="cbfrmflag1">
+                            <button type="submit" name="Submit" class="submit-btn" onClick="return funcvalidcheck();">
+                                <i class="fas fa-search"></i>
+                                Search Patients
+                            </button>
+                            <button type="reset" name="resetbutton" class="btn btn-secondary">
+                                <i class="fas fa-undo"></i> Reset
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <!-- Results Section -->
+            <?php
+            $colorloopcount = 0;
+            $sno = 0;
+            
+            if (isset($_REQUEST["cbfrmflag1"])) { 
+                $cbfrmflag1 = $_REQUEST["cbfrmflag1"]; 
+            } else { 
+                $cbfrmflag1 = ""; 
+            }
 
-	$searchpatient = $_POST['customer'];
-	$searchlocation = $_POST['location'];
-	
-		
-?>
-		<table id="AutoNumber3" style="BORDER-COLLAPSE: collapse" 
-            bordercolor="#666666" cellspacing="0" cellpadding="4" width="1450" 
-            align="left" border="0">
-          <tbody>
-             
-            <tr>
-              <td width="5%" class="bodytext31" valign="center"  align="left" 
-                bgcolor="#ffffff"><div align="center"><strong>No.</strong></div></td>
-              <td width="2%" class="bodytext31" valign="center"  align="left" 
-                bgcolor="#ffffff"><div align="center"><strong>Type.</strong></div></td>
-					 <td width="18%" class="bodytext31" valign="center"  align="left" 
-                bgcolor="#ffffff"><div align="center"><strong>Patient Name</strong></div></td>
-				 <td width="10%" class="bodytext31" valign="center"  align="left" 
-                bgcolor="#ffffff"><div align="center"><strong>Reg No</strong></div></td>
-                <td width="10%" class="bodytext31" valign="center"  align="left" 
-                bgcolor="#ffffff"><div align="center"><strong>Ward</strong></div></td>
-				  <td width="14%" class="bodytext31" valign="center"  align="left" 
-                bgcolor="#ffffff"><div align="center"><strong>IP Date</strong></div></td>
-				 <td width="10%" colspan="2"class="bodytext31" valign="center"  align="left"  bgcolor="#ffffff"><div align="center"><strong>IP Visit</strong></div></td>
-				
-
-					 <td width="18%"  align="left" valign="center" bgcolor="#ffffff" class="bodytext31"><div align="center"><strong>Provider </strong></div></td> <td width="18%"  align="left" valign="center" bgcolor="#ffffff" class="bodytext31"><div align="center"><strong>Account</strong></div></td>
-					 <td width="10%"  align="left" valign="center" bgcolor="#ffffff" class="bodytext31"><div align="right"><strong>Outstanding</strong></div></td>
-				 <td width="10%"  align="left" valign="center" 
-                bgcolor="#ffffff" class="bodytext31"><div align="center"><strong>Status</strong></div></td>
-			 <td width="10%"  align="left" valign="center" 
-                bgcolor="#ffffff" class="bodytext31"><div align="center"><strong>Action </strong></div></td>
-			
-				    <td width="13%"  align="left" valign="center" 
-                bgcolor="#ffffff" class="bodytext31"><div align="center"><strong>Credit Approval</strong></div></td>
-			
-              </tr>
+            if ($cbfrmflag1 == 'cbfrmflag1') {
+                $searchpatient = $_POST['customer'];
+                $searchlocation = $_POST['location'];
+            ?>
+                <!-- Billing Results Table -->
+                <div class="results-section">
+                    <div class="section-header">
+                        <i class="fas fa-receipt"></i>
+                        <h3>Inpatient Billing Results</h3>
+                        <div class="export-actions">
+                            <button type="button" class="btn btn-outline" onclick="exportToExcel()">
+                                <i class="fas fa-file-excel"></i>
+                                Export to Excel
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="table-container">
+                        <table class="billing-table">
+                            <thead>
+                                <tr>
+                                    <th class="serial-header">No.</th>
+                                    <th class="type-header">Type</th>
+                                    <th class="patient-header">Patient Name</th>
+                                    <th class="reg-header">Reg No</th>
+                                    <th class="ward-header">Ward</th>
+                                    <th class="date-header">IP Date</th>
+                                    <th class="visit-header">IP Visit</th>
+                                    <th class="action-header">Notes</th>
+                                    <th class="provider-header">Provider</th>
+                                    <th class="account-header">Account</th>
+                                    <th class="outstanding-header">Outstanding</th>
+                                    <th class="status-header">Status</th>
+                                    <th class="billing-header">Billing Action</th>
+                                    <th class="approval-header">Credit Approval</th>
+                                </tr>
+                            </thead>
+                            <tbody>
            <?php
 		  
 		  if($searchpatient != '')
@@ -494,51 +638,53 @@ $provider = $res15['accountname'];
 			}
 			?>
 			
-          <tr <?php echo $colorcode1; ?>>
-				<td class="bodytext31" valign="center"  align="left"><div align="center"><?php echo $sno1 = $sno1 + 1; ?></div></td>
-				<td class="bodytext31" valign="center"  align="left"><div align="center"><?php echo $type; ?></div></td>
-				<td class="bodytext31" valign="left"  align="left"> <div align="left"><?php echo $patientname; ?></div></td>
-
-				<td class="bodytext31" valign="center"  align="left"> <div align="center"><?php echo $patientcode; ?></div></td>
-				<td class="bodytext31" valign="left"  align="left"> <div align="left"><?php echo $ward_name; ?></div></td>
-				<td class="bodytext31" valign="center"  align="left"><div align="center"><?php echo date("d/m/Y", strtotime($date))." ".$conslt_timedate; ?></div></td>
-				<td class="bodytext31" valign="center"  align="left"> <div align="center"><?php echo $visitcode; ?></div></td>
-
-				<td class="bodytext31" valign="center"  align="left"><a style="cursor: pointer;" onClick="window.open('ipbilling_notes.php?ipvist_autonumber=<?=$ipvist_autonumber?>', '_blank', 'location=yes,height=570,width=700,scrollbars=yes,status=yes');">
-					<img src="images/b_edit.png">
-				</a> </td>
-				<!--<td class="bodytext31" valign="center"  align="left"><a onclick="window.open('ipbilling_notes.php?patientcode<?=$patientcode?>&&visitcode=<?=$visitcode?>', '_blank', 'location=yes,height=570,width=520,scrollbars=yes,status=yes');">T</a> </td>
-				 document.URL -->
-
-				<td class="bodytext31" valign="left"  align="left">  <div align="left"><?php echo $provider; ?></div></td>
-				<td class="bodytext31" valign="left"  align="left">  <div align="left"><?php echo $accountname; ?></div></td>
-				<td class="bodytext31" valign="center"  align="left"> <div align="right"><?php echo number_format($total,2,'.',','); ?></div></td>
-
-				 <td class="bodytext31" valign="center"  align="left">
-			    <div align="center" style='color:<?php if($status=='Discharged') echo '#F00'; elseif($status=='Requested') echo '#3366cc'; else echo ''; ?>'><?php echo $status; ?></div></td>
-				<td class="bodytext31" valign="center"  align="left">
-			    <?php if($creditapprovalstatus!='approved') { ?>
-					<select name="invoice" id="invoice" onChange="if (this.value) window.open(this.value, '_blank')">
-					<option value="">Select</option>
-					<option value="ipinteriminvoiceserver.php?patientcode=<?php echo $patientcode; ?>&&visitcode=<?php echo $visitcode; ?>&&menuid=<?php echo $menu_id; ?>">Interim</option>
-					<option value="depositform1.php?patientcode=<?php echo $patientcode; ?>&&visitcode=<?php echo $visitcode; ?>&&menuid=<?php echo $menu_id; ?>">Redeposit</option>
-					<option value="nhifprocessing.php?patientcode=<?php echo $patientcode; ?>&&visitcode=<?php echo $visitcode; ?>&&menuid=<?php echo $menu_id; ?>">NHIF</option>
-					<!--<option value="ipambulance.php?patientcode=<?php echo $patientcode; ?>&&visitcode=<?php echo $visitcode; ?>">Ambulance</option>-->
-					<!--<option value="ipdiscount.php?patientcode=<?php echo $patientcode; ?>&&visitcode=<?php echo $visitcode; ?>&&menuid=<?php echo $menu_id; ?>">Discount</option>-->
-					<option value="ipmiscbilling.php?patientcode=<?php echo $patientcode; ?>&&visitcode=<?php echo $visitcode; ?>&&menuid=<?php echo $menu_id; ?>">Misc Billing</option>
-					<!--<option value="ipdepositrefund.php?patientcode=<?php echo $patientcode; ?>&&visitcode=<?php echo $visitcode; ?>">Deposit Refund</option>-->
-					<!--<option value="packagesplitbill.php?patientcode=<?php echo $patientcode; ?>&&visitcode=<?php echo $visitcode; ?>">Package Billing</option>-->
-					<option value="ipfinalinvoice.php?patientcode=<?php echo $patientcode; ?>&&visitcode=<?php echo $visitcode; ?>&&menuid=<?php echo $menu_id; ?>">Final</option>
-					</select>
-					<?php }if($creditapprovalstatus=='approved'  and $creditnum==0) { ?>
-					<a href="ipinteriminvoiceserver.php?patientcode=<?php echo $patientcode; ?>&&visitcode=<?php echo $visitcode; ?>&&menuid="" " style="font-weight: bold;">Interim</a>	
-					<?php }	elseif($creditnum>0){ ?>
-					<a href="ipapprovedcreditform.php?patientcode=<?php echo $patientcode; ?>&&visitcode=<?php echo $visitcode; ?>&&menuid=<?php echo $menu_id; ?>" style="font-weight: bold;">Finalize</a>
-					<?php } ?>
-					
-					</td>
-					<td class="bodytext31" valign="center"  align="center"><?php if($status == 'Discharged' and $creditapprovalstatus!='approved' and $total>0) { ?><a href="creditapprovalrequest.php?patientcode=<?php echo $patientcode; ?>&&visitcode=<?php echo $visitcode; ?>&&menuid=<?php echo $menu_id; ?>">Request</a> <?php } elseif($status == 'Discharged' and $creditapprovalstatus=='approved' and $creditnum==0) { ?><strong>Sent for Approval</strong>  <?php } elseif($creditnum>0){ ?>Approved <?php  } ?></td>
-			         </tr>
+                                <tr class="table-row">
+                                    <td class="serial-cell"><?php echo $sno1 = $sno1 + 1; ?></td>
+                                    <td class="type-cell"><?php echo htmlspecialchars($type); ?></td>
+                                    <td class="patient-cell"><?php echo htmlspecialchars($patientname); ?></td>
+                                    <td class="reg-cell"><?php echo htmlspecialchars($patientcode); ?></td>
+                                    <td class="ward-cell"><?php echo htmlspecialchars($ward_name); ?></td>
+                                    <td class="date-cell"><?php echo date("d/m/Y", strtotime($date))." ".$conslt_timedate; ?></td>
+                                    <td class="visit-cell"><?php echo htmlspecialchars($visitcode); ?></td>
+                                    <td class="action-cell">
+                                        <button class="btn-action btn-notes" onclick="window.open('ipbilling_notes.php?ipvist_autonumber=<?=$ipvist_autonumber?>', '_blank', 'location=yes,height=570,width=700,scrollbars=yes,status=yes');" title="View Notes">
+                                            <i class="fas fa-sticky-note"></i>
+                                        </button>
+                                    </td>
+                                    <td class="provider-cell"><?php echo htmlspecialchars($provider); ?></td>
+                                    <td class="account-cell"><?php echo htmlspecialchars($accountname); ?></td>
+                                    <td class="outstanding-cell"><?php echo number_format($total,2,'.',','); ?></td>
+                                    <td class="status-cell">
+                                        <span class="status-badge status-<?php echo strtolower($status); ?>">
+                                            <?php echo htmlspecialchars($status); ?>
+                                        </span>
+                                    </td>
+                                    <td class="billing-cell">
+                                        <?php if($creditapprovalstatus!='approved') { ?>
+                                            <select name="invoice" id="invoice" class="billing-select" onChange="if (this.value) window.open(this.value, '_blank')">
+                                                <option value="">Select Action</option>
+                                                <option value="ipinteriminvoiceserver.php?patientcode=<?php echo $patientcode; ?>&&visitcode=<?php echo $visitcode; ?>&&menuid=<?php echo $menu_id; ?>">Interim</option>
+                                                <option value="depositform1.php?patientcode=<?php echo $patientcode; ?>&&visitcode=<?php echo $visitcode; ?>&&menuid=<?php echo $menu_id; ?>">Redeposit</option>
+                                                <option value="nhifprocessing.php?patientcode=<?php echo $patientcode; ?>&&visitcode=<?php echo $visitcode; ?>&&menuid=<?php echo $menu_id; ?>">NHIF</option>
+                                                <option value="ipmiscbilling.php?patientcode=<?php echo $patientcode; ?>&&visitcode=<?php echo $visitcode; ?>&&menuid=<?php echo $menu_id; ?>">Misc Billing</option>
+                                                <option value="ipfinalinvoice.php?patientcode=<?php echo $patientcode; ?>&&visitcode=<?php echo $visitcode; ?>&&menuid=<?php echo $menu_id; ?>">Final</option>
+                                            </select>
+                                        <?php } elseif($creditapprovalstatus=='approved' && $creditnum==0) { ?>
+                                            <a href="ipinteriminvoiceserver.php?patientcode=<?php echo $patientcode; ?>&&visitcode=<?php echo $visitcode; ?>&&menuid=" class="btn-action btn-interim">Interim</a>
+                                        <?php } elseif($creditnum>0) { ?>
+                                            <a href="ipapprovedcreditform.php?patientcode=<?php echo $patientcode; ?>&&visitcode=<?php echo $visitcode; ?>&&menuid=<?php echo $menu_id; ?>" class="btn-action btn-finalize">Finalize</a>
+                                        <?php } ?>
+                                    </td>
+                                    <td class="approval-cell">
+                                        <?php if($status == 'Discharged' && $creditapprovalstatus!='approved' && $total>0) { ?>
+                                            <a href="creditapprovalrequest.php?patientcode=<?php echo $patientcode; ?>&&visitcode=<?php echo $visitcode; ?>&&menuid=<?php echo $menu_id; ?>" class="btn-action btn-request">Request</a>
+                                        <?php } elseif($status == 'Discharged' && $creditapprovalstatus=='approved' && $creditnum==0) { ?>
+                                            <span class="status-badge status-pending">Sent for Approval</span>
+                                        <?php } elseif($creditnum>0) { ?>
+                                            <span class="status-badge status-approved">Approved</span>
+                                        <?php } ?>
+                                    </td>
+                                </tr>
 		  <?php
 		  }
 		  //}
@@ -636,97 +782,67 @@ $provider = $res15['accountname'];
 
 			?>
 			
-         <tr <?php echo $colorcode1; ?>>
-					<td class="bodytext31" valign="center"  align="left"><div align="center"><?php echo $sno1 = $sno1 + 1; ?></div></td>
-					<td class="bodytext31" valign="center"  align="left" style="color:#F00"><div align="center"><?php echo $type; ?></div></td>
-					<td class="bodytext31" valign="left"  align="left"> <div align="left"><?php echo $patientname; ?></div></td>
-
-					<td class="bodytext31" valign="center"  align="left"> <div align="center"><?php echo $patientcode; ?></div></td>
-					<td class="bodytext31" valign="left"  align="left"> <div align="left"><?php echo $ward_name; ?></div></td>
-					<td class="bodytext31" valign="center"  align="left"><div align="center"><?php echo date("d/m/Y", strtotime($date))." ".$conslt_timedate; ?></div></td>
-					<td class="bodytext31" valign="center"  align="left">  <div align="center"><?php echo $visitcode; ?></div></td>
-
-			    	<td class="bodytext31" valign="center"  align="left"><a style="cursor: pointer;" onClick="window.open('ipbilling_notes.php?ipvist_autonumber=<?=$ipvist_autonumber?>', '_blank', 'location=yes,height=570,width=700,scrollbars=yes,status=yes');"><img src="images/b_edit.png"></a> </td><!-- document.URL 
-			    	<td class="bodytext31" valign="center"  align="left"><a onclick="window.open('ipbilling_notes.php?patientcode<?=$patientcode?>&&visitcode=<?=$visitcode?>', '_blank', 'location=yes,height=570,width=520,scrollbars=yes,status=yes');">T</a> </td>-->
-					<!-- document.URL -->
-					<td class="bodytext31" valign="left"  align="left"> <div align="left"><?php echo $provider; ?></div></td>
-					<td class="bodytext31" valign="left"  align="left"> <div align="left"><?php echo $accountname; ?></div></td>
-					<td class="bodytext31" valign="center"  align="left"> <div align="right"><?php echo number_format($total,2,'.',','); ?></div></td>
-
-					<td class="bodytext31" valign="center"  align="left"> <div align="center" style='color:<?php if($status=='Discharged') echo '#F00'; elseif($status=='Requested') echo '#3366cc'; else echo ''; ?>'><?php echo $status; ?></div></td>
-
-					<td class="bodytext31" valign="center"  align="left">
-
-					<?php if($creditapprovalstatus!='approved') { ?>
-					<select name="invoice" id="invoice" onChange="if (this.value) window.open(this.value, '_blank')">
-					<option value="">Select</option>
-					<option value="ipinteriminvoiceserver.php?patientcode=<?php echo $patientcode; ?>&&visitcode=<?php echo $visitcode; ?>&&menuid=<?php echo $menu_id; ?>">Interim</option>
-					<option value="depositform1.php?patientcode=<?php echo $patientcode; ?>&&visitcode=<?php echo $visitcode; ?>&&menuid=<?php echo $menu_id; ?>">Redeposit</option>
-					<option value="nhifprocessing.php?patientcode=<?php echo $patientcode; ?>&&visitcode=<?php echo $visitcode; ?>&&menuid=<?php echo $menu_id; ?>">NHIF</option>
-					<!--<option value="ipambulance.php?patientcode=<?php echo $patientcode; ?>&&visitcode=<?php echo $visitcode; ?>">Ambulance</option>-->
-					<!--<option value="ipdiscount.php?patientcode=<?php echo $patientcode; ?>&&visitcode=<?php echo $visitcode; ?>&&menuid=<?php echo $menu_id; ?>">Discount</option>-->
-					<option value="ipmiscbilling.php?patientcode=<?php echo $patientcode; ?>&&visitcode=<?php echo $visitcode; ?>&&menuid=<?php echo $menu_id; ?>">Misc Billing</option>
-					<!--<option value="ipdepositrefund.php?patientcode=<?php echo $patientcode; ?>&&visitcode=<?php echo $visitcode; ?>">Deposit Refund</option>-->
-					<!--<option value="packagesplitbill.php?patientcode=<?php echo $patientcode; ?>&&visitcode=<?php echo $visitcode; ?>">Package Billing</option>-->
-					<option value="ipfinalinvoice.php?patientcode=<?php echo $patientcode; ?>&&visitcode=<?php echo $visitcode; ?>&&menuid=<?php echo $menu_id; ?>">Final</option>
-					</select>
-					<?php }if($creditapprovalstatus=='approved'  and $creditnum==0) { ?>
-					<a href="ipinteriminvoiceserver.php?patientcode=<?php echo $patientcode; ?>&&visitcode=<?php echo $visitcode; ?>&&menuid="" " style="font-weight: bold;">Interim</a>	
-					<?php }	elseif($creditnum>0){ ?>
-					<a href="ipapprovedcreditform.php?patientcode=<?php echo $patientcode; ?>&&visitcode=<?php echo $visitcode; ?>&&menuid=<?php echo $menu_id; ?>" style="font-weight: bold;">Finalize</a>
-					<?php } ?>
-					
-					</td>
-					<td class="bodytext31" valign="center"  align="center"><?php if($status == 'Discharged' and $creditapprovalstatus!='approved' and $total>0) { ?><a href="creditapprovalrequest.php?patientcode=<?php echo $patientcode; ?>&&visitcode=<?php echo $visitcode; ?>&&menuid=<?php echo $menu_id; ?>">Request</a> <?php } elseif($status == 'Discharged' and $creditapprovalstatus=='approved' and $creditnum==0) { ?><strong>Sent for Approval</strong>  <?php } elseif($creditnum>0){ ?>Approved <?php  } ?></td>
-			         </tr>
+                                <tr class="table-row">
+                                    <td class="serial-cell"><?php echo $sno1 = $sno1 + 1; ?></td>
+                                    <td class="type-cell type-private"><?php echo htmlspecialchars($type); ?></td>
+                                    <td class="patient-cell"><?php echo htmlspecialchars($patientname); ?></td>
+                                    <td class="reg-cell"><?php echo htmlspecialchars($patientcode); ?></td>
+                                    <td class="ward-cell"><?php echo htmlspecialchars($ward_name); ?></td>
+                                    <td class="date-cell"><?php echo date("d/m/Y", strtotime($date))." ".$conslt_timedate; ?></td>
+                                    <td class="visit-cell"><?php echo htmlspecialchars($visitcode); ?></td>
+                                    <td class="action-cell">
+                                        <button class="btn-action btn-notes" onclick="window.open('ipbilling_notes.php?ipvist_autonumber=<?=$ipvist_autonumber?>', '_blank', 'location=yes,height=570,width=700,scrollbars=yes,status=yes');" title="View Notes">
+                                            <i class="fas fa-sticky-note"></i>
+                                        </button>
+                                    </td>
+                                    <td class="provider-cell"><?php echo htmlspecialchars($provider); ?></td>
+                                    <td class="account-cell"><?php echo htmlspecialchars($accountname); ?></td>
+                                    <td class="outstanding-cell"><?php echo number_format($total,2,'.',','); ?></td>
+                                    <td class="status-cell">
+                                        <span class="status-badge status-<?php echo strtolower($status); ?>">
+                                            <?php echo htmlspecialchars($status); ?>
+                                        </span>
+                                    </td>
+                                    <td class="billing-cell">
+                                        <?php if($creditapprovalstatus!='approved') { ?>
+                                            <select name="invoice" id="invoice" class="billing-select" onChange="if (this.value) window.open(this.value, '_blank')">
+                                                <option value="">Select Action</option>
+                                                <option value="ipinteriminvoiceserver.php?patientcode=<?php echo $patientcode; ?>&&visitcode=<?php echo $visitcode; ?>&&menuid=<?php echo $menu_id; ?>">Interim</option>
+                                                <option value="depositform1.php?patientcode=<?php echo $patientcode; ?>&&visitcode=<?php echo $visitcode; ?>&&menuid=<?php echo $menu_id; ?>">Redeposit</option>
+                                                <option value="nhifprocessing.php?patientcode=<?php echo $patientcode; ?>&&visitcode=<?php echo $visitcode; ?>&&menuid=<?php echo $menu_id; ?>">NHIF</option>
+                                                <option value="ipmiscbilling.php?patientcode=<?php echo $patientcode; ?>&&visitcode=<?php echo $visitcode; ?>&&menuid=<?php echo $menu_id; ?>">Misc Billing</option>
+                                                <option value="ipfinalinvoice.php?patientcode=<?php echo $patientcode; ?>&&visitcode=<?php echo $visitcode; ?>&&menuid=<?php echo $menu_id; ?>">Final</option>
+                                            </select>
+                                        <?php } elseif($creditapprovalstatus=='approved' && $creditnum==0) { ?>
+                                            <a href="ipinteriminvoiceserver.php?patientcode=<?php echo $patientcode; ?>&&visitcode=<?php echo $visitcode; ?>&&menuid=" class="btn-action btn-interim">Interim</a>
+                                        <?php } elseif($creditnum>0) { ?>
+                                            <a href="ipapprovedcreditform.php?patientcode=<?php echo $patientcode; ?>&&visitcode=<?php echo $visitcode; ?>&&menuid=<?php echo $menu_id; ?>" class="btn-action btn-finalize">Finalize</a>
+                                        <?php } ?>
+                                    </td>
+                                    <td class="approval-cell">
+                                        <?php if($status == 'Discharged' && $creditapprovalstatus!='approved' && $total>0) { ?>
+                                            <a href="creditapprovalrequest.php?patientcode=<?php echo $patientcode; ?>&&visitcode=<?php echo $visitcode; ?>&&menuid=<?php echo $menu_id; ?>" class="btn-action btn-request">Request</a>
+                                        <?php } elseif($status == 'Discharged' && $creditapprovalstatus=='approved' && $creditnum==0) { ?>
+                                            <span class="status-badge status-pending">Sent for Approval</span>
+                                        <?php } elseif($creditnum>0) { ?>
+                                            <span class="status-badge status-approved">Approved</span>
+                                        <?php } ?>
+                                    </td>
+                                </tr>
 		  <?php
 		  }
 		  }
            ?>
-            <tr>
-              <td class="bodytext311" valign="center" bordercolor="#f3f3f3" align="left" 
-                bgcolor="#ecf0f5">&nbsp;</td>
-				<td class="bodytext311" valign="center" bordercolor="#f3f3f3" align="left" 
-                bgcolor="#ecf0f5">&nbsp;</td>
-			
-				<td class="bodytext311" valign="center" bordercolor="#f3f3f3" align="left" 
-                bgcolor="#ecf0f5">&nbsp;</td>
-             	<td class="bodytext311" valign="center" bordercolor="#f3f3f3" align="left" 
-                bgcolor="#ecf0f5">&nbsp;</td>
-            <td class="bodytext311" valign="center" bordercolor="#f3f3f3" align="left" 
-                bgcolor="#ecf0f5">&nbsp;</td>
-              <td class="bodytext311" valign="center" bordercolor="#f3f3f3" align="left" 
-                bgcolor="#ecf0f5">&nbsp;</td>
-				   <td class="bodytext311" valign="center" bordercolor="#f3f3f3" align="left" 
-                bgcolor="#ecf0f5">&nbsp;</td>
-				   <td class="bodytext311" valign="center" bordercolor="#f3f3f3" align="left" 
-                bgcolor="#ecf0f5">&nbsp;</td>
-				   <td class="bodytext311"  colspan="2"valign="center" bordercolor="#f3f3f3" align="left" 
-                bgcolor="#ecf0f5">&nbsp;</td>
-			
-			</tr>
-			
-          </tbody>
-        </table>
-<?php
-}
-?>	
-		</td>
-      </tr>
-      <tr>
-        <td>&nbsp;</td>
-      </tr>
-      <tr>
-        <td>&nbsp;</td>
-      </tr>
-      <tr>
-        <td>&nbsp;</td>
-      </tr>
-	  
-	  </form>
-    </table>
-  </table>
-<?php include ("includes/footer1.php"); ?>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <?php } ?>
+        </main>
+    </div>
+
+    <!-- Modern JavaScript -->
+    <script src="js/ipbilling-modern.js?v=<?php echo time(); ?>"></script>
 </body>
 </html>
 

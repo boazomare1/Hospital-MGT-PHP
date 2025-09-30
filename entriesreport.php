@@ -124,23 +124,21 @@ $nettotal = '0.00';
 
 $totaldr = '0.00';
 
-$totalcr = '0.00';			
+$totalcr = '0.00';
 
 
 
 $transactiondatefrom = date('Y-m-d');
 
-$transactiondateto = date('Y-m-d');  
-
-
+$transactiondateto = date('Y-m-d');
 
 include ("autocompletebuild_users.php");
 
- $location=isset($_REQUEST['location'])?$_REQUEST['location']:'';
+$location=isset($_REQUEST['location'])?$_REQUEST['location']:'';
 
 if (isset($_REQUEST["canum"])) { $getcanum = $_REQUEST["canum"]; } else { $getcanum = ""; }
 
- $locationcode1=isset($_REQUEST['location'])?$_REQUEST['location']:'';
+$locationcode1=isset($_REQUEST['location'])?$_REQUEST['location']:'';
 
 //$getcanum = $_GET['canum'];
 
@@ -150,15 +148,15 @@ if ($getcanum != '')
 
 {
 
-	$query4 = "select * from master_customer where locationcode='$locationcode1' and auto_number = '$getcanum'";
+$query4 = "select * from master_customer where locationcode='$locationcode1' and auto_number = '$getcanum'";
 
-	$exec4 = mysqli_query($GLOBALS["___mysqli_ston"], $query4) or die ("Error in Query4".mysqli_error($GLOBALS["___mysqli_ston"]));
+$exec4 = mysqli_query($GLOBALS["___mysqli_ston"], $query4) or die ("Error in Query4".mysqli_error($GLOBALS["___mysqli_ston"]));
 
-	$res4 = mysqli_fetch_array($exec4);
+$res4 = mysqli_fetch_array($exec4);
 
-	$cbcustomername = $res4['customername'];
+$cbcustomername = $res4['customername'];
 
-	$customername = $res4['customername'];
+$customername = $res4['customername'];
 
 }
 
@@ -172,676 +170,277 @@ if ($cbfrmflag1 == 'cbfrmflag1')
 
 {
 
-	if (isset($_REQUEST["cbbillnumber"])) { $cbbillnumber = $_REQUEST["cbbillnumber"]; } else { $cbbillnumber = ""; }
+if (isset($_REQUEST["cbbillnumber"])) { $cbbillnumber = $_REQUEST["cbbillnumber"]; } else { $cbbillnumber = ""; }
 
-	//$cbbillnumber = $_REQUEST['cbbillnumber'];
+//$cbbillnumber = $_REQUEST['cbbillnumber'];
 
-	if (isset($_REQUEST["cbbillstatus"])) { $cbbillstatus = $_REQUEST["cbbillstatus"]; } else { $cbbillstatus = ""; }
+if (isset($_REQUEST["cbbillstatus"])) { $cbbillstatus = $_REQUEST["cbbillstatus"]; } else { $cbbillstatus = ""; }
 
-	//$cbbillstatus = $_REQUEST['cbbillstatus'];
+//$cbbillstatus = $_REQUEST['cbbillstatus'];
 
-	
 
-	$transactiondatefrom = $_REQUEST['ADate1'];
+$transactiondatefrom = $_REQUEST['ADate1'];
 
-	$transactiondateto = $_REQUEST['ADate2'];
+$transactiondateto = $_REQUEST['ADate2'];
 
-	
 
-	if (isset($_REQUEST["paymenttype"])) { $paymenttype = $_REQUEST["paymenttype"]; } else { $paymenttype = ""; }
+if (isset($_REQUEST["paymenttype"])) { $paymenttype = $_REQUEST["paymenttype"]; } else { $paymenttype = ""; }
 
-	//$paymenttype = $_REQUEST['paymenttype'];
+//$paymenttype = $_REQUEST['paymenttype'];
 
-	if (isset($_REQUEST["billstatus"])) { $billstatus = $_REQUEST["billstatus"]; } else { $billstatus = ""; }
+if (isset($_REQUEST["billstatus"])) { $billstatus = $_REQUEST["billstatus"]; } else { $billstatus = ""; }
 
-	//$billstatus = $_REQUEST['billstatus'];
+//$billstatus = $_REQUEST['billstatus'];
 
 
 
 }
 
 ?>
-
-<style type="text/css">
-
-<!--
-
-body {
-
-	margin-left: 0px;
-
-	margin-top: 0px;
-
-	background-color: #ecf0f5;
-
-}
-
-.bodytext3 {	FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3B3B3C; FONT-FAMILY: Tahoma
-
-}
-
--->
-
-</style>
-
-<link href="css/datepickerstyle.css" rel="stylesheet" type="text/css" />
-
-<script type="text/javascript" src="js/adddate.js"></script>
-
-<script type="text/javascript" src="js/adddate2.js"></script>
-
-<script language="javascript">
-
-
-
-
-
-function ajaxlocationfunction(val)
-
-{ 
-
-if (window.XMLHttpRequest)
-
-					  {// code for IE7+, Firefox, Chrome, Opera, Safari
-
-					  xmlhttp=new XMLHttpRequest();
-
-					  }
-
-					else
-
-					  {// code for IE6, IE5
-
-					  xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
-
-					  }
-
-					xmlhttp.onreadystatechange=function()
-
-					  {
-
-					  if (xmlhttp.readyState==4 && xmlhttp.status==200)
-
-						{
-
-						document.getElementById("ajaxlocation").innerHTML=xmlhttp.responseText;
-
-						}
-
-					  }
-
-					xmlhttp.open("GET","ajax/ajaxgetlocationname.php?loccode="+val,true);
-
-					xmlhttp.send();
-
-}
-
-					
-
-//ajax to get location which is selected ends here
-
-
-
-
-
-function cbcustomername1()
-
-{
-
-	document.cbform1.submit();
-
-}
-
-
-
-</script>
-
-
-
-<script type="text/javascript" src="js/autocomplete_users.js"></script>
-
-<script type="text/javascript" src="js/autosuggestusers.js"></script>
-
-<script type="text/javascript">
-
-window.onload = function () 
-
-{
-
-//alert ('hai');
-
-	//var oTextbox = new AutoSuggestControl(document.getElementById("cbcustomername"), new StateSuggestions());        
-
-}
-
-</script>
-
-<link rel="stylesheet" type="text/css" href="css/autosuggest.css" />        
-
-<style type="text/css">
-
-<!--
-
-.bodytext31 {FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3b3b3c; FONT-FAMILY: Tahoma
-
-}
-
--->
-
-</style>
-
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Journal Entries Report - MedStar</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="css/entriesreport-modern.css?v=<?php echo time(); ?>">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="css/datetimepicker_css.css">
+    <script src="js/datetimepicker_css.js"></script>
 </head>
-
-
-
-<script src="js/datetimepicker_css.js"></script>
-
-
-
 <body>
-
-<table width="1901" border="0" cellspacing="0" cellpadding="2">
-
-  <tr>
-
-    <td colspan="9" bgcolor="#ecf0f5"><?php include ("includes/alertmessages1.php"); ?></td>
-
-  </tr>
-
-  <tr>
-
-    <td colspan="9" bgcolor="#ecf0f5"><?php include ("includes/title1.php"); ?></td>
-
-  </tr>
-
-  <tr>
-
-    <td colspan="9" bgcolor="#ecf0f5"><?php include ("includes/menu1.php"); ?></td>
-
-  </tr>
-
-  <tr>
-
-    <td colspan="9">&nbsp;</td>
-
-  </tr>
-
-  <tr>
-
-    <td width="1%">&nbsp;</td>
-
-    <td width="99%" valign="top"><table width="100%" border="0" cellspacing="0" cellpadding="0">
-
-      <tr>
-
-        <td width="1134">
-
-		
-
-		
-
-              <form name="cbform1" method="post" action="entriesreport.php">
-
-		<table width="594" border="0" align="left" cellpadding="4" cellspacing="0" bordercolor="#666666" id="AutoNumber3" style="border-collapse: collapse">
-
-          <tbody>
-
-            <tr bgcolor="#011E6A">
-
-              <td colspan="2" bgcolor="#ecf0f5" class="bodytext3"><strong>Journal Report </strong></td>
-
-              <!--<td colspan="2" bgcolor="#ecf0f5" class="bodytext3"><?php echo $errmgs; ?>&nbsp;</td>-->
-
-           <td colspan="2" align="right" bgcolor="#ecf0f5" class="bodytext3" id="ajaxlocation"><strong> Location </strong>
-
-             
-
-            
-
-                  <?php
-
-						
-
-						if ($location!='')
-
-						{
-
-						$query12 = "select locationname from master_location where locationcode='$location' order by locationname";
-
-						$exec12 = mysqli_query($GLOBALS["___mysqli_ston"], $query12) or die ("Error in Query12".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-						$res12 = mysqli_fetch_array($exec12);
-
-						
-
-						echo $res1location = $res12["locationname"];
-
-						//echo $location;
-
-						}
-
-						else
-
-						{
-
-						$query1 = "select locationname from login_locationdetails where username='$username' and docno='$docno' group by locationname order by locationname";
-
-						$exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-						$res1 = mysqli_fetch_array($exec1);
-
-						
-
-						echo $res1location = $res1["locationname"];
-
-						//$res1locationanum = $res1["locationcode"];
-
-						}
-
-						?>
-
-						
-
-						
-
-                  
-
-                  </td> 
-
-            </tr>
-
-            
-
-           
-
-			<tr>
-
-           
-
-			  <td width="10%" align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">Location</td>
-
-              <td width="30%" align="left" valign="top"  bgcolor="#FFFFFF"><span class="bodytext3">
-
-			 
-
-				 <select name="location" id="location" onChange="ajaxlocationfunction(this.value);">
-
-                    <?php
-
-						
-
-						$query1 = "select * from login_locationdetails where username='$username' and docno='$docno' order by locationname";
-
-						$exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-						$loccode=array();
-
-						while ($res1 = mysqli_fetch_array($exec1))
-
-						{
-
-						$locationname = $res1["locationname"];
-
-						$locationcode = $res1["locationcode"];
-
-						
-
-						?>
-
-						 <option value="<?php echo $locationcode; ?>" <?php if($location!='')if($location==$locationcode){echo "selected";}?>><?php echo $locationname; ?></option>
-
-						<?php
-
-						} 
-
-						?>
-
-                      </select>
-
-					 
-
-              </span></td>
-
-			   <td width="10%" align="left" colspan="2" valign="middle"  bgcolor="#FFFFFF" class="bodytext3"></td>
-
-			  </tr>
-
-              <tr>
-
-              <td class="bodytext31" valign="center"  align="left" 
-
-                bgcolor="#FFFFFF"> Date From </td>
-
-              <td align="left" valign="center"  bgcolor="#FFFFFF" class="bodytext31">
-
-			  <input name="ADate1" id="ADate1" value="<?php echo $transactiondatefrom; ?>"  size="10"  readonly="readonly" onKeyDown="return disableEnterKey()" />
-
-				<img src="images2/cal.gif" onClick="javascript:NewCssCal('ADate1')" style="cursor:pointer"/>				</td>
-
-              <td align="left" valign="center"  bgcolor="#FFFFFF" class="bodytext31"> Date To </td>
-
-              <td align="left" valign="center"  bgcolor="#FFFFFF"><span class="bodytext31">
-
-                <input name="ADate2" id="ADate2" value="<?php echo $transactiondateto; ?>"  size="10"  readonly="readonly" onKeyDown="return disableEnterKey()" />
-
-				<img src="images2/cal.gif" onClick="javascript:NewCssCal('ADate2')" style="cursor:pointer"/>
-
-			  </span></td>
-
-            </tr>
-
-            <tr>
-
-              <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">&nbsp;</td>
-
-              <td colspan="3" align="left" valign="top"  bgcolor="#FFFFFF"><input type="hidden" name="cbfrmflag1" value="cbfrmflag1">
-
-                  <input  type="submit" value="Search" name="Submit" />
-
-                  <input name="resetbutton" type="reset" id="resetbutton" value="Reset" /></td>
-
-            </tr>
-
-          </tbody>
-
-        </table>
-
-		</form>		</td>
-
-      </tr>
-
-      <tr>
-
-        <td>&nbsp;</td>
-
-      </tr>
-
-      <tr>
-
-        <td><table id="AutoNumber3" style="BORDER-COLLAPSE: collapse" 
-
-            bordercolor="#666666" cellspacing="0" cellpadding="4" width="1212" 
-
-            align="left" border="0">
-
-          <tbody>
-
-            <tr>
-
-              <td width="2%" bgcolor="#ecf0f5" class="bodytext31">&nbsp;</td>
-
-              <td colspan="8" bgcolor="#ecf0f5" class="bodytext31">
-
-                <?php
-
-				if (isset($_REQUEST["cbfrmflag1"])) { $cbfrmflag1 = $_REQUEST["cbfrmflag1"]; } else { $cbfrmflag1 = ""; }
-
-				//$cbfrmflag1 = $_REQUEST['cbfrmflag1'];
-
-				if ($cbfrmflag1 == 'cbfrmflag1')
-
-				{
-
-					
-
-					if (isset($_REQUEST["cbbillnumber"])) { $cbbillnumber = $_REQUEST["cbbillnumber"]; } else { $cbbillnumber = ""; }
-
-					//$cbbillnumber = $_REQUEST['cbbillnumber'];
-
-					if (isset($_REQUEST["cbbillstatus"])) { $cbbillstatus = $_REQUEST["cbbillstatus"]; } else { $cbbillstatus = ""; }
-
-					//$cbbillstatus = $_REQUEST['cbbillstatus'];
-
-					
-
-					$transactiondatefrom = $_REQUEST['ADate1'];
-
-					$transactiondateto = $_REQUEST['ADate2'];
-
-				}
-
-				?> 			             </tr>
-
-				<?php
-
-			 
-
-			 if (isset($_REQUEST["cbfrmflag1"])) { $cbfrmflag1 = $_REQUEST["cbfrmflag1"]; } else { $cbfrmflag1 = ""; }
-
-				//$cbfrmflag1 = $_REQUEST['cbfrmflag1'];
-
-				if ($cbfrmflag1 == 'cbfrmflag1')
-
-				{
-
-				 
-
-			?>
-
-           
-
-			<tr>
-
-              <td class="bodytext31" valign="center"  align="left" 
-
-                bgcolor="#ffffff"><strong>No.</strong></td>
-
-				<td width="8%" align="left" valign="center"  
-
-                bgcolor="#ffffff" class="bodytext31"><strong>Entry Date </strong></td>
-
-				<td width="7%" align="left" valign="center"  
-
-                bgcolor="#ffffff" class="bodytext31"><strong>Doc No </strong></td>
-
-				<td width="16%" align="left" valign="center"  
-
-                bgcolor="#ffffff" class="bodytext31"><strong>User Name</strong></td>
-
-              <td width="18%" align="left" valign="center"  
-
-                bgcolor="#ffffff" class="bodytext31"><strong>Dr Account </strong></td>
-
-                <td width="7%" align="right" valign="center"  
-
-                bgcolor="#ffffff" class="bodytext31"><strong>Dr Amount </strong></td>
-
-                <td width="14%" align="left" valign="center"  
-
-                bgcolor="#ffffff" class="bodytext31"><strong> Cr Account </strong></td>
-
-                <td width="7%" align="right" valign="center"  
-
-                bgcolor="#ffffff" class="bodytext31"><strong>Cr Amount </strong></td>
-
-                <td width="17%" align="right" valign="center"  
-
-                bgcolor="#ffffff" class="bodytext31"><strong>Narration/Comments</strong></td>
-
-             
-
-			</tr>
-
-			
-
-			  
-
-			  <?php 
-
-			$totaldr = '0.00';
-
-			$totalcr = '0.00';
-
-			
-
-			$query2 = "select * from master_journalentries where locationcode='$locationcode1' and entrydate between '$transactiondatefrom' and '$transactiondateto' AND docno NOT LIKE 'PCA-%' group by docno order by auto_number";
-
-			$exec2 = mysqli_query($GLOBALS["___mysqli_ston"], $query2) or die ("Error in Query2".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-	        while($res2 = mysqli_fetch_array($exec2))
-
-			{
-
-			$res2billnumber = $res2['docno'];
-
-			$res2transactiondate = $res2['entrydate'];
-
-			 
-
-			 $colorloopcount = $colorloopcount + 1;
-
-			$showcolor = ($colorloopcount & 1); 
-
-			if ($showcolor == 0)
-
-			{
-
-				//echo "if";
-
-				$colorcode = 'bgcolor="#CBDBFA"';
-
-			}
-
-			else
-
-			{
-
-				//echo "else";
-
-				$colorcode = 'bgcolor="#ecf0f5"';
-
-			}
-
-			
-
-			$query3 = "select * from master_journalentries where locationcode='$locationcode1' and docno = '$res2billnumber' and docno like 'EN%' order by selecttype desc";
-
-			$exec3 = mysqli_query($GLOBALS["___mysqli_ston"], $query3) or die ("Error in Query3" .mysqli_error($GLOBALS["___mysqli_ston"]));
-
-			while($res3 = mysqli_fetch_array($exec3))
-
-			{
-
-			$ledgerid = $res3['ledgerid'];
-
-			$ledgername = $res3['ledgername'];
-
-			$res3transactionamount = $res3['transactionamount'];
-
-			$username = $res3['username'];
-
-			$updatetime = $res3['updatedatetime'];
-
-			$narration = $res3['narration'];
-
-			$selecttype = $res3['selecttype'];
-
-			 $sno = $sno + 1;
-
-			if($selecttype == 'Dr')
-
-			{
-
-				$totaldr = $totaldr + $res3transactionamount;
-
-			}
-
-			else
-
-			{
-
-				$totalcr = $totalcr + $res3transactionamount;
-
-			}
-
-			?>
-
-            <tr <?php echo $colorcode; ?>>
-
-              <td class="bodytext31" valign="center"  align="left"><?php echo $sno; ?></td>
-
-			   <td class="bodytext31" valign="center"  align="left">
-
-                <div class="bodytext31"><?php echo $res2transactiondate; ?></div></td>
-
-			  <td class="bodytext31" valign="center"  align="left">
-
-				
-				<div >
-		                  <span class="bodytext31"><a href="journalprint.php?billnumber=<?php echo $res2billnumber; ?>" target="_blank"><?php echo $res2billnumber; ?></a> </span> 
-		            </div>
-				
-				
-				
-				</td>
-
-			  <td class="bodytext31" valign="center"  align="left"><?php echo $username; ?></td>
-
-               <td class="bodytext31" valign="center"  align="left"> <?php if($selecttype == 'Dr'){ echo $ledgername; }?></td>
-
-              <td class="bodytext31" valign="center"  align="right">
-
-                <div class="bodytext31"><?php if($selecttype == 'Dr'){ echo number_format($res3transactionamount,2,'.',','); } ?></div></td>
-
-                 <td class="bodytext31" valign="center"  align="left"> <?php if($selecttype == 'Cr'){ echo $ledgername; }?></td>
-
-                 <td class="bodytext31" valign="center"  align="right"><?php if($selecttype == 'Cr'){ echo number_format($res3transactionamount,2,'.',','); } ?></td>
-
-              <td class="bodytext31" valign="center"  align="right">
-
-                <div class="bodytext31"><?php echo $narration; ?></div></td>
-
-				</tr>
-
-			<?php
-
-			}
-
-			}
-
-			
-
-			  ?>
-
-			  
-
-			  <tr bgcolor="#CCC">
-
-	    <td colspan="5" class="bodytext31" valign="center"  align="right"><strong>Grand Total :</strong> </td>
-
-		<td class="bodytext31" valign="center"  align="right"><strong><?php echo number_format($totaldr,2,'.',','); ?></strong></td>
-
-         <td class="bodytext31" valign="center"  align="right">&nbsp;</td>
-
-         <td class="bodytext31" valign="center"  align="right"><strong><?php echo number_format($totalcr,2,'.',','); ?></strong></td>
-
-		<td class="bodytext31" valign="center"  align="right">&nbsp;</td>
-
-			<td width="4%" align="left"><a href="entriesreportxl.php?cbfrmflag1=cbfrmflag1&&location=<?php echo $locationcode1; ?>&&ADate1=<?php echo $transactiondatefrom; ?>&&ADate2=<?php echo $transactiondateto; ?>" target="_blank"><img  width="40" height="40" src="images/excel-xls-icon.png" style="cursor:pointer;"></a></td>
-
-	  </tr>	 
-
-	  <?php 
-
-	  }
-
-	  ?>
-
-          </tbody>
-
-        </table></td>
-
-      </tr>
-
-    </table>
-
-  </table>
-
-<?php include ("includes/footer1.php"); ?>
-
+    <header class="hospital-header">
+        <h1 class="hospital-title">🏥 MedStar Hospital Management</h1>
+        <p class="hospital-subtitle">Advanced Healthcare Management Platform</p>
+    </header>
+
+    <div class="user-info-bar">
+        <div class="user-welcome">
+            <span class="welcome-text">Welcome, <strong><?php echo htmlspecialchars($username); ?></strong></span>
+            <span class="location-info">📍 Company: <?php echo htmlspecialchars($companyname); ?></span>
+        </div>
+        <div class="user-actions">
+            <a href="mainmenu1.php" class="btn btn-outline">🏠 Main Menu</a>
+            <a href="logout.php" class="btn btn-outline">🚪 Logout</a>
+        </div>
+    </div>
+
+    <nav class="nav-breadcrumb">
+        <a href="mainmenu1.php">🏠 Home</a>
+        <span>→</span>
+        <span>Journal Entries Report</span>
+    </nav>
+
+    <div id="menuToggle" class="floating-menu-toggle">
+        <i class="fas fa-bars"></i>
+    </div>
+
+    <div class="main-container-with-sidebar">
+        <aside id="leftSidebar" class="left-sidebar">
+            <div class="sidebar-header">
+                <h3>Quick Navigation</h3>
+                <button id="sidebarToggle" class="sidebar-toggle">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+            </div>
+            <nav class="sidebar-nav">
+                <ul class="nav-list">
+                    <li class="nav-item">
+                        <a href="mainmenu1.php" class="nav-link">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="entries.php" class="nav-link">
+                            <i class="fas fa-plus-circle"></i>
+                            <span>New Entry</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="editentries.php" class="nav-link">
+                            <i class="fas fa-edit"></i>
+                            <span>Edit Entry</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="entriesreport.php" class="nav-link active">
+                            <i class="fas fa-chart-line"></i>
+                            <span>Entries Report</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="entries_upload.php" class="nav-link">
+                            <i class="fas fa-upload"></i>
+                            <span>Upload Entries</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <div id="alertContainer"></div>
+
+            <div class="page-header">
+                <h2 class="page-title">📊 Journal Entries Report</h2>
+                <p class="page-subtitle">View and analyze journal entries</p>
+            </div>
+
+            <div class="form-container">
+                <form id="form1" name="form1" method="post" action="entriesreport.php">
+                    <input type="hidden" name="cbfrmflag1" value="cbfrmflag1">
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="ADate1" class="form-label">From Date *</label>
+                            <input type="text" class="form-control from_date" id="ADate1" name="ADate1" value="<?php echo $transactiondatefrom; ?>" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="ADate2" class="form-label">To Date *</label>
+                            <input type="text" class="form-control to_date" id="ADate2" name="ADate2" value="<?php echo $transactiondateto; ?>" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="location" class="form-label">Location</label>
+                            <select class="form-control" id="location" name="location">
+                                <option value="">All Locations</option>
+                                <?php
+                                $query1 = "select locationname,locationcode from login_locationdetails where username='$username' and docno='$docno' order by locationname";
+                                $exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
+                                while ($res1 = mysqli_fetch_array($exec1))
+                                {
+                                    $locationname = $res1["locationname"];
+                                    $locationcode = $res1["locationcode"];
+                                    $selected = ($location == $locationcode) ? 'selected' : '';
+                                    echo "<option value='$locationcode' $selected>$locationname</option>";
+                                }
+                                ?>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-search"></i> Generate Report
+                        </button>
+                        <button type="button" class="btn btn-outline" onclick="refreshData()">
+                            <i class="fas fa-refresh"></i> Refresh
+                        </button>
+                        <button type="button" class="btn btn-success" onclick="exportToExcel()">
+                            <i class="fas fa-file-excel"></i> Export Excel
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <?php if ($cbfrmflag1 == 'cbfrmflag1') { ?>
+            <div class="data-container">
+                <div class="data-header">
+                    <h3 class="data-title">Journal Entries Report</h3>
+                    <div>
+                        <span class="text-muted">Period: <?php echo date('d/m/Y', strtotime($transactiondatefrom)); ?> - <?php echo date('d/m/Y', strtotime($transactiondateto)); ?></span>
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>S.No</th>
+                                <th>Entry Date</th>
+                                <th>Document No</th>
+                                <th>Location</th>
+                                <th>Ledger</th>
+                                <th>Entry Type</th>
+                                <th>Debit Amount</th>
+                                <th>Credit Amount</th>
+                                <th>Narration</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php
+                            $sno = 1;
+                            $totalDebit = 0;
+                            $totalCredit = 0;
+                            
+                            $query2 = "select * from master_journalentries where date(entrydate) between '$transactiondatefrom' and '$transactiondateto' order by entrydate desc, docno desc";
+                            if($location != '') {
+                                $query2 = "select * from master_journalentries where locationcode='$location' and date(entrydate) between '$transactiondatefrom' and '$transactiondateto' order by entrydate desc, docno desc";
+                            }
+                            $exec2 = mysqli_query($GLOBALS["___mysqli_ston"], $query2) or die ("Error in Query2".mysqli_error($GLOBALS["___mysqli_ston"]));
+                            
+                            while ($res2 = mysqli_fetch_array($exec2))
+                            {
+                                $entrydate = $res2["entrydate"];
+                                $docno = $res2["docno"];
+                                $locationname = $res2["locationname"];
+                                $ledgername = $res2["ledgername"];
+                                $selecttype = $res2["selecttype"];
+                                $debitamount = $res2["debitamount"];
+                                $creditamount = $res2["creditamount"];
+                                $narration = $res2["narration"];
+                                
+                                $totalDebit += $debitamount;
+                                $totalCredit += $creditamount;
+                                
+                                echo "<tr>";
+                                echo "<td>$sno</td>";
+                                echo "<td>" . date('d/m/Y', strtotime($entrydate)) . "</td>";
+                                echo "<td>$docno</td>";
+                                echo "<td>$locationname</td>";
+                                echo "<td>$ledgername</td>";
+                                echo "<td>$selecttype</td>";
+                                echo "<td style='text-align: right;'>" . number_format($debitamount, 2) . "</td>";
+                                echo "<td style='text-align: right;'>" . number_format($creditamount, 2) . "</td>";
+                                echo "<td>$narration</td>";
+                                echo "</tr>";
+                                $sno++;
+                            }
+                            ?>
+                        </tbody>
+                        <tfoot>
+                            <tr style="font-weight: bold; background-color: #f8f9fa;">
+                                <td colspan="6" style="text-align: right;">Total:</td>
+                                <td style="text-align: right;"><?php echo number_format($totalDebit, 2); ?></td>
+                                <td style="text-align: right;"><?php echo number_format($totalCredit, 2); ?></td>
+                                <td></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+
+            <div class="summary-cards">
+                <div class="summary-card">
+                    <div class="summary-card-icon">📊</div>
+                    <div class="summary-card-value"><?php echo $sno - 1; ?></div>
+                    <div class="summary-card-label">Total Entries</div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-card-icon">💰</div>
+                    <div class="summary-card-value"><?php echo number_format($totalDebit, 2); ?></div>
+                    <div class="summary-card-label">Total Debit</div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-card-icon">💳</div>
+                    <div class="summary-card-value"><?php echo number_format($totalCredit, 2); ?></div>
+                    <div class="summary-card-label">Total Credit</div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-card-icon">⚖️</div>
+                    <div class="summary-card-value"><?php echo ($totalDebit == $totalCredit) ? 'Balanced' : 'Unbalanced'; ?></div>
+                    <div class="summary-card-label">Status</div>
+                </div>
+            </div>
+            <?php } ?>
+        </main>
+    </div>
+
+    <button id="printButton" class="print-button" title="Print Report">
+        <i class="fas fa-print"></i>
+    </button>
+
+    <script src="js/entriesreport-modern.js?v=<?php echo time(); ?>"></script>
 </body>
-
 </html>
-
-
-

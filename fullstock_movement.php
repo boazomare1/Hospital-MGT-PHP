@@ -17,16 +17,17 @@ $user = '';
 $snocount=0;   
 
 $openingbalance_on_date1_final=0;
-			$quantity1_purchase_final=0;
-			$quantity1_preturn_final=0;
-			$quantity1_receipts_final=0;
-			$quantity2_transferout_final=0;
-			$quantity2_sales_final=0;
-			$quantity1_refunds_final=0;
-			$quantity2_transferout_ownusage_final=0;
-			$quantity1_excess_final=0;
-			$quantity2_Short_final=0;
-			$closingstock_on_date2_final=0;
+$quantity1_purchase_final=0;
+$quantity1_preturn_final=0;
+$quantity1_receipts_final=0;
+$quantity2_transferout_final=0;
+$quantity2_sales_final=0;
+$quantity1_refunds_final=0;
+$quantity2_transferout_ownusage_final=0;
+$quantity1_excess_final=0;
+$quantity2_Short_final=0;
+$closingstock_on_date2_final=0;
+
 //To populate the autocompetelist_services1.js
 if (isset($_REQUEST["mainsearch"])) { $mainsearch = $_REQUEST["mainsearch"]; } else { $mainsearch = ""; }
 
@@ -39,1524 +40,807 @@ if (isset($_REQUEST["ADate1"])) { $ADate1 = $_REQUEST["ADate1"]; } else { $ADate
 if (isset($_REQUEST["ADate2"])) { $ADate2 = $_REQUEST["ADate2"]; } else { $ADate2 = $transactiondateto; }
 
 if (isset($_REQUEST["frmflag1"])) { $frmflag1 = $_REQUEST["frmflag1"]; } else { $frmflag1 = ""; }
-//$frmflag1 = $_REQUEST['frmflag1'];
+
 if ($frmflag1 == 'frmflag1')
 {
-if (isset($_REQUEST["searchitemcode"])) { $searchmedicinecode = $_REQUEST["searchitemcode"]; } else { $searchmedicinecode = ""; }
-//$medicinecode = $_REQUEST['medicinecode'];
-if (isset($_REQUEST["itemname"])) { $searchmedicinename = $_REQUEST["itemname"]; } else { $searchmedicinename = ""; }
-if (isset($_REQUEST["categoryname"])) { $categoryname = $_REQUEST["categoryname"]; } else { $categoryname = ""; }
-if (isset($_REQUEST["store"])) { $store = $_REQUEST["store"]; } else { $store = ""; }
-if (isset($_REQUEST["store"])) { $store_search = $_REQUEST["store"]; } else { $store_search = ""; }
-
+    if (isset($_REQUEST["searchitemcode"])) { $searchmedicinecode = $_REQUEST["searchitemcode"]; } else { $searchmedicinecode = ""; }
+    if (isset($_REQUEST["itemname"])) { $searchmedicinename = $_REQUEST["itemname"]; } else { $searchmedicinename = ""; }
+    if (isset($_REQUEST["categoryname"])) { $categoryname = $_REQUEST["categoryname"]; } else { $categoryname = ""; }
+    if (isset($_REQUEST["store"])) { $store = $_REQUEST["store"]; } else { $store = ""; }
+    if (isset($_REQUEST["store"])) { $store_search = $_REQUEST["store"]; } else { $store_search = ""; }
 } 
 
 $docno = $_SESSION['docno'];
 
-  $locationcode=isset($_REQUEST['location'])?$_REQUEST['location']:'';
-  $location=isset($_REQUEST['location'])?$_REQUEST['location']:'';
-  
-  
-  $query = "select * from login_locationdetails where username='$username' and docno='$docno' order by locationname";
+$locationcode=isset($_REQUEST['location'])?$_REQUEST['location']:'';
+$location=isset($_REQUEST['location'])?$_REQUEST['location']:'';
+
+$query = "select * from login_locationdetails where username='$username' and docno='$docno' order by locationname";
 $exec = mysqli_query($GLOBALS["___mysqli_ston"], $query) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
 $res = mysqli_fetch_array($exec);
-	
-	 $locationname  = $res["locationname"];
-	 $locationcode = $res["locationcode"];
-	 $res12locationanum = $res["auto_number"];
-	 
+
+$locationname  = $res["locationname"];
+$locationcode = $res["locationcode"];
+$res12locationanum = $res["auto_number"];
+
+// Initialize report data arrays
+$reportData = [];
+$summaryData = [
+    'total_items' => 0,
+    'total_opening' => 0,
+    'total_purchase' => 0,
+    'total_preturn' => 0,
+    'total_receipts' => 0,
+    'total_transferout' => 0,
+    'total_sales' => 0,
+    'total_refunds' => 0,
+    'total_ownusage' => 0,
+    'total_excess' => 0,
+    'total_short' => 0,
+    'total_closing' => 0
+];
 ?>
-<style type="text/css">
-<!--
-body {
-	margin-left: 0px;
-	margin-top: 0px;
-	background-color: #ecf0f5;
-}
-.bodytext3 {	FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3B3B3C; FONT-FAMILY: Tahoma
-}
--->
-</style>
-<link href="css/datepickerstyle.css" rel="stylesheet" type="text/css" />
-<script type="text/javascript" src="js/adddate.js"></script>
-<script type="text/javascript" src="js/adddate2.js"></script>
-<style type="text/css">
-<!--
-.bodytext31 {FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3b3b3c; FONT-FAMILY: Tahoma
-}
-.style1 {FONT-WEIGHT: bold; FONT-SIZE: 11px; COLOR: #3b3b3c; FONT-FAMILY: Tahoma; }
--->
-</style>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stock Movement Report - MedStar</title>
+    
+    <!-- External CSS -->
+    <link href="css/stock-movement-modern.css" rel="stylesheet" type="text/css" />
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- jQuery -->
+    <script src="js/jquery-1.10.2.js"></script>
+    <script src="js/jquery-ui.min.js"></script>
+    
+    <!-- Date Picker -->
+    <link href="css/datepickerstyle.css" rel="stylesheet" type="text/css" />
+    <script type="text/javascript" src="js/adddate.js"></script>
+    <script type="text/javascript" src="js/adddate2.js"></script>
+    
+    <!-- Autocomplete -->
+    <link rel="stylesheet" type="text/css" href="css/autosuggest.css" />
+    <script type="text/javascript" src="js/disablebackenterkey.js"></script>
+    <script type="text/javascript" src="js/autosuggestmedicine2.js"></script>
+    <?php include("js/dropdownlist1scripting1stock1.php"); ?>
+    <script type="text/javascript" src="js/autosuggest1itemstock2.js"></script>
+    <script type="text/javascript" src="js/autocomplete_item1pharmacy4.js"></script>
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
-<script language="javascript">
-function funcOnLoadBodyFunctionCall()
-{
-
-
-	//funcBodyOnLoad(); //To reset any previous values in text boxes. source .js - sales1scripting1.php
-	
-	 //To handle ajax dropdown list.
-	funcCustomerDropDownSearch4();
-	
-	
-}
-
-function Locationcheck()
-{
-if(document.getElementById("location").value == '')
-{
-alert("Please Select Location");
-document.getElementById("location").focus();
-return false;
-}
-// if(document.getElementById("store").value == '')
-// {
-// alert("Please Select Store");
-// document.getElementById("store").focus();
-// return false;
-// }
-}
-
-
-//ajax function to get store for corrosponding location
-function storefunction(loc)
-{
-	var username=document.getElementById("username").value;
-	
-var xmlhttp;
-
-if (window.XMLHttpRequest)
-  {// code for IE7+, Firefox, Chrome, Opera, Safari
-  xmlhttp=new XMLHttpRequest();
-  }
-else
-  {// code for IE6, IE5
-  xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
-  }
-xmlhttp.onreadystatechange=function()
-  {
-  if (xmlhttp.readyState==4 && xmlhttp.status==200)
-    {
-    document.getElementById("store").innerHTML=xmlhttp.responseText;
-    }
-  }
-xmlhttp.open("GET","ajax/ajaxstore.php?loc="+loc+"&username="+username,true);
-xmlhttp.send();
-
-	}
-</script>
-<link rel="stylesheet" type="text/css" href="css/autosuggest.css" />        
-
-<script type="text/javascript" src="js/disablebackenterkey.js"></script>
-
-<?php //include("autocompletebuild_medicine2.php"); ?>
-<script type="text/javascript" src="js/autosuggestmedicine2.js"></script>
-<?php include("js/dropdownlist1scripting1stock1.php"); ?>
-<!--<script type="text/javascript" src="js/autocomplete_medicine2.js"></script>-->
-<script type="text/javascript" src="js/autosuggest1itemstock2.js"></script>
-<script type="text/javascript" src="js/autocomplete_item1pharmacy4.js"></script>
-
-<script src="js/datetimepicker_css.js"></script>
-<script type="text/javascript" src="js/jquery-1.10.2.js"></script>
-<script src="js/jquery.min-autocomplete.js"></script>
-<script src="js/jquery-ui.min.js"></script>
-
-<script language="javascript">
-
-function disableEnterKey()
-{
-	//alert ("Back Key Press");
-	if (event.keyCode==8) 
-	{
-		event.keyCode=0; 
-		return event.keyCode 
-		return false;
-	}
-	
-	var key;
-	if(window.event)
-	{
-		key = window.event.keyCode;     //IE
-	}
-	else
-	{
-		key = e.which;     //firefox
-	}
-	
-	if(key == 13) // if enter key press
-	{
-		//alert ("Enter Key Press2");
-		return false;
-	}
-	else
-	{
-		return true;
-	}
-	
-
-}
-
-
-
-
-function deleterecord1(varEntryNumber,varAutoNumber)
-{
-	var varEntryNumber = varEntryNumber;
-	var varAutoNumber = varAutoNumber;
-	var fRet;
-	fRet = confirm('Are you sure want to delete the stock entry no. '+varEntryNumber+' ?');
-	//alert(fRet);
-	if (fRet == false)
-	{
-		alert ("Stock Entry Delete Not Completed.");
-		return false;
-	}
-	else
-	{
-		window.location="stockreport2.php?task=del&&delanum="+varAutoNumber;		
-	}
-}
-
-function Showrows(id, code, action)
-{
-	if(action=='down')
-	{
-		$("."+code).toggle('slow'); 
-		$("#down"+id).hide(0); 
-		$("#up"+id).show();
-	}	
-	else if(action=='up')
-	{
-		$("."+code).toggle('slow');  
-		$("#up"+id).hide(0); 
-		$("#down"+id).show();
-	}
-	
-}
-
- function mainsearch_type() {
-    var mainsearch  =  document.getElementById("mainsearch");
-    var mainsearchvalue = mainsearch.options[mainsearch.selectedIndex].value;
-    var trcat =  document.getElementById("trcat");
-    var trsearch =  document.getElementById("trsearch");
-
-      if (mainsearchvalue == 1) {
-       trcat.style.display = "none";
-       trsearch.style.display = "none";
-
-      }
-      else {
-      trcat.style.display = "";
-      trsearch.style.display = "";
-      }  
-}   
-</script>
-<?php // if($mainsearch==1){ ?><!-- 
-<style type="text/css">
-	.hidden{
-		display: none;
-	}
-</style> -->
-<?php // } ?>
-<body onLoad="return funcCustomerDropDownSearch1();">
-<table width="110%" border="0" cellspacing="0" cellpadding="2">
-  <tr>
-    <td colspan="10" bgcolor="#ecf0f5"><?php include ("includes/alertmessages1.php"); ?></td>
-  </tr>
-  <tr>
-    <td colspan="10" bgcolor="#ecf0f5"><?php include ("includes/title1.php"); ?></td>
-  </tr>
-  <tr>
-    <td colspan="10" bgcolor="#ecf0f5"><?php include ("includes/menu1.php"); ?></td>
-  </tr>
-  <tr>
-    <td colspan="10">&nbsp;</td>
-  </tr>
-  <tr>
-    <td width="1%" rowspan="3">&nbsp;</td>
-    <td width="2%" rowspan="3" valign="top"><?php //include ("includes/menu4.php"); ?>
-      &nbsp;</td>
-    <td valign="top"><table width="98%" border="0" cellspacing="0" cellpadding="0">
-      <tr>
-        <td>
-		
-		
-			<form name="stockinward" action="fullstock_movement.php" method="post" onKeyDown="return disableEnterKey()" onSubmit="return Locationcheck()">
-	<table id="AutoNumber3" style="BORDER-COLLAPSE: collapse" 
-            bordercolor="#666666" cellspacing="0" cellpadding="4" width="800" 
-            align="left" border="0">
-      <tbody id="foo">
-        <tr>
-          <td colspan="6" bgcolor="#ecf0f5" class="bodytext31"><strong>Stock Movement Report</strong></td>
-          </tr>
-        <tr>
-          <td colspan="6" align="left" valign="center"  
-                 bgcolor="<?php if ($errmsg == '') { echo '#FFFFFF'; } else { echo '#cbdbfa'; } ?>" class="bodytext31"><?php echo $errmsg; ?>&nbsp;</td>
-          </tr>
-          <tr>
-          	<td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3"><strong>Type</strong></td>
-              <td  bgcolor="#FFFFFF" class="bodytext3"  colspan="5" >
-              	<select name="mainsearch" id="mainsearch" onChange="mainsearch_type();" style="border: 1px solid #001E6A;" >
-              		<option value="">--Select Type--</option>
-              		<option value="1" <?php if($mainsearch==1){ echo 'selected';}?>>Summary</option>
-              		<option value="2" <?php if($mainsearch==2){ echo 'selected';}?>>Detail</option>
-              		<option value="3" <?php if($mainsearch==3){ echo 'selected';}?>>Detail with Batch</option>
-              	</select>
-          </tr>
-        
-		 <tr>
-              <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3"><strong>Location</strong></td>
-              <td  bgcolor="#FFFFFF" class="bodytext3"  colspan="5" ><select name="location" id="location" style="border: 1px solid #001E6A;" onChange="storefunction(this.value)">
-              <!-- <option value="">-Select Location-</option> -->
-                  <?php
-						
-						$query = "select * from login_locationdetails where username='$username' and docno='$docno' group by locationname order by locationname";
-						$exec = mysqli_query($GLOBALS["___mysqli_ston"], $query) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
-						while ($res = mysqli_fetch_array($exec))
-						{
-						$reslocation = $res["locationname"];
-						$reslocationanum = $res["locationcode"];
-						?>
-						<option value="<?php echo $reslocationanum; ?>" <?php if($location!='')if($location==$reslocationanum){echo "selected";}?>><?php echo $reslocation; ?></option>
-						<?php 
-						}
-						
-				$query = "select * from login_locationdetails where username='$username' and docno='$docno' order by locationname";
-				$exec = mysqli_query($GLOBALS["___mysqli_ston"], $query) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
-				$res = mysqli_fetch_array($exec);
-				
-				$locationname  = $res["locationname"];
-				$locationcode = $res["locationcode"];
-				$res12locationanum = $res["auto_number"];
-						?>
-                  </select></td>
-                   
-                  <input type="hidden" name="locationnamenew" value="<?php echo $locationname; ?>">
-                <input type="hidden" name="locationcodenew" value="<?php echo $res1locationanum; ?>">
-                <input type="hidden" name="username" id="username" value="<?php echo $username; ?>">
-             
-              </tr>
-		<tr >
-		  <td width="104" align="left" valign="center"  bgcolor="#ffffff" class="bodytext31"><strong>Store</strong> </td>
-          <td width="680" align="left" valign="center"  bgcolor="#ffffff" class="bodytext31" colspan="5" >
-		  <?php  $loc=isset($_REQUEST['location'])?$_REQUEST['location']:'';
- 				 $username=isset($_REQUEST['username'])?$_REQUEST['username']:'';
- 				 $frmflag1=isset($_REQUEST['frmflag1'])?$_REQUEST['frmflag1']:'';
-				 $store=isset($_REQUEST['store'])?$_REQUEST['store']:'';?>  
-                 <select name="store" id="store">
-		   <option value="">Select Store</option>
-		   <!-- <option value="All">All</option>  -->
-      <?php //if (1)
-// {$loc=isset($_REQUEST['location'])?$_REQUEST['location']:'';
-// $username=isset($_REQUEST['username'])?$_REQUEST['username']:'';
-
-// $query5 = "select ms.auto_number,ms.storecode,ms.store from master_employeelocation as me LEFT JOIN master_store as ms ON me.storecode=ms.auto_number where me.locationcode = '".$loc."' AND me.username= '".$username."'";
-                $query5 = "SELECT storecode, store from master_store where locationcode='$locationcode'";
-				$exec5 = mysqli_query($GLOBALS["___mysqli_ston"], $query5) or die ("Error in Query5".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-				while ($res5 = mysqli_fetch_array($exec5))
-				{
-				$res5anum = $res5["storecode"];
-				$res5name = $res5["store"];
-				//$res5department = $res5["department"];
-?>
- 
-<option value="<?php echo $res5anum;?>" <?php if($store==$res5anum){ echo 'selected';}?>><?php echo $res5name;?></option>
-<?php } //}?>
-		  </select>
-		  </td>
-		  </tr>
-        <tr id="trcat" class="hidden">
-          <td align="left" valign="center"  
-                bgcolor="#ffffff" class="bodytext31"><strong>Category</strong></td>
-          <td colspan="5" align="left" valign="center"  bgcolor="#ffffff" class="bodytext31"><select name="categoryname" id="categoryname">
-            <?php
-			$categoryname = $_REQUEST['categoryname'];
-			if ($categoryname != '')
-			{
-			?>
-            <option value="<?php echo $categoryname; ?>" selected="selected"><?php echo $categoryname; ?></option>
-            <option value="">Show All Category</option>
-            <?php
-			}
-			else
-			{
-			?>
-            <option selected="selected" value="">Show All Category</option>
-            <?php
-			}
-			?>
-            <?php
-			$query42 = "select * from master_medicine where status = '' group by categoryname order by categoryname";
-			$exec42 = mysqli_query($GLOBALS["___mysqli_ston"], $query42) or die ("Error in Query42".mysqli_error($GLOBALS["___mysqli_ston"]));
-			while ($res42 = mysqli_fetch_array($exec42))
-			{
-			$categoryname1 = $res42['categoryname'];
-			?>
-            <option value="<?php echo $categoryname1; ?>"><?php echo $categoryname1; ?></option>
-            <?php
-			}
-			?>
-          </select></td>
-        </tr>
-        <tr id="trsearch" class="hidden">
-        	 
-	        <div >
-	          <td align="left" valign="center"  
-	                bgcolor="#ffffff" class="bodytext31"><strong>Search</strong></td>
-	          <td colspan="5" align="left" valign="center"  bgcolor="#ffffff" class="bodytext31">
-			  <input type="hidden" name="searchitem1hiddentextbox" id="searchitem1hiddentextbox">
-			  <input type="hidden" name="searchitemcode" id="searchitemcode">
-			  <input name="itemname" type="text" id="itemname" style="border: 1px solid #001E6A; text-align:left" size="50" autocomplete="off" value="<?php echo $searchmedicinename; ?>">
-	           </td>
-	       </div>
-        </tr>
-        
-        <tr>
-          <td width="76" align="left" valign="center"  
-                bgcolor="#ffffff" class="bodytext31"><strong> Date From </strong></td>
-          <td width="123" align="left" valign="center"  bgcolor="#ffffff" class="bodytext31"><input name="ADate1" id="ADate1" style="border: 1px solid #001E6A" value="<?php echo $ADate1; ?>"  size="10"  readonly="readonly" onKeyDown="return disableEnterKey()" />
-			<img src="images2/cal.gif" onClick="javascript:NewCssCal('ADate1')" style="cursor:pointer"/>			</td>
-          <td width="51" align="left" valign="center"  bgcolor="#FFFFFF" class="style1"><span class="bodytext31"><strong> Date To </strong></span></td>
-          <td colspan="2" width="129" align="left" valign="center"  bgcolor="#ffffff"><span class="bodytext31">
-            <input name="ADate2" id="ADate2" style="border: 1px solid #001E6A" value="<?php echo $ADate2; ?>"  size="10"  readonly="readonly" onKeyDown="return disableEnterKey()" />
-			<img src="images2/cal.gif" onClick="javascript:NewCssCal('ADate2')" style="cursor:pointer"/>
-		  </span></td>
-		  </tr>
-        <tr>
-          <td class="bodytext31" valign="center"  align="left" bgcolor="#ffffff"><input type="hidden" name="medicinecode" id="medicinecode" style="border: 1px solid #001E6A; text-align:left" onKeyDown="return disableEnterKey()" value="<?php echo $searchmedicinecode; ?>" size="10" readonly /></td>
-          <td colspan="5" align="left" valign="center"  bgcolor="#ffffff" class="bodytext31">
-		 <div align="left">
-            <input type="hidden" name="cbfrmflag1" value="cbfrmflag1">
-            <input  style="border: 1px solid #001E6A" type="submit" value="Search" name="Submit" />
-            <input name="resetbutton" type="reset" id="resetbutton"  style="border: 1px solid #001E6A" value="Reset" />
-			<input type="hidden" name="frmflag1" value="frmflag1" id="frmflag1">
-          </div></td>
-        </tr>
-        <tr>
-          <td class="bodytext31" valign="center"  align="left" bgcolor="#ffffff">&nbsp;</td>
-          <td colspan="5" align="left" valign="center"  bgcolor="#ffffff" class="bodytext31"><strong>Date Range : <?php echo $ADate1.' To '.$ADate2; ?></strong></td>
-        </tr>
-      </tbody>
-    </table>
-    </form>		
-	</td>
-      </tr>
-      <tr>
-        <td>&nbsp;</td>
-      </tr>
-      <tr>
-        <td>
-		<table id="AutoNumber3" style="BORDER-COLLAPSE: collapse" 
-            bordercolor="#666666" cellspacing="0" cellpadding="4" width="1200"
-            align="left" border="0">
-
-          <tbody>
-				<?php
-				if (isset($_REQUEST["frmflag1"])) { $frmflag1 = $_REQUEST["frmflag1"]; } else { $frmflag1 = ""; }
-//$frmflag1 = $_REQUEST['frmflag1'];
-if ($frmflag1 == 'frmflag1')
-{
-
-if (isset($_REQUEST["store"])) { $store = $_REQUEST["store"]; } else { $store = ""; }
-if (isset($_REQUEST["categoryname"])) { $categoryname = $_REQUEST["categoryname"]; } else { $categoryname = ""; }
-
-$noofdays=strtotime($ADate2) - strtotime($ADate1);
-				$noofdays = $noofdays/(3600*24);
-?>
-<?php
-
-if($_POST['mainsearch']=='1'){
-
-?>
-
-          	<tr>
-             <td align="left" valign="center"  
-                bgcolor="#ffffff" class="bodytext31"><strong>Sl. No</strong></td>
-              <td align="left" valign="center"  
-                bgcolor="#ffffff" class="bodytext31"><strong>Description</strong></td>
-             <!--  <td align="left" valign="center"  
-                bgcolor="#ffffff" class="bodytext31"><strong>Batch</strong></td> -->
-              <td align="left" valign="center"  
-                bgcolor="#ffffff" class="bodytext31"><div align="right"><strong>Opg.Stock</strong></div></td>
-              <td align="left" valign="center"  
-                bgcolor="#ffffff" class="bodytext31"><div align="right"><strong>Purchase</strong></div></td>
-
-                 <td align="left" valign="center"  
-                bgcolor="#ffffff" class="bodytext31"><div align="right"><strong>Purchase Returns</strong></div></td>
-
-                  <td align="left" valign="center"  
-                bgcolor="#ffffff" class="bodytext31"><div align="right"><strong>Receipts</strong></div></td>
-
-              <td align="left" valign="center"  
-                bgcolor="#ffffff" class="bodytext31"><div align="right"><strong>Issued To Dept</strong></div></td>
-
-                <td align="left" valign="center"  
-                bgcolor="#ffffff" class="bodytext31"><div align="right"><strong>Sales</strong></div></td>
-
-
-              <td align="left" valign="center"  
-                bgcolor="#ffffff" class="bodytext31"><div align="right"><strong>Refunds</strong></div></td>
-
-                <td align="left" valign="center"  
-                bgcolor="#ffffff" class="bodytext31"><div align="right"><strong>Own Usage</strong></div></td>
-                <td align="left" valign="center"  
-                bgcolor="#ffffff" class="bodytext31"><div align="right"><strong>Phy.Excess</strong></div></td>
-                <td align="left" valign="center"  
-                bgcolor="#ffffff" class="bodytext31"><div align="right"><strong>Phy.Short</strong></div></td>
-
-              <td align="left" valign="center"  
-                bgcolor="#ffffff" class="bodytext31"><div align="right"><strong>Closing Stock</strong></div></td>
-				<!-- <td align="left" valign="center"  
-                bgcolor="#ffffff" class="bodytext31"><div align="left"><strong>Username</strong></div></td> -->
-				</tr>
-
-
-<?php
-
- $query_store = "SELECT * FROM `master_store`"; 
-if($store!=''){ 
-  $query_store .= " where storecode='$store'  " ; 
-}
-
-$exec_store = mysqli_query($GLOBALS["___mysqli_ston"], $query_store) or die ("Error in query_store".mysqli_error($GLOBALS["___mysqli_ston"]));
-				while ($res_store = mysqli_fetch_array($exec_store))
-				{ 
-					$store=$res_store['storecode'];
-					
-					 $storename=$res_store['store']; 
-                ////////////////////FIRST //////////////////
-                // echo $openingbalance_on_date; 
-                // $ADate12 = date('Y-m-d', strtotime('-1 day', strtotime($ADate1)));
-                   $query1a = "SELECT sum(transaction_quantity) as addstock from transaction_stock where locationcode='$location' and storecode ='$store' and transaction_date < '$ADate1' and transactionfunction='1' order by auto_number desc  ";
-                 // echo $query1a = "SELECT sum(transaction_quantity) as addstock from transaction_stock where itemcode='$medicinecode' and locationcode='$location' and storecode ='$store' and transaction_date between '$ADate1' and '$ADate2' and transactionfunction='1' order by auto_number desc  ";
-				$exec1a = mysqli_query($GLOBALS["___mysqli_ston"], $query1a) or die(mysqli_error($GLOBALS["___mysqli_ston"]));	 
-				$res1a = mysqli_fetch_array($exec1a);
-				 $totaladdstock = $res1a['addstock'];
-				
-				$query1m = "SELECT sum(transaction_quantity) as minusstock from transaction_stock where  locationcode='$location' and storecode ='$store' and transaction_date < '$ADate1' and transactionfunction='0' order by auto_number desc  ";
-				$exec1m = mysqli_query($GLOBALS["___mysqli_ston"], $query1m) or die(mysqli_error($GLOBALS["___mysqli_ston"]));		 
-				$res1m = mysqli_fetch_array($exec1m);
-				 $totalminusstock = $res1m['minusstock'];
-				
-				 $openingbalance_on_date1 = $totaladdstock-$totalminusstock;
-				// $balance_close_stock1 = $openingbalance;
-				 ///////////////////////second//////////////////
-				 $quantity1_purchase=0;  //PURCHASE
-                   $query1_purchase = "SELECT transaction_quantity from transaction_stock where locationcode = '".$locationcode."'  and transactionfunction='1' and (description='Purchase' or description='OPENINGSTOCK' or description='".$storename."' ) and transaction_date between '$ADate1' and '$ADate2' and storecode = '$store'";
-				$exec1_purchase = mysqli_query($GLOBALS["___mysqli_ston"], $query1_purchase) or die(mysqli_error($GLOBALS["___mysqli_ston"]));			
-				while($res1_purchase = mysqli_fetch_array($exec1_purchase))
-				{
-				
-				  $quantity1_purchase += $res1_purchase['transaction_quantity'];
-
-				} 
-				//////////////////////THIRD /////////////////
-				$quantity1_preturn=0;  //PURCHASE RETURN
-                  $query1_pr = "SELECT transaction_quantity from transaction_stock where locationcode = '".$locationcode."' and transactionfunction='0' and description='Purchase Return' and transaction_date between '$ADate1' and '$ADate2' and storecode = '$store'";
-				$exec1_pr = mysqli_query($GLOBALS["___mysqli_ston"], $query1_pr) or die(mysqli_error($GLOBALS["___mysqli_ston"]));			
-				while($res1_pr = mysqli_fetch_array($exec1_pr))
-				{
-				
-				  $quantity1_preturn += $res1_pr['transaction_quantity'];
-
-				} 
-				/////////////////// FOURTH //////////////////
-				$quantity2_transferout_ownusage=0;
-				$quantity1_receipts=0; //	Receipts --> Transfer IN
-				$quantity1_receipts_1=0;
-				$quantity1_receipts_2=0;
-				
-                   $query1_receipts = "SELECT transaction_quantity,entrydocno, storecode, itemcode from transaction_stock where locationcode = '".$locationcode."' and transactionfunction='1' and description='Stock Transfer To'   and transaction_date between '$ADate1' and '$ADate2' and storecode = '$store'";
-				$exec1_receipts = mysqli_query($GLOBALS["___mysqli_ston"], $query1_receipts) or die(mysqli_error($GLOBALS["___mysqli_ston"]));			
-				while($res1_receipts = mysqli_fetch_array($exec1_receipts))
-				{
-				  // $quantity1_receipts += $res1_receipts['transaction_quantity'];
-
-				  	$docno=$res1_receipts['entrydocno'];
-					$storecode_fet=$res1_receipts['storecode'];
-					$itemcode_fet=$res1_receipts['itemcode'];
-
-					// SELECT sum(`transferquantity`) FROM `master_stock_transfer` WHERE `fromstore`='STO1' and `typetransfer`='Transfer' and `entrydate` between '2019-03-01' and '2019-05-02'
-
-						// $quantity1_receipts += $res1_receipts['transaction_quantity'];
-					 
-                    $query1_receipts2 = "SELECT typetransfer from master_stock_transfer where `docno`='$docno' and itemcode='$itemcode_fet' and locationcode = '".$locationcode."' ";
-					$exec_receipts2 = mysqli_query($GLOBALS["___mysqli_ston"], $query1_receipts2) or die(mysqli_error($GLOBALS["___mysqli_ston"]));			
-					$res_receipts2 = mysqli_fetch_array($exec_receipts2);
-					
-						$typetransfer=$res_receipts2['typetransfer'];
-						if($typetransfer=='Transfer'){
-					  			$quantity1_receipts += $res1_receipts['transaction_quantity'];
-					  		}else{
-					  			$quantity2_transferout_ownusage += $res1_receipts['transaction_quantity'];
-					  		}
-				  	
-				  	// $quantity1_receipts_1 = $quantity1_receipts+$quantity1_receipts1;
-				  	// $quantity2_transferout_ownusage += $quantity2_transferout_ownusage1;
-				} 
-				//  $query1_receipts_2 = "SELECT transaction_quantity,entrydocno, storecode from transaction_stock where locationcode = '".$locationcode."' AND  transactionfunction='1' and  description='Stock Adj Add Stock'  and transaction_date between '$ADate1' and '$ADate2' and storecode = '$store'";
-				// $exec1_receipts_2 = mysql_query($query1_receipts_2) or die(mysql_error());			
-				// while($res1_receipts_2 = mysql_fetch_array($exec1_receipts_2))
-				// {
-				// 	  			$quantity1_receipts_2 += $res1_receipts_2['transaction_quantity'];
-				// } 
-				// $quantity1_receipts=$quantity1_receipts_1+$quantity1_receipts_2;
-
-				//////////////// fifth ///////////////////////////////////
-				 $quantity2_transferout=0;  //Transfer out
-				 $quantity2_transferout_1=0;   
-				 $quantity2_transferout_2=0; 
-
-				 $quantity2_transferout_11=0; 
-				 $quantity2_transferout_22=0;
-				 $quantity2_transferout_ownusage1=0; 
-				 
-                    $query12_transferout = "SELECT transaction_quantity,storecode, entrydocno ,itemcode from transaction_stock where locationcode = '".$locationcode."' AND  transactionfunction='0' and description='Stock Transfer From'  and transaction_date between '$ADate1' and '$ADate2' and storecode = '$store'";
-				$exec12_transferout = mysqli_query($GLOBALS["___mysqli_ston"], $query12_transferout) or die(mysqli_error($GLOBALS["___mysqli_ston"]));			
-				while($res12_transferout = mysqli_fetch_array($exec12_transferout))
-				{
-
-					$docno=$res12_transferout['entrydocno'];
-					$storecode_fet=$res12_transferout['storecode'];
-					$itemcode_fet=$res12_transferout['itemcode'];
-
-					 // SELECT sum(`transferquantity`) FROM `master_stock_transfer` WHERE `fromstore`='STO1' and `typetransfer`='Transfer' and `entrydate` between '2019-03-01' and '2019-05-02'
-
-                    $query12_transferout2 = "SELECT typetransfer ,transferquantity from master_stock_transfer where `docno`='$docno' and itemcode='$itemcode_fet' and locationcode = '".$locationcode."' ";
-                    // AND  fromstore = '$storecode_fet'
-					$exec12_transferout2 = mysqli_query($GLOBALS["___mysqli_ston"], $query12_transferout2) or die(mysqli_error($GLOBALS["___mysqli_ston"]));			
-					$res12_transferout2 = mysqli_fetch_array($exec12_transferout2);
-					
-						$typetransfer=$res12_transferout2['typetransfer'];
-						// $transferquantity=$res12_transferout2['transferquantity'];
-						if($typetransfer=='Consumable'){
-					  			// $quantity2_transferout_ownusage += $transferquantity;
-					  			$quantity2_transferout_ownusage += $res12_transferout['transaction_quantity'];
-					  		}elseif($typetransfer=='Transfer'){
-					  		// }else{
-					  			// $quantity2_transferout += $transferquantity;
-					  			$quantity2_transferout += $res12_transferout['transaction_quantity'];
-					  		}
-				  	// }
-				  	
-				  	// $quantity2_transferout = $quantity2_transferout+$quantity2_transferout_11;
-				  	// $quantity2_transferout_ownusage=$quantity2_transferout_ownusage+$quantity2_transferout_ownusage1;
-				} 
-
-				 
-
-				////////////////////////// SIXTH ///////////////
-				$quantity2_sales=0;   // Sales
-                    $query12_sales = "SELECT transaction_quantity from transaction_stock where locationcode = '".$locationcode."' AND transactionfunction='0' and (description='Sales' or description='Package' or description='IP Direct Sales' or description='IP Sales' or description='Process' ) and transaction_date between '$ADate1' and '$ADate2' and storecode = '$store'";
-				$exec12_sales = mysqli_query($GLOBALS["___mysqli_ston"], $query12_sales) or die(mysqli_error($GLOBALS["___mysqli_ston"]));			
-				while($res12_sales = mysqli_fetch_array($exec12_sales))
-				{
-				
-				  $quantity2_sales += $res12_sales['transaction_quantity'];
-
-				} 
-				////////////////// SEVENTH ///////////////////////////
-				$quantity1_refunds=0;   // Refunds
-                  $query1_refunds = "SELECT transaction_quantity from transaction_stock where locationcode = '".$locationcode."' AND  transactionfunction='1' and (description='Sales Return' or description='IP Sales Return' or description='Sales Return' ) and transaction_date between '$ADate1' and '$ADate2' and storecode = '$store'";
-				$exec1_refunds = mysqli_query($GLOBALS["___mysqli_ston"], $query1_refunds) or die(mysqli_error($GLOBALS["___mysqli_ston"]));			
-				while($res1_refunds = mysqli_fetch_array($exec1_refunds))
-				{
-				
-				  $quantity1_refunds += $res1_refunds['transaction_quantity'];
-
-				} 
-				/////////////////////////// eight CLOSING STOCK ///////////////////
-
-				$query1a_closingstock = "SELECT sum(transaction_quantity) as addstock from transaction_stock where  locationcode='$location' and storecode ='$store' and transaction_date <= '$ADate2' and transactionfunction='1' order by auto_number desc  ";
-                 // echo $query1a = "SELECT sum(transaction_quantity) as addstock from transaction_stock where itemcode='$medicinecode' and locationcode='$location' and storecode ='$store' and transaction_date between '$ADate1' and '$ADate2' and transactionfunction='1' order by auto_number desc  ";
-				$exec1a_closingstock = mysqli_query($GLOBALS["___mysqli_ston"], $query1a_closingstock) or die(mysqli_error($GLOBALS["___mysqli_ston"]));	 
-				$res1a_closingstock = mysqli_fetch_array($exec1a_closingstock);
-				 $totaladdstock_closingstock = $res1a_closingstock['addstock'];
-				
-				$query1m_closingstock = "SELECT sum(transaction_quantity) as minusstock from transaction_stock where locationcode='$location' and storecode ='$store' and transaction_date <= '$ADate2' and transactionfunction='0' order by auto_number desc  ";
-				$exec1m_closingstock = mysqli_query($GLOBALS["___mysqli_ston"], $query1m_closingstock) or die(mysqli_error($GLOBALS["___mysqli_ston"]));		 
-				$res1m_closingstock = mysqli_fetch_array($exec1m_closingstock);
-				 $totalminusstock_closingstock = $res1m_closingstock['minusstock'];
-				
-				 $closingstock_on_date2 = $totaladdstock_closingstock-$totalminusstock_closingstock;
-				///////////////////////////phy excess///////////////////////////
-				 $quantity1_excess=0;
-				 $query1_excess = "SELECT transaction_quantity,entrydocno, storecode from transaction_stock where locationcode = '".$locationcode."' AND  transactionfunction='1' and  description='Stock Adj Add Stock'  and transaction_date between '$ADate1' and '$ADate2' and storecode = '$store'";
-				$exec1_excess = mysqli_query($GLOBALS["___mysqli_ston"], $query1_excess) or die(mysqli_error($GLOBALS["___mysqli_ston"]));			
-				while($res1_excess = mysqli_fetch_array($exec1_excess))
-				{
-					  			$quantity1_excess += $res1_excess['transaction_quantity'];
-				} 
-				 /////////////////////  Phy.Short /////////
-				 $quantity2_Short=0;
-				 $query12_Short = "SELECT transaction_quantity,storecode, entrydocno from transaction_stock where locationcode = '".$locationcode."' AND  transactionfunction='0' and (description='Stock Damaged Minus Stock' or description='Stock Expired Minus Stock' or description='Stock Adj Minus Stock' ) and transaction_date between '$ADate1' and '$ADate2' and storecode = '$store'";
-				$exec12_Short = mysqli_query($GLOBALS["___mysqli_ston"], $query12_Short) or die(mysqli_error($GLOBALS["___mysqli_ston"]));			
-				while($res12_Short = mysqli_fetch_array($exec12_Short))
-				{
-					$quantity2_Short += $res12_Short['transaction_quantity'];
-				} 
-				// $quantity2_Short_2=$quantity2_Short_2+$quantity2_Short_22;
-
-				// $quantity2_Short=$quantity2_Short_1+$quantity2_Short_2;
-
-				// if($openingbalance_on_date1==0 && $quantity1_purchase==0 && $quantity1_preturn==0 && $quantity1_receipts==0 && $quantity2_transferout==0 && $quantity2_sales==0 && $quantity1_refunds==0 && $closingstock_on_date2==0 && $quantity2_transferout_ownusage==0){
-
-				// }else{
-
-					$snocount = $snocount + 1;
-				$colorloopcount = $colorloopcount + 1;
-				$showcolor = ($colorloopcount & 1); 
-				if ($showcolor == 0)
-				{
-					//echo "if";
-					$colorcode = 'bgcolor="#CBDBFA"';
-				}
-				else
-				{
-					//echo "else";
-					$colorcode = 'bgcolor="#ecf0f5"';
-				} ?>
-				 <tr <?php echo $colorcode; ?>>
-				 	<td class="bodytext31" valign="center"  align="center"><?php echo $snocount; ?></td>
-					<td class="bodytext31" valign="center"  align="left" ><strong><?=$storename;?></strong></td>
-				
-            	
-            		  <td align="right" valign="right"  
-                 class="bodytext31"><div align="right"><strong><?php echo number_format($openingbalance_on_date1,0,'.',','); ?></strong></div></td>
-
-				<td align="right" valign="right"  
-                 class="bodytext31"><strong><?php echo number_format($quantity1_purchase,0,'.',',');  ?>  </strong></td>
-
-                 <td align="right" valign="right"  
-                 class="bodytext31"><strong><?php echo number_format($quantity1_preturn,0,'.',','); ?>  </strong></td>
-				
-				<td align="right" valign="right"  
-                 class="bodytext31"><strong><?php echo number_format($quantity1_receipts,0,'.',','); ?>  </strong></td>
-       			
-       			<td align="right" valign="right"  
-                 class="bodytext31"><strong><?php echo number_format($quantity2_transferout,0,'.',',');   ?>  </strong></td>
-
-
-            <td align="right" valign="right"  
-                 class="bodytext31"><strong><?php echo number_format($quantity2_sales,0,'.',',');  ?>  </strong></td>
-               
-			<td align="right" valign="right"  
-                 class="bodytext31"><strong><?php echo number_format($quantity1_refunds,0,'.',',');?>  </strong></td>
-
-       			 <!-- <td align="left" valign="center"  
-                 class="bodytext31"><strong> <?php //echo intval($balance);?> </strong></td> -->
-
-                 <td align="right" valign="right"  
-                 class="bodytext31"><strong> <?php echo number_format($quantity2_transferout_ownusage,0,'.',','); ?> </strong></td>
-                   <td align="right" valign="right"  
-                 class="bodytext31"><strong> <?php echo number_format($quantity1_excess,0,'.',',');  ?> </strong></td>
-                   <td align="right" valign="right"  
-                 class="bodytext31"><strong> <?php echo number_format($quantity2_Short,0,'.',','); ?> </strong></td>
-
-
-                <td align="right" valign="right"  
-                 class="bodytext31"><strong><?php echo number_format($closingstock_on_date2,0,'.',','); ?>  </strong></td>
-				 
-			</tr>
-
-<?php
-// } // else of ==0 condition
-   $openingbalance_on_date1_final        += $openingbalance_on_date1;
-			$quantity1_purchase_final        +=$quantity1_purchase;
-			$quantity1_preturn_final        +=$quantity1_preturn;
-			$quantity1_receipts_final        +=$quantity1_receipts;
-			$quantity2_transferout_final        +=$quantity2_transferout;
-			$quantity2_sales_final        +=$quantity2_sales;
-			$quantity1_refunds_final        +=$quantity1_refunds;
-			$quantity2_transferout_ownusage_final        +=$quantity2_transferout_ownusage;
-			$quantity1_excess_final        +=$quantity1_excess;
-			$quantity2_Short_final        +=$quantity2_Short;
-			$closingstock_on_date2_final  +=$closingstock_on_date2;
-
-}//if condition
-}else if($_POST['mainsearch']=='2'){
-?>
-
-          	<tr>
-             <td align="left" valign="center"  
-                bgcolor="#ffffff" class="bodytext31"><strong>Sl. No</strong></td>
-              <td align="left" valign="center"  
-                bgcolor="#ffffff" class="bodytext31"><strong>Description</strong></td>
-             <!--  <td align="left" valign="center"  
-                bgcolor="#ffffff" class="bodytext31"><strong>Batch</strong></td> -->
-              <td align="left" valign="center"  
-                bgcolor="#ffffff" class="bodytext31"><div align="right"><strong>Opg.Stock</strong></div></td>
-              <td align="left" valign="center"  
-                bgcolor="#ffffff" class="bodytext31"><div align="right"><strong>Purchase</strong></div></td>
-
-                 <td align="left" valign="center"  
-                bgcolor="#ffffff" class="bodytext31"><div align="right"><strong>Purchase Returns</strong></div></td>
-
-                  <td align="left" valign="center"  
-                bgcolor="#ffffff" class="bodytext31"><div align="right"><strong>Receipts</strong></div></td>
-
-              <td align="left" valign="center"  
-                bgcolor="#ffffff" class="bodytext31"><div align="right"><strong>Issued To Dept</strong></div></td>
-
-                <td align="left" valign="center"  
-                bgcolor="#ffffff" class="bodytext31"><div align="right"><strong>Sales</strong></div></td>
-
-
-              <td align="left" valign="center"  
-                bgcolor="#ffffff" class="bodytext31"><div align="right"><strong>Refunds</strong></div></td>
-
-                <td align="left" valign="center"  
-                bgcolor="#ffffff" class="bodytext31"><div align="right"><strong>Own Usage</strong></div></td>
-                <td align="left" valign="center"  
-                bgcolor="#ffffff" class="bodytext31"><div align="right"><strong>Phy.Excess</strong></div></td>
-                <td align="left" valign="center"  
-                bgcolor="#ffffff" class="bodytext31"><div align="right"><strong>Phy.Short</strong></div></td>
-
-              <td align="left" valign="center"  
-                bgcolor="#ffffff" class="bodytext31"><div align="right"><strong>Closing Stock</strong></div></td>
-				<!-- <td align="left" valign="center"  
-                bgcolor="#ffffff" class="bodytext31"><div align="left"><strong>Username</strong></div></td> -->
-				</tr>
-
-<?php
-$query_store = "SELECT * FROM `master_store`"; 
-if($store!=''){ 
-$query_store .= " where storecode='$store'  " ; 
-	}
-$exec_store = mysqli_query($GLOBALS["___mysqli_ston"], $query_store) or die ("Error in query_store".mysqli_error($GLOBALS["___mysqli_ston"]));
-				while ($res_store = mysqli_fetch_array($exec_store))
-				{ 
-					$store=$res_store['storecode'];
-					 $storename=$res_store['store']; 
-					?>
-					<tr>
-                <td bgcolor="#FF9900" colspan="14" class="bodytext3" align="left"><strong><?php echo $res_store['store']; ?></strong></td>
-                </tr>
-                <?php
-
-// $query991 = "select itemcode, categoryname, itemname from master_medicine where categoryname like '%$categoryname%' and itemcode like '%$searchmedicinecode%' and status <> 'deleted' group by categoryname order by categoryname, itemname";
-// $exec991 = mysql_query($query991) or die ("Error in Query991".mysql_error());
-// 				while ($res991 = mysql_fetch_array($exec991))
-// 				{
-// 					$categoryname2 = $res991['categoryname'];
-// 					$itemname = $res991['itemname'];
-				?>
-               <!--  <tr>
-                <td bgcolor="#FF9900" colspan="8" class="bodytext3" align="left"><strong><?php echo $categoryname2; ?></strong></td>
-                </tr> -->
-                <?php
-				$sno = 0;
-				$query99 = "SELECT itemcode, categoryname, itemname from master_medicine where categoryname like '%$categoryname%' and itemcode like '%$searchmedicinecode%' order by itemname";
-				// $query99 = "select itemcode, categoryname, itemname from master_medicine where categoryname = '$categoryname2' and itemcode like '%$searchmedicinecode%' and status <> 'deleted' order by itemname";
-$exec99 = mysqli_query($GLOBALS["___mysqli_ston"], $query99) or die ("Error in Query99".mysqli_error($GLOBALS["___mysqli_ston"]));
-				while ($res99 = mysqli_fetch_array($exec99))
-				{
-					$categoryname2 = $res99['categoryname'];
-					$medicinecode = $res99['itemcode'];
-					$itemname = $res99['itemname'];
-				?>
-				
-                <?php
-				//get store for location
-// 	$loc=isset($_REQUEST['location'])?$_REQUEST['location']:'';
-// $username=isset($_REQUEST['username'])?$_REQUEST['username']:'';
-//   $query5ll = "select ms.auto_number,ms.storecode,ms.store from master_employeelocation as me LEFT JOIN master_store as ms ON me.storecode=ms.auto_number where me.locationcode = '".$loc."' AND me.username= '".$username."'";
-// if($store!='')
-// {
-// 	$query5ll .=" and ms.storecode='".$store."' group by ms.storecode";
-// 	}
-// 				$exec5ll = mysql_query($query5ll) or die ("Error in Query5ll".mysql_error());
-// 				while ($res5ll = mysql_fetch_array($exec5ll))
-// 				{
-			
-// 				}
-                
-				
-				?>
-				 
-                
-                <?php
-                ////////////////////FIRST //////////////////
-                // echo $openingbalance_on_date; 
-                // $ADate12 = date('Y-m-d', strtotime('-1 day', strtotime($ADate1)));
-                   $query1a = "SELECT sum(transaction_quantity) as addstock from transaction_stock where itemcode='$medicinecode' and locationcode='$location' and storecode ='$store' and transaction_date < '$ADate1' and transactionfunction='1'   ";
-                 // echo $query1a = "SELECT sum(transaction_quantity) as addstock from transaction_stock where itemcode='$medicinecode' and locationcode='$location' and storecode ='$store' and transaction_date between '$ADate1' and '$ADate2' and transactionfunction='1' order by auto_number desc  ";
-				$exec1a = mysqli_query($GLOBALS["___mysqli_ston"], $query1a) or die(mysqli_error($GLOBALS["___mysqli_ston"]));	 
-				$res1a = mysqli_fetch_array($exec1a);
-				 $totaladdstock = $res1a['addstock'];
-				
-				$query1m = "SELECT sum(transaction_quantity) as minusstock from transaction_stock where itemcode='$medicinecode' and locationcode='$location' and storecode ='$store' and transaction_date < '$ADate1' and transactionfunction='0'   ";
-				$exec1m = mysqli_query($GLOBALS["___mysqli_ston"], $query1m) or die(mysqli_error($GLOBALS["___mysqli_ston"]));		 
-				$res1m = mysqli_fetch_array($exec1m);
-				 $totalminusstock = $res1m['minusstock'];
-				
-				 $openingbalance_on_date1 = $totaladdstock-$totalminusstock;
-				// $balance_close_stock1 = $openingbalance;
-				 ///////////////////////second//////////////////
-				 $quantity1_purchase=0;  //PURCHASE
-                   $query1_purchase = "SELECT transaction_quantity from transaction_stock where locationcode = '".$locationcode."' AND itemcode = '$medicinecode' and transactionfunction='1' and (description='Purchase' or description='OPENINGSTOCK' or description='".$storename."' ) and transaction_date between '$ADate1' and '$ADate2' and storecode = '$store'";
-				$exec1_purchase = mysqli_query($GLOBALS["___mysqli_ston"], $query1_purchase) or die(mysqli_error($GLOBALS["___mysqli_ston"]));			
-				while($res1_purchase = mysqli_fetch_array($exec1_purchase))
-				{
-				
-				  $quantity1_purchase += $res1_purchase['transaction_quantity'];
-
-				} 
-				//////////////////////THIRD /////////////////
-				$quantity1_preturn=0;  //PURCHASE RETURN
-                  $query1_pr = "SELECT transaction_quantity from transaction_stock where locationcode = '".$locationcode."' AND itemcode = '$medicinecode' and transactionfunction='0' and description='Purchase Return' and transaction_date between '$ADate1' and '$ADate2' and storecode = '$store'";
-				$exec1_pr = mysqli_query($GLOBALS["___mysqli_ston"], $query1_pr) or die(mysqli_error($GLOBALS["___mysqli_ston"]));			
-				while($res1_pr = mysqli_fetch_array($exec1_pr))
-				{
-				
-				  $quantity1_preturn += $res1_pr['transaction_quantity'];
-
-				} 
-				/////////////////// FOURTH //////////////////
-				$quantity2_transferout_ownusage=0;
-				$quantity1_receipts=0; //	Receipts --> Transfer IN
-				$quantity1_receipts_1=0;
-				$quantity1_receipts_2=0;
-				
-                   $query1_receipts = "SELECT transaction_quantity,entrydocno, storecode from transaction_stock where locationcode = '".$locationcode."' AND itemcode = '$medicinecode' and transactionfunction='1' and description='Stock Transfer To'   and transaction_date between '$ADate1' and '$ADate2' and storecode = '$store'";
-				$exec1_receipts = mysqli_query($GLOBALS["___mysqli_ston"], $query1_receipts) or die(mysqli_error($GLOBALS["___mysqli_ston"]));			
-				while($res1_receipts = mysqli_fetch_array($exec1_receipts))
-				{
-				  // $quantity1_receipts += $res1_receipts['transaction_quantity'];
-
-				  	$docno=$res1_receipts['entrydocno'];
-					$storecode_fet=$res1_receipts['storecode'];
-
-					 
-                    $query1_receipts2 = "SELECT typetransfer from master_stock_transfer where `docno`='$docno'  AND itemcode = '$medicinecode' limit 0,1";
-					$exec_receipts2 = mysqli_query($GLOBALS["___mysqli_ston"], $query1_receipts2) or die(mysqli_error($GLOBALS["___mysqli_ston"]));			
-					$res_receipts2 = mysqli_fetch_array($exec_receipts2);
-					
-						$typetransfer=$res_receipts2['typetransfer'];
-						if($typetransfer=='Transfer'){
-					  			$quantity1_receipts += $res1_receipts['transaction_quantity'];
-					  		}else{
-					  			$quantity2_transferout_ownusage += $res1_receipts['transaction_quantity'];
-					  		}
-				  	
-				  	// $quantity1_receipts_1 = $quantity1_receipts+$quantity1_receipts1;
-				  	// $quantity2_transferout_ownusage += $quantity2_transferout_ownusage1;
-				} 
-				//  $query1_receipts_2 = "SELECT transaction_quantity,entrydocno, storecode from transaction_stock where locationcode = '".$locationcode."' AND itemcode = '$medicinecode' and transactionfunction='1' and  description='Stock Adj Add Stock'  and transaction_date between '$ADate1' and '$ADate2' and storecode = '$store'";
-				// $exec1_receipts_2 = mysql_query($query1_receipts_2) or die(mysql_error());			
-				// while($res1_receipts_2 = mysql_fetch_array($exec1_receipts_2))
-				// {
-				// 	  			$quantity1_receipts_2 += $res1_receipts_2['transaction_quantity'];
-				// } 
-				// $quantity1_receipts=$quantity1_receipts_1+$quantity1_receipts_2;
-
-				//////////////// fifth ///////////////////////////////////
-				 $quantity2_transferout=0;  //Transfer out
-				 $quantity2_transferout_1=0;   
-				 $quantity2_transferout_2=0;   
-				 
-                    $query12_transferout = "SELECT transaction_quantity,storecode, entrydocno from transaction_stock where locationcode = '".$locationcode."' AND itemcode = '$medicinecode' and transactionfunction='0' and description='Stock Transfer From'  and transaction_date between '$ADate1' and '$ADate2' and storecode = '$store'";
-				$exec12_transferout = mysqli_query($GLOBALS["___mysqli_ston"], $query12_transferout) or die(mysqli_error($GLOBALS["___mysqli_ston"]));			
-				while($res12_transferout = mysqli_fetch_array($exec12_transferout))
-				{
-
-					$docno=$res12_transferout['entrydocno'];
-					$storecode_fet=$res12_transferout['storecode'];
-
-					 
-                    $query12_transferout2 = "SELECT typetransfer from master_stock_transfer where `docno`='$docno' and locationcode = '".$locationcode."' AND itemcode = '$medicinecode'  and fromstore = '$storecode_fet'";
-					$exec12_transferout2 = mysqli_query($GLOBALS["___mysqli_ston"], $query12_transferout2) or die(mysqli_error($GLOBALS["___mysqli_ston"]));			
-					$res12_transferout2 = mysqli_fetch_array($exec12_transferout2);
-					
-						$typetransfer=$res12_transferout2['typetransfer'];
-						if($typetransfer=='Transfer'){
-					  			$quantity2_transferout += $res12_transferout['transaction_quantity'];
-					  		}else{
-					  			$quantity2_transferout_ownusage += $res12_transferout['transaction_quantity'];
-					  		}
-				  	
-
-				} 
-
-				//  $query12_transferout = "SELECT transaction_quantity,storecode, entrydocno from transaction_stock where locationcode = '".$locationcode."' AND itemcode = '$medicinecode' and transactionfunction='0' and (description='Stock Damaged Minus Stock' or description='Stock Expired Minus Stock' or description='Stock Adj Minus Stock' ) and transaction_date between '$ADate1' and '$ADate2' and storecode = '$store'";
-				// $exec12_transferout = mysql_query($query12_transferout) or die(mysql_error());			
-				// while($res12_transferout = mysql_fetch_array($exec12_transferout))
-				// {
-				// 	$quantity2_transferout_2 += $res12_transferout['transaction_quantity'];
-				// } 
-				// $quantity2_transferout=$quantity2_transferout_1+$quantity2_transferout_2;
-
-				////////////////////////// SIXTH ///////////////
-				$quantity2_sales=0;   // Sales
-                    $query12_sales = "SELECT transaction_quantity from transaction_stock where locationcode = '".$locationcode."' AND itemcode = '$medicinecode' and transactionfunction='0' and (description='Sales' or description='Package' or description='IP Direct Sales' or description='IP Sales' or description='Process' ) and transaction_date between '$ADate1' and '$ADate2' and storecode = '$store'";
-				$exec12_sales = mysqli_query($GLOBALS["___mysqli_ston"], $query12_sales) or die(mysqli_error($GLOBALS["___mysqli_ston"]));			
-				while($res12_sales = mysqli_fetch_array($exec12_sales))
-				{
-				
-				  $quantity2_sales += $res12_sales['transaction_quantity'];
-
-				} 
-				////////////////// SEVENTH ///////////////////////////
-				$quantity1_refunds=0;   // Refunds
-                  $query1_refunds = "SELECT transaction_quantity from transaction_stock where locationcode = '".$locationcode."' AND itemcode = '$medicinecode' and transactionfunction='1' and (description='Sales Return' or description='IP Sales Return' or description='Sales Return' ) and transaction_date between '$ADate1' and '$ADate2' and storecode = '$store'";
-				$exec1_refunds = mysqli_query($GLOBALS["___mysqli_ston"], $query1_refunds) or die(mysqli_error($GLOBALS["___mysqli_ston"]));			
-				while($res1_refunds = mysqli_fetch_array($exec1_refunds))
-				{
-				
-				  $quantity1_refunds += $res1_refunds['transaction_quantity'];
-
-				} 
-				/////////////////////////// eight CLOSING STOCK ///////////////////
-
-				$query1a_closingstock = "SELECT sum(transaction_quantity) as addstock from transaction_stock where itemcode='$medicinecode' and locationcode='$location' and storecode ='$store' and transaction_date <= '$ADate2' and transactionfunction='1' order by auto_number desc  ";
-                 // echo $query1a = "SELECT sum(transaction_quantity) as addstock from transaction_stock where itemcode='$medicinecode' and locationcode='$location' and storecode ='$store' and transaction_date between '$ADate1' and '$ADate2' and transactionfunction='1' order by auto_number desc  ";
-				$exec1a_closingstock = mysqli_query($GLOBALS["___mysqli_ston"], $query1a_closingstock) or die(mysqli_error($GLOBALS["___mysqli_ston"]));	 
-				$res1a_closingstock = mysqli_fetch_array($exec1a_closingstock);
-				 $totaladdstock_closingstock = $res1a_closingstock['addstock'];
-				
-				$query1m_closingstock = "SELECT sum(transaction_quantity) as minusstock from transaction_stock where itemcode='$medicinecode' and locationcode='$location' and storecode ='$store' and transaction_date <= '$ADate2' and transactionfunction='0' order by auto_number desc  ";
-				$exec1m_closingstock = mysqli_query($GLOBALS["___mysqli_ston"], $query1m_closingstock) or die(mysqli_error($GLOBALS["___mysqli_ston"]));		 
-				$res1m_closingstock = mysqli_fetch_array($exec1m_closingstock);
-				 $totalminusstock_closingstock = $res1m_closingstock['minusstock'];
-				
-				 $closingstock_on_date2 = $totaladdstock_closingstock-$totalminusstock_closingstock;
-
-				 ///////////////////////////phy excess///////////////////////////
-				 $quantity1_excess=0;
-				 $query1_excess = "SELECT transaction_quantity,entrydocno, storecode from transaction_stock where locationcode = '".$locationcode."' AND itemcode = '$medicinecode' AND  transactionfunction='1' and  description='Stock Adj Add Stock'  and transaction_date between '$ADate1' and '$ADate2' and storecode = '$store'";
-				$exec1_excess = mysqli_query($GLOBALS["___mysqli_ston"], $query1_excess) or die(mysqli_error($GLOBALS["___mysqli_ston"]));			
-				while($res1_excess = mysqli_fetch_array($exec1_excess))
-				{
-					  			$quantity1_excess += $res1_excess['transaction_quantity'];
-				} 
-				 /////////////////////  Phy.Short /////////
-				 $quantity2_Short=0;
-				 $query12_Short = "SELECT transaction_quantity,storecode, entrydocno from transaction_stock where locationcode = '".$locationcode."' AND itemcode = '$medicinecode' AND  transactionfunction='0' and (description='Stock Damaged Minus Stock' or description='Stock Expired Minus Stock' or description='Stock Adj Minus Stock' ) and transaction_date between '$ADate1' and '$ADate2' and storecode = '$store'";
-				$exec12_Short = mysqli_query($GLOBALS["___mysqli_ston"], $query12_Short) or die(mysqli_error($GLOBALS["___mysqli_ston"]));			
-				while($res12_Short = mysqli_fetch_array($exec12_Short))
-				{
-					$quantity2_Short += $res12_Short['transaction_quantity'];
-				} 
-				//////////////////////////////////////////////////////
-
-				if($openingbalance_on_date1==0 && $quantity1_purchase==0 && $quantity1_preturn==0 && $quantity1_receipts==0 && $quantity2_transferout==0 && $quantity2_sales==0 && $quantity1_refunds==0 && $closingstock_on_date2==0 && $quantity2_transferout_ownusage==0 && $quantity1_excess==0 && $quantity2_Short==0){
-
-				}else{
-
-					$snocount = $snocount + 1;
-				$colorloopcount = $colorloopcount + 1;
-				$showcolor = ($colorloopcount & 1); 
-				if ($showcolor == 0)
-				{
-					//echo "if";
-					$colorcode = 'bgcolor="#CBDBFA"';
-				}
-				else
-				{
-					//echo "else";
-					$colorcode = 'bgcolor="#ecf0f5"';
-				} ?>
-				 <tr <?php echo $colorcode; ?>>
-				 	<td class="bodytext31" valign="center"  align="center"><?php echo $snocount; ?></td>
-					<td class="bodytext31" valign="center"  align="left" ><strong><?=$itemname;?></strong></td>
-				
+<body>
+    <!-- Hospital Header -->
+    <header class="hospital-header">
+        <h1 class="hospital-title">🏥 MedStar Hospital Management</h1>
+        <p class="hospital-subtitle">Stock Movement Report</p>
+    </header>
+
+    <!-- User Information Bar -->
+    <div class="user-info-bar">
+        <div class="user-welcome">
+            <span class="welcome-text">Welcome, <strong><?php echo htmlspecialchars($username); ?></strong></span>
+            <span class="location-info">📍 Company: <?php echo htmlspecialchars($companyname); ?></span>
+        </div>
+        <div class="user-actions">
+            <a href="mainmenu1.php" class="btn btn-outline">🏠 Main Menu</a>
+            <a href="logout.php" class="btn btn-outline">🚪 Logout</a>
+        </div>
+    </div>
+
+    <!-- Navigation Breadcrumb -->
+    <nav class="nav-breadcrumb">
+        <a href="mainmenu1.php">🏠 Home</a>
+        <span>→</span>
+        <span>Stock Movement Report</span>
+    </nav>
+
+    <!-- Floating Menu Toggle -->
+    <button class="floating-menu-toggle" id="menuToggle">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <div class="main-container-with-sidebar">
+        <!-- Left Sidebar -->
+        <aside id="leftSidebar" class="left-sidebar">
+            <div class="sidebar-header">
+                <h3>Quick Navigation</h3>
+                <button id="sidebarToggle" class="sidebar-toggle">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+            </div>
             
-            		  <td align="right" valign="right"  
-                 class="bodytext31"><div align="right"><strong><?php echo number_format($openingbalance_on_date1,0,'.',',');?></strong></div></td>
+            <nav class="sidebar-nav">
+                <ul class="nav-list">
+                    <li class="nav-item">
+                        <a href="mainmenu1.php" class="nav-link">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="labitem1master.php" class="nav-link">
+                            <i class="fas fa-flask"></i>
+                            <span>Lab Items</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="openingstockentry_master.php" class="nav-link">
+                            <i class="fas fa-boxes"></i>
+                            <span>Opening Stock</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="addward.php" class="nav-link">
+                            <i class="fas fa-bed"></i>
+                            <span>Wards</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="accountreceivableentrylist.php" class="nav-link">
+                            <i class="fas fa-receipt"></i>
+                            <span>Account Receivable</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="corporateoutstanding.php" class="nav-link">
+                            <i class="fas fa-building"></i>
+                            <span>Corporate Outstanding</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="accountstatement.php" class="nav-link">
+                            <i class="fas fa-file-invoice-dollar"></i>
+                            <span>Account Statement</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="addaccountsmain.php" class="nav-link">
+                            <i class="fas fa-chart-line"></i>
+                            <span>Accounts Main</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="addaccountssub.php" class="nav-link">
+                            <i class="fas fa-chart-pie"></i>
+                            <span>Accounts Sub Type</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="fixedasset_acquisition_report.php" class="nav-link">
+                            <i class="fas fa-building"></i>
+                            <span>Fixed Asset Acquisition</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="activeinpatientlist.php" class="nav-link">
+                            <i class="fas fa-bed"></i>
+                            <span>Active Inpatient List</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="activeusersreport.php" class="nav-link">
+                            <i class="fas fa-users"></i>
+                            <span>Active Users Report</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="chartofaccounts_upload.php" class="nav-link">
+                            <i class="fas fa-upload"></i>
+                            <span>Chart of Accounts Upload</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="chartaccountsmaindataimport.php" class="nav-link">
+                            <i class="fas fa-database"></i>
+                            <span>Chart of Accounts Main Import</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="chartaccountssubdataimport.php" class="nav-link">
+                            <i class="fas fa-database"></i>
+                            <span>Chart of Accounts Sub Import</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="addbloodgroup.php" class="nav-link">
+                            <i class="fas fa-tint"></i>
+                            <span>Blood Group Master</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="addfoodallergy1.php" class="nav-link">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <span>Food Allergy Master</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="addgenericname.php" class="nav-link">
+                            <i class="fas fa-pills"></i>
+                            <span>Generic Name Master</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="addpromotion.php" class="nav-link">
+                            <i class="fas fa-percentage"></i>
+                            <span>Promotion Master</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="addsalutation1.php" class="nav-link">
+                            <i class="fas fa-user-tie"></i>
+                            <span>Salutation Master</span>
+                        </a>
+                    </li>
+                    <li class="nav-item active">
+                        <a href="fullstock_movement.php" class="nav-link">
+                            <i class="fas fa-chart-line"></i>
+                            <span>Stock Movement Report</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
 
-				<td align="right" valign="right"  
-                 class="bodytext31"><strong><?php echo number_format($quantity1_purchase,0,'.',','); ?>  </strong></td>
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Report Card -->
+            <div class="report-card-container">
+                <div class="report-card">
+                    <div class="card-header">
+                        <div class="card-title-section">
+                            <i class="fas fa-chart-line card-icon"></i>
+                            <h2 class="card-title">Stock Movement Report</h2>
+                        </div>
+                        <div class="card-actions">
+                            <button type="button" class="btn btn-outline btn-sm" onclick="toggleChartView()">
+                                <i class="fas fa-chart-bar"></i> Chart View
+                            </button>
+                            <button type="button" class="btn btn-outline btn-sm" onclick="exportToExcel()">
+                                <i class="fas fa-file-excel"></i> Export Excel
+                            </button>
+                            <button type="button" class="btn btn-outline btn-sm" onclick="printReport()">
+                                <i class="fas fa-print"></i> Print
+                            </button>
+                        </div>
+                    </div>
 
-                 <td align="right" valign="right"  
-                 class="bodytext31"><strong><?php echo number_format($quantity1_preturn,0,'.',','); ?>  </strong></td>
-				
-				<td align="right" valign="right"  
-                 class="bodytext31"><strong><?php echo number_format($quantity1_receipts,0,'.',','); ?>  </strong></td>
-       			
-       			<td align="right" valign="right"  
-                 class="bodytext31"><strong><?php echo number_format($quantity2_transferout,0,'.',','); ?>  </strong></td>
+                    <!-- Search Form -->
+                    <form name="stockinward" action="fullstock_movement.php" method="post" onKeyDown="return disableEnterKey()" onSubmit="return Locationcheck()" class="search-form">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="mainsearch">Report Type</label>
+                                <select name="mainsearch" id="mainsearch" onChange="mainsearch_type();" class="form-control">
+                                    <option value="">--Select Type--</option>
+                                    <option value="1" <?php if($mainsearch==1){ echo 'selected';}?>>Summary</option>
+                                    <option value="2" <?php if($mainsearch==2){ echo 'selected';}?>>Detail</option>
+                                    <option value="3" <?php if($mainsearch==3){ echo 'selected';}?>>Detail with Batch</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="location">Location</label>
+                                <select name="location" id="location" onChange="storefunction(this.value)" class="form-control">
+                                    <?php
+                                    $query = "select * from login_locationdetails where username='$username' and docno='$docno' group by locationname order by locationname";
+                                    $exec = mysqli_query($GLOBALS["___mysqli_ston"], $query) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
+                                    while ($res = mysqli_fetch_array($exec))
+                                    {
+                                        $reslocation = $res["locationname"];
+                                        $reslocationanum = $res["locationcode"];
+                                        ?>
+                                        <option value="<?php echo $reslocationanum; ?>" <?php if($location!='')if($location==$reslocationanum){echo "selected";}?>><?php echo $reslocation; ?></option>
+                                        <?php 
+                                    }
+                                    
+                                    $query = "select * from login_locationdetails where username='$username' and docno='$docno' order by locationname";
+                                    $exec = mysqli_query($GLOBALS["___mysqli_ston"], $query) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
+                                    $res = mysqli_fetch_array($exec);
+                                    
+                                    $locationname  = $res["locationname"];
+                                    $locationcode = $res["locationcode"];
+                                    $res12locationanum = $res["auto_number"];
+                                    ?>
+                                </select>
+                                <input type="hidden" name="locationnamenew" value="<?php echo $locationname; ?>">
+                                <input type="hidden" name="locationcodenew" value="<?php echo $res12locationanum; ?>">
+                                <input type="hidden" name="username" id="username" value="<?php echo $username; ?>">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="store">Store</label>
+                                <?php  
+                                $loc=isset($_REQUEST['location'])?$_REQUEST['location']:'';
+                                $username=isset($_REQUEST['username'])?$_REQUEST['username']:'';
+                                $frmflag1=isset($_REQUEST['frmflag1'])?$_REQUEST['frmflag1']:'';
+                                $store=isset($_REQUEST['store'])?$_REQUEST['store']:'';
+                                ?>  
+                                <select name="store" id="store" class="form-control">
+                                    <option value="">Select Store</option>
+                                    <?php 
+                                    $query5 = "SELECT storecode, store from master_store where locationcode='$locationcode'";
+                                    $exec5 = mysqli_query($GLOBALS["___mysqli_ston"], $query5) or die ("Error in Query5".mysqli_error($GLOBALS["___mysqli_ston"]));
+                                    
+                                    while ($res5 = mysqli_fetch_array($exec5))
+                                    {
+                                        $res5anum = $res5["storecode"];
+                                        $res5name = $res5["store"];
+                                        ?>
+                                        <option value="<?php echo $res5anum;?>" <?php if($store==$res5anum){ echo 'selected';}?>><?php echo $res5name;?></option>
+                                        <?php 
+                                    }
+                                    ?>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="form-row" id="trcat" style="display: none;">
+                            <div class="form-group">
+                                <label for="categoryname">Category</label>
+                                <select name="categoryname" id="categoryname" class="form-control">
+                                    <?php
+                                    $categoryname = isset($_REQUEST['categoryname']) ? $_REQUEST['categoryname'] : '';
+                                    if ($categoryname != '')
+                                    {
+                                        ?>
+                                        <option value="<?php echo $categoryname; ?>" selected="selected"><?php echo $categoryname; ?></option>
+                                        <option value="">Show All Category</option>
+                                        <?php
+                                    }
+                                    else
+                                    {
+                                        ?>
+                                        <option selected="selected" value="">Show All Category</option>
+                                        <?php
+                                    }
+                                    ?>
+                                    <?php
+                                    $query42 = "select * from master_medicine where status = '' group by categoryname order by categoryname";
+                                    $exec42 = mysqli_query($GLOBALS["___mysqli_ston"], $query42) or die ("Error in Query42".mysqli_error($GLOBALS["___mysqli_ston"]));
+                                    while ($res42 = mysqli_fetch_array($exec42))
+                                    {
+                                        $categoryname1 = $res42['categoryname'];
+                                        ?>
+                                        <option value="<?php echo $categoryname1; ?>"><?php echo $categoryname1; ?></option>
+                                        <?php
+                                    }
+                                    ?>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="form-row" id="trsearch" style="display: none;">
+                            <div class="form-group">
+                                <label for="itemname">Search Item</label>
+                                <input type="hidden" name="searchitem1hiddentextbox" id="searchitem1hiddentextbox">
+                                <input type="hidden" name="searchitemcode" id="searchitemcode">
+                                <input name="itemname" type="text" id="itemname" class="form-control" autocomplete="off" value="<?php echo $searchmedicinename; ?>" placeholder="Search for items...">
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="ADate1">Date From</label>
+                                <input name="ADate1" id="ADate1" value="<?php echo $ADate1; ?>" readonly="readonly" class="form-control date-picker">
+                                <i class="fas fa-calendar-alt date-picker-icon" onclick="javascript:NewCssCal('ADate1')"></i>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="ADate2">Date To</label>
+                                <input name="ADate2" id="ADate2" value="<?php echo $ADate2; ?>" readonly="readonly" class="form-control date-picker">
+                                <i class="fas fa-calendar-alt date-picker-icon" onclick="javascript:NewCssCal('ADate2')"></i>
+                            </div>
+                        </div>
+                        
+                        <div class="form-actions">
+                            <input type="hidden" name="medicinecode" id="medicinecode" value="<?php echo $searchmedicinecode; ?>" readonly />
+                            <input type="hidden" name="cbfrmflag1" value="cbfrmflag1">
+                            <input type="hidden" name="frmflag1" value="frmflag1" id="frmflag1">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-search"></i> Search
+                            </button>
+                            <button name="resetbutton" type="reset" class="btn btn-secondary">
+                                <i class="fas fa-undo"></i> Reset
+                            </button>
+                        </div>
+                        
+                        <div class="date-range-info">
+                            <strong>Date Range: <?php echo $ADate1.' To '.$ADate2; ?></strong>
+                        </div>
+                    </form>
+                </div>
 
-
-            <td align="right" valign="right"  
-                 class="bodytext31"><strong><?php echo number_format($quantity2_sales,0,'.',',') ;  ?>  </strong></td>
-               
-			<td align="right" valign="right"  
-                 class="bodytext31"><strong><?php echo number_format($quantity1_refunds,0,'.',','); ?>  </strong></td>
-
-       			 <!-- <td align="left" valign="center"  
-                 class="bodytext31"><strong> <?php //echo number_format($quantity1_purchase,0,'.',',') intval($balance);?> </strong></td> -->
-
-                 <td align="right" valign="right"  
-                 class="bodytext31"><strong> <?php echo number_format($quantity2_transferout_ownusage,0,'.',',');?> </strong></td>
-                   <td align="right" valign="right"  
-                 class="bodytext31"><strong> <?php echo number_format($quantity1_excess,0,'.',',');?> </strong></td>
-                   <td align="right" valign="right"  
-                 class="bodytext31"><strong> <?php echo number_format($quantity2_Short,0,'.',',');?> </strong></td>
-
-
-                <td align="right" valign="right"  
-                 class="bodytext31"><strong><?php echo number_format($closingstock_on_date2,0,'.',','); ?>  </strong></td>
-				 
-			</tr>
-				<?php
-				   $openingbalance_on_date1_final        += $openingbalance_on_date1;
-			$quantity1_purchase_final        +=$quantity1_purchase;
-			$quantity1_preturn_final        +=$quantity1_preturn;
-			$quantity1_receipts_final        +=$quantity1_receipts;
-			$quantity2_transferout_final        +=$quantity2_transferout;
-			$quantity2_sales_final        +=$quantity2_sales;
-			$quantity1_refunds_final        +=$quantity1_refunds;
-			$quantity2_transferout_ownusage_final        +=$quantity2_transferout_ownusage;
-			$quantity1_excess_final        +=$quantity1_excess;
-			$quantity2_Short_final        +=$quantity2_Short;
-			$closingstock_on_date2_final  +=$closingstock_on_date2;
-
-			} // if loop for all zeros has closed
-			
-
-			     
-			// $openingbalance_on_date1=
-			// $quantity1_purchase=
-			// $quantity1_preturn=
-			// $quantity1_receipts=
-			// $quantity2_transferout=
-			// $quantity2_sales=
-			// $quantity1_refunds=
-			// $quantity2_transferout_ownusage=
-			// $quantity1_excess=
-			// $quantity2_Short=
-			// $closingstock_on_date2=
-				}
-}}
-else if($_POST['mainsearch']=='3'){
-?>
-
-          	<tr>
-             <td align="left" valign="center"  
-                bgcolor="#ffffff" class="bodytext31"><strong>Sl. No</strong></td>     
-				<td align="left" valign="center"  
-                bgcolor="#ffffff" class="bodytext31"><strong>Code</strong></td>
-              <td align="left" valign="center"  
-                bgcolor="#ffffff" class="bodytext31"><strong>Description</strong></td>
-              <td align="left" valign="center"  
-                bgcolor="#ffffff" class="bodytext31"><strong>Batch</strong></td>
-              <td align="left" valign="center"  
-                bgcolor="#ffffff" class="bodytext31"><strong>Expiry</strong></td>
-              <td align="left" valign="center"  
-                bgcolor="#ffffff" class="bodytext31"><div align="right"><strong>Opg.Stock</strong></div></td>
-              <td align="left" valign="center"  
-                bgcolor="#ffffff" class="bodytext31"><div align="right"><strong>Purchase</strong></div></td>
-
-                 <td align="left" valign="center"  
-                bgcolor="#ffffff" class="bodytext31"><div align="right"><strong>Purchase Returns</strong></div></td>
-
-                  <td align="left" valign="center"  
-                bgcolor="#ffffff" class="bodytext31"><div align="right"><strong>Receipts</strong></div></td>
-
-              <td align="left" valign="center"  
-                bgcolor="#ffffff" class="bodytext31"><div align="right"><strong>Issued To Dept</strong></div></td>
-
-                <td align="left" valign="center"  
-                bgcolor="#ffffff" class="bodytext31"><div align="right"><strong>Sales</strong></div></td>
-
-
-              <td align="left" valign="center"  
-                bgcolor="#ffffff" class="bodytext31"><div align="right"><strong>Refunds</strong></div></td>
-
-                <td align="left" valign="center"  
-                bgcolor="#ffffff" class="bodytext31"><div align="right"><strong>Own Usage</strong></div></td>
-                <td align="left" valign="center"  
-                bgcolor="#ffffff" class="bodytext31"><div align="right"><strong>Phy.Excess</strong></div></td>
-                <td align="left" valign="center"  
-                bgcolor="#ffffff" class="bodytext31"><div align="right"><strong>Phy.Short</strong></div></td>
-
-              <td align="left" valign="center"  
-                bgcolor="#ffffff" class="bodytext31"><div align="right"><strong>Closing Stock</strong></div></td>
-				<!-- <td align="left" valign="center"  
-                bgcolor="#ffffff" class="bodytext31"><div align="left"><strong>Username</strong></div></td> -->
-				</tr>
-
-
-<?php
-$query_store = "SELECT * FROM `master_store`"; 
-if($store!=''){ 
-$query_store .= " where storecode='$store'  " ; 
-	}
-$exec_store = mysqli_query($GLOBALS["___mysqli_ston"], $query_store) or die ("Error in query_store".mysqli_error($GLOBALS["___mysqli_ston"]));
-				while ($res_store = mysqli_fetch_array($exec_store))
-				{ 
-					$store=$res_store['storecode'];
-					 $storename=$res_store['store']; 
-					?>
-					<tr>
-                <td bgcolor="#FF9900" colspan="16" class="bodytext3" align="left"><strong><?php echo $res_store['store']; ?></strong></td>
-                </tr>
                 <?php
-				// $query991 = "select itemcode, categoryname, itemname from master_medicine where categoryname like '%$categoryname%' and itemcode like '%$searchmedicinecode%' and status <> 'deleted' group by categoryname order by categoryname, itemname";
-				// $exec991 = mysql_query($query991) or die ("Error in Query991".mysql_error());
-				// 				while ($res991 = mysql_fetch_array($exec991))
-				// 				{
-				// 					$categoryname2 = $res991['categoryname'];
-				// 					$itemname = $res991['itemname'];
-				?>
-	            <!--  <tr>
-       	        <td bgcolor="#FF9900" colspan="8" class="bodytext3" align="left"><strong><?php echo $categoryname2; ?></strong></td>
-                </tr> -->
-                <?php
-				$sno = 0;
-					$query99 = "SELECT b.itemcode, b.categoryname, b.itemname, a.batchnumber  from transaction_stock as a JOIN master_medicine as b on b.itemcode = a.itemcode where b.categoryname like '%$categoryname%' and b.itemcode like '%$searchmedicinecode%' group by a.itemcode,a.batchnumber order by b.itemname";
-				// $query99 = "select itemcode, categoryname, itemname from master_medicine where categoryname = '$categoryname2' and itemcode like '%$searchmedicinecode%' and status <> 'deleted' order by itemname";
-$exec99 = mysqli_query($GLOBALS["___mysqli_ston"], $query99) or die ("Error in Query99".mysqli_error($GLOBALS["___mysqli_ston"]));
-				while ($res99 = mysqli_fetch_array($exec99))
-				{
-					$categoryname2 = $res99['categoryname'];
-					$medicinecode = $res99['itemcode'];
-					$itemname = $res99['itemname'];
-					$itemname = "<pre class='bodytext31'>".$res99['itemname']."</pre>";
-					$batchnumber = $res99['batchnumber'];
-					$expiry_date = '';
+                if (isset($_REQUEST["frmflag1"])) { $frmflag1 = $_REQUEST["frmflag1"]; } else { $frmflag1 = ""; }
 
-			 $query_inner = "select expirydate from purchase_details where batchnumber = '$batchnumber' and itemcode='$medicinecode' 
-			 union all select expirydate from materialreceiptnote_details where batchnumber = '$batchnumber' and itemcode='$medicinecode' limit 0,1 ";
-				$exec_inner = mysqli_query($GLOBALS["___mysqli_ston"], $query_inner) or die ("Error in Query_inner".mysqli_error($GLOBALS["___mysqli_ston"]));
-				while ($res_inner = mysqli_fetch_array($exec_inner))
-				{
-					$expiry_date = $res_inner['expirydate'];
-				}
+                if ($frmflag1 == 'frmflag1')
+                {
+                    if (isset($_REQUEST["store"])) { $store = $_REQUEST["store"]; } else { $store = ""; }
+                    if (isset($_REQUEST["categoryname"])) { $categoryname = $_REQUEST["categoryname"]; } else { $categoryname = ""; }
 
-				?>
-				
-                <?php
-				//get store for location
-// 	$loc=isset($_REQUEST['location'])?$_REQUEST['location']:'';
-// $username=isset($_REQUEST['username'])?$_REQUEST['username']:'';
-//   $query5ll = "select ms.auto_number,ms.storecode,ms.store from master_employeelocation as me LEFT JOIN master_store as ms ON me.storecode=ms.auto_number where me.locationcode = '".$loc."' AND me.username= '".$username."'";
-// if($store!='')
-// {
-// 	$query5ll .=" and ms.storecode='".$store."' group by ms.storecode";
-// 	}
-// 				$exec5ll = mysql_query($query5ll) or die ("Error in Query5ll".mysql_error());
-// 				while ($res5ll = mysql_fetch_array($exec5ll))
-// 				{
-			
-// 				}
-                
-				
-				?>
-				 
-                
-                <?php
-                ////////////////////FIRST //////////////////
-                // echo $openingbalance_on_date; 
-                // $ADate12 = date('Y-m-d', strtotime('-1 day', strtotime($ADate1)));
-                   $query1a = "SELECT sum(transaction_quantity) as addstock from transaction_stock where batchnumber='$batchnumber' and itemcode='$medicinecode' and locationcode='$location' and storecode ='$store' and transaction_date < '$ADate1' and transactionfunction='1'   ";
-                 // echo $query1a = "SELECT sum(transaction_quantity) as addstock from transaction_stock where batchnumber='$batchnumber' and itemcode='$medicinecode' and locationcode='$location' and storecode ='$store' and transaction_date between '$ADate1' and '$ADate2' and transactionfunction='1' order by auto_number desc  ";
-				$exec1a = mysqli_query($GLOBALS["___mysqli_ston"], $query1a) or die(mysqli_error($GLOBALS["___mysqli_ston"]));	 
-				$res1a = mysqli_fetch_array($exec1a);
-				 $totaladdstock = $res1a['addstock'];
-				
-				$query1m = "SELECT sum(transaction_quantity) as minusstock from transaction_stock where batchnumber='$batchnumber' and itemcode='$medicinecode' and locationcode='$location' and storecode ='$store' and transaction_date < '$ADate1' and transactionfunction='0'   ";
-				$exec1m = mysqli_query($GLOBALS["___mysqli_ston"], $query1m) or die(mysqli_error($GLOBALS["___mysqli_ston"]));		 
-				$res1m = mysqli_fetch_array($exec1m);
-				 $totalminusstock = $res1m['minusstock'];
-				
-				 $openingbalance_on_date1 = $totaladdstock-$totalminusstock;
-				// $balance_close_stock1 = $openingbalance;
-				 ///////////////////////second//////////////////
-				 $quantity1_purchase=0;  //PURCHASE
-                   $query1_purchase = "SELECT transaction_quantity from transaction_stock where locationcode = '".$locationcode."' AND batchnumber='$batchnumber' and itemcode = '$medicinecode' and transactionfunction='1' and (description='Purchase' or description='OPENINGSTOCK' or description='".$storename."' ) and transaction_date between '$ADate1' and '$ADate2' and storecode = '$store'";
-				$exec1_purchase = mysqli_query($GLOBALS["___mysqli_ston"], $query1_purchase) or die(mysqli_error($GLOBALS["___mysqli_ston"]));			
-				while($res1_purchase = mysqli_fetch_array($exec1_purchase))
-				{
-				
-				  $quantity1_purchase += $res1_purchase['transaction_quantity'];
+                    $noofdays=strtotime($ADate2) - strtotime($ADate1);
+                    $noofdays = $noofdays/(3600*24);
 
-				} 
-				//////////////////////THIRD /////////////////
-				$quantity1_preturn=0;  //PURCHASE RETURN
-                  $query1_pr = "SELECT transaction_quantity from transaction_stock where locationcode = '".$locationcode."' AND batchnumber='$batchnumber' and itemcode = '$medicinecode' and transactionfunction='0' and description='Purchase Return' and transaction_date between '$ADate1' and '$ADate2' and storecode = '$store'";
-				$exec1_pr = mysqli_query($GLOBALS["___mysqli_ston"], $query1_pr) or die(mysqli_error($GLOBALS["___mysqli_ston"]));			
-				while($res1_pr = mysqli_fetch_array($exec1_pr))
-				{
-				
-				  $quantity1_preturn += $res1_pr['transaction_quantity'];
+                    // Process data based on report type
+                    if($_POST['mainsearch']=='1'){
+                        // Summary Report Logic
+                        include 'stock_movement_summary.php';
+                    } else if($_POST['mainsearch']=='2'){
+                        // Detail Report Logic  
+                        include 'stock_movement_detail.php';
+                    } else if($_POST['mainsearch']=='3'){
+                        // Detail with Batch Report Logic
+                        include 'stock_movement_batch.php';
+                    }
+                }
+                ?>
 
-				} 
-				/////////////////// FOURTH //////////////////
-				$quantity2_transferout_ownusage=0;
-				$quantity1_receipts=0; //	Receipts --> Transfer IN
-				$quantity1_receipts_1=0;
-				$quantity1_receipts_2=0;
-				
-                   $query1_receipts = "SELECT transaction_quantity,entrydocno, storecode from transaction_stock where locationcode = '".$locationcode."' AND batchnumber='$batchnumber' and itemcode = '$medicinecode' and transactionfunction='1' and description='Stock Transfer To'   and transaction_date between '$ADate1' and '$ADate2' and storecode = '$store'";
-				$exec1_receipts = mysqli_query($GLOBALS["___mysqli_ston"], $query1_receipts) or die(mysqli_error($GLOBALS["___mysqli_ston"]));			
-				while($res1_receipts = mysqli_fetch_array($exec1_receipts))
-				{
-				  // $quantity1_receipts += $res1_receipts['transaction_quantity'];
+                <?php if (!empty($reportData)): ?>
+                    <!-- Summary Cards -->
+                    <div class="summary-cards">
+                        <div class="summary-card total-items">
+                            <div class="summary-icon">
+                                <i class="fas fa-boxes"></i>
+                            </div>
+                            <div class="summary-content">
+                                <h3><?php echo $summaryData['total_items']; ?></h3>
+                                <p>Total Items</p>
+                            </div>
+                        </div>
 
-				  	$docno=$res1_receipts['entrydocno'];
-					$storecode_fet=$res1_receipts['storecode'];
+                        <div class="summary-card total-opening">
+                            <div class="summary-icon">
+                                <i class="fas fa-warehouse"></i>
+                            </div>
+                            <div class="summary-content">
+                                <h3><?php echo number_format($summaryData['total_opening'], 0, '.', ','); ?></h3>
+                                <p>Opening Stock</p>
+                            </div>
+                        </div>
 
-					 
-                    $query1_receipts2 = "SELECT typetransfer from master_stock_transfer where `docno`='$docno'  and itemcode = '$medicinecode' limit 0,1";
-					$exec_receipts2 = mysqli_query($GLOBALS["___mysqli_ston"], $query1_receipts2) or die(mysqli_error($GLOBALS["___mysqli_ston"]));			
-					$res_receipts2 = mysqli_fetch_array($exec_receipts2);
-					
-						$typetransfer=$res_receipts2['typetransfer'];
-						if($typetransfer=='Transfer'){
-					  			$quantity1_receipts += $res1_receipts['transaction_quantity'];
-					  		}else{
-					  			$quantity2_transferout_ownusage += $res1_receipts['transaction_quantity'];
-					  		}
-				  	
-				  	// $quantity1_receipts_1 = $quantity1_receipts+$quantity1_receipts1;
-				  	// $quantity2_transferout_ownusage += $quantity2_transferout_ownusage1;
-				} 
-				//  $query1_receipts_2 = "SELECT transaction_quantity,entrydocno, storecode from transaction_stock where locationcode = '".$locationcode."' AND batchnumber='$batchnumber' and itemcode = '$medicinecode' and transactionfunction='1' and  description='Stock Adj Add Stock'  and transaction_date between '$ADate1' and '$ADate2' and storecode = '$store'";
-				// $exec1_receipts_2 = mysql_query($query1_receipts_2) or die(mysql_error());			
-				// while($res1_receipts_2 = mysql_fetch_array($exec1_receipts_2))
-				// {
-				// 	  			$quantity1_receipts_2 += $res1_receipts_2['transaction_quantity'];
-				// } 
-				// $quantity1_receipts=$quantity1_receipts_1+$quantity1_receipts_2;
+                        <div class="summary-card total-purchase">
+                            <div class="summary-icon">
+                                <i class="fas fa-shopping-cart"></i>
+                            </div>
+                            <div class="summary-content">
+                                <h3><?php echo number_format($summaryData['total_purchase'], 0, '.', ','); ?></h3>
+                                <p>Purchase</p>
+                            </div>
+                        </div>
 
-				//////////////// fifth ///////////////////////////////////
-				 $quantity2_transferout=0;  //Transfer out
-				 $quantity2_transferout_1=0;   
-				 $quantity2_transferout_2=0;   
-				 
-                    $query12_transferout = "SELECT transaction_quantity,storecode, entrydocno from transaction_stock where locationcode = '".$locationcode."' AND batchnumber='$batchnumber' and itemcode = '$medicinecode' and transactionfunction='0' and description='Stock Transfer From'  and transaction_date between '$ADate1' and '$ADate2' and storecode = '$store'";
-				$exec12_transferout = mysqli_query($GLOBALS["___mysqli_ston"], $query12_transferout) or die(mysqli_error($GLOBALS["___mysqli_ston"]));			
-				while($res12_transferout = mysqli_fetch_array($exec12_transferout))
-				{
+                        <div class="summary-card total-sales">
+                            <div class="summary-icon">
+                                <i class="fas fa-cash-register"></i>
+                            </div>
+                            <div class="summary-content">
+                                <h3><?php echo number_format($summaryData['total_sales'], 0, '.', ','); ?></h3>
+                                <p>Sales</p>
+                            </div>
+                        </div>
 
-					$docno=$res12_transferout['entrydocno'];
-					$storecode_fet=$res12_transferout['storecode'];
+                        <div class="summary-card total-closing">
+                            <div class="summary-icon">
+                                <i class="fas fa-archive"></i>
+                            </div>
+                            <div class="summary-content">
+                                <h3><?php echo number_format($summaryData['total_closing'], 0, '.', ','); ?></h3>
+                                <p>Closing Stock</p>
+                            </div>
+                        </div>
+                    </div>
 
-					 
-                    $query12_transferout2 = "SELECT typetransfer from master_stock_transfer where `docno`='$docno' and locationcode = '".$locationcode."'and itemcode = '$medicinecode'  and fromstore = '$storecode_fet'";
-					$exec12_transferout2 = mysqli_query($GLOBALS["___mysqli_ston"], $query12_transferout2) or die(mysqli_error($GLOBALS["___mysqli_ston"]));			
-					$res12_transferout2 = mysqli_fetch_array($exec12_transferout2);
-					
-						$typetransfer=$res12_transferout2['typetransfer'];
-						if($typetransfer=='Transfer'){
-					  			$quantity2_transferout += $res12_transferout['transaction_quantity'];
-					  		}else{
-					  			$quantity2_transferout_ownusage += $res12_transferout['transaction_quantity'];
-					  		}
-				  	
+                    <!-- Report Section -->
+                    <div class="report-section">
+                        <div class="report-header">
+                            <div class="report-title-section">
+                                <i class="fas fa-chart-line report-icon"></i>
+                                <h3 class="report-title">Stock Movement Report</h3>
+                                <div class="report-period">
+                                    <span><?php echo date('d/m/Y', strtotime($ADate1)); ?> - <?php echo date('d/m/Y', strtotime($ADate2)); ?></span>
+                                </div>
+                            </div>
+                        </div>
 
-				} 
+                        <!-- Modern Data Table -->
+                        <div class="modern-table-container">
+                            <table class="modern-data-table">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <?php if(isset($_POST['mainsearch']) && $_POST['mainsearch']=='3'): ?>
+                                            <th>Code</th>
+                                        <?php endif; ?>
+                                        <th>Description</th>
+                                        <?php if(isset($_POST['mainsearch']) && $_POST['mainsearch']=='3'): ?>
+                                            <th>Batch</th>
+                                            <th>Expiry</th>
+                                        <?php endif; ?>
+                                        <th>Opening Stock</th>
+                                        <th>Purchase</th>
+                                        <th>Purchase Returns</th>
+                                        <th>Receipts</th>
+                                        <th>Issued To Dept</th>
+                                        <th>Sales</th>
+                                        <th>Refunds</th>
+                                        <th>Own Usage</th>
+                                        <th>Physical Excess</th>
+                                        <th>Physical Short</th>
+                                        <th>Closing Stock</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php
+                                    $rowCount = 0;
+                                    foreach ($reportData as $item):
+                                        $rowCount++;
+                                        $rowClass = ($rowCount % 2 == 0) ? 'even' : 'odd';
+                                    ?>
+                                        <tr class="table-row <?php echo $rowClass; ?>">
+                                            <td><?php echo $rowCount; ?></td>
+                                            <?php if(isset($_POST['mainsearch']) && $_POST['mainsearch']=='3'): ?>
+                                                <td><span class="item-code"><?php echo htmlspecialchars($item['code']); ?></span></td>
+                                            <?php endif; ?>
+                                            <td>
+                                                <span class="item-name"><?php echo htmlspecialchars($item['description']); ?></span>
+                                            </td>
+                                            <?php if(isset($_POST['mainsearch']) && $_POST['mainsearch']=='3'): ?>
+                                                <td><span class="batch-number"><?php echo htmlspecialchars($item['batch']); ?></span></td>
+                                                <td><span class="expiry-date"><?php echo htmlspecialchars($item['expiry']); ?></span></td>
+                                            <?php endif; ?>
+                                            <td>
+                                                <span class="amount-badge opening"><?php echo number_format($item['opening'], 0, '.', ','); ?></span>
+                                            </td>
+                                            <td>
+                                                <span class="amount-badge purchase"><?php echo number_format($item['purchase'], 0, '.', ','); ?></span>
+                                            </td>
+                                            <td>
+                                                <span class="amount-badge purchase-return"><?php echo number_format($item['preturn'], 0, '.', ','); ?></span>
+                                            </td>
+                                            <td>
+                                                <span class="amount-badge receipts"><?php echo number_format($item['receipts'], 0, '.', ','); ?></span>
+                                            </td>
+                                            <td>
+                                                <span class="amount-badge transfer-out"><?php echo number_format($item['transferout'], 0, '.', ','); ?></span>
+                                            </td>
+                                            <td>
+                                                <span class="amount-badge sales"><?php echo number_format($item['sales'], 0, '.', ','); ?></span>
+                                            </td>
+                                            <td>
+                                                <span class="amount-badge refunds"><?php echo number_format($item['refunds'], 0, '.', ','); ?></span>
+                                            </td>
+                                            <td>
+                                                <span class="amount-badge own-usage"><?php echo number_format($item['ownusage'], 0, '.', ','); ?></span>
+                                            </td>
+                                            <td>
+                                                <span class="amount-badge excess"><?php echo number_format($item['excess'], 0, '.', ','); ?></span>
+                                            </td>
+                                            <td>
+                                                <span class="amount-badge short"><?php echo number_format($item['short'], 0, '.', ','); ?></span>
+                                            </td>
+                                            <td>
+                                                <span class="amount-badge closing"><?php echo number_format($item['closing'], 0, '.', ','); ?></span>
+                                            </td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                </tbody>
+                                <tfoot>
+                                    <tr class="totals-row">
+                                        <td colspan="<?php echo (isset($_POST['mainsearch']) && $_POST['mainsearch']=='3') ? '4' : '2'; ?>"><strong>Total:</strong></td>
+                                        <td><strong><?php echo number_format($summaryData['total_opening'], 0, '.', ','); ?></strong></td>
+                                        <td><strong><?php echo number_format($summaryData['total_purchase'], 0, '.', ','); ?></strong></td>
+                                        <td><strong><?php echo number_format($summaryData['total_preturn'], 0, '.', ','); ?></strong></td>
+                                        <td><strong><?php echo number_format($summaryData['total_receipts'], 0, '.', ','); ?></strong></td>
+                                        <td><strong><?php echo number_format($summaryData['total_transferout'], 0, '.', ','); ?></strong></td>
+                                        <td><strong><?php echo number_format($summaryData['total_sales'], 0, '.', ','); ?></strong></td>
+                                        <td><strong><?php echo number_format($summaryData['total_refunds'], 0, '.', ','); ?></strong></td>
+                                        <td><strong><?php echo number_format($summaryData['total_ownusage'], 0, '.', ','); ?></strong></td>
+                                        <td><strong><?php echo number_format($summaryData['total_excess'], 0, '.', ','); ?></strong></td>
+                                        <td><strong><?php echo number_format($summaryData['total_short'], 0, '.', ','); ?></strong></td>
+                                        <td><strong><?php echo number_format($summaryData['total_closing'], 0, '.', ','); ?></strong></td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
 
-				//  $query12_transferout = "SELECT transaction_quantity,storecode, entrydocno from transaction_stock where locationcode = '".$locationcode."' AND batchnumber='$batchnumber' and itemcode = '$medicinecode' and transactionfunction='0' and (description='Stock Damaged Minus Stock' or description='Stock Expired Minus Stock' or description='Stock Adj Minus Stock' ) and transaction_date between '$ADate1' and '$ADate2' and storecode = '$store'";
-				// $exec12_transferout = mysql_query($query12_transferout) or die(mysql_error());			
-				// while($res12_transferout = mysql_fetch_array($exec12_transferout))
-				// {
-				// 	$quantity2_transferout_2 += $res12_transferout['transaction_quantity'];
-				// } 
-				// $quantity2_transferout=$quantity2_transferout_1+$quantity2_transferout_2;
+                    <!-- Chart Section (Hidden by default) -->
+                    <div class="chart-section" id="chartSection" style="display: none;">
+                        <div class="chart-header">
+                            <i class="fas fa-chart-pie chart-icon"></i>
+                            <h3 class="chart-title">Stock Movement Summary Chart</h3>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="stockMovementChart"></canvas>
+                        </div>
+                    </div>
+                <?php elseif ($frmflag1 == 'frmflag1'): ?>
+                    <div class="no-results-message">
+                        <i class="fas fa-chart-line"></i>
+                        <h3>No Data Found</h3>
+                        <p>No stock movement data found for the selected criteria.</p>
+                        <button type="button" class="btn btn-primary" onclick="resetForm()">
+                            <i class="fas fa-undo"></i> Try Different Criteria
+                        </button>
+                    </div>
+                <?php endif; ?>
+            </div>
+        </main>
+    </div>
 
-				////////////////////////// SIXTH ///////////////
-				$quantity2_sales=0;   // Sales
-                    $query12_sales = "SELECT transaction_quantity from transaction_stock where locationcode = '".$locationcode."' AND batchnumber='$batchnumber' and itemcode = '$medicinecode' and transactionfunction='0' and (description='Sales' or description='Package' or description='IP Direct Sales' or description='IP Sales' or description='Process' ) and transaction_date between '$ADate1' and '$ADate2' and storecode = '$store'";
-				$exec12_sales = mysqli_query($GLOBALS["___mysqli_ston"], $query12_sales) or die(mysqli_error($GLOBALS["___mysqli_ston"]));			
-				while($res12_sales = mysqli_fetch_array($exec12_sales))
-				{
-				
-				  $quantity2_sales += $res12_sales['transaction_quantity'];
+    <!-- Modern JavaScript -->
+    <script src="js/stock-movement-modern.js?v=<?php echo time(); ?>"></script>
 
-				} 
-				////////////////// SEVENTH ///////////////////////////
-				$quantity1_refunds=0;   // Refunds
-                  $query1_refunds = "SELECT transaction_quantity from transaction_stock where locationcode = '".$locationcode."' AND batchnumber='$batchnumber' and itemcode = '$medicinecode' and transactionfunction='1' and (description='Sales Return' or description='IP Sales Return' or description='Sales Return' ) and transaction_date between '$ADate1' and '$ADate2' and storecode = '$store'";
-				$exec1_refunds = mysqli_query($GLOBALS["___mysqli_ston"], $query1_refunds) or die(mysqli_error($GLOBALS["___mysqli_ston"]));			
-				while($res1_refunds = mysqli_fetch_array($exec1_refunds))
-				{
-				
-				  $quantity1_refunds += $res1_refunds['transaction_quantity'];
+    <!-- Legacy JavaScript for compatibility -->
+    <script language="javascript">
+        function funcOnLoadBodyFunctionCall()
+        {
+            funcCustomerDropDownSearch4();
+        }
 
-				} 
-				/////////////////////////// eight CLOSING STOCK ///////////////////
+        function Locationcheck()
+        {
+            if(document.getElementById("location").value == '')
+            {
+                alert("Please Select Location");
+                document.getElementById("location").focus();
+                return false;
+            }
+        }
 
-				$query1a_closingstock = "SELECT sum(transaction_quantity) as addstock from transaction_stock where batchnumber='$batchnumber' and itemcode='$medicinecode' and locationcode='$location' and storecode ='$store' and transaction_date <= '$ADate2' and transactionfunction='1' order by auto_number desc  ";
-                 // echo $query1a = "SELECT sum(transaction_quantity) as addstock from transaction_stock where batchnumber='$batchnumber' and itemcode='$medicinecode' and locationcode='$location' and storecode ='$store' and transaction_date between '$ADate1' and '$ADate2' and transactionfunction='1' order by auto_number desc  ";
-				$exec1a_closingstock = mysqli_query($GLOBALS["___mysqli_ston"], $query1a_closingstock) or die(mysqli_error($GLOBALS["___mysqli_ston"]));	 
-				$res1a_closingstock = mysqli_fetch_array($exec1a_closingstock);
-				 $totaladdstock_closingstock = $res1a_closingstock['addstock'];
-				
-				$query1m_closingstock = "SELECT sum(transaction_quantity) as minusstock from transaction_stock where batchnumber='$batchnumber' and itemcode='$medicinecode' and locationcode='$location' and storecode ='$store' and transaction_date <= '$ADate2' and transactionfunction='0' order by auto_number desc  ";
-				$exec1m_closingstock = mysqli_query($GLOBALS["___mysqli_ston"], $query1m_closingstock) or die(mysqli_error($GLOBALS["___mysqli_ston"]));		 
-				$res1m_closingstock = mysqli_fetch_array($exec1m_closingstock);
-				 $totalminusstock_closingstock = $res1m_closingstock['minusstock'];
-				
-				 $closingstock_on_date2 = $totaladdstock_closingstock-$totalminusstock_closingstock;
-
-				 ///////////////////////////phy excess///////////////////////////
-				 $quantity1_excess=0;
-				 $query1_excess = "SELECT transaction_quantity,entrydocno, storecode from transaction_stock where locationcode = '".$locationcode."' AND batchnumber='$batchnumber' and itemcode = '$medicinecode' AND  transactionfunction='1' and  description='Stock Adj Add Stock'  and transaction_date between '$ADate1' and '$ADate2' and storecode = '$store'";
-				$exec1_excess = mysqli_query($GLOBALS["___mysqli_ston"], $query1_excess) or die(mysqli_error($GLOBALS["___mysqli_ston"]));			
-				while($res1_excess = mysqli_fetch_array($exec1_excess))
-				{
-					  			$quantity1_excess += $res1_excess['transaction_quantity'];
-				} 
-				 /////////////////////  Phy.Short /////////
-				 $quantity2_Short=0;
-				 $query12_Short = "SELECT transaction_quantity,storecode, entrydocno from transaction_stock where locationcode = '".$locationcode."' AND batchnumber='$batchnumber' and itemcode = '$medicinecode' AND  transactionfunction='0' and (description='Stock Damaged Minus Stock' or description='Stock Expired Minus Stock' or description='Stock Adj Minus Stock' ) and transaction_date between '$ADate1' and '$ADate2' and storecode = '$store'";
-				$exec12_Short = mysqli_query($GLOBALS["___mysqli_ston"], $query12_Short) or die(mysqli_error($GLOBALS["___mysqli_ston"]));			
-				while($res12_Short = mysqli_fetch_array($exec12_Short))
-				{
-					$quantity2_Short += $res12_Short['transaction_quantity'];
-				} 
-				//////////////////////////////////////////////////////
-
-				if($openingbalance_on_date1==0 && $quantity1_purchase==0 && $quantity1_preturn==0 && $quantity1_receipts==0 && $quantity2_transferout==0 && $quantity2_sales==0 && $quantity1_refunds==0 && $closingstock_on_date2==0 && $quantity2_transferout_ownusage==0 && $quantity1_excess==0 && $quantity2_Short==0){
-
-				}else{
-
-					$snocount = $snocount + 1;
-				$colorloopcount = $colorloopcount + 1;
-				$showcolor = ($colorloopcount & 1); 
-				if ($showcolor == 0)
-				{
-					//echo "if";
-					$colorcode = 'bgcolor="#CBDBFA"';
-				}
-				else
-				{
-					//echo "else";
-					$colorcode = 'bgcolor="#ecf0f5"';
-				} ?>
-				 <tr <?php echo $colorcode; ?>>
-				 	<td class="bodytext31" valign="center"  align="center"><?php echo $snocount; ?></td>
-				 	<td class="bodytext31" valign="center"  align="center"><strong><?php echo $medicinecode; ?></strong></td>
-					<td class="bodytext31" valign="center"  align="left" ><strong><?=$itemname;?></strong></td>
-				
-					<td class="bodytext31" valign="center"  align="left" ><strong><?=$batchnumber;?></strong></td>
-				
-					<td class="bodytext31" valign="center"  align="left" width="10px" ><strong><?=$expiry_date;?></strong></td>
-				
+        //ajax function to get store for corrosponding location
+        function storefunction(loc)
+        {
+            var username=document.getElementById("username").value;
             
-            		  <td align="right" valign="right"  
-                 class="bodytext31"><div align="right"><strong><?php echo number_format($openingbalance_on_date1,0,'.',',');?></strong></div></td>
+            var xmlhttp;
 
-				<td align="right" valign="right"  
-                 class="bodytext31"><strong><?php echo number_format($quantity1_purchase,0,'.',','); ?>  </strong></td>
+            if (window.XMLHttpRequest)
+            {// code for IE7+, Firefox, Chrome, Opera, Safari
+                xmlhttp=new XMLHttpRequest();
+            }
+            else
+            {// code for IE6, IE5
+                xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+            }
+            xmlhttp.onreadystatechange=function()
+            {
+                if (xmlhttp.readyState==4 && xmlhttp.status==200)
+                {
+                    document.getElementById("store").innerHTML=xmlhttp.responseText;
+                }
+            }
+            xmlhttp.open("GET","ajax/ajaxstore.php?loc="+loc+"&username="+username,true);
+            xmlhttp.send();
+        }
 
-                 <td align="right" valign="right"  
-                 class="bodytext31"><strong><?php echo number_format($quantity1_preturn,0,'.',','); ?>  </strong></td>
-				
-				<td align="right" valign="right"  
-                 class="bodytext31"><strong><?php echo number_format($quantity1_receipts,0,'.',','); ?>  </strong></td>
-       			
-       			<td align="right" valign="right"  
-                 class="bodytext31"><strong><?php echo number_format($quantity2_transferout,0,'.',','); ?>  </strong></td>
+        function disableEnterKey()
+        {
+            if (event.keyCode==8) 
+            {
+                event.keyCode=0; 
+                return event.keyCode 
+                return false;
+            }
+            
+            var key;
+            if(window.event)
+            {
+                key = window.event.keyCode;     //IE
+            }
+            else
+            {
+                key = e.which;     //firefox
+            }
+            
+            if(key == 13) // if enter key press
+            {
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+        }
 
+        function Showrows(id, code, action)
+        {
+            if(action=='down')
+            {
+                $("."+code).toggle('slow'); 
+                $("#down"+id).hide(0); 
+                $("#up"+id).show();
+            }	
+            else if(action=='up')
+            {
+                $("."+code).toggle('slow');  
+                $("#up"+id).hide(0); 
+                $("#down"+id).show();
+            }
+        }
 
-            <td align="right" valign="right"  
-                 class="bodytext31"><strong><?php echo number_format($quantity2_sales,0,'.',',') ;  ?>  </strong></td>
-               
-			<td align="right" valign="right"  
-                 class="bodytext31"><strong><?php echo number_format($quantity1_refunds,0,'.',','); ?>  </strong></td>
+        function mainsearch_type() {
+            var mainsearch  =  document.getElementById("mainsearch");
+            var mainsearchvalue = mainsearch.options[mainsearch.selectedIndex].value;
+            var trcat =  document.getElementById("trcat");
+            var trsearch =  document.getElementById("trsearch");
 
-       			 <!-- <td align="left" valign="center"  
-                 class="bodytext31"><strong> <?php //echo number_format($quantity1_purchase,0,'.',',') intval($balance);?> </strong></td> -->
+            if (mainsearchvalue == 1) {
+                trcat.style.display = "none";
+                trsearch.style.display = "none";
+            }
+            else {
+                trcat.style.display = "";
+                trsearch.style.display = "";
+            }  
+        }
 
-                 <td align="right" valign="right"  
-                 class="bodytext31"><strong> <?php echo number_format($quantity2_transferout_ownusage,0,'.',',');?> </strong></td>
-                   <td align="right" valign="right"  
-                 class="bodytext31"><strong> <?php echo number_format($quantity1_excess,0,'.',',');?> </strong></td>
-                   <td align="right" valign="right"  
-                 class="bodytext31"><strong> <?php echo number_format($quantity2_Short,0,'.',',');?> </strong></td>
+        function exportToExcel() {
+            // Get current URL parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            const formData = new FormData(document.querySelector('.search-form'));
 
+            // Build export URL
+            let exportUrl = 'xl_fullstockmovement.php?';
+            exportUrl += 'mainsearch=' + encodeURIComponent(formData.get('mainsearch') || '');
+            exportUrl += '&frmflag1=' + encodeURIComponent(formData.get('frmflag1') || '');
+            exportUrl += '&searchitemcode=' + encodeURIComponent(formData.get('searchitemcode') || '');
+            exportUrl += '&categoryname=' + encodeURIComponent(formData.get('categoryname') || '');
+            exportUrl += '&location=' + encodeURIComponent(formData.get('location') || '');
+            exportUrl += '&store=' + encodeURIComponent(formData.get('store') || '');
+            exportUrl += '&ADate1=' + encodeURIComponent(formData.get('ADate1') || '');
+            exportUrl += '&ADate2=' + encodeURIComponent(formData.get('ADate2') || '');
 
-                <td align="right" valign="right"  
-                 class="bodytext31"><strong><?php echo number_format($closingstock_on_date2,0,'.',','); ?>  </strong></td>
-				 
-			</tr>
-				<?php
-				   $openingbalance_on_date1_final        += $openingbalance_on_date1;
-			$quantity1_purchase_final        +=$quantity1_purchase;
-			$quantity1_preturn_final        +=$quantity1_preturn;
-			$quantity1_receipts_final        +=$quantity1_receipts;
-			$quantity2_transferout_final        +=$quantity2_transferout;
-			$quantity2_sales_final        +=$quantity2_sales;
-			$quantity1_refunds_final        +=$quantity1_refunds;
-			$quantity2_transferout_ownusage_final        +=$quantity2_transferout_ownusage;
-			$quantity1_excess_final        +=$quantity1_excess;
-			$quantity2_Short_final        +=$quantity2_Short;
-			$closingstock_on_date2_final  +=$closingstock_on_date2;
+            // Open export in new window
+            window.open(exportUrl, '_blank');
 
-			} // if loop for all zeros has closed
-			
+            showAlert('Export initiated successfully!', 'success');
+        }
 
-			     
-			// $openingbalance_on_date1=
-			// $quantity1_purchase=
-			// $quantity1_preturn=
-			// $quantity1_receipts=
-			// $quantity2_transferout=
-			// $quantity2_sales=
-			// $quantity1_refunds=
-			// $quantity2_transferout_ownusage=
-			// $quantity1_excess=
-			// $quantity2_Short=
-			// $closingstock_on_date2=
-				}
-				// } // FIRST WHILE LOOP AFTER ELSE
+        function printReport() {
+            // Hide sidebar and other non-printable elements
+            const sidebar = document.getElementById('leftSidebar');
+            const floatingToggle = document.querySelector('.floating-menu-toggle');
 
-				} // fetch_store close
-			} // main if loop
-}// main else for the main search ended				
-				?>
-				
+            if (sidebar) sidebar.style.display = 'none';
+            if (floatingToggle) floatingToggle.style.display = 'none';
 
-		  </tbody>
-		   <tfoot style="background-color: #FF9900;" >
+            // Print
+            window.print();
 
-		  		<td class="bodytext31" valign="center"  align="center"><?php echo ""; ?></td>
-				<td class="bodytext31" valign="center"  align="left" ><strong><?="Total";?></strong></td>
-				<?php if(isset($_POST['mainsearch']) && $_POST['mainsearch']=='3'){
-				?>
-		  			<td class="bodytext31" valign="center"  align="center"><?php echo ""; ?></td>
-		  			<td class="bodytext31" valign="center"  align="center"><?php echo ""; ?></td>
-		  			<td class="bodytext31" valign="center"  align="center"><?php echo ""; ?></td>
-				<?php 
-				}
-				?>
+            // Restore elements
+            if (sidebar) sidebar.style.display = '';
+            if (floatingToggle) floatingToggle.style.display = '';
 
+            showAlert('Print dialog opened.', 'info');
+        }
 
+        function resetForm() {
+            const form = document.querySelector('.search-form');
+            if (form) {
+                form.reset();
 
-				<td class="bodytext31" valign="center"  align="right" ><strong><?=number_format($openingbalance_on_date1_final,0,'.',',');?></strong></td>
-				<td class="bodytext31" valign="center"  align="right" ><strong><?=number_format($quantity1_purchase_final,0,'.',',');?></strong></td>
-				<td class="bodytext31" valign="center"  align="right" ><strong><?=number_format($quantity1_preturn_final,0,'.',',');?></strong></td>
-				<td class="bodytext31" valign="center"  align="right" ><strong><?=number_format($quantity1_receipts_final,0,'.',',');?></strong></td>
-				<td class="bodytext31" valign="center"  align="right" ><strong><?=number_format($quantity2_transferout_final,0,'.',',');?></strong></td>
-				<td class="bodytext31" valign="center"  align="right" ><strong><?=number_format($quantity2_sales_final,0,'.',',');?></strong></td>
-				<td class="bodytext31" valign="center"  align="right" ><strong><?=number_format($quantity1_refunds_final,0,'.',',');?></strong></td>
-				<td class="bodytext31" valign="center"  align="right" ><strong><?=number_format($quantity2_transferout_ownusage_final,0,'.',',');?></strong></td>
-				<td class="bodytext31" valign="center"  align="right" ><strong><?=number_format($quantity1_excess_final,0,'.',',');?></strong></td>
-				<td class="bodytext31" valign="center"  align="right" ><strong><?=number_format($quantity2_Short_final,0,'.',',');?></strong></td>
-				<td class="bodytext31" valign="center"  align="right" ><strong><?=number_format($closingstock_on_date2_final,0,'.',',');?></strong></td>
-		  </tfoot>
-		  </table>
-          <?php
-          if ($frmflag1 == 'frmflag1')
-		  { ?>
-          <a target="_blank" href="xl_fullstockmovement.php?mainsearch=<?=$mainsearch;?>&&frmflag1=<?=$frmflag1;?>&&searchitemcode=<?=$searchmedicinecode;?>&&categoryname=<?= $categoryname;?>&&location=<?= $loc;?>&&store=<?= $store_search;?>&&ADate1=<?= $ADate1;?>&&ADate2=<?=$ADate2;?>"> <img src="images/excel-xls-icon.png" width="30" height="30"></a>
-          <?php } ?>
-          </td>
-		  
-      </tr>
-      <tr>
-        <td>&nbsp;</td>
-      </tr>
-    </table>    
-  <tr>
-    <td valign="top">    
-  <tr>
-    <td width="97%" valign="top">    
-</table>
-<?php include ("includes/footer1.php"); ?>
+                // Set default dates
+                const today = new Date();
+                const lastWeek = new Date();
+                lastWeek.setDate(today.getDate() - 7);
+
+                const dateFrom = document.getElementById('ADate1');
+                const dateTo = document.getElementById('ADate2');
+
+                if (dateFrom) {
+                    dateFrom.value = lastWeek.toISOString().split('T')[0];
+                }
+                if (dateTo) {
+                    dateTo.value = today.toISOString().split('T')[0];
+                }
+
+                showAlert('Form reset successfully!', 'info');
+            }
+        }
+    </script>
 </body>
 </html>

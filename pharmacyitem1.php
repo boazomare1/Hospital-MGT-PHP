@@ -2,8 +2,11 @@
 session_start();
 include("includes/loginverify.php");
 include("db/db_connect.php");
-//echo $menu_id;
 include ("includes/check_user_access.php");
+
+$username = $_SESSION["username"];
+$companyanum = $_SESSION["companyanum"];
+$companyname = $_SESSION["companyname"];
 
 $ipaddress = $_SERVER["REMOTE_ADDR"];
 $updatedatetime = date('Y-m-d H:i:s');
@@ -12,7 +15,7 @@ $bgcolorcode = "";
 $colorloopcount = "";
 $exclude = '';
 $docno = $_SESSION['docno'];
-$username = $_SESSION['username'];
+
 //to redirect if there is no entry in masters category or item.
 $pkg = isset($_REQUEST['pkg']) ? $_REQUEST['pkg'] : 'no';
 
@@ -249,6 +252,17 @@ if ($frmflag1 == 'frmflag1') {
 			$purchaseprice  = '0.00';
 			$description = '';
 			$referencevalue = '';
+
+			// Check for URL messages
+			if (isset($_GET['msg'])) {
+			    if ($_GET['msg'] == 'success') {
+			        $errmsg = "Pharmacy item added successfully.";
+			        $bgcolorcode = 'success';
+			    } elseif ($_GET['msg'] == 'failed') {
+			        $errmsg = "Failed to add pharmacy item.";
+			        $bgcolorcode = 'failed';
+			    }
+			}
 
 			//$itemcode = '';
 			$query1 = "select * from master_medicine order by auto_number desc limit 0, 1";
@@ -523,35 +537,31 @@ if (isset($_REQUEST["search2"])) {
 
 
 ?>
-<style type="text/css">
-th {
-            background-color: #ffffff;
-            position: sticky;
-            top: 0;
-            z-index: 1;
-        }
-	<!--
-	body {
-		margin-left: 0px;
-		margin-top: 0px;
-		background-color: #ecf0f5;
-	}
-
-	.bodytext3 {
-		FONT-WEIGHT: normal;
-		FONT-SIZE: 11px;
-		COLOR: #3B3B3C;
-		FONT-FAMILY: Tahoma;
-		text-decoration: none
-	}
-	-->
-</style>
-<link href="../hospitalmillennium/datepickerstyle.css" rel="stylesheet" type="text/css" />
-<script type="text/javascript" src="js/adddate.js"></script>
-<script type="text/javascript" src="js/adddate2.js"></script>
-<script src="js/jquery-1.11.3.min.js" type="text/javascript"></script>
-<script src="js/jquery-ui.js" type="text/javascript"></script>
-<link href="js/jquery-ui.css" rel="stylesheet">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pharmacy Item Master - MedStar</title>
+    
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <!-- Modern CSS -->
+    <link rel="stylesheet" href="css/pharmacy-modern.css?v=<?php echo time(); ?>">
+    
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- Legacy CSS for compatibility -->
+    <link href="../hospitalmillennium/datepickerstyle.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="css/autocomplete.css">
+    <link href="js/jquery-ui.css" rel="stylesheet">
+    
+    <!-- Legacy JavaScript -->
+    <script type="text/javascript" src="js/adddate.js"></script>
+    <script type="text/javascript" src="js/adddate2.js"></script>
+    <script src="js/jquery-ui.js" type="text/javascript"></script>
 <style type="text/css">
 	<!--
 	.bodytext3 {
@@ -1024,136 +1034,341 @@ th {
 	});
 </script>
 
-<body onLoad="return;">
-	<table width="101%" border="0" cellspacing="0" cellpadding="2">
-		<tr>
-			<td colspan="9" bgcolor="#ecf0f5"><?php include("includes/alertmessages1.php"); ?></td>
-		</tr>
-		<tr>
-			<td colspan="9" bgcolor="#ecf0f5"><?php include("includes/title1.php"); ?></td>
-		</tr>
-		<tr>
-			<td colspan="9" bgcolor="#ecf0f5"><?php include("includes/menu1.php"); ?></td>
-		</tr>
-		<tr>
-			<td colspan="9">&nbsp;</td>
-		</tr>
-		<tr>
-			<td width="1%">&nbsp;</td>
-			<td width="97%" valign="top">
-				<table width="100%" border="0" cellspacing="0" cellpadding="0">
-					<tr>
-						<td width="860">
-							<table width="100%" border="0" cellspacing="0" cellpadding="0" class="tablebackgroundcolor1">
-								<tr>
-									<td>
-										<form name="form1" id="form1" method="post" action="pharmacyitem1.php" onSubmit="return additem1process1();">
-											<table width="1072" border="0" cellpadding="4" cellspacing="0" bordercolor="#666666" id="AutoNumber3" style="border-collapse: collapse">
-												<tbody>
-													<tr bgcolor="#011E6A">
-														<td colspan="4" bgcolor="#ecf0f5" class="bodytext3"><strong>Pharmacy Item Master - Add New </strong></td>
-													</tr>
-													<?php if ($st == 1) { ?>
-														<tr>
-															<td colspan="4" align="left" valign="middle" bgcolor="#AAFF00">
-																<font size="2">Sorry Special Characters Are Not Allowed</font>
-																</div>
-															</td>
-														</tr>
-													<?php } ?>
-													<?php if (isset($_REQUEST['errmsg'])) { ?>
-														<tr>
-															<td colspan="4" align="left" valign="middle" bgcolor="red">
-																<font size="2"><?php echo $_REQUEST['errmsg']; ?></font>
-																</div>
-															</td>
-														</tr>
-													<?php } ?>
-													<tr>
-														<td colspan="4" align="left" valign="middle" bgcolor="<?php if ($bgcolorcode == '') {
-																													echo '#FFFFFF';
-																												} else if ($bgcolorcode == 'success') {
-																													echo '#FFBF00';
-																												} else if ($bgcolorcode == 'failed') {
-																													echo '#AAFF00';
-																												} else if ($bgcolorcode == 'fail') {
-																													echo '#AAFF00';
-																												} ?>" class="bodytext3">
-															<div align="left"><?php echo $errmsg; ?>&nbsp;</div>
-														</td>
-													</tr>
-													<tr>
-														<td align="left" valign="middle" bgcolor="#ecf0f5" class="bodytext3">
-															<div align="left">Select Category Name </div>
-														</td>
-														<td align="left" valign="top" bgcolor="#ecf0f5"><select id="categoryname" name="categoryname">
-																<?php
-																if ($categoryname != '') {
-																?>
-																	<option value="<?php echo $categoryname; ?>" selected="selected"><?php echo $categoryname; ?></option>
-																<?php
-																} else {
-																?>
-																	<option value="" selected="selected">Select Category</option>
-																<?php
-																}
-																$query1 = "select * from master_categorypharmacy where status <> 'deleted' order by categoryname";
-																$exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die("Error in Query1" . mysqli_error($GLOBALS["___mysqli_ston"]));
-																while ($res1 = mysqli_fetch_array($exec1)) {
-																	$res1categoryname = $res1["categoryname"];
-																?>
-																	<option value="<?php echo $res1categoryname; ?>"><?php echo $res1categoryname; ?></option>
-																<?php
-																}
-																?>
-															</select>
-															<a href="pharmacycategory1.php">
-																<font class="bodytext32" color="#000000">(Click Here To Add New Category)</font>
-															</a>
-														</td>
-														<td align="left" valign="top" bgcolor="#ecf0f5" class="bodytext3">Generic Name</td>
-														<td align="left" valign="top" bgcolor="#ecf0f5"><a href="pharmacycategory1.php"></a><select id="genericname" name="genericname">
-																<option value="" selected="selected">Select Generic Name</option>
-																<?php
-																$query111 = "select * from master_genericname where recordstatus = '' ";
-																$exec111 = mysqli_query($GLOBALS["___mysqli_ston"], $query111) or die("Error in Query111" . mysqli_error($GLOBALS["___mysqli_ston"]));
-																while ($res111 = mysqli_fetch_array($exec111)) {
-																	$res111genericname = $res111['genericname'];
-																?>
-																	<option value="<?php echo $res111genericname; ?>"><?php echo $res111genericname; ?></option>
-																<?php
-																}
-																?>
-															</select></td>
-													</tr>
-													<tr>
-														<td align="left" valign="middle" bgcolor="#ecf0f5" class="bodytext3">
-															<div align="left">New Pharmacy Item Code </div>
-														</td>
-														<td align="left" valign="top" bgcolor="#ecf0f5"><input name="itemcode" readonly value="<?php echo $itemcode; ?>" id="itemcode" onKeyDown="return process1backkeypress1()" style="border: 1px solid #001E6A; background-color:#ecf0f5" size="20" maxlength="100" />
-															<span class="bodytext32">( Example : PRD1234567890 ) </span>
-														</td>
-														<td align="left" valign="top" bgcolor="#ecf0f5" class="bodytext3">Exclude</td>
-														<td align="left" valign="top" bgcolor="#ecf0f5"><input type="checkbox" name="exclude"></td>
-													</tr>
-													<tr>
-														<td align="left" valign="middle" bgcolor="#ecf0f5" class="bodytext3">
-															<div align="left">Add New Pharmacy Item Name </div>
-														</td>
-														<td align="left" valign="top" bgcolor="#ecf0f5"><input name="itemname" type="text" id="itemname" style="border: 1px solid #001E6A" onkeydown="return spl()" value="<?php echo $itemname; ?>" size="60"></td>
-														<td align="left" valign="top" bgcolor="#ecf0f5" class="bodytext3">Min Stock</td>
-														<td align="left" valign="top" bgcolor="#ecf0f5"><input type="text" name="minimumstock" id="minimumstock" style="border: 1px solid #001E6A"></td>
-													</tr>
+    <!-- Hospital Header -->
+    <header class="hospital-header">
+        <h1 class="hospital-title">🏥 MedStar Hospital Management</h1>
+        <p class="hospital-subtitle">Advanced Healthcare Management Platform</p>
+    </header>
 
-													<tr>
-														<td align="left" valign="middle" bgcolor="#ecf0f5" class="bodytext3">
-															<div align="left">Charge Price Per Unit </div>
-														</td>
-														<td align="left" valign="top" bgcolor="#ecf0f5"><input name="rateperunit2" id="rateperunit2" style="border: 1px solid #001E6A" value="<?php echo $rateperunit; ?>" size="20" />
-														</td>
-														<td align="left" valign="top" bgcolor="#ecf0f5" class="bodytext3">Max Stock</td>
-														<td align="left" valign="top" bgcolor="#ecf0f5"><input type="text" name="maximumstock" id="maximumstock" style="border: 1px solid #001E6A"></td>
-													</tr>
+    <!-- User Information Bar -->
+    <div class="user-info-bar">
+        <div class="user-welcome">
+            <span class="welcome-text">Welcome, <strong><?php echo htmlspecialchars($username); ?></strong></span>
+            <span class="location-info">📍 Company: <?php echo htmlspecialchars($companyname); ?></span>
+        </div>
+        <div class="user-actions">
+            <a href="mainmenu1.php" class="btn btn-outline">🏠 Main Menu</a>
+            <a href="logout.php" class="btn btn-outline">🚪 Logout</a>
+        </div>
+    </div>
+
+    <!-- Navigation Breadcrumb -->
+    <nav class="nav-breadcrumb">
+        <a href="mainmenu1.php">🏠 Home</a>
+        <span>→</span>
+        <span>Pharmacy Item Master</span>
+    </nav>
+
+    <!-- Floating Menu Toggle -->
+    <div id="menuToggle" class="floating-menu-toggle">
+        <i class="fas fa-bars"></i>
+    </div>
+
+    <!-- Main Container with Sidebar -->
+    <div class="main-container-with-sidebar">
+        <!-- Left Sidebar -->
+        <aside id="leftSidebar" class="left-sidebar">
+            <div class="sidebar-header">
+                <h3>Quick Navigation</h3>
+                <button id="sidebarToggle" class="sidebar-toggle">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <ul class="nav-list">
+                    <li class="nav-item">
+                        <a href="mainmenu1.php" class="nav-link">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="labitem1master.php" class="nav-link">
+                            <i class="fas fa-flask"></i>
+                            <span>Lab Items</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="openingstockentry_master.php" class="nav-link">
+                            <i class="fas fa-boxes"></i>
+                            <span>Opening Stock</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="addward.php" class="nav-link">
+                            <i class="fas fa-bed"></i>
+                            <span>Wards</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="accountreceivableentrylist.php" class="nav-link">
+                            <i class="fas fa-receipt"></i>
+                            <span>Account Receivable</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="corporateoutstanding.php" class="nav-link">
+                            <i class="fas fa-building"></i>
+                            <span>Corporate Outstanding</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="accountstatement.php" class="nav-link">
+                            <i class="fas fa-file-invoice-dollar"></i>
+                            <span>Account Statement</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="addaccountsmain.php" class="nav-link">
+                            <i class="fas fa-chart-line"></i>
+                            <span>Accounts Main</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="addaccountssub.php" class="nav-link">
+                            <i class="fas fa-chart-pie"></i>
+                            <span>Accounts Sub Type</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="fixedasset_acquisition_report.php" class="nav-link">
+                            <i class="fas fa-building"></i>
+                            <span>Fixed Asset Acquisition</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="activeinpatientlist.php" class="nav-link">
+                            <i class="fas fa-bed"></i>
+                            <span>Active Inpatient List</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="activeusersreport.php" class="nav-link">
+                            <i class="fas fa-users"></i>
+                            <span>Active Users Report</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="chartofaccounts_upload.php" class="nav-link">
+                            <i class="fas fa-upload"></i>
+                            <span>Chart of Accounts Upload</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="chartaccountsmaindataimport.php" class="nav-link">
+                            <i class="fas fa-database"></i>
+                            <span>Chart of Accounts Main Import</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="chartaccountssubdataimport.php" class="nav-link">
+                            <i class="fas fa-database"></i>
+                            <span>Chart of Accounts Sub Import</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="addbloodgroup.php" class="nav-link">
+                            <i class="fas fa-tint"></i>
+                            <span>Blood Group Master</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="addfoodallergy1.php" class="nav-link">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <span>Food Allergy Master</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="addgenericname.php" class="nav-link">
+                            <i class="fas fa-pills"></i>
+                            <span>Generic Name Master</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="addpromotion.php" class="nav-link">
+                            <i class="fas fa-percentage"></i>
+                            <span>Promotion Master</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="addsalutation1.php" class="nav-link">
+                            <i class="fas fa-user-tie"></i>
+                            <span>Salutation Master</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="vat.php" class="nav-link">
+                            <i class="fas fa-receipt"></i>
+                            <span>VAT Master</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="payrollmonthwiseinterim.php" class="nav-link">
+                            <i class="fas fa-money-bill-wave"></i>
+                            <span>Payroll Report</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="internalreferallist.php" class="nav-link">
+                            <i class="fas fa-exchange-alt"></i>
+                            <span>Internal Referral List</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="crdradjustment.php" class="nav-link">
+                            <i class="fas fa-balance-scale"></i>
+                            <span>Credit/Debit Adjustment</span>
+                        </a>
+                    </li>
+                    <li class="nav-item active">
+                        <a href="pharmacyitem1.php" class="nav-link">
+                            <i class="fas fa-pills"></i>
+                            <span>Pharmacy Item Master</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Alert Container -->
+            <div id="alertContainer">
+                <?php if (!empty($errmsg)): ?>
+                    <div class="alert alert-<?php echo $bgcolorcode === 'success' ? 'success' : ($bgcolorcode === 'failed' ? 'error' : 'info'); ?>">
+                        <i class="fas fa-<?php echo $bgcolorcode === 'success' ? 'check-circle' : ($bgcolorcode === 'failed' ? 'exclamation-triangle' : 'info-circle'); ?> alert-icon"></i>
+                        <span><?php echo htmlspecialchars($errmsg); ?></span>
+                    </div>
+                <?php endif; ?>
+                
+                <?php if ($st == 1): ?>
+                    <div class="alert alert-error">
+                        <i class="fas fa-exclamation-triangle alert-icon"></i>
+                        <span>Sorry Special Characters Are Not Allowed</span>
+                    </div>
+                <?php endif; ?>
+                
+                <?php if (isset($_REQUEST['errmsg'])): ?>
+                    <div class="alert alert-error">
+                        <i class="fas fa-exclamation-triangle alert-icon"></i>
+                        <span><?php echo htmlspecialchars($_REQUEST['errmsg']); ?></span>
+                    </div>
+                <?php endif; ?>
+            </div>
+
+            <!-- Page Header -->
+            <div class="page-header">
+                <div class="page-header-content">
+                    <h2>Pharmacy Item Master</h2>
+                    <p>Manage pharmacy items, medications, and inventory for the hospital pharmacy.</p>
+                </div>
+                <div class="page-header-actions">
+                    <button type="button" class="btn btn-secondary" onclick="refreshPage()">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                    <button type="button" class="btn btn-outline" onclick="exportToExcel()">
+                        <i class="fas fa-download"></i> Export
+                    </button>
+                </div>
+            </div>
+
+            <!-- Add New Pharmacy Item Section -->
+            <div class="add-item-section">
+                <div class="section-header">
+                    <i class="fas fa-plus-circle"></i>
+                    <h3>Add New Pharmacy Item</h3>
+                </div>
+                
+                <form name="form1" id="form1" method="post" action="pharmacyitem1.php" onSubmit="return additem1process1();" class="pharmacy-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="categoryname" class="form-label">Category Name</label>
+                            <select id="categoryname" name="categoryname" class="form-select">
+                                <?php
+                                if ($categoryname != '') {
+                                ?>
+                                    <option value="<?php echo $categoryname; ?>" selected="selected"><?php echo $categoryname; ?></option>
+                                <?php
+                                } else {
+                                ?>
+                                    <option value="" selected="selected">Select Category</option>
+                                <?php
+                                }
+                                $query1 = "select * from master_categorypharmacy where status <> 'deleted' order by categoryname";
+                                $exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die("Error in Query1" . mysqli_error($GLOBALS["___mysqli_ston"]));
+                                while ($res1 = mysqli_fetch_array($exec1)) {
+                                    $res1categoryname = $res1["categoryname"];
+                                ?>
+                                    <option value="<?php echo $res1categoryname; ?>"><?php echo $res1categoryname; ?></option>
+                                <?php
+                                }
+                                ?>
+                            </select>
+                            <a href="pharmacycategory1.php" class="form-link">
+                                <i class="fas fa-plus"></i> Add New Category
+                            </a>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="genericname" class="form-label">Generic Name</label>
+                            <select id="genericname" name="genericname" class="form-select">
+                                <option value="" selected="selected">Select Generic Name</option>
+                                <?php
+                                $query111 = "select * from master_genericname where recordstatus = '' ";
+                                $exec111 = mysqli_query($GLOBALS["___mysqli_ston"], $query111) or die("Error in Query111" . mysqli_error($GLOBALS["___mysqli_ston"]));
+                                while ($res111 = mysqli_fetch_array($exec111)) {
+                                    $res111genericname = $res111['genericname'];
+                                ?>
+                                    <option value="<?php echo $res111genericname; ?>"><?php echo $res111genericname; ?></option>
+                                <?php
+                                }
+                                ?>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="itemcode" class="form-label">Item Code</label>
+                            <input name="itemcode" readonly value="<?php echo $itemcode; ?>" id="itemcode" 
+                                   onKeyDown="return process1backkeypress1()" class="form-input readonly" 
+                                   size="20" maxlength="100" />
+                            <span class="form-hint">( Example : PRD1234567890 )</span>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Exclude</label>
+                            <div class="checkbox-group">
+                                <input type="checkbox" name="exclude" id="exclude" class="form-checkbox">
+                                <label for="exclude" class="checkbox-label">Exclude from reports</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="itemname" class="form-label">Item Name</label>
+                            <input name="itemname" type="text" id="itemname" class="form-input" 
+                                   onkeydown="return spl()" value="<?php echo $itemname; ?>" size="60">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="minimumstock" class="form-label">Min Stock</label>
+                            <input type="text" name="minimumstock" id="minimumstock" class="form-input">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="rateperunit2" class="form-label">Charge Price Per Unit</label>
+                            <input name="rateperunit2" id="rateperunit2" class="form-input" 
+                                   value="<?php echo $rateperunit; ?>" size="20">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="maximumstock" class="form-label">Max Stock</label>
+                            <input type="text" name="maximumstock" id="maximumstock" class="form-input">
+                        </div>
+                    </div>
 													<!--  <tr>
                         <td align="left" valign="middle"  bgcolor="#ecf0f5" class="bodytext3"><div align="left">radiology Item Reference Value (Optional) </div></td>
                         <td align="left" valign="top"  bgcolor="#ecf0f5"><textarea name="referencevalue" cols="60" id="referencevalue" style="border: 1px solid #001E6A"><?php echo $referencevalue; ?></textarea>
@@ -1196,99 +1411,114 @@ th {
                         </select></td>
                       </tr>
 -->
-													<tr>
-														<td align="left" valign="middle" bgcolor="#ecf0f5" class="bodytext3">
-															<div align="left">Formula</div>
-														</td>
-														<td align="left" valign="top" bgcolor="#ecf0f5"><select id="formula" name="formula" onChange="fixed2()">
-																<option value="">Select Formula</option>
-																<option value="CONSTANT">Constant</option>
-																<option value="FIXED">Fixed</option>
-																<option value="INCREMENT">Increment</option>
-															</select></td>
-														<td align="left" valign="top" bgcolor="#ecf0f5" class="bodytext3">ROL</td>
-														<td align="left" valign="top" bgcolor="#ecf0f5"><input type="text" name="rol" style="border: 1px solid #001E6A"></td>
-													</tr>
-													<tr>
-														<td align="left" valign="middle" bgcolor="#ecf0f5" class="bodytext3">
-															<div align="left">Select Pharmacy Package </div>
-														</td>
-														<td align="left" valign="top" bgcolor="#ecf0f5"><select id="packageanum" name="packageanum">
-															<!--	<option value="">Select Pack</option>-->
-																<?php
-																$query1 = "select * from master_packagepharmacy where status <> 'deleted' order by packagename";
-																$exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die("Error in Query1" . mysqli_error($GLOBALS["___mysqli_ston"]));
-																while ($res1 = mysqli_fetch_array($exec1)) {
-																	$res1anum = $res1['auto_number'];
-																	$res1packagename = $res1["packagename"];
-																	$res1packagename = stripslashes($res1packagename);
-																	$quantityperpackage = $res1["quantityperpackage"];
-																	$quantityperpackage = round($quantityperpackage);
-																?>
-																	<option value="<?php echo $res1anum; ?>"><?php echo $res1packagename . ' ( ' . $quantityperpackage . ' ) '; ?></option>
-																<?php
-																}
-																?>
-															</select></td>
-														<td align="left" valign="top" bgcolor="#ecf0f5" class="bodytext3"><strong>Volume (for CONSTANT item)</strong></td>
-														<td align="left" valign="top" bgcolor="#ecf0f5"><input type="text" name="roq" style="border: 1px solid #001E6A"></td>
-													</tr>
-													<tr>
-														<td align="left" valign="middle" bgcolor="#ecf0f5" class="bodytext3">
-															<div align="left">Select Applicable Tax </div>
-														</td>
-														<td align="left" valign="top" bgcolor="#ecf0f5"><select id="taxanum" name="taxanum">
-																<option value="">Select Tax</option>
-																<?php
-																$query1 = "select * from master_tax where status <> 'deleted' order by taxname";
-																$exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die("Error in Query1" . mysqli_error($GLOBALS["___mysqli_ston"]));
-																while ($res1 = mysqli_fetch_array($exec1)) {
-																	$res1taxname = $res1["taxname"];
-																	$res1taxpercent = $res1["taxpercent"];
-																	$res1anum = $res1["auto_number"];
-																?>
-																	<option value="<?php echo $res1anum; ?>"><?php echo $res1taxname . ' ( ' . $res1taxpercent . '% ) '; ?></option>
-																<?php
-																}
-																?>
-															</select>
-															<input name="rateperunit" type="hidden" id="rateperunit" style="border: 1px solid #001E6A" value="<?php echo $rateperunit; ?>" size="20" />
-															<input type="hidden" name="purchaseprice" id="purchaseprice" style="border: 1px solid #001E6A" value="<?php echo $purchaseprice; ?>" size="20" />
-															<input name="description" type="hidden" id="description" style="border: 1px solid #001E6A" value="<?php echo $description; ?>" size="50">
-															<input type="hidden" name="unitname_abbreviation" id="unitname_abbreviation" value="NOS">
-														</td>
-														<td align="left" valign="top" bgcolor="#ecf0f5" class="bodytext3">IP Mark up</td>
-														<td align="left" valign="top" bgcolor="#ecf0f5"><input type="text" name="ipmarkup" style="border: 1px solid #001E6A"></td>
-													</tr>
-													<tr>
-														<td align="left" valign="top" bgcolor="#ecf0f5" class="bodytext3">Cost Price</td>
-														<td align="left" valign="top" bgcolor="#ecf0f5"><input type="text" name="costprice" id="costprice" style="border: 1px solid #001E6A"></td>
-														<td align="left" valign="top" bgcolor="#ecf0f5" class="bodytext3">SP Mark up</td>
-														<td align="left" valign="top" bgcolor="#ecf0f5"><input type="text" name="spmarkup" id="spmarkup" style="border: 1px solid #001E6A"></td>
-													</tr>
-													<tr>
-														<td align="left" valign="top" bgcolor="#ecf0f5" class="bodytext3">Disease</td>
-														<td align="left" valign="top" bgcolor="#ecf0f5"><input type="text" name="disease" id="disease" style="border: 1px solid #001E6A"></td>
-														<td align="left" valign="top" bgcolor="#ecf0f5" class="bodytext3">Purchase Type</td>
-														<td align="left" valign="top" bgcolor="#ecf0f5">
-															<select name="type" id="type">
-																<option value="">Select Purchase Type</option>
-																<?php
-
-																$query = "select id,name from master_purchase_type where status !='deleted' order by id desc";
-																$exec = mysqli_query($GLOBALS["___mysqli_ston"], $query) or die("Error in Query1" . mysqli_error($GLOBALS["___mysqli_ston"]));
-																while ($res = mysqli_fetch_array($exec)) {
-																	$producttype = $res["name"];
-																	$product_type_id = $res["id"];
-																?>
-																	<option value="<?php echo $producttype; ?>"><?php echo $producttype; ?></option>
-																<?php
-																}
-																?>
-
-															</select>
-														</td>
-													</tr>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="formula" class="form-label">Formula</label>
+                            <select id="formula" name="formula" onChange="fixed2()" class="form-select">
+                                <option value="">Select Formula</option>
+                                <option value="CONSTANT">Constant</option>
+                                <option value="FIXED">Fixed</option>
+                                <option value="INCREMENT">Increment</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="rol" class="form-label">ROL</label>
+                            <input type="text" name="rol" id="rol" class="form-input">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="packageanum" class="form-label">Pharmacy Package</label>
+                            <select id="packageanum" name="packageanum" class="form-select">
+                                <?php
+                                $query1 = "select * from master_packagepharmacy where status <> 'deleted' order by packagename";
+                                $exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die("Error in Query1" . mysqli_error($GLOBALS["___mysqli_ston"]));
+                                while ($res1 = mysqli_fetch_array($exec1)) {
+                                    $res1anum = $res1['auto_number'];
+                                    $res1packagename = $res1["packagename"];
+                                    $res1packagename = stripslashes($res1packagename);
+                                    $quantityperpackage = $res1["quantityperpackage"];
+                                    $quantityperpackage = round($quantityperpackage);
+                                ?>
+                                    <option value="<?php echo $res1anum; ?>"><?php echo $res1packagename . ' ( ' . $quantityperpackage . ' ) '; ?></option>
+                                <?php
+                                }
+                                ?>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="roq" class="form-label">Volume (for CONSTANT item)</label>
+                            <input type="text" name="roq" id="roq" class="form-input">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="taxanum" class="form-label">Applicable Tax</label>
+                            <select id="taxanum" name="taxanum" class="form-select">
+                                <option value="">Select Tax</option>
+                                <?php
+                                $query1 = "select * from master_tax where status <> 'deleted' order by taxname";
+                                $exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die("Error in Query1" . mysqli_error($GLOBALS["___mysqli_ston"]));
+                                while ($res1 = mysqli_fetch_array($exec1)) {
+                                    $res1taxname = $res1["taxname"];
+                                    $res1taxpercent = $res1["taxpercent"];
+                                    $res1anum = $res1["auto_number"];
+                                ?>
+                                    <option value="<?php echo $res1anum; ?>"><?php echo $res1taxname . ' ( ' . $res1taxpercent . '% ) '; ?></option>
+                                <?php
+                                }
+                                ?>
+                            </select>
+                            
+                            <!-- Hidden fields -->
+                            <input name="rateperunit" type="hidden" id="rateperunit" value="<?php echo $rateperunit; ?>" />
+                            <input type="hidden" name="purchaseprice" id="purchaseprice" value="<?php echo $purchaseprice; ?>" />
+                            <input name="description" type="hidden" id="description" value="<?php echo $description; ?>">
+                            <input type="hidden" name="unitname_abbreviation" id="unitname_abbreviation" value="NOS">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="ipmarkup" class="form-label">IP Mark up</label>
+                            <input type="text" name="ipmarkup" id="ipmarkup" class="form-input">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="costprice" class="form-label">Cost Price</label>
+                            <input type="text" name="costprice" id="costprice" class="form-input">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="spmarkup" class="form-label">SP Mark up</label>
+                            <input type="text" name="spmarkup" id="spmarkup" class="form-input">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="disease" class="form-label">Disease</label>
+                            <input type="text" name="disease" id="disease" class="form-input">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="type" class="form-label">Purchase Type</label>
+                            <select name="type" id="type" class="form-select">
+                                <option value="">Select Purchase Type</option>
+                                <?php
+                                $query = "select id,name from master_purchase_type where status !='deleted' order by id desc";
+                                $exec = mysqli_query($GLOBALS["___mysqli_ston"], $query) or die("Error in Query1" . mysqli_error($GLOBALS["___mysqli_ston"]));
+                                while ($res = mysqli_fetch_array($exec)) {
+                                    $producttype = $res["name"];
+                                    $product_type_id = $res["id"];
+                                ?>
+                                    <option value="<?php echo $producttype; ?>"><?php echo $producttype; ?></option>
+                                <?php
+                                }
+                                ?>
+                            </select>
+                        </div>
+                    </div>
 
 													<!--Product Type-->
 													<tr>
@@ -1406,15 +1636,16 @@ th {
 													</tr>
 
 
-													<tr>
-														<td align="left" valign="top" bgcolor="#ecf0f5" class="bodytext3"></td>
-														<td align="left" valign="top" bgcolor="#ecf0f5"></td>
-														<td width="13%" align="left" valign="top" bgcolor="#ecf0f5">&nbsp;</td>
-														<td width="33%" align="left" valign="top" bgcolor="#ecf0f5"><input type="hidden" name="frmflag1" value="frmflag1" />
-															<input type="hidden" name="frmflag" value="addnew" />
-															<input type="submit" name="Submit" value="Save Pharmacy Item" style="border: 1px solid #001E6A" />
-														</td>
-													</tr>
+                    <div class="form-actions">
+                        <input type="hidden" name="frmflag1" value="frmflag1" />
+                        <input type="hidden" name="frmflag" value="addnew" />
+                        <button type="submit" name="Submit" class="submit-btn">
+                            <i class="fas fa-save"></i>
+                            Save Pharmacy Item
+                        </button>
+                    </div>
+                </form>
+            </div>
 												</tbody>
 											</table>
 										</form>
@@ -1452,7 +1683,7 @@ th {
 
 																/* Setup vars for query. */
 																$targetpage = $_SERVER['PHP_SELF']; 	//your file name  (the name of this file)
-																$limit = 50; 								//how many items to show per page
+																$limit = 10; 								//how many items to show per page
 																if (isset($_REQUEST['page'])) {
 																	$page = $_REQUEST['page'];
 																} else {
@@ -1543,87 +1774,151 @@ th {
 																	echo $pagination .= "</div>\n";
 																}
 															}
-															?></span>
+															?>
 													</td>
 												</tr>
-												<tr bgcolor="#011E6A">
-													<td colspan="20" bgcolor="#FFFFFF" class="bodytext3">
-														<input name="search1" type="text" id="search1" size="40" value="<?php echo $search1; ?>" autocomplete="off" Placeholder="Search by item">
-														<input name="searchcat" type="text" id="searchcat" size="20" value="<?php echo $searchcat; ?>" autocomplete="off" Placeholder="Search by Category">
-														<input name="searchgen" type="text" id="searchgen" size="20" value="<?php echo $searchgen; ?>" autocomplete="off" Placeholder="Search by Generic">
-														<select name="pharmacytype" id="pharmacytype">
-															<option value="">Select by Type</option>
-															<option value="DRUGS" <?php if ($pharmacytype == 'DRUGS') {
-																						echo 'selected';
-																					} ?>>DRUGS</option>
-															<option value="NON DRUGS" <?php if ($pharmacytype == 'NON DRUGS') {
-																							echo 'selected';
-																						} ?>>NON DRUGS</option>
-															<option value="ASSETS" <?php if ($pharmacytype == 'ASSETS') {
-																							echo 'selected';
-																						} ?>>ASSETS</option>
-														</select>
-														<input type="hidden" name="searchflag1" id="searchflag1" value="searchflag1">
-														<input type="hidden" id="sortfunc" name="sortfunc" value="">
-														<input type="hidden" id="start" value="<?php echo $start ?>">
-														<input type="hidden" id="limit" value="<?php echo $limit ?>">
-														<input type="submit" name="Submit2" value="Search" style="border: 1px solid #001E6A" />
-													</td>
-												</tr>
-												<tr bgcolor="#011E6A">
-													<th width="4%" bgcolor="#ecf0f5" class="bodytext3">
-														<div align="center"><strong>Delete</strong></div>
-													</th>
-													<th width="4%" bgcolor="#ecf0f5" class="bodytext3">
-														<div align="center"><strong>Edit</strong></div>
-													</th>
-													<th width="5%" bgcolor="#ecf0f5" class="bodytext3"><strong>ID / Code </strong></th>
-													<th width="8%" bgcolor="#ecf0f5" class=" sorting bodytext3" id="category" style="cursor:pointer"><strong>Category<br><b class="arrow" id='categoryup'>&darr;</b> <b class="arrow" id='categorydown'>&uarr;</b></strong></th>
-													<th width="8%" bgcolor="#ecf0f5" class=" sorting bodytext3" id="pharmacyitem" style="cursor:pointer"><strong>Pharmacy Item
-															<br><b class="arrow" id='pharmacyitemup'>&darr;</b> <b class="arrow" id='pharmacyitemdown'>&uarr;</b></strong></th>
-													<th width="5%" bgcolor="#ecf0f5" class="bodytext3"><strong>Unit</strong>
-														<div align="center"><strong>
-																<!--Purchase-->
-															</strong></div>
-													</th>
-													<th width="7%" bgcolor="#ecf0f5" class="bodytext3">
-														<div align="center"><strong>Charges</strong></div>
-													</th>
-													<th width="11%" bgcolor="#ecf0f5" class="bodytext3">
-														<div align="center"><strong>Formula</strong></div>
-													</th>
-													<th width="5%" bgcolor="#ecf0f5" class="bodytext3">
-														<div align="center"><strong>Tax</strong></div>
-													</th>
-													<th width="6%" bgcolor="#ecf0f5" class="bodytext3">
-														<div align="center"><strong>Cost price</strong></div>
-													</th>
-													<th width="7%" bgcolor="#ecf0f5" class="bodytext3">
-														<div align="center"><strong>Disease</strong></div>
-													</th>
-													<th width="7%" bgcolor="#ecf0f5" class="sorting bodytext3" id="generic" style="cursor:pointer"><strong>Generic<br><b class="arrow" id='genericup'>&darr;</b> <b class="arrow" id='genericdown'>&uarr;</b></strong></th>
-													<th width="7%" bgcolor="#ecf0f5" class="sorting bodytext3" id="phtype" style="cursor:pointer"><strong>Type<br><b class="arrow" id='phtypeup'>&darr;</b> <b class="arrow" id='phtypedown'>&uarr;</b></strong></th>
-													<th width="6%" bgcolor="#ecf0f5" class="bodytext3">
-														<div align="center"><strong>Min Stock</strong></div>
-													</th>
-													<th width="6%" bgcolor="#ecf0f5" class="bodytext3">
-														<div align="center"><strong>Max Stock</strong></div>
-													</th>
-													<th width="6%" bgcolor="#ecf0f5" class="bodytext3">
-														<div align="center"><strong>ROL</strong></div>
-													</th>
-													<th width="6%" bgcolor="#ecf0f5" class="bodytext3">
-														<div align="center"><strong>Strength</strong></div>
-													</th>
-													<th width="6%" bgcolor="#ecf0f5" class="bodytext3">
-														<div align="center"><strong>IP Markup</strong></div>
-													</th>
-													<th width="7%" bgcolor="#ecf0f5" class="bodytext3">
-														<div align="center"><strong>SP Markup</strong></div>
-													</th>
-												</tr>
-												<div id="wait" style="display:none;width:69px;height:89px;position:fixed;top:50%;left:45%;padding:2px;"><img src='images/ajaxloader.gif' width="64" height="64" /><strong>LOADING...</strong></div>
-												<tbody id="activepharmacylist">
+            <!-- Search Form Section -->
+            <div class="search-form-section">
+                <div class="section-header">
+                    <i class="fas fa-search"></i>
+                    <h3>Search Pharmacy Items</h3>
+                </div>
+                
+                <form method="get" action="pharmacyitem1.php" class="search-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="search1" class="form-label">Search by Item</label>
+                            <input name="search1" type="text" id="search1" class="form-input" 
+                                   value="<?php echo $search1; ?>" placeholder="Search by item name" autocomplete="off">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="searchcat" class="form-label">Search by Category</label>
+                            <input name="searchcat" type="text" id="searchcat" class="form-input" 
+                                   value="<?php echo $searchcat; ?>" placeholder="Search by category" autocomplete="off">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="searchgen" class="form-label">Search by Generic</label>
+                            <input name="searchgen" type="text" id="searchgen" class="form-input" 
+                                   value="<?php echo $searchgen; ?>" placeholder="Search by generic name" autocomplete="off">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="pharmacytype" class="form-label">Type</label>
+                            <select name="pharmacytype" id="pharmacytype" class="form-select">
+                                <option value="">Select by Type</option>
+                                <option value="DRUGS" <?php if ($pharmacytype == 'DRUGS') { echo 'selected'; } ?>>DRUGS</option>
+                                <option value="NON DRUGS" <?php if ($pharmacytype == 'NON DRUGS') { echo 'selected'; } ?>>NON DRUGS</option>
+                                <option value="ASSETS" <?php if ($pharmacytype == 'ASSETS') { echo 'selected'; } ?>>ASSETS</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group form-group-submit">
+                            <input type="hidden" name="searchflag1" id="searchflag1" value="searchflag1">
+                            <input type="hidden" id="sortfunc" name="sortfunc" value="">
+                            <input type="hidden" id="start" value="<?php echo $start ?>">
+                            <input type="hidden" id="limit" value="<?php echo $limit ?>">
+                            <button type="submit" name="Submit2" class="submit-btn">
+                                <i class="fas fa-search"></i>
+                                Search
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Pagination Info Section -->
+            <?php if (isset($pagination) && !empty($pagination)): ?>
+            <div class="pagination-info-section">
+                <div class="pagination-stats">
+                    <div class="stats-info">
+                        <i class="fas fa-info-circle"></i>
+                        <span>Showing page <?php echo $page; ?> of <?php echo $lastpage; ?> (Total: <?php echo $total_pages; ?> items)</span>
+                    </div>
+                    <div class="records-per-page">
+                        <label for="recordsPerPage">Records per page:</label>
+                        <select id="recordsPerPage" onchange="changeRecordsPerPage(this.value)">
+                            <option value="10" <?php echo $limit == 10 ? 'selected' : ''; ?>>10</option>
+                            <option value="25" <?php echo $limit == 25 ? 'selected' : ''; ?>>25</option>
+                            <option value="50" <?php echo $limit == 50 ? 'selected' : ''; ?>>50</option>
+                            <option value="100" <?php echo $limit == 100 ? 'selected' : ''; ?>>100</option>
+                            <option value="200" <?php echo $limit == 200 ? 'selected' : ''; ?>>200</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <?php endif; ?>
+
+            <!-- Data Table Section -->
+            <div class="data-table-section">
+                <div class="section-header">
+                    <i class="fas fa-list"></i>
+                    <h3>Pharmacy Items List</h3>
+                </div>
+                
+                <!-- Table Container -->
+                <div class="table-container">
+                    <table class="pharmacy-table">
+                        <thead>
+                            <tr>
+                                <th class="action-header">Delete</th>
+                                <th class="action-header">Edit</th>
+                                <th class="id-header">ID / Code</th>
+                                <th class="sortable-header" id="category" style="cursor:pointer">
+                                    Category
+                                    <span class="sort-arrows">
+                                        <i class="fas fa-sort-down" id='categoryup'></i>
+                                        <i class="fas fa-sort-up" id='categorydown'></i>
+                                    </span>
+                                </th>
+                                <th class="sortable-header" id="pharmacyitem" style="cursor:pointer">
+                                    Pharmacy Item
+                                    <span class="sort-arrows">
+                                        <i class="fas fa-sort-down" id='pharmacyitemup'></i>
+                                        <i class="fas fa-sort-up" id='pharmacyitemdown'></i>
+                                    </span>
+                                </th>
+                                <th class="unit-header">Unit</th>
+                                <th class="charges-header">Charges</th>
+                                <th class="formula-header">Formula</th>
+                                <th class="tax-header">Tax</th>
+                                <th class="cost-header">Cost Price</th>
+                                <th class="disease-header">Disease</th>
+                                <th class="sortable-header" id="generic" style="cursor:pointer">
+                                    Generic
+                                    <span class="sort-arrows">
+                                        <i class="fas fa-sort-down" id='genericup'></i>
+                                        <i class="fas fa-sort-up" id='genericdown'></i>
+                                    </span>
+                                </th>
+                                <th class="sortable-header" id="phtype" style="cursor:pointer">
+                                    Type
+                                    <span class="sort-arrows">
+                                        <i class="fas fa-sort-down" id='phtypeup'></i>
+                                        <i class="fas fa-sort-up" id='phtypedown'></i>
+                                    </span>
+                                </th>
+                                <th class="stock-header">Min Stock</th>
+                                <th class="stock-header">Max Stock</th>
+                                <th class="rol-header">ROL</th>
+                                <th class="strength-header">Strength</th>
+                                <th class="markup-header">IP Markup</th>
+                                <th class="markup-header">SP Markup</th>
+                            </tr>
+                        </thead>
+                        
+                        <!-- Loading Overlay -->
+                        <div id="wait" class="loading-overlay" style="display:none;">
+                            <div class="loading-content">
+                                <div class="loading-spinner">
+                                    <i class="fas fa-spinner fa-spin"></i>
+                                </div>
+                                <p><strong>Loading...</strong></p>
+                            </div>
+                        </div>
+                        
+                        <tbody id="activepharmacylist">
 													<?php
 													if ($searchflag1 == 'searchflag1') {
 
@@ -1678,46 +1973,35 @@ th {
 															}
 
 													?>
-															<tr <?php echo $colorcode; ?>>
-																<th align="left" valign="top" bgcolor="#FFFFFF" class="bodytext3">
-																	<div align="center"><a href="pharmacyitem1.php?st=del&&anum=<?php echo $auto_number; ?>"><img src="images/b_drop.png" width="16" height="16" border="0" /></a></div>
-																</th>
-																<th align="left" valign="top" class="bodytext3"><a href="editpharmacyitem.php?itemcode=<?php echo $itemcode; ?>">Edit</a></th>
-																<td align="left" valign="top" class="bodytext3"><?php echo $itemcode; ?> </td>
-																<td align="left" valign="top" class="bodytext3"><?php echo $categoryname; ?> </td>
-																<td align="left" valign="top" class="bodytext3"><?php echo $itemname; ?> </td>
-																<td align="left" valign="top" class="bodytext3"><?php echo $itemname_abbreviation; ?> <div align="right"></div>
-																</td>
-																<td align="left" valign="top" class="bodytext3">
-																	<div align="right"><?php echo $rateperunit; ?></div>
-																</td>
-																<td align="left" valign="top" class="bodytext3"> <?php echo $formula; ?> </td>
-																<td align="left" valign="top" class="bodytext3"> <?php echo $taxname; ?> </td>
-																<td align="left" valign="top" class="bodytext3">
-																	<div align="right"> <?php echo $purchaseprice; ?> </div>
-																</td>
-																<td align="left" valign="top" class="bodytext3"> <?php echo $disease; ?> </td>
-																<td align="left" valign="top" class="bodytext3"> <?php echo $genericname; ?> </td>
-																<td align="left" valign="top" class="bodytext3"> <?php echo $type; ?> </td>
-																<td align="left" valign="top" class="bodytext3">
-																	<div align="center"> <?php echo $minimumstock; ?> </div>
-																</td>
-																<td align="left" valign="top" class="bodytext3">
-																	<div align="center"> <?php echo $maximumstock; ?> </div>
-																</td>
-																<td align="left" valign="top" class="bodytext3">
-																	<div align="center"> <?php echo $rol; ?> </div>
-																</td>
-																<td align="left" valign="top" class="bodytext3">
-																	<div align="center"> <?php echo $roq; ?> </div>
-																</td>
-																<td align="left" valign="top" class="bodytext3">
-																	<div align="right"><?php echo $ipmarkup; ?> </div>
-																</td>
-																<td align="left" valign="top" class="bodytext3">
-																	<div align="right"><?php echo $spmarkup; ?> </div>
-																</td>
-															</tr>
+                            <tr class="table-row">
+                                <td class="action-cell">
+                                    <button class="btn-action btn-delete" onclick="deleteItem('<?php echo $auto_number; ?>')" title="Delete Item">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
+                                </td>
+                                <td class="action-cell">
+                                    <a href="editpharmacyitem.php?itemcode=<?php echo $itemcode; ?>" class="btn-action btn-edit" title="Edit Item">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                </td>
+                                <td class="id-cell"><?php echo htmlspecialchars($itemcode); ?></td>
+                                <td class="category-cell"><?php echo htmlspecialchars($categoryname); ?></td>
+                                <td class="item-cell"><?php echo htmlspecialchars($itemname); ?></td>
+                                <td class="unit-cell"><?php echo htmlspecialchars($itemname_abbreviation); ?></td>
+                                <td class="charges-cell"><?php echo number_format($rateperunit, 2); ?></td>
+                                <td class="formula-cell"><?php echo htmlspecialchars($formula); ?></td>
+                                <td class="tax-cell"><?php echo htmlspecialchars($taxname); ?></td>
+                                <td class="cost-cell"><?php echo number_format($purchaseprice, 2); ?></td>
+                                <td class="disease-cell"><?php echo htmlspecialchars($disease); ?></td>
+                                <td class="generic-cell"><?php echo htmlspecialchars($genericname); ?></td>
+                                <td class="type-cell"><?php echo htmlspecialchars($type); ?></td>
+                                <td class="stock-cell"><?php echo $minimumstock; ?></td>
+                                <td class="stock-cell"><?php echo $maximumstock; ?></td>
+                                <td class="rol-cell"><?php echo $rol; ?></td>
+                                <td class="strength-cell"><?php echo $roq; ?></td>
+                                <td class="markup-cell"><?php echo number_format($ipmarkup, 2); ?></td>
+                                <td class="markup-cell"><?php echo number_format($spmarkup, 2); ?></td>
+                            </tr>
 														<?php
 														}
 													} else {
@@ -1768,70 +2052,199 @@ th {
 															}
 
 														?>
-															<tr <?php echo $colorcode; ?>>
-																<td align="left" valign="top" bgcolor="#FFFFFF" class="bodytext3">
-																	<div align="center"><a href="pharmacyitem1.php?st=del&&anum=<?php echo $auto_number; ?>"><img src="images/b_drop.png" width="16" height="16" border="0" /></a></div>
-																</td>
-																<td align="left" valign="top" class="bodytext3"><a href="editpharmacyitem.php?itemcode=<?php echo $itemcode; ?>">Edit</a></td>
-																<td align="left" valign="top" class="bodytext3"><?php echo $itemcode; ?> </td>
-																<td align="left" valign="top" class="bodytext3"><?php echo $categoryname; ?> </td>
-																<td align="left" valign="top" class="bodytext3"><?php echo $itemname; ?> </td>
-																<td align="left" valign="top" class="bodytext3"><?php echo $itemname_abbreviation; ?> <div align="right"></div>
-																</td>
-																<td align="left" valign="top" class="bodytext3">
-																	<div align="right"><?php echo $rateperunit; ?></div>
-																</td>
-																<td align="left" valign="top" class="bodytext3"> <?php echo $formula; ?> </td>
-																<td align="left" valign="top" class="bodytext3"> <?php echo $taxname; ?> </td>
-																<td align="left" valign="top" class="bodytext3">
-																	<div align="right"><?php echo $purchaseprice; ?> </div>
-																</td>
-																<td align="left" valign="top" class="bodytext3"> <?php echo $disease; ?> </td>
-																<td align="left" valign="top" class="bodytext3"> <?php echo $genericname; ?> </td>
-																<td align="left" valign="top" class="bodytext3"> <?php echo $type; ?> </td>
-																<td align="left" valign="top" class="bodytext3">
-																	<div align="center"> <?php echo $minimumstock; ?> </div>
-																</td>
-																<td align="left" valign="top" class="bodytext3">
-																	<div align="center"> <?php echo $maximumstock; ?> </div>
-																</td>
-																<td align="left" valign="top" class="bodytext3">
-																	<div align="center"> <?php echo $rol; ?> </div>
-																</td>
-																<td align="left" valign="top" class="bodytext3">
-																	<div align="center"> <?php echo $roq; ?> </div>
-																</td>
-																<td align="left" valign="top" class="bodytext3">
-																	<div align="right"><?php echo $ipmarkup; ?> </div>
-																</td>
-																<td align="left" valign="top" class="bodytext3">
-																	<div align="right"><?php echo $spmarkup; ?> </div>
-																</td>
-															</tr>
+                            <tr class="table-row">
+                                <td class="action-cell">
+                                    <button class="btn-action btn-delete" onclick="deleteItem('<?php echo $auto_number; ?>')" title="Delete Item">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
+                                </td>
+                                <td class="action-cell">
+                                    <a href="editpharmacyitem.php?itemcode=<?php echo $itemcode; ?>" class="btn-action btn-edit" title="Edit Item">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                </td>
+                                <td class="id-cell"><?php echo htmlspecialchars($itemcode); ?></td>
+                                <td class="category-cell"><?php echo htmlspecialchars($categoryname); ?></td>
+                                <td class="item-cell"><?php echo htmlspecialchars($itemname); ?></td>
+                                <td class="unit-cell"><?php echo htmlspecialchars($itemname_abbreviation); ?></td>
+                                <td class="charges-cell"><?php echo number_format($rateperunit, 2); ?></td>
+                                <td class="formula-cell"><?php echo htmlspecialchars($formula); ?></td>
+                                <td class="tax-cell"><?php echo htmlspecialchars($taxname); ?></td>
+                                <td class="cost-cell"><?php echo number_format($purchaseprice, 2); ?></td>
+                                <td class="disease-cell"><?php echo htmlspecialchars($disease); ?></td>
+                                <td class="generic-cell"><?php echo htmlspecialchars($genericname); ?></td>
+                                <td class="type-cell"><?php echo htmlspecialchars($type); ?></td>
+                                <td class="stock-cell"><?php echo $minimumstock; ?></td>
+                                <td class="stock-cell"><?php echo $maximumstock; ?></td>
+                                <td class="rol-cell"><?php echo $rol; ?></td>
+                                <td class="strength-cell"><?php echo $roq; ?></td>
+                                <td class="markup-cell"><?php echo number_format($ipmarkup, 2); ?></td>
+                                <td class="markup-cell"><?php echo number_format($spmarkup, 2); ?></td>
+                            </tr>
 
 
-													<?php
-														}
-													}
-													?>
-												</tbody>
-											</table>
-										</form>
-										<br>
+                            <?php
+                            }
+                            }
+                            ?>
+                        </tbody>
+                    </table>
+                </div>
 
-										<form>
-											<table width="1200" border="0" cellpadding="4" cellspacing="0" bordercolor="#666666" id="AutoNumber3" style="border-collapse: collapse">
-												<tbody>
-													<tr bgcolor="#011E6A">
-														<td colspan="18" bgcolor="#ecf0f5" class="bodytext3"><strong>Pharmacy Item Master - Deleted </strong></td>
-													</tr>
-													<tr bgcolor="#011E6A">
-														<td colspan="18" bgcolor="#FFFFFF" class="bodytext3"><span class="bodytext32">
-																<input name="search2" type="text" id="search2" size="40" value="<?php echo $search2; ?>">
-																<input type="hidden" name="searchflag2" id="searchflag2" value="searchflag2">
-																<input type="submit" name="Submit22" value="Search" style="border: 1px solid #001E6A" />
-															</span></td>
-													</tr>
+                <!-- Modern Pagination Controls -->
+                <?php if (isset($pagination) && !empty($pagination)): ?>
+                <div class="pagination-controls">
+                    <div class="pagination-info">
+                        <span class="pagination-text">
+                            Showing <?php echo ($start + 1); ?> to <?php echo min($start + $limit, $total_pages); ?> of <?php echo $total_pages; ?> entries
+                        </span>
+                    </div>
+                    
+                    <div class="pagination-nav">
+                        <?php if ($page > 1): ?>
+                            <a href="<?php echo $targetpage; ?>?page=1<?php echo isset($search1) ? '&search1=' . urlencode($search1) : ''; ?><?php echo isset($searchflag1) ? '&searchflag1=' . urlencode($searchflag1) : ''; ?><?php echo isset($searchcat) ? '&searchcat=' . urlencode($searchcat) : ''; ?><?php echo isset($searchgen) ? '&searchgen=' . urlencode($searchgen) : ''; ?><?php echo isset($pharmacytype) ? '&pharmacytype=' . urlencode($pharmacytype) : ''; ?>&limit=<?php echo $limit; ?>" class="pagination-btn pagination-btn-first">
+                                <i class="fas fa-angle-double-left"></i>
+                                First
+                            </a>
+                            <a href="<?php echo $targetpage; ?>?page=<?php echo $prev; ?><?php echo isset($search1) ? '&search1=' . urlencode($search1) : ''; ?><?php echo isset($searchflag1) ? '&searchflag1=' . urlencode($searchflag1) : ''; ?><?php echo isset($searchcat) ? '&searchcat=' . urlencode($searchcat) : ''; ?><?php echo isset($searchgen) ? '&searchgen=' . urlencode($searchgen) : ''; ?><?php echo isset($pharmacytype) ? '&pharmacytype=' . urlencode($pharmacytype) : ''; ?>&limit=<?php echo $limit; ?>" class="pagination-btn pagination-btn-prev">
+                                <i class="fas fa-angle-left"></i>
+                                Previous
+                            </a>
+                        <?php else: ?>
+                            <span class="pagination-btn pagination-btn-disabled">
+                                <i class="fas fa-angle-double-left"></i>
+                                First
+                            </span>
+                            <span class="pagination-btn pagination-btn-disabled">
+                                <i class="fas fa-angle-left"></i>
+                                Previous
+                            </span>
+                        <?php endif; ?>
+
+                        <div class="pagination-pages">
+                            <?php
+                            // Show page numbers
+                            $start_page = max(1, $page - 2);
+                            $end_page = min($lastpage, $page + 2);
+                            
+                            if ($start_page > 1): ?>
+                                <a href="<?php echo $targetpage; ?>?page=1<?php echo isset($search1) ? '&search1=' . urlencode($search1) : ''; ?><?php echo isset($searchflag1) ? '&searchflag1=' . urlencode($searchflag1) : ''; ?><?php echo isset($searchcat) ? '&searchcat=' . urlencode($searchcat) : ''; ?><?php echo isset($searchgen) ? '&searchgen=' . urlencode($searchgen) : ''; ?><?php echo isset($pharmacytype) ? '&pharmacytype=' . urlencode($pharmacytype) : ''; ?>&limit=<?php echo $limit; ?>" class="pagination-number">1</a>
+                                <?php if ($start_page > 2): ?>
+                                    <span class="pagination-ellipsis">...</span>
+                                <?php endif; ?>
+                            <?php endif; ?>
+
+                            <?php for ($i = $start_page; $i <= $end_page; $i++): ?>
+                                <?php if ($i == $page): ?>
+                                    <span class="pagination-number pagination-number-active"><?php echo $i; ?></span>
+                                <?php else: ?>
+                                    <a href="<?php echo $targetpage; ?>?page=<?php echo $i; ?><?php echo isset($search1) ? '&search1=' . urlencode($search1) : ''; ?><?php echo isset($searchflag1) ? '&searchflag1=' . urlencode($searchflag1) : ''; ?><?php echo isset($searchcat) ? '&searchcat=' . urlencode($searchcat) : ''; ?><?php echo isset($searchgen) ? '&searchgen=' . urlencode($searchgen) : ''; ?><?php echo isset($pharmacytype) ? '&pharmacytype=' . urlencode($pharmacytype) : ''; ?>&limit=<?php echo $limit; ?>" class="pagination-number"><?php echo $i; ?></a>
+                                <?php endif; ?>
+                            <?php endfor; ?>
+
+                            <?php if ($end_page < $lastpage): ?>
+                                <?php if ($end_page < $lastpage - 1): ?>
+                                    <span class="pagination-ellipsis">...</span>
+                                <?php endif; ?>
+                                <a href="<?php echo $targetpage; ?>?page=<?php echo $lastpage; ?><?php echo isset($search1) ? '&search1=' . urlencode($search1) : ''; ?><?php echo isset($searchflag1) ? '&searchflag1=' . urlencode($searchflag1) : ''; ?><?php echo isset($searchcat) ? '&searchcat=' . urlencode($searchcat) : ''; ?><?php echo isset($searchgen) ? '&searchgen=' . urlencode($searchgen) : ''; ?><?php echo isset($pharmacytype) ? '&pharmacytype=' . urlencode($pharmacytype) : ''; ?>&limit=<?php echo $limit; ?>" class="pagination-number"><?php echo $lastpage; ?></a>
+                            <?php endif; ?>
+                        </div>
+
+                        <?php if ($page < $lastpage): ?>
+                            <a href="<?php echo $targetpage; ?>?page=<?php echo $next; ?><?php echo isset($search1) ? '&search1=' . urlencode($search1) : ''; ?><?php echo isset($searchflag1) ? '&searchflag1=' . urlencode($searchflag1) : ''; ?><?php echo isset($searchcat) ? '&searchcat=' . urlencode($searchcat) : ''; ?><?php echo isset($searchgen) ? '&searchgen=' . urlencode($searchgen) : ''; ?><?php echo isset($pharmacytype) ? '&pharmacytype=' . urlencode($pharmacytype) : ''; ?>&limit=<?php echo $limit; ?>" class="pagination-btn pagination-btn-next">
+                                Next
+                                <i class="fas fa-angle-right"></i>
+                            </a>
+                            <a href="<?php echo $targetpage; ?>?page=<?php echo $lastpage; ?><?php echo isset($search1) ? '&search1=' . urlencode($search1) : ''; ?><?php echo isset($searchflag1) ? '&searchflag1=' . urlencode($searchflag1) : ''; ?><?php echo isset($searchcat) ? '&searchcat=' . urlencode($searchcat) : ''; ?><?php echo isset($searchgen) ? '&searchgen=' . urlencode($searchgen) : ''; ?><?php echo isset($pharmacytype) ? '&pharmacytype=' . urlencode($pharmacytype) : ''; ?>&limit=<?php echo $limit; ?>" class="pagination-btn pagination-btn-last">
+                                Last
+                                <i class="fas fa-angle-double-right"></i>
+                            </a>
+                        <?php else: ?>
+                            <span class="pagination-btn pagination-btn-disabled">
+                                Next
+                                <i class="fas fa-angle-right"></i>
+                            </span>
+                            <span class="pagination-btn pagination-btn-disabled">
+                                Last
+                                <i class="fas fa-angle-double-right"></i>
+                            </span>
+                        <?php endif; ?>
+                    </div>
+                </div>
+                <?php endif; ?>
+            </div>
+            <!-- Deleted Items Section -->
+            <div class="deleted-items-section">
+                <div class="section-header">
+                    <i class="fas fa-trash-alt"></i>
+                    <h3>Deleted Pharmacy Items</h3>
+                </div>
+                
+                <form method="get" action="pharmacyitem1.php" class="deleted-search-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="search2" class="form-label">Search Deleted Items</label>
+                            <input name="search2" type="text" id="search2" class="form-input" 
+                                   value="<?php echo $search2; ?>" placeholder="Search deleted items..." autocomplete="off">
+                            <input type="hidden" name="searchflag2" id="searchflag2" value="searchflag2">
+                        </div>
+                        
+                        <div class="form-group form-group-submit">
+                            <button type="submit" name="Submit22" class="submit-btn">
+                                <i class="fas fa-search"></i>
+                                Search Deleted
+                            </button>
+                        </div>
+                    </div>
+                </form>
+
+                <!-- Deleted Items Pagination Info -->
+                <?php if (isset($deleted_total_pages) && $deleted_total_pages > 0): ?>
+                <div class="pagination-info-section">
+                    <div class="pagination-stats">
+                        <div class="stats-info">
+                            <i class="fas fa-info-circle"></i>
+                            <span>Showing page <?php echo $deleted_page; ?> of <?php echo ceil($deleted_total_pages / $deleted_limit); ?> (Total: <?php echo $deleted_total_pages; ?> deleted items)</span>
+                        </div>
+                        <div class="records-per-page">
+                            <label for="deletedRecordsPerPage">Records per page:</label>
+                            <select id="deletedRecordsPerPage" onchange="changeDeletedRecordsPerPage(this.value)">
+                                <option value="10" <?php echo $deleted_limit == 10 ? 'selected' : ''; ?>>10</option>
+                                <option value="25" <?php echo $deleted_limit == 25 ? 'selected' : ''; ?>>25</option>
+                                <option value="50" <?php echo $deleted_limit == 50 ? 'selected' : ''; ?>>50</option>
+                                <option value="100" <?php echo $deleted_limit == 100 ? 'selected' : ''; ?>>100</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <?php endif; ?>
+
+                <!-- Deleted Items Table -->
+                <div class="table-container">
+                    <table class="deleted-table">
+                        <thead>
+                            <tr>
+                                <th class="action-header">Activate</th>
+                                <th class="id-header">ID / Code</th>
+                                <th class="category-header">Category</th>
+                                <th class="item-header">Pharmacy Item</th>
+                                <th class="unit-header">Unit</th>
+                                <th class="charges-header">Charges</th>
+                                <th class="formula-header">Formula</th>
+                                <th class="tax-header">Tax</th>
+                                <th class="cost-header">Cost Price</th>
+                                <th class="disease-header">Disease</th>
+                                <th class="generic-header">Generic</th>
+                                <th class="type-header">Type</th>
+                                <th class="stock-header">Min Stock</th>
+                                <th class="stock-header">Max Stock</th>
+                                <th class="rol-header">ROL</th>
+                                <th class="roq-header">ROQ</th>
+                                <th class="markup-header">IP Markup</th>
+                                <th class="markup-header">SP Markup</th>
+                            </tr>
+                        </thead>
+                        <tbody>
 													<tr bgcolor="#011E6A">
 														<td width="4%" bgcolor="#ecf0f5" class="bodytext3">
 															<div align="center"><strong>Activate</strong></div>
@@ -1892,10 +2305,25 @@ th {
 													} else {
 														$searchflag2 = "";
 													}
+													// Deleted items pagination setup
+													$deleted_limit = 10; // Records per page for deleted items
+													if (isset($_REQUEST['deleted_page'])) {
+														$deleted_page = $_REQUEST['deleted_page'];
+													} else {
+														$deleted_page = 1;
+													}
+													$deleted_start = ($deleted_page - 1) * $deleted_limit;
+													
 													if ($searchflag2 == 'searchflag2') {
 
 														$search2 = $_REQUEST["search2"];
-														$query1 = "select * from master_medicine where   ( itemname like '%$search2%' or categoryname = '$search2') and status = 'deleted' order by auto_number asc LIMIT 100";
+														// Get total count for deleted items with search
+														$count_query = "select count(*) as total from master_medicine where ( itemname like '%$search2%' or categoryname = '$search2') and status = 'deleted'";
+														$count_exec = mysqli_query($GLOBALS["___mysqli_ston"], $count_query) or die("Error in count query" . mysqli_error($GLOBALS["___mysqli_ston"]));
+														$count_res = mysqli_fetch_array($count_exec);
+														$deleted_total_pages = $count_res['total'];
+														
+														$query1 = "select * from master_medicine where   ( itemname like '%$search2%' or categoryname = '$search2') and status = 'deleted' order by auto_number asc LIMIT $deleted_start, $deleted_limit";
 														$exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die("Error in Query1" . mysqli_error($GLOBALS["___mysqli_ston"]));
 														while ($res1 = mysqli_fetch_array($exec1)) {
 															$itemcode = $res1["itemcode"];
@@ -1941,53 +2369,42 @@ th {
 															}
 
 													?>
-															<tr <?php echo $colorcode; ?>>
-																<td align="left" valign="top" bgcolor="#FFFFFF" class="bodytext3">
-																	<a href="pharmacyitem1.php?st=activate&&anum=<?php echo $auto_number; ?>" class="bodytext3">
-																		<div align="center" class="bodytext3">Activate</div>
-																	</a>
-																</td>
-																<td align="left" valign="top" class="bodytext3"><?php echo $itemcode; ?> </td>
-																<td align="left" valign="top" class="bodytext3"><?php echo $categoryname; ?> </td>
-																<td align="left" valign="top" class="bodytext3"><?php echo $itemname; ?></td>
-																<td align="left" valign="top" class="bodytext3"><?php echo $itemname_abbreviation; ?></td>
-																<td align="left" valign="top" class="bodytext3">
-																	<div align="right"><span class="bodytext32"><?php echo $rateperunit; ?></span></div>
-																</td>
-																<td align="left" valign="top" class="bodytext3"> <?php echo $formula; ?> </td>
-																<td align="left" valign="top" class="bodytext3"> <?php echo $taxname; ?> </td>
-																<td align="left" valign="top" class="bodytext3">
-																	<div align="right"><?php echo $purchaseprice; ?> </div>
-																</td>
-																<td align="left" valign="top" class="bodytext3"> <?php echo $disease; ?> </td>
-																<td align="left" valign="top" class="bodytext3"> <?php echo $genericname; ?> </td>
-																<td align="left" valign="top" class="bodytext3"> <?php echo $type; ?> </td>
-																<td align="left" valign="top" class="bodytext3">
-																	<div align="center"> <?php echo $minimumstock; ?> </div>
-																</td>
-																<td align="left" valign="top" class="bodytext3">
-																	<div align="center"> <?php echo $maximumstock; ?> </div>
-																</td>
-																<td align="left" valign="top" class="bodytext3">
-																	<div align="center"> <?php echo $rol; ?> </div>
-																</td>
-																<td align="left" valign="top" class="bodytext3">
-																	<div align="center"> <?php echo $roq; ?> </div>
-																</td>
-																<td align="left" valign="top" class="bodytext3">
-																	<div align="right"><?php echo $ipmarkup; ?> </div>
-																</td>
-																<td align="left" valign="top" class="bodytext3">
-																	<div align="right"><?php echo $spmarkup; ?> </div>
-																</td>
-															</tr>
+                            <tr class="table-row deleted-row">
+                                <td class="action-cell">
+                                    <button class="btn-action btn-activate" onclick="activateItem('<?php echo $auto_number; ?>')" title="Activate Item">
+                                        <i class="fas fa-undo"></i>
+                                    </button>
+                                </td>
+                                <td class="id-cell"><?php echo htmlspecialchars($itemcode); ?></td>
+                                <td class="category-cell"><?php echo htmlspecialchars($categoryname); ?></td>
+                                <td class="item-cell"><?php echo htmlspecialchars($itemname); ?></td>
+                                <td class="unit-cell"><?php echo htmlspecialchars($itemname_abbreviation); ?></td>
+                                <td class="charges-cell"><?php echo number_format($rateperunit, 2); ?></td>
+                                <td class="formula-cell"><?php echo htmlspecialchars($formula); ?></td>
+                                <td class="tax-cell"><?php echo htmlspecialchars($taxname); ?></td>
+                                <td class="cost-cell"><?php echo number_format($purchaseprice, 2); ?></td>
+                                <td class="disease-cell"><?php echo htmlspecialchars($disease); ?></td>
+                                <td class="generic-cell"><?php echo htmlspecialchars($genericname); ?></td>
+                                <td class="type-cell"><?php echo htmlspecialchars($type); ?></td>
+                                <td class="stock-cell"><?php echo $minimumstock; ?></td>
+                                <td class="stock-cell"><?php echo $maximumstock; ?></td>
+                                <td class="rol-cell"><?php echo $rol; ?></td>
+                                <td class="roq-cell"><?php echo $roq; ?></td>
+                                <td class="markup-cell"><?php echo number_format($ipmarkup, 2); ?></td>
+                                <td class="markup-cell"><?php echo number_format($spmarkup, 2); ?></td>
+                            </tr>
 
 
 														<?php
 														}
 													} else {
+														// Get total count for all deleted items
+														$count_query = "select count(*) as total from master_medicine where status = 'deleted'";
+														$count_exec = mysqli_query($GLOBALS["___mysqli_ston"], $count_query) or die("Error in count query" . mysqli_error($GLOBALS["___mysqli_ston"]));
+														$count_res = mysqli_fetch_array($count_exec);
+														$deleted_total_pages = $count_res['total'];
 
-														$query1 = "select * from master_medicine where   status = 'deleted' order by auto_number asc LIMIT 100";
+														$query1 = "select * from master_medicine where   status = 'deleted' order by auto_number asc LIMIT $deleted_start, $deleted_limit";
 														$exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die("Error in Query1" . mysqli_error($GLOBALS["___mysqli_ston"]));
 														while ($res1 = mysqli_fetch_array($exec1)) {
 															$itemcode = $res1["itemcode"];
@@ -2033,58 +2450,127 @@ th {
 															}
 
 														?>
-															<tr <?php echo $colorcode; ?>>
-																<td align="left" valign="top" bgcolor="#FFFFFF" class="bodytext3">
-																	<a href="pharmacyitem1.php?st=activate&&anum=<?php echo $auto_number; ?>" class="bodytext3">
-																		<div align="center" class="bodytext3">Activate</div>
-																	</a>
-																</td>
-																<td align="left" valign="top" class="bodytext3"><?php echo $itemcode; ?> </td>
-																<td align="left" valign="top" class="bodytext3"><?php echo $categoryname; ?> </td>
-																<td align="left" valign="top" class="bodytext3"><?php echo $itemname; ?></td>
-																<td align="left" valign="top" class="bodytext3"><?php echo $itemname_abbreviation; ?></td>
-																<td align="left" valign="top" class="bodytext3">
-																	<div align="right"><span class="bodytext32"><?php echo $rateperunit; ?></span></div>
-																</td>
-																<td align="left" valign="top" class="bodytext3"> <?php echo $formula; ?> </td>
-																<td align="left" valign="top" class="bodytext3"> <?php echo $taxname; ?> </td>
-																<td align="left" valign="top" class="bodytext3">
-																	<div align="right"><?php echo $purchaseprice; ?> </div>
-																</td>
-																<td align="left" valign="top" class="bodytext3"> <?php echo $disease; ?> </td>
-																<td align="left" valign="top" class="bodytext3"> <?php echo $genericname; ?> </td>
-																<td align="left" valign="top" class="bodytext3"> <?php echo $type; ?> </td>
-																<td align="left" valign="top" class="bodytext3">
-																	<div align="center"> <?php echo $minimumstock; ?> </div>
-																</td>
-																<td align="left" valign="top" class="bodytext3">
-																	<div align="center"> <?php echo $maximumstock; ?> </div>
-																</td>
-																<td align="left" valign="top" class="bodytext3">
-																	<div align="center"> <?php echo $rol; ?> </div>
-																</td>
-																<td align="left" valign="top" class="bodytext3">
-																	<div align="center"> <?php echo $roq; ?> </div>
-																</td>
-																<td align="left" valign="top" class="bodytext3">
-																	<div align="right"><?php echo $ipmarkup; ?> </div>
-																</td>
-																<td align="left" valign="top" class="bodytext3">
-																	<div align="right"><?php echo $spmarkup; ?> </div>
-																</td>
-															</tr>
+                            <tr class="table-row deleted-row">
+                                <td class="action-cell">
+                                    <button class="btn-action btn-activate" onclick="activateItem('<?php echo $auto_number; ?>')" title="Activate Item">
+                                        <i class="fas fa-undo"></i>
+                                    </button>
+                                </td>
+                                <td class="id-cell"><?php echo htmlspecialchars($itemcode); ?></td>
+                                <td class="category-cell"><?php echo htmlspecialchars($categoryname); ?></td>
+                                <td class="item-cell"><?php echo htmlspecialchars($itemname); ?></td>
+                                <td class="unit-cell"><?php echo htmlspecialchars($itemname_abbreviation); ?></td>
+                                <td class="charges-cell"><?php echo number_format($rateperunit, 2); ?></td>
+                                <td class="formula-cell"><?php echo htmlspecialchars($formula); ?></td>
+                                <td class="tax-cell"><?php echo htmlspecialchars($taxname); ?></td>
+                                <td class="cost-cell"><?php echo number_format($purchaseprice, 2); ?></td>
+                                <td class="disease-cell"><?php echo htmlspecialchars($disease); ?></td>
+                                <td class="generic-cell"><?php echo htmlspecialchars($genericname); ?></td>
+                                <td class="type-cell"><?php echo htmlspecialchars($type); ?></td>
+                                <td class="stock-cell"><?php echo $minimumstock; ?></td>
+                                <td class="stock-cell"><?php echo $maximumstock; ?></td>
+                                <td class="rol-cell"><?php echo $rol; ?></td>
+                                <td class="roq-cell"><?php echo $roq; ?></td>
+                                <td class="markup-cell"><?php echo number_format($ipmarkup, 2); ?></td>
+                                <td class="markup-cell"><?php echo number_format($spmarkup, 2); ?></td>
+                            </tr>
 
 
 													<?php
 														}
 													}
 													?>
-													<tr>
-														<td colspan="6" align="middle">&nbsp;</td>
-													</tr>
-												</tbody>
-											</table>
-										</form>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Deleted Items Pagination Controls -->
+                <?php if (isset($deleted_total_pages) && $deleted_total_pages > 0): ?>
+                <?php
+                $deleted_lastpage = ceil($deleted_total_pages / $deleted_limit);
+                $deleted_prev = $deleted_page - 1;
+                $deleted_next = $deleted_page + 1;
+                ?>
+                <div class="pagination-controls">
+                    <div class="pagination-info">
+                        <span class="pagination-text">
+                            Showing <?php echo ($deleted_start + 1); ?> to <?php echo min($deleted_start + $deleted_limit, $deleted_total_pages); ?> of <?php echo $deleted_total_pages; ?> deleted entries
+                        </span>
+                    </div>
+                    
+                    <div class="pagination-nav">
+                        <?php if ($deleted_page > 1): ?>
+                            <a href="<?php echo $targetpage; ?>?deleted_page=1<?php echo isset($search2) ? '&search2=' . urlencode($search2) : ''; ?><?php echo isset($searchflag2) ? '&searchflag2=' . urlencode($searchflag2) : ''; ?>&deleted_limit=<?php echo $deleted_limit; ?>" class="pagination-btn pagination-btn-first">
+                                <i class="fas fa-angle-double-left"></i>
+                                First
+                            </a>
+                            <a href="<?php echo $targetpage; ?>?deleted_page=<?php echo $deleted_prev; ?><?php echo isset($search2) ? '&search2=' . urlencode($search2) : ''; ?><?php echo isset($searchflag2) ? '&searchflag2=' . urlencode($searchflag2) : ''; ?>&deleted_limit=<?php echo $deleted_limit; ?>" class="pagination-btn pagination-btn-prev">
+                                <i class="fas fa-angle-left"></i>
+                                Previous
+                            </a>
+                        <?php else: ?>
+                            <span class="pagination-btn pagination-btn-disabled">
+                                <i class="fas fa-angle-double-left"></i>
+                                First
+                            </span>
+                            <span class="pagination-btn pagination-btn-disabled">
+                                <i class="fas fa-angle-left"></i>
+                                Previous
+                            </span>
+                        <?php endif; ?>
+
+                        <div class="pagination-pages">
+                            <?php
+                            // Show page numbers for deleted items
+                            $deleted_start_page = max(1, $deleted_page - 2);
+                            $deleted_end_page = min($deleted_lastpage, $deleted_page + 2);
+                            
+                            if ($deleted_start_page > 1): ?>
+                                <a href="<?php echo $targetpage; ?>?deleted_page=1<?php echo isset($search2) ? '&search2=' . urlencode($search2) : ''; ?><?php echo isset($searchflag2) ? '&searchflag2=' . urlencode($searchflag2) : ''; ?>&deleted_limit=<?php echo $deleted_limit; ?>" class="pagination-number">1</a>
+                                <?php if ($deleted_start_page > 2): ?>
+                                    <span class="pagination-ellipsis">...</span>
+                                <?php endif; ?>
+                            <?php endif; ?>
+
+                            <?php for ($i = $deleted_start_page; $i <= $deleted_end_page; $i++): ?>
+                                <?php if ($i == $deleted_page): ?>
+                                    <span class="pagination-number pagination-number-active"><?php echo $i; ?></span>
+                                <?php else: ?>
+                                    <a href="<?php echo $targetpage; ?>?deleted_page=<?php echo $i; ?><?php echo isset($search2) ? '&search2=' . urlencode($search2) : ''; ?><?php echo isset($searchflag2) ? '&searchflag2=' . urlencode($searchflag2) : ''; ?>&deleted_limit=<?php echo $deleted_limit; ?>" class="pagination-number"><?php echo $i; ?></a>
+                                <?php endif; ?>
+                            <?php endfor; ?>
+
+                            <?php if ($deleted_end_page < $deleted_lastpage): ?>
+                                <?php if ($deleted_end_page < $deleted_lastpage - 1): ?>
+                                    <span class="pagination-ellipsis">...</span>
+                                <?php endif; ?>
+                                <a href="<?php echo $targetpage; ?>?deleted_page=<?php echo $deleted_lastpage; ?><?php echo isset($search2) ? '&search2=' . urlencode($search2) : ''; ?><?php echo isset($searchflag2) ? '&searchflag2=' . urlencode($searchflag2) : ''; ?>&deleted_limit=<?php echo $deleted_limit; ?>" class="pagination-number"><?php echo $deleted_lastpage; ?></a>
+                            <?php endif; ?>
+                        </div>
+
+                        <?php if ($deleted_page < $deleted_lastpage): ?>
+                            <a href="<?php echo $targetpage; ?>?deleted_page=<?php echo $deleted_next; ?><?php echo isset($search2) ? '&search2=' . urlencode($search2) : ''; ?><?php echo isset($searchflag2) ? '&searchflag2=' . urlencode($searchflag2) : ''; ?>&deleted_limit=<?php echo $deleted_limit; ?>" class="pagination-btn pagination-btn-next">
+                                Next
+                                <i class="fas fa-angle-right"></i>
+                            </a>
+                            <a href="<?php echo $targetpage; ?>?deleted_page=<?php echo $deleted_lastpage; ?><?php echo isset($search2) ? '&search2=' . urlencode($search2) : ''; ?><?php echo isset($searchflag2) ? '&searchflag2=' . urlencode($searchflag2) : ''; ?>&deleted_limit=<?php echo $deleted_limit; ?>" class="pagination-btn pagination-btn-last">
+                                Last
+                                <i class="fas fa-angle-double-right"></i>
+                            </a>
+                        <?php else: ?>
+                            <span class="pagination-btn pagination-btn-disabled">
+                                Next
+                                <i class="fas fa-angle-right"></i>
+                            </span>
+                            <span class="pagination-btn pagination-btn-disabled">
+                                Last
+                                <i class="fas fa-angle-double-right"></i>
+                            </span>
+                        <?php endif; ?>
+                    </div>
+                </div>
+                <?php endif; ?>
+            </div>
 									</td>
 								</tr>
 								<tr>

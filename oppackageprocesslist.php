@@ -1,2220 +1,565 @@
 <?php
-
 session_start();
-
 include ("includes/loginverify.php");
-
 include ("db/db_connect.php");
 
-
-
 $ipaddress = $_SERVER['REMOTE_ADDR'];
-
 $updatedatetime = date('Y-m-d H:i:s');
-
 $username = $_SESSION['username'];
-
 $companyanum = $_SESSION['companyanum'];
-
 $companyname = $_SESSION['companyname'];
-
 $transactiondatefrom = date('Y-m-d');
-
 $transactiondateto = date('Y-m-d');
+$consultationdate = '';
 
-$consultationdate = '';	
+if(isset($_POST['ADate1'])) {
+    $fromdate = $_POST['ADate1'];
+} else {
+    $fromdate = $transactiondatefrom;
+}
 
-if(isset($_POST['ADate1'])){$fromdate = $_POST['ADate1'];}else{$fromdate=$transactiondatefrom;}
+if(isset($_POST['ADate2'])) {
+    $todate = $_POST['ADate2'];
+} else {
+    $todate = $transactiondateto;
+}
 
-if(isset($_POST['ADate2'])){$todate = $_POST['ADate2'];}else{$todate=$transactiondateto;}
-
-$var112=0;
-
+$var112 = 0;
 $docno = $_SESSION['docno'];
-
 $sno = 0;
 
+// Get location for sort by location purpose
+$location = isset($_REQUEST['location']) ? $_REQUEST['location'] : '';
 
+if($location != '') {
+    $locationcode = $location;
+}
 
- //get location for sort by location purpose
+// Status messages
+$matchfailed = isset($_REQUEST['st']) ? $_REQUEST['st'] : '';
+$errmsg = "";
+$bgcolorcode = "";
 
-   $location=isset($_REQUEST['location'])?$_REQUEST['location']:'';
-
-	if($location!='')
-
-	{
-
-		  $locationcode=$location;
-
-		}
-
-		//location get end here
-
-
-
-
-
-
-
+if($matchfailed == "matchfailed") {
+    $errmsg = "Failed to update.";
+    $bgcolorcode = 'error';
+}
 ?>
 
-<style type="text/css">
-
-<!--
-
-body {
-
-	margin-left: 0px;
-
-	margin-top: 0px;
-
-	background-color: #ecf0f5;
-
-}
-
-.bodytext3 {	FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3B3B3C; FONT-FAMILY: Tahoma
-
-}
-
-.number
-
-{
-
-padding-left:900px;
-
-text-align:right;
-
-font-weight:bold;
-
-}
-
--->
-
-</style>
-
-<link href="css/datepickerstyle.css" rel="stylesheet" type="text/css" />
-
-<script type="text/javascript" src="js/adddate.js"></script>
-
-<script type="text/javascript" src="js/adddate2.js"></script>
-
-<script type="text/javascript" src="jquery/jquery-1.11.3.min.js"></script>
-
-<script language="javascript">
-
-$(document).ready(function() {
-
-	$('.executelink').click(function(){
-    return confirm("Are you sure you want to process?");
-})
-});
-
-function cbcustomername1()
-
-{
-
-	document.cbform1.submit();
-
-}
-
-
-
-</script>
-
-
-
-<script type="text/javascript">
-
-function pharmacy(patientcode,visitcode)
-
-{
-
-	var patientcode = patientcode;
-
-	var visitcode = visitcode;
-
-	var url="pharmacy1.php?RandomKey="+Math.random()+"&&patientcode="+patientcode+"&&visitcode="+visitcode;
-
-	
-
-window.open(url,"Pharmacy",'width=600,height=400');
-
-}
-
-function disableEnterKey(varPassed)
-
-{
-
-	//alert ("Back Key Press");
-
-	if (event.keyCode==8) 
-
-	{
-
-		event.keyCode=0; 
-
-		return event.keyCode 
-
-		return false;
-
-	}
-
-	
-
-	var key;
-
-	if(window.event)
-
-	{
-
-		key = window.event.keyCode;     //IE
-
-	}
-
-	else
-
-	{
-
-		key = e.which;     //firefox
-
-	}
-
-
-
-	if(key == 13) // if enter key press
-
-	{
-
-		//alert ("Enter Key Press2");
-
-		return false;
-
-	}
-
-	else
-
-	{
-
-		return true;
-
-	}
-
-}
-
-
-
-
-
-
-
-function ajaxlocationfunction(val)
-
-{ 
-
-if (window.XMLHttpRequest)
-
-					  {// code for IE7+, Firefox, Chrome, Opera, Safari
-
-					  xmlhttp=new XMLHttpRequest();
-
-					  }
-
-					else
-
-					  {// code for IE6, IE5
-
-					  xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
-
-					  }
-
-					xmlhttp.onreadystatechange=function()
-
-					  {
-
-					  if (xmlhttp.readyState==4 && xmlhttp.status==200)
-
-						{
-
-						document.getElementById("ajaxlocation").innerHTML=xmlhttp.responseText;
-
-						}
-
-					  }
-
-					xmlhttp.open("GET","ajax/ajaxgetlocationname.php?loccode="+val,true);
-
-					xmlhttp.send();
-
-}
-
-					
-
-//ajax to get location which is selected ends here
-
-
-
-</script>
-
-<script src="jquery/jquery-1.11.3.min.js"></script>
-
-
-
-<script>
-
-$(document).ready(function(){
-
-
-
-$('.showdocument').click(function(){
-
-	var sno = $(this).attr('id');
-
-	$('#show'+sno).toggle();	
-
-});
-
-});
-
-</script>
-
-
-
-<script src="js/datetimepicker_css.js"></script>
-
-<link rel="stylesheet" type="text/css" href="css/autosuggest.css" />        
-
-<style type="text/css">
-
-<!--
-
-.bodytext31 {FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3b3b3c; FONT-FAMILY: Tahoma
-
-}
-
-.style1 {FONT-WEIGHT: bold; FONT-SIZE: 11px; COLOR: #3b3b3c; FONT-FAMILY: Tahoma; }
-
--->
-
-</style>
-
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OP Package Process List - MedStar</title>
+    
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <!-- Modern CSS -->
+    <link rel="stylesheet" href="css/oppackageprocesslist-modern.css?v=<?php echo time(); ?>">
+    
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- Date picker styles -->
+    <link href="css/datepickerstyle.css" rel="stylesheet" type="text/css" />
+    
+    <!-- AutoComplete styles -->
+    <link rel="stylesheet" type="text/css" href="css/autosuggest.css" />
+    
+    <!-- JavaScript files -->
+    <script type="text/javascript" src="js/adddate.js"></script>
+    <script type="text/javascript" src="js/adddate2.js"></script>
+    <script src="js/datetimepicker_css.js"></script>
 </head>
-
 <body>
+    <!-- Hospital Header -->
+    <header class="hospital-header">
+        <h1 class="hospital-title">🏥 MedStar Hospital Management</h1>
+        <p class="hospital-subtitle">Advanced Healthcare Management Platform</p>
+    </header>
 
+    <!-- User Information Bar -->
+    <div class="user-info-bar">
+        <div class="user-welcome">
+            <span class="welcome-text">Welcome, <strong><?php echo htmlspecialchars($username); ?></strong></span>
+            <span class="location-info">📍 Company: <?php echo htmlspecialchars($companyname); ?></span>
+        </div>
+        <div class="user-actions">
+            <a href="mainmenu1.php" class="btn btn-outline">🏠 Main Menu</a>
+            <a href="logout.php" class="btn btn-outline">🚪 Logout</a>
+        </div>
+    </div>
 
+    <!-- Navigation Breadcrumb -->
+    <nav class="nav-breadcrumb">
+        <a href="mainmenu1.php">🏠 Home</a>
+        <span>→</span>
+        <a href="op.php">🏥 OP Management</a>
+        <span>→</span>
+        <span>Wellness Package Process List</span>
+    </nav>
 
-<table width="103%" border="0" cellspacing="0" cellpadding="2">
+    <!-- Floating Menu Toggle -->
+    <div id="menuToggle" class="floating-menu-toggle">
+        <i class="fas fa-bars"></i>
+    </div>
 
-  <tr>
-
-    <td colspan="9" bgcolor="#ecf0f5"><?php include ("includes/alertmessages1.php"); ?></td>
-
-  </tr>
-
-  <tr>
-
-    <td colspan="9" bgcolor="#ecf0f5"><?php include ("includes/title1.php"); ?></td>
-
-  </tr>
-
-  <tr>
-
-    <td colspan="9" bgcolor="#ecf0f5"><?php include ("includes/menu1.php"); ?></td>
-
-  </tr>
-
-  <tr>
-
-    <td colspan="9">&nbsp;</td>
-
-  </tr>
-
-   <tr>
-
-    <td width="1%">&nbsp;</td>
-
-    <td width="99%" valign="top"><table width="105%" border="0" cellspacing="0" cellpadding="0">
-
-	      
-
-		  <tr>
-
-        <td width="860">
-
-              <form name="cbform1" method="post" action="oppackageprocesslist.php">
-
-                <table width="600" border="0" align="left" cellpadding="4" cellspacing="0" bordercolor="#666666" id="AutoNumber3" style="border-collapse: collapse">
-
-                  <tbody>
-
-
-
-<?php
-
-                  	$matchfailed=isset($_REQUEST['st'])?$_REQUEST['st']:'';
-
-if($matchfailed=="matchfailed")
-
-{
-
-?>
-
-                 <tr>
-
-                  <td colspan="7"  bgcolor="#FF9933" class="bodytext31"> <span> Failed to update. </span> </td>
-
-                 </tr>
-
-
-
-<?php	
-
-}
-
-?>
-
-
-
-                   <tr>
-
-                   
-
-          <td colspan="3" bgcolor="#ecf0f5" class="bodytext31"><strong>Wellness Package List</strong></td>
-
-            <td colspan="3" align="right" bgcolor="#ecf0f5" class="bodytext3" id="ajaxlocation"><strong> Location </strong>
-
-             
-
+    <!-- Main Container with Sidebar -->
+    <div class="main-container-with-sidebar">
+        <!-- Left Sidebar -->
+        <aside id="leftSidebar" class="left-sidebar">
+            <div class="sidebar-header">
+                <h3>Quick Navigation</h3>
+                <button id="sidebarToggle" class="sidebar-toggle">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+            </div>
             
-
-                  <?php
-
-						
-
-						if ($location!='')
-
-						{
-
-						$query12 = "select locationname from master_location where locationcode='$location' order by locationname";
-
-						$exec12 = mysqli_query($GLOBALS["___mysqli_ston"], $query12) or die ("Error in Query12".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-						$res12 = mysqli_fetch_array($exec12);
-
-						
-
-						echo $res1location = $res12["locationname"];
-
-						//echo $location;
-
-						}
-
-						else
-
-						{
-
-						$query1 = "select locationname from login_locationdetails where username='$username' and docno='$docno' group by locationname order by locationname";
-
-						$exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-						$res1 = mysqli_fetch_array($exec1);
-
-						
-
-						echo $res1location = $res1["locationname"];
-
-						//$res1locationanum = $res1["locationcode"];
-
-						}
-
-						?>
-
-						
-
-						
-
-                  
-
-                  </td> 
-
-          </tr>
-
-                  
-
-                  	  <tr>
-
-              <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">Location</td>
-
-              <td  bgcolor="#FFFFFF" class="bodytext3"  colspan="3" ><select name="location" id="location" onChange=" ajaxlocationfunction(this.value);" style="border: 1px solid #001E6A;">
-
-                  <?php
-
-						
-
-						$query = "select * from login_locationdetails where username='$username' and docno='$docno' group by locationname order by locationname";
-
-						$exec = mysqli_query($GLOBALS["___mysqli_ston"], $query) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-						while ($res = mysqli_fetch_array($exec))
-
-						{
-
-						$reslocation = $res["locationname"];
-
-						$reslocationanum = $res["locationcode"];
-
-						?>
-
-						<option value="<?php echo $reslocationanum; ?>" <?php if($location!='')if($location==$reslocationanum){echo "selected";}?>><?php echo $reslocation; ?></option>
-
-						<?php
-
-						}
-
-						?>
-
-                  </select></td>
-
-                   
-
-                  <input type="hidden" name="locationnamenew" value="<?php echo $locationname; ?>">
-
-                <input type="hidden" name="locationcodenew" value="<?php echo $res1locationanum; ?>">
-
-             
-
-              </tr>
-
-				  	   <tr>
-
-              <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">Patient Name</td>
-
-              <td colspan="3" align="left" valign="top"  bgcolor="#FFFFFF"><span class="bodytext3">
-
-                <input name="patient" type="text" id="patient" value="" size="50" autocomplete="off">
-
-              </span></td>
-
-              </tr>
-
-			    <tr>
-
-              <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">Registration No</td>
-
-              <td colspan="3" align="left" valign="top"  bgcolor="#FFFFFF"><span class="bodytext3">
-
-                <input name="patientcode" type="text" id="patient" value="" size="50" autocomplete="off">
-
-              </span></td>
-
-              </tr>
-
-			   <tr>
-
-              <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">Visitcode</td>
-
-              <td colspan="3" align="left" valign="top"  bgcolor="#FFFFFF"><span class="bodytext3">
-
-                <input name="visitcode" type="text" id="visitcode" value="" size="50" autocomplete="off">
-
-              </span></td>
-
-              </tr>
-
-                   <tr>
-
-          <td width="100" align="left" valign="center"  
-
-                bgcolor="#ffffff" class="bodytext31"><strong> Date From </strong></td>
-
-          <td width="137" align="left" valign="center"  bgcolor="#ffffff" class="bodytext31"><input name="ADate1" id="ADate1" value="<?php echo $transactiondatefrom; ?>"  size="10"  readonly="readonly" onKeyDown="return disableEnterKey()" />
-
-			<img src="images2/cal.gif" onClick="javascript:NewCssCal('ADate1')" style="cursor:pointer"/>			</td>
-
-          <td width="68" align="left" valign="center"  bgcolor="#FFFFFF" class="style1"><span class="bodytext31"><strong> Date To </strong></span></td>
-
-          <td width="263" align="left" valign="center"  bgcolor="#ffffff"><span class="bodytext31">
-
-            <input name="ADate2" id="ADate2" value="<?php echo $transactiondateto; ?>"  size="10"  readonly="readonly" onKeyDown="return disableEnterKey()" />
-
-			<img src="images2/cal.gif" onClick="javascript:NewCssCal('ADate2')" style="cursor:pointer"/>
-
-		  </span></td>
-
-          </tr>
-
-					
-
-				
-
-			<tr>
-
-                      <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">&nbsp;</td>
-
-                      <td colspan="3" align="left" valign="top"  bgcolor="#FFFFFF">
-
-					  <input type="hidden" name="cbfrmflag1" value="cbfrmflag1">
-
-                          <input  type="submit" value="Search" name="Submit" />
-
-                          <input name="resetbutton" type="reset" id="resetbutton"  value="Reset" /></td>
-
-                    </tr>
-
-                  </tbody>
-
-                </table>
-
-              </form>		</td>
-
-      </tr>
-
-  <tr>
-
-    <td colspan="9">&nbsp;</td>
-
-  </tr>
-
-  <tr>
-
-   
-
-    <td width="99%" valign="top"><table width="116%" border="0" cellspacing="0" cellpadding="0">
-
-	<?php if (isset($_REQUEST["cbfrmflag1"])) { $cbfrmflag1 = $_REQUEST["cbfrmflag1"]; } else { $cbfrmflag1 = ""; }
-
-//$cbfrmflag1 = $_POST['cbfrmflag1'];
-
-if ($cbfrmflag1 == 'cbfrmflag1')
-
-{
-
-//	$res1patientcode='';
-
-	$searchpatient = $_POST['patient'];
-
-	$searchpatientcode=$_POST['patientcode'];
-
-	$searchvisitcode = $_POST['visitcode'];
-
-	$fromdate=$_POST['ADate1'];
-
-	$todate=$_POST['ADate2'];?>
-
-      <tr>
-
-        <td><table id="AutoNumber3" style="BORDER-COLLAPSE: collapse" 
-
-            bordercolor="#666666" cellspacing="0" cellpadding="4" width="1127" 
-
-            align="left" border="0">
-
-          <tbody>
-
-            <tr>
-
-              <td width="5%" bgcolor="#ecf0f5" class="bodytext31">&nbsp;</td>
-
-              <td colspan="11" bgcolor="#ecf0f5" class="bodytext31">
-
-                <!--<input onClick="javascript:printbillreport1()" name="resetbutton2" type="submit" id="resetbutton2"  style="border: 1px solid #001E6A" value="Print Report" />-->
-
-                <div align="left"><strong></strong>
-
-                <label class="number"> </label>
-
-                </div></td>
-
-              </tr>
-
-            <tr>
-
-              <td class="bodytext31" valign="center"  align="left" 
-
-                bgcolor="#ffffff"><div align="left"><strong>No.</strong></div></td>
-
-              <td width="8%"  align="left" valign="center" 
-
-                bgcolor="#ffffff" class="bodytext31"><div align="left"><strong> OP Date</strong></div></td>
-
-              <td width="8%"  align="left" valign="center" 
-
-                bgcolor="#ffffff" class="bodytext31"><div align="left"><strong>Patientcode </strong></div></td>
-
-              <td width="6%"  align="left" valign="center" 
-
-                bgcolor="#ffffff" class="bodytext31"><div align="left"><strong>Visitcode</strong></div></td>
-
-              <td width="13%"  align="left" valign="center" 
-
-                bgcolor="#ffffff" class="bodytext31"><div align="left"><strong>Patient</strong></div></td>
-
-              <td width="7%"  align="left" valign="center" 
-
-                bgcolor="#ffffff" class="bodytext31"><strong>Age</strong></td>
-
-              <td width="6%"  align="left" valign="center" 
-
-                bgcolor="#ffffff" class="style1">Gender</td>
-
-              <td width="18%"  align="left" valign="center" 
-
-                bgcolor="#ffffff" class="style1">Department</td>
-
-              <td width="20%"  align="left" valign="center" 
-
-                bgcolor="#ffffff" class="bodytext31"><strong>Account</strong></td>
-
-              <td width="9%"  align="left" valign="center" 
-
-                bgcolor="#ffffff" class="bodytext31"><div align="left"><strong>Action</strong></div></td>
-
-              </tr>
-
-			<?php
-
-			$colorloopcount = '';
-
-			$sno = '0';
-
-			
-
-			$triagedatefrom = date('Y-m-d', strtotime('-2 day'));
-
-			$triagedateto = date('Y-m-d');
-
-			
-
-
-
-			
-
-			//$query1 = "select * from master_billing where paymentstatus = 'completed' and consultationdate >= NOW() - INTERVAL 6 DAY order by consultationdate";
-
-			  $query1 = "select * from consultation_services where locationcode = '".$locationcode."' and patientname like '%$searchpatient%' and patientcode like '%$searchpatientcode%' and patientvisitcode like '%$searchvisitcode%' and (paymentstatus='completed' OR paymentstatus='paid') and billtype='PAY NOW' and process='pending' and servicerefund <> 'completed' and wellnessitem <> '1' and wellnesspkg ='1' and consultationdate between '$fromdate' and '$todate' group by patientvisitcode order by consultationdate desc";// and (billingdatetime between '$triagedatefrom' and '$triagedateto')";//
-
-			$exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-			while ($res1 = mysqli_fetch_array($exec1))
-
-			{
-
-			$res1patientcode = $res1['patientcode'];
-
-			  $res1visitcode = $res1['patientvisitcode'];
-
-			$res1patientfullname = $res1['patientname'];
-
-			$res1account = $res1['accountname'];
-
-			$res1consultationdate = $res1['consultationdate'];
-
-			 $billnumber=$res1['billnumber'];
-
-			$sno = $sno + 1;
-
-			
-
-			$query11 = "select * from master_customer where customercode = '$res1patientcode' and status = '' ";
-
-			$exec11 = mysqli_query($GLOBALS["___mysqli_ston"], $query11) or die ("Error in Query11".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-			$res11 = mysqli_fetch_array($exec11);
-
-			$res11age = $res11['age'];
-
-			$res11gender= $res11['gender'];
-
-			
-
-			$query111 = "select * from master_visitentry where patientcode = '$res1patientcode' ";
-
-			$exec111 = mysqli_query($GLOBALS["___mysqli_ston"], $query111) or die ("Error in Query111".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-			$res111 = mysqli_fetch_array($exec111);
-
-			$res111consultingdoctor = $res111['consultingdoctor'];
-
-			$res1111department = $res111['departmentname'];
-
-			//check that patient is a external patient
-
-			if($res1patientcode=='walkin')
-
-			{
-
-			$query11="select * from billing_external where billno='$billnumber'";
-
-			$exec11=mysqli_query($GLOBALS["___mysqli_ston"], $query11) or die(mysqli_error($GLOBALS["___mysqli_ston"]));
-
-			$res11=mysqli_fetch_array($exec11);
-
-			$res11age=$res11['age'];
-
-			$res11gender= $res11['gender'];
-
-			$res1111department = 'External';
-
-			 $res1visitcode =$res1['billnumber'];
-
-			//$res1account = 'External';
-
-			}
-
-
-
-			$colorloopcount = $colorloopcount + 1;
-
-			$showcolor = ($colorloopcount & 1); 
-
-			
-
-			if ($showcolor == 0)
-
-			{
-
-				//echo "if";
-
-				$colorcode = 'bgcolor="#CBDBFA"';
-
-			}
-
-			else
-
-			{
-
-				//echo "else";
-
-				$colorcode = 'bgcolor="#ecf0f5"';
-
-			}
-
-			 $query822 = "select * from transaction_stock where patientcode='$res1patientcode'  and locationcode='$locationcode' and patientvisitcode='$res1visitcode' and description='Process' ";
-
-		   $exec822 = mysqli_query($GLOBALS["___mysqli_ston"], $query822) or die(mysqli_error($GLOBALS["___mysqli_ston"]));
-
-		   $num822= mysqli_num_rows($exec822);
-
-		  // if($num822 == 0)
-
-		   {
-
-			?>
-
-            <tr <?php echo $colorcode; ?>  class="showdocument"  id="<?php echo $sno; ?>">
-
-              <td class="bodytext31" valign="center"  align="left"><div align="left"><?php echo $sno; ?></div></td>
-
-              <td class="bodytext31" valign="center"  align="left">
-
-			  <div class="bodytext31"><?php echo $res1consultationdate; ?></div></td>
-
-              <td class="bodytext31" valign="center"  align="left">
-
-			    <div align="left">
-
-			      <?php echo $res1patientcode;?>			      </div></td>
-
-              <td class="bodytext31" valign="center"  align="left">
-
-			    <div align="left"><?php echo $res1visitcode; ?></div></td>
-
-              <td class="bodytext31" valign="center"  align="left">
-
-			    <div align="left"><?php echo $res1patientfullname; ?></div></td>
-
-              <td class="bodytext31" valign="center"  align="left"><?php echo $res11age; ?></td>
-
-              <td class="bodytext31" valign="center"  align="left"><?php echo $res11gender; ?></td>
-
-              <td class="bodytext31" valign="center"  align="left"><?php echo $res1111department; ?></td>
-
-              <td class="bodytext31" valign="center"  align="left"><?php echo $res1account; ?></td>
-
-          	 <td><img id="toggleimg" src="images/plus1.gif" width="13" height="13">	</td>
-
-              </tr>
-
-			
-
-			  <tr  id='show<?php echo $sno; ?>'  style="">
-
-             
-
-             <td colspan="5" >
-
-             
-
-             
-
-           <table >
-
-             
-
-             
-
-             <?php
-
-		 
-
-			$sno11 = '';
-
-			$totalamount=0;
-
-			  
-
-			 $query61 = "select * from consultation_services where paymentstatus='completed' and patientcode = '$res1patientcode' and patientvisitcode = '$res1visitcode' and process='pending' and servicerefund <> 'completed' and wellnessitem <> '1' and wellnesspkg ='1' and (billtype='PAY NOW' or (billtype='PAY LATER' ))";
-
-$exec61 = mysqli_query($GLOBALS["___mysqli_ston"], $query61) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-$numb=mysqli_num_rows($exec61);
-
-while($res61 = mysqli_fetch_array($exec61))
-
-{
-
-	
-
-	$serviceqty =$res61["serviceqty"];
-
-	
-
-
-
-$refnumber=$res61['refno'];
-
-$service_item_code=$res61['servicesitemcode'];
-
-			
-
-			
-
-$servicename =$res61["servicesitemname"];
-
-$billtype = $res61["billtype"];
-
-$refno = $res61['auto_number'];
-
-$query68="select * from master_services where itemname='$servicename'";
-
-$exec68=mysqli_query($GLOBALS["___mysqli_ston"], $query68);
-
-$res68=mysqli_fetch_array($exec68);
-
-$itemcode=$res68['itemcode'];
-
-$sno11 = $sno11 + 1;
-
-?>
-
-  
-
-  <tr>
-
-  		
-
-		<td class="bodytext31" valign="center"  align="left" colspan="6"><div align="center"><?php echo $servicename;?></div></td>
-
-		<input type="hidden" name="service[]" value="<?php echo $servicename;?>">
-
-		<input type="hidden" name="code[]" value="<?php echo $itemcode; ?>">
-
-		<input type="hidden" name="refno[]" value="<?php echo $refno; ?>">
-
-		<input type="hidden" name="sno[]" value="<?php echo $sno11; ?>">
-
-		<input type="hidden" name="billtype" id="billtype" value="<?php //echo $billtype; ?>">
-
-        <input type="hidden" name="serquantity<?php echo $sno11; ?>" id="serquantity<?php echo $sno11; ?>" value="<?php echo $serviceqty; ?>">
-
-		  <td class="bodytext31" valign="center"  align="center"><?php //echo $serviceqty;?>
-
-			 		  </td>
-
-
-
-		   <td class="bodytext31" valign="center"  align="center">
-
-           <input type="hidden" name="avqtyy<?php echo $sno11;?>" id="avqtyy<?php echo $sno11;?>" readonly value="<?php echo $serviceqty;?>" size="5" style="border:none;background: none;">
-
-       </td>
-
-		<td class="bodytext31" valign="center"  align="center">
-
-        <input type="hidden" name="rfqty<?php echo $sno11;?>" id="rfqty<?php echo $sno11;?>"  value="" size="5" onKeyDown="return numbervaild(event)" onKeyUp="sumtheservice(this.value,<?php echo $sno11;?>)">
-
-       </td>
-
-        <td class="bodytext31" valign="center"  align="left" 
-
-                >&nbsp;</td>
-
+            <nav class="sidebar-nav">
+                <ul class="nav-list">
+                    <li class="nav-item">
+                        <a href="mainmenu1.php" class="nav-link">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="op.php" class="nav-link">
+                            <i class="fas fa-user-md"></i>
+                            <span>OP Management</span>
+                        </a>
+                    </li>
+                    <li class="nav-item active">
+                        <a href="oppackageprocesslist.php" class="nav-link">
+                            <i class="fas fa-clipboard-list"></i>
+                            <span>Package Process List</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="pharmacy1.php" class="nav-link">
+                            <i class="fas fa-pills"></i>
+                            <span>Pharmacy</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Alert Container -->
+            <div id="alertContainer">
+                <?php if (!empty($errmsg)): ?>
+                    <div class="alert alert-<?php echo $bgcolorcode; ?>">
+                        <i class="fas fa-<?php echo $bgcolorcode === 'error' ? 'exclamation-triangle' : 'info-circle'; ?> alert-icon"></i>
+                        <span><?php echo htmlspecialchars($errmsg); ?></span>
+                    </div>
+                <?php endif; ?>
+            </div>
+
+            <!-- Page Header -->
+            <div class="page-header">
+                <div class="page-header-content">
+                    <h2>Wellness Package Process List</h2>
+                    <p>Manage and process wellness packages for patients.</p>
+                </div>
+                <div class="page-header-actions">
+                    <button type="button" class="btn btn-secondary" onclick="refreshPage()">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                    <a href="op.php" class="btn btn-outline">
+                        <i class="fas fa-user-md"></i> OP Management
+                    </a>
+                </div>
+            </div>
+
+            <!-- Search Form -->
+            <div class="search-section">
+                <div class="search-header">
+                    <i class="fas fa-search search-icon"></i>
+                    <h3 class="search-title">Search Wellness Packages</h3>
+                </div>
                 
+                <form name="cbform1" method="post" action="oppackageprocesslist.php" class="search-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="location" class="form-label">Location</label>
+                            <select name="location" id="location" onChange="ajaxlocationfunction(this.value);" class="form-select">
+                                <?php
+                                $query = "select * from login_locationdetails where username='$username' and docno='$docno' group by locationname order by locationname";
+                                $exec = mysqli_query($GLOBALS["___mysqli_ston"], $query) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
+                                
+                                while ($res = mysqli_fetch_array($exec)) {
+                                    $reslocation = $res["locationname"];
+                                    $reslocationanum = $res["locationcode"];
+                                    ?>
+                                    <option value="<?php echo htmlspecialchars($reslocationanum); ?>" 
+                                            <?php if($location != '' && $location == $reslocationanum) echo "selected"; ?>>
+                                        <?php echo htmlspecialchars($reslocation); ?>
+                                    </option>
+                                    <?php
+                                }
+                                ?>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="patient" class="form-label">Patient Name</label>
+                            <input name="patient" type="text" id="patient" class="form-input" 
+                                   value="" placeholder="Enter patient name..." autocomplete="off">
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="patientcode" class="form-label">Registration No</label>
+                            <input name="patientcode" type="text" id="patientcode" class="form-input" 
+                                   value="" placeholder="Enter registration number..." autocomplete="off">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="visitcode" class="form-label">Visit Code</label>
+                            <input name="visitcode" type="text" id="visitcode" class="form-input" 
+                                   value="" placeholder="Enter visit code..." autocomplete="off">
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="ADate1" class="form-label">Date From</label>
+                            <div class="date-input-group">
+                                <input name="ADate1" id="ADate1" value="<?php echo $transactiondatefrom; ?>" 
+                                       class="form-input" readonly onKeyDown="return disableEnterKey()" />
+                                <img src="images2/cal.gif" onClick="javascript:NewCssCal('ADate1')" 
+                                     class="date-picker-icon" alt="Select Date" />
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="ADate2" class="form-label">Date To</label>
+                            <div class="date-input-group">
+                                <input name="ADate2" id="ADate2" value="<?php echo $transactiondateto; ?>" 
+                                       class="form-input" readonly onKeyDown="return disableEnterKey()" />
+                                <img src="images2/cal.gif" onClick="javascript:NewCssCal('ADate2')" 
+                                     class="date-picker-icon" alt="Select Date" />
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <input type="hidden" name="cbfrmflag1" value="cbfrmflag1">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-search"></i> Search
+                        </button>
+                        <button type="reset" class="btn btn-secondary">
+                            <i class="fas fa-undo"></i> Reset
+                        </button>
+                    </div>
+                </form>
+            </div>
 
-                  <td class="bodytext31" valign="center"  align="left" 
-
-               >&nbsp;</td>
-
+            <!-- Results Section -->
+            <?php if (isset($_REQUEST["cbfrmflag1"])): 
+                $cbfrmflag1 = $_REQUEST["cbfrmflag1"];
+                if ($cbfrmflag1 == 'cbfrmflag1') {
+                    $searchpatient = $_POST['patient'];
+                    $searchpatientcode = $_POST['patientcode'];
+                    $searchvisitcode = $_POST['visitcode'];
+                    $fromdate = $_POST['ADate1'];
+                    $todate = $_POST['ADate2'];
+            ?>
+            <div class="results-section">
+                <div class="results-header">
+                    <i class="fas fa-list results-icon"></i>
+                    <h3 class="results-title">Wellness Package Results</h3>
+                    <div class="location-display" id="ajaxlocation">
+                        <strong>Location: </strong>
+                        <?php
+                        if ($location != '') {
+                            $query12 = "select locationname from master_location where locationcode='$location' order by locationname";
+                            $exec12 = mysqli_query($GLOBALS["___mysqli_ston"], $query12) or die ("Error in Query12".mysqli_error($GLOBALS["___mysqli_ston"]));
+                            $res12 = mysqli_fetch_array($exec12);
+                            echo htmlspecialchars($res1location = $res12["locationname"]);
+                        } else {
+                            $query1 = "select locationname from login_locationdetails where username='$username' and docno='$docno' group by locationname order by locationname";
+                            $exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
+                            $res1 = mysqli_fetch_array($exec1);
+                            echo htmlspecialchars($res1location = $res1["locationname"]);
+                        }
+                        ?>
+                    </div>
+                </div>
                 
-
-                     <td class="bodytext31" valign="center"  align="left" 
-
-               >&nbsp;</td>
-
-                
-
-                     <td class="bodytext31" valign="center"  align="left" 
-
-               >&nbsp;</td>
-
-                
-
-                     <td class="bodytext31" valign="center"  align="left" 
-
-               >&nbsp;</td>
-
-                
-
-               <td class="bodytext31" valign="center" align="left" > 
-
-			    
-
-                <div align="left"><?php if($res1patientcode!='walkin'){?><a class="executelink" href="oppackageexecution.php?patientcode=<?php echo $res1patientcode; ?>&&visitcode=<?php echo $res1visitcode; ?>&&refnumber=<?php  echo $refno; ?>&&servicesitemcode=<?php  echo $service_item_code; ?>"><strong>Execute</strong></a><?php }else{?><a class="executelink" href="oppackageexecution.php?patientcode=<?php echo $res1patientcode; ?>&&visitcode=<?php echo $res1visitcode; ?>&&refnumber=<?php  echo $refno; ?>&&servicesitemcode=<?php  echo $service_item_code; ?>"><strong>$res55</strong></a><?php }?></div></td>
-
-         
-
-         </tr>
-
-              <?php
-
-			}
-
-			  ?>
-
-            </table>  
-
-               
-
-             
-
-            </td>
-
-            </tr>
-
-           
-
-             <?php
-
-			}
-
-		   }
-
-			?>
-
-			<?php
-
-			//$query1 = "select * from master_billing where paymentstatus = 'completed' and consultationdate >= NOW() - INTERVAL 6 DAY order by consultationdate";
-
-			  $query2 = "select * from consultation_services where locationcode = '".$locationcode."' and patientname like '%$searchpatient%' and patientcode like '%$searchpatientcode%' and patientvisitcode like '%$searchvisitcode%' and paymentstatus='completed' and billtype='PAY LATER' and process='pending' and servicerefund <> 'completed' and consultationdate between '$fromdate' and '$todate' and wellnessitem <> '1' and wellnesspkg ='1' group by patientvisitcode order by consultationdate desc";// and (billingdatetime between '$triagedatefrom' and '$triagedateto')";//
-
-			$exec2 = mysqli_query($GLOBALS["___mysqli_ston"], $query2) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-			while ($res2 = mysqli_fetch_array($exec2))
-
-			{
-
-			 $res2patientcode = $res2['patientcode'];
-
-			$res2visitcode = $res2['patientvisitcode'];
-
-			$res2patientfullname = $res2['patientname'];
-
-			$res2account = $res2['accountname'];
-
-			$res2consultationdate = $res2['consultationdate'];
-
-			
-
-				$refnumber=$res1['refno'];
-
-			$service_item_code=$res1['servicesitemcode'];
-
-			$sno = $sno + 1;
-
-			
-
-			$query12 = "select * from master_customer where customercode = '$res2patientcode' and status = '' ";
-
-			$exec12 = mysqli_query($GLOBALS["___mysqli_ston"], $query12) or die ("Error in Query12".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-			$res12 = mysqli_fetch_array($exec12);
-
-			$res12age = $res12['age'];
-
-			$res12gender= $res12['gender'];
-
-			
-
-			$query112 = "select * from master_visitentry where patientcode = '$res2patientcode' ";
-
-			$exec112 = mysqli_query($GLOBALS["___mysqli_ston"], $query112) or die ("Error in Query112".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-			$res112 = mysqli_fetch_array($exec112);
-
-			$res112consultingdoctor = $res112['consultingdoctor'];
-
-			$res1112department = $res112['departmentname'];
-
-			$res1112plannumber = $res112['planname'];
-
-			$res1112planpercentage = $res112['planpercentage'];
-
-
-
-			$querypl = "select forall from master_planname where auto_number = '$res1112plannumber' ";
-
-			$execpl = mysqli_query($GLOBALS["___mysqli_ston"], $querypl) or die ("Error in Querypl".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-			$respl = mysqli_fetch_array($execpl);
-
-			$resplforall = $respl['forall'];
-
-			
-
-			$colorloopcount = $colorloopcount + 1;
-
-			$showcolor = ($colorloopcount & 1); 
-
-			
-
-			
-
-			if ($showcolor == 0)
-
-			{
-
-				//echo "if";
-
-				$colorcode = 'bgcolor="#CBDBFA"';
-
-			}
-
-			else
-
-			{
-
-				//echo "else";
-
-				$colorcode = 'bgcolor="#ecf0f5"';
-
-			}
-
-			if(true){
-
-				
-
-			$query822 = "select * from transaction_stock where patientcode='$res2patientcode'  and locationcode='$locationcode' and patientvisitcode='$res2visitcode' and description='Process' ";
-
-		   $exec822 = mysqli_query($GLOBALS["___mysqli_ston"], $query822) or die(mysqli_error($GLOBALS["___mysqli_ston"]));
-
-		   $num822= mysqli_num_rows($exec822);
-
-		  // if($num822 == 0)
-
-		   {
-
-			?>
-
-            <tr <?php echo $colorcode; ?>  class="showdocument"  id="<?php echo $sno; ?>" >
-
-              <td class="bodytext31" valign="center"  align="left"><div align="left"><?php echo $sno; ?></div></td>
-
-              <td class="bodytext31" valign="center"  align="left">
-
-			  <div class="bodytext31"><?php echo $res2consultationdate; ?></div></td>
-
-              <td class="bodytext31" valign="center"  align="left">
-
-			    <div align="left">
-
-			      <?php echo $res2patientcode;?>			      </div></td>
-
-              <td class="bodytext31" valign="center"  align="left">
-
-			    <div align="left"><?php echo $res2visitcode; ?></div></td>
-
-              <td class="bodytext31" valign="center"  align="left">
-
-			    <div align="left"><?php echo $res2patientfullname; ?></div></td>
-
-               <td class="bodytext31" valign="center"  align="left"><?php echo $res12age; ?></td>
-
-              <td class="bodytext31" valign="center"  align="left"><?php echo $res12gender; ?></td>
-
-              <td class="bodytext31" valign="center"  align="left"><?php echo $res1112department; ?></td>
-
-              <td class="bodytext31" valign="center"  align="left"><?php echo $res2account; ?></td>
-
-              <td class="bodytext31" valign="center" align="left">
-
-			  <img id="toggleimg" src="images/plus1.gif" width="13" height="13">
-
-              </td>
-
-              </tr>
-
-             
-
-             
-
-             <tr  id='show<?php echo $sno; ?>'  style="">
-
-             
-
-             <td colspan="5" >
-
-            
-
-           <table >
-
-             
-
-             
-
-             <?php
-
-			 
-
-			$sno11 = '';
-
-			$totalamount=0;
-
-			  
-
-			  $query61 = "select * from consultation_services where paymentstatus='completed' and patientcode = '$res2patientcode' and patientvisitcode = '$res2visitcode' and process='pending' and servicerefund <> 'completed' and wellnessitem <> '1' and wellnesspkg ='1' and (billtype='PAY NOW' or (billtype='PAY LATER' ))";
-
-$exec61 = mysqli_query($GLOBALS["___mysqli_ston"], $query61) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-$numb=mysqli_num_rows($exec61);
-
-while($res61 = mysqli_fetch_array($exec61))
-
-{
-
-	
-
-	$serviceqty =$res61["serviceqty"];
-
-	/*for($i=0; $i<$serviceqty; $i++)
-
-	{ */
-
-
-
-$refnumber=$res61['refno'];
-
-$service_item_code=$res61['servicesitemcode'];
-
-			
-
-			
-
-$servicename =$res61["servicesitemname"];
-
-$billtype = $res61["billtype"];
-
-$refno = $res61['auto_number'];
-
-$query68="select * from master_services where itemname='$servicename'";
-
-$exec68=mysqli_query($GLOBALS["___mysqli_ston"], $query68);
-
-$res68=mysqli_fetch_array($exec68);
-
-$itemcode=$res68['itemcode'];
-
-$sno11 = $sno11 + 1;
-
-?>
-
-  
-
-  <tr>
-
-  		
-
-		<td class="bodytext31" valign="center"  align="left" colspan="6"><div align="center"><?php echo $servicename;?></div></td>
-
-		<input type="hidden" name="service[]" value="<?php echo $servicename;?>">
-
-		<input type="hidden" name="code[]" value="<?php echo $itemcode; ?>">
-
-		<input type="hidden" name="refno[]" value="<?php echo $refno; ?>">
-
-		<input type="hidden" name="sno[]" value="<?php echo $sno11; ?>">
-
-		<input type="hidden" name="billtype" id="billtype" value="<?php //echo $billtype; ?>">
-
-        <input type="hidden" name="serquantity<?php echo $sno11; ?>" id="serquantity<?php echo $sno11; ?>" value="<?php echo $serviceqty; ?>">
-
-		  <td class="bodytext31" valign="center"  align="center"><?php //echo $serviceqty;?>
-
-			 		  </td>
-
-
-
-		   <td class="bodytext31" valign="center"  align="center">
-
-           <input type="hidden" name="avqtyy<?php echo $sno11;?>" id="avqtyy<?php echo $sno11;?>" readonly value="<?php echo $serviceqty;?>" size="5" style="border:none;background: none;">
-
-       </td>
-
-		<td class="bodytext31" valign="center"  align="center">
-
-        <input type="hidden" name="rfqty<?php echo $sno11;?>" id="rfqty<?php echo $sno11;?>"  value="" size="5" onKeyDown="return numbervaild(event)" onKeyUp="sumtheservice(this.value,<?php echo $sno11;?>)">
-
-       </td>
-
-        <td class="bodytext31" valign="center"  align="left" 
-
-                >&nbsp;</td>
-
-                
-
-                  <td class="bodytext31" valign="center"  align="left" 
-
-               >&nbsp;</td>
-
-                
-
-                     <td class="bodytext31" valign="center"  align="left" 
-
-               >&nbsp;</td>
-
-                
-
-                     <td class="bodytext31" valign="center"  align="left" 
-
-               >&nbsp;</td>
-
-                
-
-                     <td class="bodytext31" valign="center"  align="left" 
-
-               >&nbsp;</td>
-
-                
-
-               <!--<td class="bodytext31" valign="center" align="left" > 
-
-			    
-
-                <div align="left"><?php if($res2patientcode!='walkin'){?><a class="executelink" href="processservice.php?patientcode=<?php echo $res2patientcode; ?>&&visitcode=<?php echo $res2visitcode; ?>&&refnumber=<?php  echo $refno; ?>&&servicesitemcode=<?php  echo $service_item_code; ?>"><strong>Execute</strong></a><?php }else{?><a class="executelink" href="externalprocessservice.php?billnumber=<?php echo $billnumber; ?>"><strong>Execute</strong></a><?php }?></div></td>-->
-
-
-				<td class="bodytext31" valign="center" align="left" > 
-
-			    
-
-               <div align="left"><?php if($res2patientcode!='walkin'){?><a class="executelink" href="oppackageexecution.php?patientcode=<?php echo $res2patientcode; ?>&&visitcode=<?php echo $res2visitcode; ?>&&refnumber=<?php  echo $refno; ?>&&servicesitemcode=<?php  echo $service_item_code; ?>"><strong>Execute</strong></a><?php }else{?><a class="executelink" href="oppackageexecution.php?patientcode=<?php echo $res2patientcode; ?>&&visitcode=<?php echo $res2visitcode; ?>&&refnumber=<?php  echo $refno; ?>&&servicesitemcode=<?php  echo $service_item_code; ?>"><strong>Execute</strong></a><?php }?></div></td>
-
-
-
-         
-
-         </tr>
-
-              <?php
-
-			}
-
-			  ?>
-
-            </table>  
-
-               
-
-             
-
-            </td>
-
-            </tr>
-
-           
-
-
-
-              
-
-              
-
-			<?php
-
-			}  } }  
-
-			?>
-
-            <?php
-
-			//$query1 = "select * from master_billing where paymentstatus = 'completed' and consultationdate >= NOW() - INTERVAL 6 DAY order by consultationdate";
-
-			 $query2 = "select * from consultation_services where locationcode = '".$locationcode."' and patientname like '%$searchpatient%' and patientcode like '%$searchpatientcode%' and patientvisitcode like '%$searchvisitcode%' and paymentstatus='pending' and servicerefund <> 'completed' and billtype='PAY LATER' and approvalstatus!='0' and process='pending' and consultationdate between '$fromdate' and '$todate' and wellnessitem <> '1' and wellnesspkg ='1' group by billnumber order by consultationdate desc";// and (billingdatetime between '$triagedatefrom' and '$triagedateto')";//
-
-			$exec2 = mysqli_query($GLOBALS["___mysqli_ston"], $query2) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-			while ($res2 = mysqli_fetch_array($exec2))
-
-			{
-
-			$res2patientcode = $res2['patientcode'];
-
-			$res2visitcode = $res2['patientvisitcode'];
-
-			 $res2patientfullname = $res2['patientname'];
-
-			$res2account = $res2['accountname'];
-
-			$res2consultationdate = $res2['consultationdate'];
-
-			$sno = $sno + 1;
-
-			
-
-			$query12 = "select * from master_customer where customercode = '$res2patientcode' and status = '' ";
-
-			$exec12 = mysqli_query($GLOBALS["___mysqli_ston"], $query12) or die ("Error in Query12".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-			$res12 = mysqli_fetch_array($exec12);
-
-			$res12age = $res12['age'];
-
-			$res12gender= $res12['gender'];
-
-			
-
-			$query112 = "select * from master_visitentry where patientcode = '$res2patientcode' ";
-
-			$exec112 = mysqli_query($GLOBALS["___mysqli_ston"], $query112) or die ("Error in Query112".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-			$res112 = mysqli_fetch_array($exec112);
-
-			$res112consultingdoctor = $res112['consultingdoctor'];
-
-			$res1112department = $res112['departmentname'];
-
-			$planfixedamount = $res112['planfixedamount'];
-
-			
-
-			$colorloopcount = $colorloopcount + 1;
-
-			$showcolor = ($colorloopcount & 1); 
-
-			
-
-			
-
-			if ($showcolor == 0)
-
-			{
-
-				//echo "if";
-
-				$colorcode = 'bgcolor="#CBDBFA"';
-
-			}
-
-			else
-
-			{
-
-				//echo "else";
-
-				$colorcode = 'bgcolor="#ecf0f5"';
-
-			}
-
-			if($planfixedamount==0.00)
-
-			{
-
-				$query822 = "select * from transaction_stock where patientcode='$res2patientcode'  and locationcode='$locationcode' and patientvisitcode='$res2visitcode' and description='Process' ";
-
-		   $exec822 = mysqli_query($GLOBALS["___mysqli_ston"], $query822) or die(mysqli_error($GLOBALS["___mysqli_ston"]));
-
-		   $num822= mysqli_num_rows($exec822);
-
-		  // if($num822 == 0)
-
-		   {
-
-			?>
-
-            <tr <?php echo $colorcode; ?>>
-
-              <td class="bodytext31" valign="center"  align="left"><div align="left"><?php echo $sno; ?></div></td>
-
-              <td class="bodytext31" valign="center"  align="left">
-
-			  <div class="bodytext31"><?php echo $res2consultationdate; ?></div></td>
-
-              <td class="bodytext31" valign="center"  align="left">
-
-			    <div align="left">
-
-			      <?php echo $res2patientcode;?>			      </div></td>
-
-              <td class="bodytext31" valign="center"  align="left">
-
-			    <div align="left"><?php echo $res2visitcode; ?></div></td>
-
-              <td class="bodytext31" valign="center"  align="left">
-
-			    <div align="left"><?php echo $res2patientfullname; ?></div></td>
-
-               <td class="bodytext31" valign="center"  align="left"><?php echo $res12age; ?></td>
-
-              <td class="bodytext31" valign="center"  align="left"><?php echo $res12gender; ?></td>
-
-              <td class="bodytext31" valign="center"  align="left"><?php echo $res1112department; ?></td>
-
-              <td class="bodytext31" valign="center"  align="left"><?php echo $res2account; ?></td>
-
-              <td class="bodytext31" valign="center" align="left">
-
-			    <div align="left">Collect Copay</div></td>
-
-              </tr>
-
-			<?php
-
-			}  
-
-			}
-
-			}
-
-			?>
-
-            <?php
-
-			//$query1 = "select * from master_billing where paymentstatus = 'completed' and consultationdate >= NOW() - INTERVAL 6 DAY order by consultationdate";
-
-			 $query2 = "select * from consultation_services where locationcode = '".$locationcode."' and patientname like '%$searchpatient%' and patientcode like '%$searchpatientcode%' and patientvisitcode like '%$searchvisitcode%' and paymentstatus='completed' and servicerefund <> 'completed' and billtype='PAY LATER' and process='pending' and consultationdate between '$fromdate' and '$todate' and wellnessitem <> '1' and wellnesspkg ='1' group by patientvisitcode order by consultationdate desc";// and (billingdatetime between '$triagedatefrom' and '$triagedateto')";//
-
-			$exec2 = mysqli_query($GLOBALS["___mysqli_ston"], $query2) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-//			while ($res2 = mysql_fetch_array($exec2))
-
-			while (0)
-
-			{
-
-			$res2patientcode = $res2['patientcode'];
-
-			$res2visitcode = $res2['patientvisitcode'];
-
-			 $res2patientfullname = $res2['patientname'];
-
-			$res2account = $res2['accountname'];
-
-			$res2consultationdate = $res2['consultationdate'];
-
-			$sno = $sno + 1;
-
-			
-
-			$query12 = "select * from master_customer where customercode = '$res2patientcode' and status = '' ";
-
-			$exec12 = mysqli_query($GLOBALS["___mysqli_ston"], $query12) or die ("Error in Query12".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-			$res12 = mysqli_fetch_array($exec12);
-
-			$res12age = $res12['age'];
-
-			$res12gender= $res12['gender'];
-
-			
-
-			$query112 = "select * from master_visitentry where patientcode = '$res2patientcode' ";
-
-			$exec112 = mysqli_query($GLOBALS["___mysqli_ston"], $query112) or die ("Error in Query112".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-			$res112 = mysqli_fetch_array($exec112);
-
-			$res112consultingdoctor = $res112['consultingdoctor'];
-
-			$res1112department = $res112['departmentname'];
-
-			$res1112plannumber = $res112['planname'];
-
-			$planfixedamount = $res112['planfixedamount'];
-
-
-
-			$querypl = "select forall from master_planname where auto_number = '$res1112plannumber' ";
-
-			$execpl = mysqli_query($GLOBALS["___mysqli_ston"], $querypl) or die ("Error in Querypl".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-			$respl = mysqli_fetch_array($execpl);
-
-			$resplforall = $respl['forall'];
-
-			
-
-			
-
-			$colorloopcount = $colorloopcount + 1;
-
-			$showcolor = ($colorloopcount & 1); 
-
-			
-
-			
-
-			if ($showcolor == 0)
-
-			{
-
-				//echo "if";
-
-				$colorcode = 'bgcolor="#CBDBFA"';
-
-			}
-
-			else
-
-			{
-
-				//echo "else";
-
-				$colorcode = 'bgcolor="#ecf0f5"';
-
-			}
-
-			if(true){
-
-				
-
-				$query822 = "select * from transaction_stock where patientcode='$res2patientcode'  and locationcode='$locationcode' and patientvisitcode='$res2visitcode' and description='Process' ";
-
-		   $exec822 = mysqli_query($GLOBALS["___mysqli_ston"], $query822) or die(mysqli_error($GLOBALS["___mysqli_ston"]));
-
-		   $num822= mysqli_num_rows($exec822);
-
-		  // if($num822 == 0)
-
-		   {
-
-			?>
-
-            <tr <?php echo $colorcode; ?> class="showdocument"  id="<?php echo $sno; ?>" >
-
-              <td class="bodytext31" valign="center"  align="left"><div align="left"><?php echo $sno; ?></div></td>
-
-              <td class="bodytext31" valign="center"  align="left">
-
-			  <div class="bodytext31"><?php echo $res2consultationdate; ?></div></td>
-
-              <td class="bodytext31" valign="center"  align="left">
-
-			    <div align="left">
-
-			      <?php echo $res2patientcode;?>			      </div></td>
-
-              <td class="bodytext31" valign="center"  align="left">
-
-			    <div align="left"><?php echo $res2visitcode; ?></div></td>
-
-              <td class="bodytext31" valign="center"  align="left">
-
-			    <div align="left"><?php echo $res2patientfullname; ?></div></td>
-
-               <td class="bodytext31" valign="center"  align="left"><?php echo $res12age; ?></td>
-
-              <td class="bodytext31" valign="center"  align="left"><?php echo $res12gender; ?></td>
-
-              <td class="bodytext31" valign="center"  align="left"><?php echo $res1112department; ?></td>
-
-              <td class="bodytext31" valign="center"  align="left"><?php echo $res2account; ?></td>
-
-              <td class="bodytext31" valign="center" align="left">
-
-			    <img id="toggleimg" src="images/plus1.gif" width="13" height="13">
-
-            </td>
-
-              </tr>
-
-              
-
-              <tr  id='show<?php echo $sno; ?>'  style="">
-
-             
-
-             <td colspan="5" >
-
-             
-
-             
-
-           <table >
-
-             
-
-             
-
-             <?php
-
-			 
-
-			$sno11 = '';
-
-			$totalamount=0;
-
-			  
-
-			   $query61 = "select * from consultation_services where paymentstatus='completed' and patientcode = '$res1patientcode' and patientvisitcode = '$res1visitcode' and process='pending' and servicerefund <> 'completed' and wellnessitem <> '1' and wellnesspkg ='1' and (billtype='PAY NOW' or (billtype='PAY LATER' ))";
-
-$exec61 = mysqli_query($GLOBALS["___mysqli_ston"], $query61) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-$numb=mysqli_num_rows($exec61);
-
-while($res61 = mysqli_fetch_array($exec61))
-
-{
-
-	
-
-	$serviceqty =$res61["serviceqty"];
-
-	/*for($i=0; $i<$serviceqty; $i++)
-
-	{ */
-
-
-
-$refnumber=$res61['refno'];
-
-$service_item_code=$res61['servicesitemcode'];
-
-			
-
-			
-
-$servicename =$res61["servicesitemname"];
-
-$billtype = $res61["billtype"];
-
-$refno = $res61['auto_number'];
-
-$query68="select * from master_services where itemname='$servicename'";
-
-$exec68=mysqli_query($GLOBALS["___mysqli_ston"], $query68);
-
-$res68=mysqli_fetch_array($exec68);
-
-$itemcode=$res68['itemcode'];
-
-$sno11 = $sno11 + 1;
-
-?>
-
-  
-
-  <tr>
-
-  		
-
-		<td class="bodytext31" valign="center"  align="left" colspan="6"><div align="center"><?php echo $servicename;?></div></td>
-
-		<input type="hidden" name="service[]" value="<?php echo $servicename;?>">
-
-		<input type="hidden" name="code[]" value="<?php echo $itemcode; ?>">
-
-		<input type="hidden" name="refno[]" value="<?php echo $refno; ?>">
-
-		<input type="hidden" name="sno[]" value="<?php echo $sno11; ?>">
-
-		<input type="hidden" name="billtype" id="billtype" value="<?php //echo $billtype; ?>">
-
-        <input type="hidden" name="serquantity<?php echo $sno11; ?>" id="serquantity<?php echo $sno11; ?>" value="<?php echo $serviceqty; ?>">
-
-		  <td class="bodytext31" valign="center"  align="center"><?php //echo $serviceqty;?>
-
-			 		  </td>
-
-
-
-		   <td class="bodytext31" valign="center"  align="center">
-
-           <input type="hidden" name="avqtyy<?php echo $sno11;?>" id="avqtyy<?php echo $sno11;?>" readonly value="<?php echo $serviceqty;?>" size="5" style="border:none;background: none;">
-
-       </td>
-
-		<td class="bodytext31" valign="center"  align="center">
-
-        <input type="hidden" name="rfqty<?php echo $sno11;?>" id="rfqty<?php echo $sno11;?>"  value="" size="5" onKeyDown="return numbervaild(event)" onKeyUp="sumtheservice(this.value,<?php echo $sno11;?>)">
-
-       </td>
-
-        <td class="bodytext31" valign="center"  align="left" 
-
-                >&nbsp;</td>
-
-                
-
-                  <td class="bodytext31" valign="center"  align="left" 
-
-               >&nbsp;</td>
-
-                
-
-                     <td class="bodytext31" valign="center"  align="left" 
-
-               >&nbsp;</td>
-
-                
-
-                     <td class="bodytext31" valign="center"  align="left" 
-
-               >&nbsp;</td>
-
-                
-
-                     <td class="bodytext31" valign="center"  align="left" 
-
-               >&nbsp;</td>
-
-                
-
-               <td class="bodytext31" valign="center" align="left" > 
-
-			    
-
-               <div align="left"><?php if($res1patientcode!='walkin'){?><a class="executelink" href="oppackageexecution.php?patientcode=<?php echo $res1patientcode; ?>&&visitcode=<?php echo $res1visitcode; ?>&&refnumber=<?php  echo $refno; ?>&&servicesitemcode=<?php  echo $service_item_code; ?>"><strong>Execute</strong></a><?php }else{?><a class="executelink" href="oppackageexecution.php?patientcode=<?php echo $res1patientcode; ?>&&visitcode=<?php echo $res1visitcode; ?>&&refnumber=<?php  echo $refno; ?>&&servicesitemcode=<?php  echo $service_item_code; ?>"><strong>Execute</strong></a><?php }?></div></td>
-
-         
-
-         </tr>
-
-              <?php
-
-			}
-
-			  ?>
-
-            </table>  
-
-               
-
-             
-
-            </td>
-
-            </tr>
-
-           
-
-              
-
-			<?php
-
-			}  }  } 
-
-			?>
-
-            	<?php
-
-			//$query1 = "select * from master_billing where paymentstatus = 'completed' and consultationdate >= NOW() - INTERVAL 6 DAY order by consultationdate";
-
-			 $query2 = "select * from consultation_services where locationcode = '".$locationcode."' and patientname like '%$searchpatient%' and patientcode like '%$searchpatientcode%' and patientvisitcode like '%$searchvisitcode%' and paymentstatus='completed' and billtype='PAY LATER' and process='pending' and servicerefund <> 'completed' and consultationdate between '$fromdate' and '$todate'  and wellnessitem <> '1' and wellnesspkg ='1' group by patientvisitcode order by consultationdate desc";// and (billingdatetime between '$triagedatefrom' and '$triagedateto')";//
-
-			$exec2 = mysqli_query($GLOBALS["___mysqli_ston"], $query2) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-			while ($res2 = mysqli_fetch_array($exec2))
-
-			{
-
-			$res2patientcode = $res2['patientcode'];
-
-			$res2visitcode = $res2['patientvisitcode'];
-
-			$res2patientfullname = $res2['patientname'];
-
-			$res2account = $res2['accountname'];
-
-			$res2consultationdate = $res2['consultationdate'];
-
-			$sno = $sno + 1;
-
-			
-
-			$query12 = "select * from master_customer where customercode = '$res2patientcode' and status = '' ";
-
-			$exec12 = mysqli_query($GLOBALS["___mysqli_ston"], $query12) or die ("Error in Query12".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-			$res12 = mysqli_fetch_array($exec12);
-
-			$res12age = $res12['age'];
-
-			$res12gender= $res12['gender'];
-
-			
-
-			$query112 = "select * from master_visitentry where patientcode = '$res2patientcode' ";
-
-			$exec112 = mysqli_query($GLOBALS["___mysqli_ston"], $query112) or die ("Error in Query112".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-			$res112 = mysqli_fetch_array($exec112);
-
-			$res112consultingdoctor = $res112['consultingdoctor'];
-
-			$res1112department = $res112['departmentname'];
-
-			$res1112plannumber = $res112['planname'];
-
-			$res1112planpercentage = $res112['planpercentage'];
-
-			$planfixedamount = $res112['planfixedamount'];
-
-
-
-			$querypl = "select forall from master_planname where auto_number = '$res1112plannumber' ";
-
-			$execpl = mysqli_query($GLOBALS["___mysqli_ston"], $querypl) or die ("Error in Querypl".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-			$respl = mysqli_fetch_array($execpl);
-
-			$resplforall = $respl['forall'];
-
-			
-
-			$colorloopcount = $colorloopcount + 1;
-
-			$showcolor = ($colorloopcount & 1); 
-
-			
-
-			
-
-			if ($showcolor == 0)
-
-			{
-
-				//echo "if";
-
-				$colorcode = 'bgcolor="#CBDBFA"';
-
-			}
-
-			else
-
-			{
-
-				//echo "else";
-
-				$colorcode = 'bgcolor="#ecf0f5"';
-
-			}
-
-			if($res1112planpercentage!=0.00 && $resplforall=='' && $planfixedamount==0.00){ 
-
-			
-
-			$query822 = "select * from transaction_stock where patientcode='$res2patientcode'  and locationcode='$locationcode' and patientvisitcode='$res2visitcode' and description='Process' ";
-
-		   $exec822 = mysqli_query($GLOBALS["___mysqli_ston"], $query822) or die(mysqli_error($GLOBALS["___mysqli_ston"]));
-
-		   $num822= mysqli_num_rows($exec822);
-
-		  // if($num822 == 0)
-
-		   {
-
-			?>
-
-            <tr <?php echo $colorcode; ?> class="showdocument"  id="<?php echo $sno; ?>" >
-
-              <td class="bodytext31" valign="center"  align="left"><div align="left"><?php echo $sno; ?></div></td>
-
-              <td class="bodytext31" valign="center"  align="left">
-
-			  <div class="bodytext31"><?php echo $res2consultationdate; ?></div></td>
-
-              <td class="bodytext31" valign="center"  align="left">
-
-			    <div align="left">
-
-			      <?php echo $res2patientcode;?>			      </div></td>
-
-              <td class="bodytext31" valign="center"  align="left">
-
-			    <div align="left"><?php echo $res2visitcode; ?></div></td>
-
-              <td class="bodytext31" valign="center"  align="left">
-
-			    <div align="left"><?php echo $res2patientfullname; ?></div></td>
-
-               <td class="bodytext31" valign="center"  align="left"><?php echo $res12age; ?></td>
-
-              <td class="bodytext31" valign="center"  align="left"><?php echo $res12gender; ?></td>
-
-              <td class="bodytext31" valign="center"  align="left"><?php echo $res1112department; ?></td>
-
-              <td class="bodytext31" valign="center"  align="left"><?php echo $res2account; ?></td>
-
-              <td class="bodytext31" valign="center" align="left">
-
-			    <img id="toggleimg" src="images/plus1.gif" width="13" height="13">
-
-            </td>
-
-              </tr>
-
-              
-
-              
-
-              <tr  id='show<?php echo $sno; ?>'  style="">
-
-             
-
-             <td colspan="5" >
-
-             
-
-             
-
-           <table >
-
-             
-
-             
-
-             <?php
-
-			 
-
-			$sno11 = '';
-
-			$totalamount=0;
-
-			  
-
-			   $query61 = "select * from consultation_services where paymentstatus='completed' and patientcode = '$res1patientcode' and patientvisitcode = '$res1visitcode' and process='pending' and servicerefund <> 'completed' and wellnessitem <> '1' and wellnesspkg ='1' and (billtype='PAY NOW' or (billtype='PAY LATER' ))";
-
-$exec61 = mysqli_query($GLOBALS["___mysqli_ston"], $query61) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-$numb=mysqli_num_rows($exec61);
-
-while($res61 = mysqli_fetch_array($exec61))
-
-{
-
-	
-
-	$serviceqty =$res61["serviceqty"];
-
-	/*for($i=0; $i<$serviceqty; $i++)
-
-	{ */
-
-
-
-$refnumber=$res61['refno'];
-
-$service_item_code=$res61['servicesitemcode'];
-
-			
-
-			
-
-$servicename =$res61["servicesitemname"];
-
-$billtype = $res61["billtype"];
-
-$refno = $res61['auto_number'];
-
-$query68="select * from master_services where itemname='$servicename'";
-
-$exec68=mysqli_query($GLOBALS["___mysqli_ston"], $query68);
-
-$res68=mysqli_fetch_array($exec68);
-
-$itemcode=$res68['itemcode'];
-
-$sno11 = $sno11 + 1;
-
-?>
-
-  
-
-  <tr>
-
-  		
-
-		<td class="bodytext31" valign="center"  align="left" colspan="6"><div align="center"><?php echo $servicename;?></div></td>
-
-		<input type="hidden" name="service[]" value="<?php echo $servicename;?>">
-
-		<input type="hidden" name="code[]" value="<?php echo $itemcode; ?>">
-
-		<input type="hidden" name="refno[]" value="<?php echo $refno; ?>">
-
-		<input type="hidden" name="sno[]" value="<?php echo $sno11; ?>">
-
-		<input type="hidden" name="billtype" id="billtype" value="<?php //echo $billtype; ?>">
-
-        <input type="hidden" name="serquantity<?php echo $sno11; ?>" id="serquantity<?php echo $sno11; ?>" value="<?php echo $serviceqty; ?>">
-
-		  <td class="bodytext31" valign="center"  align="center"><?php //echo $serviceqty;?>
-
-			 		  </td>
-
-
-
-		   <td class="bodytext31" valign="center"  align="center">
-
-           <input type="hidden" name="avqtyy<?php echo $sno11;?>" id="avqtyy<?php echo $sno11;?>" readonly value="<?php echo $serviceqty;?>" size="5" style="border:none;background: none;">
-
-       </td>
-
-		<td class="bodytext31" valign="center"  align="center">
-
-        <input type="hidden" name="rfqty<?php echo $sno11;?>" id="rfqty<?php echo $sno11;?>"  value="" size="5" onKeyDown="return numbervaild(event)" onKeyUp="sumtheservice(this.value,<?php echo $sno11;?>)">
-
-       </td>
-
-        <td class="bodytext31" valign="center"  align="left" 
-
-                >&nbsp;</td>
-
-                
-
-                  <td class="bodytext31" valign="center"  align="left" 
-
-               >&nbsp;</td>
-
-                
-
-                     <td class="bodytext31" valign="center"  align="left" 
-
-               >&nbsp;</td>
-
-                
-
-                     <td class="bodytext31" valign="center"  align="left" 
-
-               >&nbsp;</td>
-
-                
-
-                     <td class="bodytext31" valign="center"  align="left" 
-
-               >&nbsp;</td>
-
-                
-
-               <td class="bodytext31" valign="center" align="left" > 
-
-			    
-
-                <div align="left"><?php if($res1patientcode!='walkin'){?><a class="executelink" href="oppackageexecution.php?patientcode=<?php echo $res1patientcode; ?>&&visitcode=<?php echo $res1visitcode; ?>&&refnumber=<?php  echo $refno; ?>&&servicesitemcode=<?php  echo $service_item_code; ?>"><strong>Execute</strong></a><?php }else{?><a class="executelink" href="oppackageexecution.php?patientcode=<?php echo $res1patientcode; ?>&&visitcode=<?php echo $res1visitcode; ?>&&refnumber=<?php  echo $refno; ?>&&servicesitemcode=<?php  echo $service_item_code; ?>"><strong>Execute</strong></a><?php }?></div> 
-
-                </td>
-
-         
-
-         </tr>
-
-              <?php
-
-			}
-
-			  ?>
-
-            </table>  
-
-               
-
-             
-
-            </td>
-
-            </tr>
-
-           
-
-           
-
-			<?php
-
-			}  }   }
-
-			?>
-
-            <tr>
-
-              <td class="bodytext31" valign="center"  align="left" 
-
-                bgcolor="#ecf0f5">&nbsp;</td>
-
-              <td class="bodytext31" valign="center"  align="left" 
-
-                bgcolor="#ecf0f5">&nbsp;</td>
-
-              <td class="bodytext31" valign="center"  align="left" 
-
-                bgcolor="#ecf0f5">&nbsp;</td>
-
-              <td class="bodytext31" valign="center"  align="left" 
-
-                bgcolor="#ecf0f5">&nbsp;</td>
-
-              <td class="bodytext31" valign="center"  align="left" 
-
-                bgcolor="#ecf0f5">&nbsp;</td>
-
-              <td class="bodytext31" valign="center"  align="left" 
-
-                bgcolor="#ecf0f5">&nbsp;</td>
-
-              <td class="bodytext31" valign="center"  align="left" 
-
-                bgcolor="#ecf0f5">&nbsp;</td>
-
-              <td class="bodytext31" valign="center"  align="left" 
-
-                bgcolor="#ecf0f5">&nbsp;</td>
-
-              <td class="bodytext31" valign="center"  align="left" 
-
-                bgcolor="#ecf0f5">&nbsp;</td>
-
-              <td class="bodytext31" valign="center"  align="left" 
-
-                bgcolor="#ecf0f5">&nbsp;</td>
-
-              </tr>
-
-          </tbody>
-
-        </table></td>
-
-      </tr>
-
-	  <?php }?>
-
-    </table>
-
-  </table>
-
-<?php include ("includes/footer1.php"); ?>
-
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>No.</th>
+                                <th>OP Date</th>
+                                <th>Patient Code</th>
+                                <th>Visit Code</th>
+                                <th>Patient</th>
+                                <th>Age</th>
+                                <th>Gender</th>
+                                <th>Department</th>
+                                <th>Account</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php
+                            $colorloopcount = '';
+                            $sno = '0';
+                            
+                            // Query for PAY NOW completed packages
+                            $query1 = "select * from consultation_services where locationcode = '".$locationcode."' and patientname like '%$searchpatient%' and patientcode like '%$searchpatientcode%' and patientvisitcode like '%$searchvisitcode%' and (paymentstatus='completed' OR paymentstatus='paid') and billtype='PAY NOW' and process='pending' and servicerefund <> 'completed' and wellnessitem <> '1' and wellnesspkg ='1' and consultationdate between '$fromdate' and '$todate' group by patientvisitcode order by consultationdate desc";
+                            
+                            $exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
+                            
+                            while ($res1 = mysqli_fetch_array($exec1)) {
+                                $res1patientcode = $res1['patientcode'];
+                                $res1visitcode = $res1['patientvisitcode'];
+                                $res1patientfullname = $res1['patientname'];
+                                $res1account = $res1['accountname'];
+                                $res1consultationdate = $res1['consultationdate'];
+                                $billnumber = $res1['billnumber'];
+                                $sno = $sno + 1;
+                                
+                                $query11 = "select * from master_customer where customercode = '$res1patientcode' and status = '' ";
+                                $exec11 = mysqli_query($GLOBALS["___mysqli_ston"], $query11) or die ("Error in Query11".mysqli_error($GLOBALS["___mysqli_ston"]));
+                                $res11 = mysqli_fetch_array($exec11);
+                                $res11age = $res11['age'];
+                                $res11gender = $res11['gender'];
+                                
+                                $query111 = "select * from master_visitentry where patientcode = '$res1patientcode' ";
+                                $exec111 = mysqli_query($GLOBALS["___mysqli_ston"], $query111) or die ("Error in Query111".mysqli_error($GLOBALS["___mysqli_ston"]));
+                                $res111 = mysqli_fetch_array($exec111);
+                                $res111consultingdoctor = $res111['consultingdoctor'];
+                                $res1111department = $res111['departmentname'];
+                                
+                                // Check if patient is external
+                                if($res1patientcode == 'walkin') {
+                                    $query11 = "select * from billing_external where billno='$billnumber'";
+                                    $exec11 = mysqli_query($GLOBALS["___mysqli_ston"], $query11) or die(mysqli_error($GLOBALS["___mysqli_ston"]));
+                                    $res11 = mysqli_fetch_array($exec11);
+                                    $res11age = $res11['age'];
+                                    $res11gender = $res11['gender'];
+                                    $res1111department = 'External';
+                                    $res1visitcode = $res1['billnumber'];
+                                }
+                                
+                                $colorloopcount = $colorloopcount + 1;
+                                $showcolor = ($colorloopcount & 1);
+                                
+                                if ($showcolor == 0) {
+                                    $colorcode = 'bgcolor="#CBDBFA"';
+                                } else {
+                                    $colorcode = 'bgcolor="#ecf0f5"';
+                                }
+                                
+                                $query822 = "select * from transaction_stock where patientcode='$res1patientcode' and locationcode='$locationcode' and patientvisitcode='$res1visitcode' and description='Process' ";
+                                $exec822 = mysqli_query($GLOBALS["___mysqli_ston"], $query822) or die(mysqli_error($GLOBALS["___mysqli_ston"]));
+                                $num822 = mysqli_num_rows($exec822);
+                            ?>
+                            <tr <?php echo $colorcode; ?> class="showdocument" id="<?php echo $sno; ?>">
+                                <td class="sno-cell"><?php echo $sno; ?></td>
+                                <td class="date-cell"><?php echo htmlspecialchars($res1consultationdate); ?></td>
+                                <td class="code-cell"><?php echo htmlspecialchars($res1patientcode); ?></td>
+                                <td class="code-cell"><?php echo htmlspecialchars($res1visitcode); ?></td>
+                                <td class="name-cell"><?php echo htmlspecialchars($res1patientfullname); ?></td>
+                                <td class="age-cell"><?php echo htmlspecialchars($res11age); ?></td>
+                                <td class="gender-cell"><?php echo htmlspecialchars($res11gender); ?></td>
+                                <td class="dept-cell"><?php echo htmlspecialchars($res1111department); ?></td>
+                                <td class="account-cell"><?php echo htmlspecialchars($res1account); ?></td>
+                                <td class="action-cell">
+                                    <img id="toggleimg" src="images/plus1.gif" width="13" height="13" alt="Expand">
+                                </td>
+                            </tr>
+                            
+                            <!-- Expandable Service Details -->
+                            <tr id='show<?php echo $sno; ?>' style="display: none;">
+                                <td colspan="10">
+                                    <div class="service-details">
+                                        <h4>Service Details</h4>
+                                        <table class="service-table">
+                                            <thead>
+                                                <tr>
+                                                    <th>Service Name</th>
+                                                    <th>Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <?php
+                                                $sno11 = '';
+                                                $totalamount = 0;
+                                                
+                                                $query61 = "select * from consultation_services where paymentstatus='completed' and patientcode = '$res1patientcode' and patientvisitcode = '$res1visitcode' and process='pending' and servicerefund <> 'completed' and wellnessitem <> '1' and wellnesspkg ='1' and (billtype='PAY NOW' or (billtype='PAY LATER' ))";
+                                                
+                                                $exec61 = mysqli_query($GLOBALS["___mysqli_ston"], $query61) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
+                                                $numb = mysqli_num_rows($exec61);
+                                                
+                                                while($res61 = mysqli_fetch_array($exec61)) {
+                                                    $serviceqty = $res61["serviceqty"];
+                                                    $refnumber = $res61['refno'];
+                                                    $service_item_code = $res61['servicesitemcode'];
+                                                    $servicename = $res61["servicesitemname"];
+                                                    $billtype = $res61["billtype"];
+                                                    $refno = $res61['auto_number'];
+                                                    
+                                                    $query68 = "select * from master_services where itemname='$servicename'";
+                                                    $exec68 = mysqli_query($GLOBALS["___mysqli_ston"], $query68);
+                                                    $res68 = mysqli_fetch_array($exec68);
+                                                    $itemcode = $res68['itemcode'];
+                                                    $sno11 = $sno11 + 1;
+                                                ?>
+                                                <tr>
+                                                    <td class="service-name"><?php echo htmlspecialchars($servicename); ?></td>
+                                                    <td class="service-action">
+                                                        <?php if($res1patientcode != 'walkin'): ?>
+                                                            <a class="executelink btn btn-primary btn-small" 
+                                                               href="oppackageexecution.php?patientcode=<?php echo urlencode($res1patientcode); ?>&&visitcode=<?php echo urlencode($res1visitcode); ?>&&refnumber=<?php echo urlencode($refno); ?>&&servicesitemcode=<?php echo urlencode($service_item_code); ?>">
+                                                                <i class="fas fa-play"></i> Execute
+                                                            </a>
+                                                        <?php else: ?>
+                                                            <a class="executelink btn btn-primary btn-small" 
+                                                               href="oppackageexecution.php?patientcode=<?php echo urlencode($res1patientcode); ?>&&visitcode=<?php echo urlencode($res1visitcode); ?>&&refnumber=<?php echo urlencode($refno); ?>&&servicesitemcode=<?php echo urlencode($service_item_code); ?>">
+                                                                <i class="fas fa-play"></i> Execute
+                                                            </a>
+                                                        <?php endif; ?>
+                                                    </td>
+                                                </tr>
+                                                <?php } ?>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </td>
+                            </tr>
+                            <?php } ?>
+                            
+                            <!-- Similar queries for other payment types would go here -->
+                            <!-- PAY LATER completed packages -->
+                            <?php
+                            $query2 = "select * from consultation_services where locationcode = '".$locationcode."' and patientname like '%$searchpatient%' and patientcode like '%$searchpatientcode%' and patientvisitcode like '%$searchvisitcode%' and paymentstatus='completed' and billtype='PAY LATER' and process='pending' and servicerefund <> 'completed' and consultationdate between '$fromdate' and '$todate' and wellnessitem <> '1' and wellnesspkg ='1' group by patientvisitcode order by consultationdate desc";
+                            
+                            $exec2 = mysqli_query($GLOBALS["___mysqli_ston"], $query2) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
+                            
+                            while ($res2 = mysqli_fetch_array($exec2)) {
+                                $res2patientcode = $res2['patientcode'];
+                                $res2visitcode = $res2['patientvisitcode'];
+                                $res2patientfullname = $res2['patientname'];
+                                $res2account = $res2['accountname'];
+                                $res2consultationdate = $res2['consultationdate'];
+                                $sno = $sno + 1;
+                                
+                                $query12 = "select * from master_customer where customercode = '$res2patientcode' and status = '' ";
+                                $exec12 = mysqli_query($GLOBALS["___mysqli_ston"], $query12) or die ("Error in Query12".mysqli_error($GLOBALS["___mysqli_ston"]));
+                                $res12 = mysqli_fetch_array($exec12);
+                                $res12age = $res12['age'];
+                                $res12gender = $res12['gender'];
+                                
+                                $query112 = "select * from master_visitentry where patientcode = '$res2patientcode' ";
+                                $exec112 = mysqli_query($GLOBALS["___mysqli_ston"], $query112) or die ("Error in Query112".mysqli_error($GLOBALS["___mysqli_ston"]));
+                                $res112 = mysqli_fetch_array($exec112);
+                                $res1112department = $res112['departmentname'];
+                                
+                                $colorloopcount = $colorloopcount + 1;
+                                $showcolor = ($colorloopcount & 1);
+                                
+                                if ($showcolor == 0) {
+                                    $colorcode = 'bgcolor="#CBDBFA"';
+                                } else {
+                                    $colorcode = 'bgcolor="#ecf0f5"';
+                                }
+                                
+                                $query822 = "select * from transaction_stock where patientcode='$res2patientcode' and locationcode='$locationcode' and patientvisitcode='$res2visitcode' and description='Process' ";
+                                $exec822 = mysqli_query($GLOBALS["___mysqli_ston"], $query822) or die(mysqli_error($GLOBALS["___mysqli_ston"]));
+                                $num822 = mysqli_num_rows($exec822);
+                            ?>
+                            <tr <?php echo $colorcode; ?> class="showdocument" id="<?php echo $sno; ?>">
+                                <td class="sno-cell"><?php echo $sno; ?></td>
+                                <td class="date-cell"><?php echo htmlspecialchars($res2consultationdate); ?></td>
+                                <td class="code-cell"><?php echo htmlspecialchars($res2patientcode); ?></td>
+                                <td class="code-cell"><?php echo htmlspecialchars($res2visitcode); ?></td>
+                                <td class="name-cell"><?php echo htmlspecialchars($res2patientfullname); ?></td>
+                                <td class="age-cell"><?php echo htmlspecialchars($res12age); ?></td>
+                                <td class="gender-cell"><?php echo htmlspecialchars($res12gender); ?></td>
+                                <td class="dept-cell"><?php echo htmlspecialchars($res1112department); ?></td>
+                                <td class="account-cell"><?php echo htmlspecialchars($res2account); ?></td>
+                                <td class="action-cell">
+                                    <img id="toggleimg" src="images/plus1.gif" width="13" height="13" alt="Expand">
+                                </td>
+                            </tr>
+                            
+                            <!-- Expandable Service Details for PAY LATER -->
+                            <tr id='show<?php echo $sno; ?>' style="display: none;">
+                                <td colspan="10">
+                                    <div class="service-details">
+                                        <h4>Service Details</h4>
+                                        <table class="service-table">
+                                            <thead>
+                                                <tr>
+                                                    <th>Service Name</th>
+                                                    <th>Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <?php
+                                                $sno11 = '';
+                                                $totalamount = 0;
+                                                
+                                                $query61 = "select * from consultation_services where paymentstatus='completed' and patientcode = '$res2patientcode' and patientvisitcode = '$res2visitcode' and process='pending' and servicerefund <> 'completed' and wellnessitem <> '1' and wellnesspkg ='1' and (billtype='PAY NOW' or (billtype='PAY LATER' ))";
+                                                
+                                                $exec61 = mysqli_query($GLOBALS["___mysqli_ston"], $query61) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
+                                                $numb = mysqli_num_rows($exec61);
+                                                
+                                                while($res61 = mysqli_fetch_array($exec61)) {
+                                                    $serviceqty = $res61["serviceqty"];
+                                                    $refnumber = $res61['refno'];
+                                                    $service_item_code = $res61['servicesitemcode'];
+                                                    $servicename = $res61["servicesitemname"];
+                                                    $billtype = $res61["billtype"];
+                                                    $refno = $res61['auto_number'];
+                                                    
+                                                    $query68 = "select * from master_services where itemname='$servicename'";
+                                                    $exec68 = mysqli_query($GLOBALS["___mysqli_ston"], $query68);
+                                                    $res68 = mysqli_fetch_array($exec68);
+                                                    $itemcode = $res68['itemcode'];
+                                                    $sno11 = $sno11 + 1;
+                                                ?>
+                                                <tr>
+                                                    <td class="service-name"><?php echo htmlspecialchars($servicename); ?></td>
+                                                    <td class="service-action">
+                                                        <?php if($res2patientcode != 'walkin'): ?>
+                                                            <a class="executelink btn btn-primary btn-small" 
+                                                               href="oppackageexecution.php?patientcode=<?php echo urlencode($res2patientcode); ?>&&visitcode=<?php echo urlencode($res2visitcode); ?>&&refnumber=<?php echo urlencode($refno); ?>&&servicesitemcode=<?php echo urlencode($service_item_code); ?>">
+                                                                <i class="fas fa-play"></i> Execute
+                                                            </a>
+                                                        <?php else: ?>
+                                                            <a class="executelink btn btn-primary btn-small" 
+                                                               href="oppackageexecution.php?patientcode=<?php echo urlencode($res2patientcode); ?>&&visitcode=<?php echo urlencode($res2visitcode); ?>&&refnumber=<?php echo urlencode($refno); ?>&&servicesitemcode=<?php echo urlencode($service_item_code); ?>">
+                                                                <i class="fas fa-play"></i> Execute
+                                                            </a>
+                                                        <?php endif; ?>
+                                                    </td>
+                                                </tr>
+                                                <?php } ?>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </td>
+                            </tr>
+                            <?php } ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <?php } endif; ?>
+        </main>
+    </div>
+
+    <!-- Modern JavaScript -->
+    <script src="js/oppackageprocesslist-modern.js?v=<?php echo time(); ?>"></script>
 </body>
-
 </html>
-
-
-

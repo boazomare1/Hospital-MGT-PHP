@@ -1,1231 +1,439 @@
 <?php
-
 session_start();
-
 include ("includes/loginverify.php");
-
 include ("db/db_connect.php");
-//echo $menu_id;
 include ("includes/check_user_access.php");
 
-
-$ipaddress = $_SERVER['REMOTE_ADDR'];
-
-$updatedatetime = date('Y-m-d H:i:s');
-
 $username = $_SESSION['username'];
-
 $companyanum = $_SESSION['companyanum'];
-
 $companyname = $_SESSION['companyname'];
 
-$transactiondatefrom = date('Y-m-d', strtotime('-1 month'));
+$ipaddress = $_SERVER["REMOTE_ADDR"];
+$updatedatetime = date('Y-m-d H:i:s');
+$errmsg = "";
+$bgcolorcode = "";
 
+$transactiondatefrom = date('Y-m-d', strtotime('-1 month'));
 $transactiondateto = date('Y-m-d');
 
-?>
-
-<style type="text/css">
-
-<!--
-
-body {
-
-	margin-left: 0px;
-
-	margin-top: 0px;
-
-	background-color: #ecf0f5;
-
+// Handle form data
+if (isset($_REQUEST['searchstatus'])) {
+    $searchstatus = $_REQUEST['searchstatus'];
+} else {
+    $searchstatus = 'Purchase Indent';
 }
 
-.bodytext3 {	FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3B3B3C; FONT-FAMILY: Tahoma
-
+if (isset($_POST['ADate1'])) {
+    $fromdate = $_POST['ADate1'];
+} else {
+    $fromdate = $transactiondatefrom;
 }
 
-.number
-
-{
-
-padding-left:690px;
-
-text-align:right;
-
-font-weight:bold;
-
+if (isset($_POST['ADate2'])) {
+    $todate = $_POST['ADate2'];
+} else {
+    $todate = $transactiondateto;
 }
 
--->
-
-</style>
-
-<link href="css/datepickerstyle.css" rel="stylesheet" type="text/css" />
-
-<script type="text/javascript" src="js/adddate.js"></script>
-
-<script type="text/javascript" src="js/adddate2.js"></script>
-
-<script language="javascript">
-
-
-
-function cbcustomername1()
-
-{
-
-	document.cbform1.submit();
-
+if (isset($_POST['docno'])) {
+    $docno = $_POST['docno'];
+} else {
+    $docno = '';
 }
 
-
-
-</script>
-
-
-
-<script type="text/javascript">
-
-function pharmacy(patientcode,visitcode)
-
-{
-
-	var patientcode = patientcode;
-
-	var visitcode = visitcode;
-
-	var url="pharmacy1.php?RandomKey="+Math.random()+"&&patientcode="+patientcode+"&&visitcode="+visitcode;
-
-	
-
-window.open(url,"Pharmacy",'width=600,height=400');
-
-}
-
-function disableEnterKey(varPassed)
-
-{
-
-	//alert ("Back Key Press");
-
-	if (event.keyCode==8) 
-
-	{
-
-		event.keyCode=0; 
-
-		return event.keyCode 
-
-		return false;
-
-	}
-
-	
-
-	var key;
-
-	if(window.event)
-
-	{
-
-		key = window.event.keyCode;     //IE
-
-	}
-
-	else
-
-	{
-
-		key = e.which;     //firefox
-
-	}
-
-
-
-	if(key == 13) // if enter key press
-
-	{
-
-		//alert ("Enter Key Press2");
-
-		return false;
-
-	}
-
-	else
-
-	{
-
-		return true;
-
-	}
-
-}
-
-
-
-</script>
-
-<script src="js/datetimepicker_css.js"></script>
-
-<link rel="stylesheet" type="text/css" href="css/autosuggest.css" />        
-
-<style type="text/css">
-
-<!--
-
-.bodytext31 {FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3b3b3c; FONT-FAMILY: Tahoma
-
-}
-
--->
-
-</style>
-
-</head>
-
-<body>
-
-<?php
-
-if(isset($_REQUEST['searchstatus'])){$searchstatus = $_REQUEST['searchstatus'];}else{$searchstatus='Purchase Indent';}
-
-if(isset($_POST['ADate1'])){$fromdate = $_POST['ADate1'];}else{$fromdate=$transactiondatefrom;}
-
-if(isset($_POST['ADate2'])){$todate = $_POST['ADate2'];}else{$todate=$transactiondateto;}
-
-if(isset($_POST['docno'])){$docno = $_POST['docno'];}else{$docno='';}
-
-
-
-	$query1 = "select * from purchase_indent where approvalstatus='1' and (date between '$fromdate' and '$todate') and docno like '%$docno%' group by docno";// and (billingdatetime between '$triagedatefrom' and '$triagedateto')";//
-
+// Get approved purchase indents count
+$query1 = "select * from purchase_indent where approvalstatus='1' and (date between '$fromdate' and '$todate') and docno like '%$docno%' group by docno";
 	$exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
-
 	$resnw3 = mysqli_num_rows($exec1);
 
-	
-
-	$query2 = "select * from purchase_indent where approvalstatus='rejected2' and (date between '$fromdate' and '$todate') and docno like '%$docno%' group by docno";// and (billingdatetime between '$triagedatefrom' and '$triagedateto')";//
-
-	$exec2 = mysqli_query($GLOBALS["___mysqli_ston"], $query2) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
-
+// Get rejected purchase indents count
+$query2 = "select * from purchase_indent where approvalstatus='rejected2' and (date between '$fromdate' and '$todate') and docno like '%$docno%' group by docno";
+$exec2 = mysqli_query($GLOBALS["___mysqli_ston"], $query2) or die ("Error in Query2".mysqli_error($GLOBALS["___mysqli_ston"]));
 	$resnw2 = mysqli_num_rows($exec2);
+?>
 
-				?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Purchase Indent Approval - MedStar</title>
+    
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <!-- Modern CSS -->
+    <link rel="stylesheet" href="css/purchase-indent-modern.css?v=<?php echo time(); ?>">
+    
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- Date picker styles -->
+    <link href="css/datepickerstyle.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="css/autosuggest.css" />
+    
+    <!-- Scripts -->
+    <script type="text/javascript" src="js/adddate.js"></script>
+    <script type="text/javascript" src="js/adddate2.js"></script>
+    <script src="js/datetimepicker_css.js"></script>
+</head>
+<body>
+    <!-- Hospital Header -->
+    <header class="hospital-header">
+        <h1 class="hospital-title">🏥 MedStar Hospital Management</h1>
+        <p class="hospital-subtitle">Advanced Healthcare Management Platform</p>
+    </header>
 
-<table width="103%" border="0" cellspacing="0" cellpadding="2">
+    <!-- User Information Bar -->
+    <div class="user-info-bar">
+        <div class="user-welcome">
+            <span class="welcome-text">Welcome, <strong><?php echo htmlspecialchars($username); ?></strong></span>
+            <span class="location-info">📍 Company: <?php echo htmlspecialchars($companyname); ?></span>
+        </div>
+        <div class="user-actions">
+            <a href="mainmenu1.php" class="btn btn-outline">🏠 Main Menu</a>
+            <a href="logout.php" class="btn btn-outline">🚪 Logout</a>
+        </div>
+    </div>
 
-  <tr>
+    <!-- Navigation Breadcrumb -->
+    <nav class="nav-breadcrumb">
+        <a href="mainmenu1.php">🏠 Home</a>
+        <span>→</span>
+        <span>Purchase Indent Approval</span>
+    </nav>
 
-    <td colspan="9" bgcolor="#ecf0f5"><?php include ("includes/alertmessages1.php"); ?></td>
+    <!-- Main Container -->
+    <div class="main-container">
+        <!-- Alert Container -->
+        <div id="alertContainer">
+            <?php include ("includes/alertmessages1.php"); ?>
+        </div>
 
-  </tr>
+        <!-- Page Header -->
+        <div class="page-header">
+            <div class="page-header-content">
+                <h2>Purchase Indent Approval</h2>
+                <p>Review and approve purchase indent requests from various departments.</p>
+            </div>
+            <div class="page-header-actions">
+                <button type="button" class="btn btn-secondary" onclick="refreshPage()">
+                    <i class="fas fa-sync-alt"></i> Refresh
+                </button>
+                <button type="button" class="btn btn-outline" onclick="exportToExcel()">
+                    <i class="fas fa-download"></i> Export
+                </button>
+            </div>
+        </div>
 
-  <tr>
-
-    <td colspan="9" bgcolor="#ecf0f5"><?php include ("includes/title1.php"); ?></td>
-
-  </tr>
-
-  <tr>
-
-    <td colspan="9" bgcolor="#ecf0f5"><?php include ("includes/menu1.php"); ?></td>
-
-  </tr>
-
-  <tr>
-
-    <td colspan="9">&nbsp;</td>
-
-  </tr>
-
-  <tr>
-
-    <td width="1%">&nbsp;</td>
-
-    <td width="99%" valign="top"><table width="105%" border="0" cellspacing="0" cellpadding="0">
-
-	      
-
-		  <tr>
-
-        <td width="860">
-
-              <form name="cbform1" method="post" action="viewpurchaseindent2.php">
-
-                <table width="600" border="0" align="left" cellpadding="4" cellspacing="0" bordercolor="#666666" id="AutoNumber3" style="border-collapse: collapse">
-
-                  <tbody>
-
-                   <tr bgcolor="#011E6A">
-
-              <td colspan="3" bgcolor="#ecf0f5" class="bodytext3"><strong>Finance Purchase Indents Approval</strong></td>
-
-              <td colspan="1" align="right" bgcolor="#ecf0f5" class="bodytext3" id="ajaxlocation"><strong>  </strong>
-
-                  </td>
-
-              </tr>
-
-			   <tr>
-
-              <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">Doc No</td>
-
-              <td colspan="3" align="left" valign="top"  bgcolor="#FFFFFF"><span class="bodytext3">
-
-                <input name="docno" type="text" id="docno" value="" autocomplete="off">
-
-              </span></td>
-
-              </tr>
-
-			  <tr>
-
-              <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">Status</td>
-
-              <td colspan="3" align="left" valign="top"  bgcolor="#FFFFFF"><span class="bodytext3">
-
-              <select name="searchstatus" id="searchstatus">
-
+        <!-- Search Form Section -->
+        <div class="search-form-section">
+            <div class="search-form-header">
+                <i class="fas fa-search search-form-icon"></i>
+                <h3 class="search-form-title">Search Purchase Indents</h3>
+            </div>
+            
+            <form name="cbform1" method="post" action="viewpurchaseindent2_modern.php" class="search-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="docno" class="form-label">Document Number</label>
+                        <input type="text" name="docno" id="docno" class="form-input" 
+                               value="<?php echo htmlspecialchars($docno); ?>"
+                               placeholder="Enter document number..." autocomplete="off">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="searchstatus" class="form-label">Status</label>
+                        <select name="searchstatus" id="searchstatus" class="form-input">
 			  <?php if($searchstatus != '') { ?>
-
-			  <option value="<?php echo $searchstatus; ?>"><?php echo $searchstatus; ?></option>
-
+                                <option value="<?php echo htmlspecialchars($searchstatus); ?>"><?php echo htmlspecialchars($searchstatus); ?></option>
 			  <?php } ?>
-
               <option value="Purchase Indent">Purchase Indent</option>
-
 			  <option value="All">All</option>             
-
 			  <option value="Discarded">Discarded</option>
-
 			  </select>
+                    </div>
+                </div>
 
-              </span></td>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="ADate1" class="form-label">Date From</label>
+                        <div class="date-input-group">
+                            <input name="ADate1" id="ADate1" value="<?php echo $fromdate; ?>" 
+                                   class="form-input date-input" readonly onKeyDown="return disableEnterKey()">
+                            <img src="images2/cal.gif" onClick="javascript:NewCssCal('ADate1')" 
+                                 class="date-picker-icon" alt="Select Date">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="ADate2" class="form-label">Date To</label>
+                        <div class="date-input-group">
+                            <input name="ADate2" id="ADate2" value="<?php echo $todate; ?>" 
+                                   class="form-input date-input" readonly onKeyDown="return disableEnterKey()">
+                            <img src="images2/cal.gif" onClick="javascript:NewCssCal('ADate2')" 
+                                 class="date-picker-icon" alt="Select Date">
+                        </div>
+                    </div>
+                </div>
 
-              </tr>
-
-                   <tr>
-
-          <td width="100" align="left" valign="center"  
-
-                bgcolor="#ffffff" class="bodytext31"><strong> Date From </strong></td>
-
-          <td width="137" align="left" valign="center"  bgcolor="#ffffff" class="bodytext31"><input name="ADate1" id="ADate1" value="<?php echo $transactiondatefrom; ?>"  size="10"  readonly="readonly" onKeyDown="return disableEnterKey()" />
-
-			<img src="images2/cal.gif" onClick="javascript:NewCssCal('ADate1')" style="cursor:pointer"/>			</td>
-
-          <td width="68" align="left" valign="center"  bgcolor="#FFFFFF" class="style1"><span class="bodytext31"><strong> Date To </strong></span></td>
-
-          <td width="263" align="left" valign="center"  bgcolor="#ffffff"><span class="bodytext31">
-
-            <input name="ADate2" id="ADate2" value="<?php echo $transactiondateto; ?>"  size="10"  readonly="readonly" onKeyDown="return disableEnterKey()" />
-
-			<img src="images2/cal.gif" onClick="javascript:NewCssCal('ADate2')" style="cursor:pointer"/>
-
-		  </span></td>
-
-          </tr>
-
-					
-
-				
-
-			<tr>
-
-                      <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">&nbsp;</td>
-
-                      <td colspan="3" align="left" valign="top"  bgcolor="#FFFFFF">
-
+                <div class="form-actions">
 					  <input type="hidden" name="cbfrmflag1" value="cbfrmflag1">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-search"></i> Search
+                    </button>
+                    <button type="reset" class="btn btn-secondary">
+                        <i class="fas fa-undo"></i> Reset
+                    </button>
+                </div>
+            </form>
+        </div>
 
-                          <input  type="submit" value="Search" name="Submit" />
-
-                          <input name="resetbutton" type="reset" id="resetbutton"  value="Reset" /></td>
-
-                    </tr>
-
-                  </tbody>
-
-                </table>
-
-              </form>		</td>
-
-      </tr>
-
-  
-
-    <tr>
-
-    <td colspan="9">&nbsp;</td>
-
-  </tr><tr>
-
-    <td valign="top"><table width="61%" border="0" cellspacing="0" cellpadding="0">
-
-      <tr>
-
-        <td><table id="AutoNumber3" style="BORDER-COLLAPSE: collapse" 
-
-            bordercolor="#666666" cellspacing="0" cellpadding="4" width="800" 
-
-            align="left" border="0">
-
-          <tbody>
-
+        <!-- Data Tables Section -->
+        <div class="data-tables-section">
           <?php if($searchstatus=='Purchase Indent'||$searchstatus=='All'){?>
-
-            <tr>
-
-              <td colspan="8" bgcolor="#ecf0f5" class="bodytext31">
-
-                <!--<input onClick="javascript:printbillreport1()" name="resetbutton2" type="submit" id="resetbutton2"  style="border: 1px solid #001E6A" value="Print Report" />-->
-
-                <div align="left" style="width:70%; float:left"><strong>Finance Purchase Indents Approval</strong></div><div align="right" style="width:20%; float:left;"><strong><<<?php echo $resnw3;?>>></strong></div></td>
-
-              </tr>
+                <!-- Approved Purchase Indents -->
+                <div class="data-table-section">
+                    <div class="data-table-header">
+                        <i class="fas fa-check-circle data-table-icon"></i>
+                        <h3 class="data-table-title">Finance Purchase Indents Approval</h3>
+                        <div class="data-table-count">Total: <strong><?php echo $resnw3; ?></strong></div>
+                    </div>
 
 			  <?php
-
+                    // Get departments for approved indents
 		 $dptqry = "select distinct departmentname from master_employee where username in (select bausername from purchase_indent where approvalstatus = '1')";
-
 	$dptexec = mysqli_query($GLOBALS["___mysqli_ston"], $dptqry);
 
-	while ($resdpt = mysqli_fetch_assoc($dptexec))
-
-	{
-
+                    while ($resdpt = mysqli_fetch_assoc($dptexec)) {
 	$dpt = $resdpt['departmentname'];
+                        ?>
+                        
+                        <!-- Department Section -->
+                        <div class="department-section">
+                            <div class="department-header">
+                                <h4 class="department-title">
+                                    <i class="fas fa-building"></i>
+                                    <?php echo ($dpt != '') ? htmlspecialchars($dpt) : 'OTHER DEPARTMENTS'; ?>
+                                </h4>
+                            </div>
 
-	
-
-			  ?>
-
-			  <tr><td colspan="8" bgcolor="#ecf0f5" class="bodytext31">
-
-                <!--<input onClick="javascript:printbillreport1()" name="resetbutton2" type="submit" id="resetbutton2"  style="border: 1px solid #001E6A" value="Print Report" />-->
-
-                <div align="left" style="width:70%; float:left"><strong><?php if($dpt!='')
-
-				{
-
-				echo $dpt;
-
-				}
-
-				else
-
-				{
-
-				echo 'OTHER DEPARTMENTS';
-
-				}?></strong></div></td>
-
+                            <!-- Modern Data Table -->
+                            <div class="modern-table-container">
+                                <table class="modern-data-table">
+                                    <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Date</th>
+                                            <th>From</th>
+                                            <th>Doc No</th>
+                                            <th>Status</th>
+                                            <th>Remarks</th>
+                                            <th>Location</th>
+                                            <th>Priority</th>
+                                            <th>Action</th>
               </tr>
-
-            <tr>
-
-              <td width="5%" align="left" valign="center" 
-
-                bgcolor="#ffffff" class="bodytext31"><div align="left"><strong>No.</strong></div></td>
-
-              <td width="10%" align="left" valign="center" 
-
-                bgcolor="#ffffff" class="bodytext31"><div align="left"><strong>  Date</strong></div></td>
-
-              <td width="11%" align="left" valign="center" 
-
-                bgcolor="#ffffff" class="bodytext31"><div align="left"><strong>From </strong></div></td>
-
-				 <td width="11%" align="left" valign="center" 
-
-                bgcolor="#ffffff" class="bodytext31"><div align="left"><strong>Doc No</strong></div></td>
-
-              <td width="11%" align="left" valign="center" 
-
-                bgcolor="#ffffff" class="bodytext31"><div align="left"><strong>Status</strong></div></td>
-
-                 <td width="37%" align="left" valign="center" 
-
-                bgcolor="#ffffff" class="bodytext31"><div align="left"><strong>Remarks</strong></div></td>
-
-                <td width="37%" align="left" valign="center" 
-
-                bgcolor="#ffffff" class="bodytext31"><div align="left"><strong>Location</strong></div></td>
-
-                
-
-                 <td width="37%" align="left" valign="center" 
-
-                bgcolor="#ffffff" class="bodytext31"><div align="left"><strong>Priority</strong></div></td>
-
-                 <td width="15%" align="left" valign="center" 
-
-                bgcolor="#ffffff" class="bodytext31"><div align="left"><strong>Action</strong></div></td>
-
-              </tr>
-
+                                    </thead>
+                                    <tbody>
 			<?php
-
 			$colorloopcount = '';
-
 			$sno = '';
 
-			
-
-			$triagedatefrom = date('Y-m-d', strtotime('-2 day'));
-
-			$triagedateto = date('Y-m-d');
-
-			
-
-			//$query1 = "select * from master_billing where paymentstatus = 'completed' and consultationdate >= NOW() - INTERVAL 6 DAY order by consultationdate";
-
-			 $query1 = "select * from purchase_indent where approvalstatus='1' and (date between '$fromdate' and '$todate') and docno like '%$docno%' and bausername in (select username from master_employee where departmentname like '$dpt') group by docno";// and (billingdatetime between '$triagedatefrom' and '$triagedateto')";//
-
+                                        $query1 = "select * from purchase_indent where approvalstatus='1' and (date between '$fromdate' and '$todate') and docno like '%$docno%' and bausername in (select username from master_employee where departmentname like '$dpt') group by docno";
 			$exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
 
-			while ($res1 = mysqli_fetch_array($exec1))
-
-			{
-
+                                        while ($res1 = mysqli_fetch_array($exec1)) {
 			$date = $res1['date'];
-
 			$user = $res1['bausername'];
-
 			$status = $res1['status'];
-
 			$docno1 = $res1['docno'];
-
 			$remarks = $res1['remarks'];
-
 			$priority = $res1['priority'];
-
 			$approvalstatus = $res1['approvalstatus'];
 			$location_name = $res1['location'];
 
-
 			$colorloopcount = $colorloopcount + 1;
-
-			$showcolor = ($colorloopcount & 1); 
-
-			
-
-			
-
-			if ($showcolor == 0)
-
-			{
-
-				//echo "if";
-
-				$colorcode = 'bgcolor="#CBDBFA"';
-
-			}
-
-			else
-
-			{
-
-				//echo "else";
-
-				$colorcode = 'bgcolor="#ecf0f5"';
-
-			}
-
-			?>
-
-            <tr <?php echo $colorcode; ?>>
-
-              <td class="bodytext31" valign="center"  align="left"><div align="left"><?php echo $sno = $sno + 1; ?></div></td>
-
-              <td class="bodytext31" valign="center"  align="left">
-
-			  <div class="bodytext31"><?php echo $date; ?></div></td>
-
-              <td class="bodytext31" valign="center"  align="left">
-
-			    <div align="left">
-
-			     <?php echo $user.'-'.$dpt;?>		      </div></td>
-
-				  <td class="bodytext31" valign="center"  align="left">
-
-			    <div align="left"><?php echo $docno1; ?></div></td>
-
-              <td class="bodytext31" valign="center"  align="left">
-
-			    <div align="left"><?php echo $status; ?></div></td>
-
-
-
-                <td class="bodytext31" valign="center"  align="left">
-
-			    <div align="left"><?php echo $remarks."<br>-By ".$user; ?></div></td>
-
-			    <td class="bodytext31" valign="center"  align="left">
-
-			    <div align="left"><?php echo $location_name; ?></div></td>
-
-			    
-
-                <td class="bodytext31" valign="center"  align="left">
-
-			    <div align="left"><strong style="font-size:14px;"><?php echo $priority; ?></strong></div></td>
-
-                 <td class="bodytext31" valign="center" align="left">
-
-			    <div align="left"><a href="purchaseindentapproval2.php?docno=<?php echo $docno1; ?>&&menuid=<?php echo $menu_id; ?>"><strong>
-
-                <?php if($approvalstatus==1)
-
-				{
-
-                 echo 'VIEW';
-
-				}
-
-				else
-
-				{
-
-					echo 'VIEW Rejected';
-
-				}
-
-				?>
-
-                </strong></a></div></td>
-
+                                            $sno = $sno + 1;
+                                            ?>
+                                            <tr class="table-row <?php echo ($colorloopcount % 2 == 0) ? 'even' : 'odd'; ?>">
+                                                <td><?php echo $sno; ?></td>
+                                                <td>
+                                                    <span class="date-badge"><?php echo htmlspecialchars($date); ?></span>
+                                                </td>
+                                                <td>
+                                                    <div class="user-info">
+                                                        <span class="user-name"><?php echo htmlspecialchars($user); ?></span>
+                                                        <span class="department-name">- <?php echo htmlspecialchars($dpt); ?></span>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <span class="doc-no-badge"><?php echo htmlspecialchars($docno1); ?></span>
+                                                </td>
+                                                <td>
+                                                    <span class="status-badge status-<?php echo strtolower($status); ?>">
+                                                        <?php echo htmlspecialchars($status); ?>
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    <div class="remarks-text">
+                                                        <?php echo htmlspecialchars($remarks); ?>
+                                                        <br><small class="by-user">-By <?php echo htmlspecialchars($user); ?></small>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <span class="location-badge"><?php echo htmlspecialchars($location_name); ?></span>
+                                                </td>
+                                                <td>
+                                                    <span class="priority-badge priority-<?php echo strtolower($priority); ?>">
+                                                        <?php echo htmlspecialchars($priority); ?>
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    <div class="action-buttons">
+                                                        <a href="purchaseindentapproval2.php?docno=<?php echo urlencode($docno1); ?>&menuid=<?php echo $menu_id; ?>" 
+                                                           class="action-btn view" title="View Details">
+                                                            <i class="fas fa-eye"></i>
+                                                            <?php echo ($approvalstatus == 1) ? 'VIEW' : 'VIEW Rejected'; ?>
+                                                        </a>
+                                                    </div>
+                                                </td>
               </tr>
+			<?php
+                                        }
+                                        ?>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+			<?php
+                    }
+                    ?>
+                </div>
+            <?php } ?>
+
+            <?php if($searchstatus=='Discarded'||$searchstatus=='All'){?>   
+                <!-- Discarded Purchase Indents -->
+                <div class="data-table-section">
+                    <div class="data-table-header">
+                        <i class="fas fa-times-circle data-table-icon"></i>
+                        <h3 class="data-table-title">Discarded Purchase Indents</h3>
+                        <div class="data-table-count">Total: <strong><?php echo $resnw2; ?></strong></div>
+                    </div>
 
 			<?php
-
-			} 
-
-			}/*
-
-			?>
-
-			 <tr><td colspan="7" bgcolor="#ecf0f5" class="bodytext31">
-
-                <!--<input onClick="javascript:printbillreport1()" name="resetbutton2" type="submit" id="resetbutton2"  style="border: 1px solid #001E6A" value="Print Report" />-->
-
-                <div align="left" style="width:70%; float:left"><strong><?php echo 'OTHER DEPARTMENTS';?></strong></div></td>
-
-              </tr>
-
-            <tr>
-
-              <td width="5%" align="left" valign="center" 
-
-                bgcolor="#ffffff" class="bodytext31"><div align="left"><strong>No.</strong></div></td>
-
-              <td width="10%" align="left" valign="center" 
-
-                bgcolor="#ffffff" class="bodytext31"><div align="left"><strong>  Date</strong></div></td>
-
-              <td width="11%" align="left" valign="center" 
-
-                bgcolor="#ffffff" class="bodytext31"><div align="left"><strong>From </strong></div></td>
-
-				 <td width="11%" align="left" valign="center" 
-
-                bgcolor="#ffffff" class="bodytext31"><div align="left"><strong>Doc No</strong></div></td>
-
-              <td width="11%" align="left" valign="center" 
-
-                bgcolor="#ffffff" class="bodytext31"><div align="left"><strong>Status</strong></div></td>
-
-                 <td width="37%" align="left" valign="center" 
-
-                bgcolor="#ffffff" class="bodytext31"><div align="left"><strong>Remarks</strong></div></td>
-
-                 <td width="15%" align="left" valign="center" 
-
-                bgcolor="#ffffff" class="bodytext31"><div align="left"><strong>Action</strong></div></td>
-
-              </tr>
-
-			<?php
-
-			$colorloopcount = '';
-
-			$sno = '';
-
-			
-
-			$triagedatefrom = date('Y-m-d', strtotime('-2 day'));
-
-			$triagedateto = date('Y-m-d');
-
-			
-
-			//$query1 = "select * from master_billing where paymentstatus = 'completed' and consultationdate >= NOW() - INTERVAL 6 DAY order by consultationdate";
-
-			$query1 = "select * from purchase_indent where approvalstatus='1' and (date between '$fromdate' and '$todate') and docno like '%$docno%' and bausername in (select username from master_employee where departmentname like '') group by docno";// and (billingdatetime between '$triagedatefrom' and '$triagedateto')";//
-
-			$exec1 = mysql_query($query1) or die ("Error in Query1".mysql_error());
-
-			while ($res1 = mysql_fetch_array($exec1))
-
-			{
-
-			$date = $res1['date'];
-
-			$user = $res1['bausername'];
-
-			$status = $res1['status'];
-
-			$docno = $res1['docno'];
-
-			$remarks = $res1['remarks'];
-
-			$approvalstatus = $res1['approvalstatus'];
-
-			$colorloopcount = $colorloopcount + 1;
-
-			$showcolor = ($colorloopcount & 1); 
-
-			
-
-			
-
-			if ($showcolor == 0)
-
-			{
-
-				//echo "if";
-
-				$colorcode = 'bgcolor="#CBDBFA"';
-
-			}
-
-			else
-
-			{
-
-				//echo "else";
-
-				$colorcode = 'bgcolor="#ecf0f5"';
-
-			}
-
-			?>
-
-            <tr <?php echo $colorcode; ?>>
-
-              <td class="bodytext31" valign="center"  align="left"><div align="left"><?php echo $sno = $sno + 1; ?></div></td>
-
-              <td class="bodytext31" valign="center"  align="left">
-
-			  <div class="bodytext31"><?php echo $date; ?></div></td>
-
-              <td class="bodytext31" valign="center"  align="left">
-
-			    <div align="left">
-
-			     <?php echo $user.'-'.$dpt;?>		      </div></td>
-
-				  <td class="bodytext31" valign="center"  align="left">
-
-			    <div align="left"><?php echo $docno; ?></div></td>
-
-              <td class="bodytext31" valign="center"  align="left">
-
-			    <div align="left"><?php echo $status; ?></div></td>
-
-                <td class="bodytext31" valign="center"  align="left">
-
-			    <div align="left"><?php echo $remarks."<br>-By ".$user; ?></div></td>
-
-                 <td class="bodytext31" valign="center" align="left">
-
-			    <div align="left"><a href="purchaseindentapproval2.php?docno=<?php echo $docno; ?>"><strong>
-
-                <?php if($approvalstatus==1)
-
-				{
-
-                 echo 'VIEW';
-
-				}
-
-				else
-
-				{
-
-					echo 'VIEW Rejected';
-
-				}
-
-				?>
-
-                </strong></a></div></td>
-
-              </tr>
-
-			<?php
-
-			}*/
-
-			}
-
-			if($searchstatus=='Discarded'||$searchstatus=='All'){?>   
-
-			<tr>
-
-              <td colspan="8" class="bodytext31">&nbsp;
-
-               </td>
-
-              </tr>
-
-            
-
-            <tr>
-
-              <td colspan="8" bgcolor="#ecf0f5" class="bodytext31">
-
-                <!--<input onClick="javascript:printbillreport1()" name="resetbutton2" type="submit" id="resetbutton2"  style="border: 1px solid #001E6A" value="Print Report" />-->
-
-                <div align="left" style="width:70%; float:left"><strong>Discarded Purchase Indents</strong></div><div align="right" style="width:20%; float:left;"><strong><<<?php echo $resnw2;?>>></strong></div></td>
-
-              </tr>
-
-			  <?php
-
+                    // Get departments for discarded indents
 		$dptqry = "select distinct departmentname from master_employee where username in (select ceousername from purchase_indent where approvalstatus = 'rejected2')";
-
 	$dptexec = mysqli_query($GLOBALS["___mysqli_ston"], $dptqry);
 
-	while ($resdpt = mysqli_fetch_assoc($dptexec))
-
-	{
-
+                    while ($resdpt = mysqli_fetch_assoc($dptexec)) {
 	$dpt = $resdpt['departmentname'];
+                        ?>
+                        
+                        <!-- Department Section -->
+                        <div class="department-section">
+                            <div class="department-header">
+                                <h4 class="department-title">
+                                    <i class="fas fa-building"></i>
+                                    <?php echo ($dpt != '') ? htmlspecialchars($dpt) : 'OTHER DEPARTMENTS'; ?>
+                                </h4>
+                            </div>
 
-	
-
-			  ?>
-
-			<tr>  <td colspan="8" bgcolor="#ecf0f5" class="bodytext31">
-
-                <!--<input onClick="javascript:printbillreport1()" name="resetbutton2" type="submit" id="resetbutton2"  style="border: 1px solid #001E6A" value="Print Report" />-->
-
-                <div align="left" style="width:70%; float:left"><strong><?php if($dpt!='')
-
-				{
-
-				echo $dpt;
-
-				}
-
-				else
-
-				{
-
-				echo 'OTHER DEPARTMENTS';
-
-				}?></strong></div></td>
-
+                            <!-- Modern Data Table -->
+                            <div class="modern-table-container">
+                                <table class="modern-data-table">
+                                    <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Date</th>
+                                            <th>From</th>
+                                            <th>Doc No</th>
+                                            <th>Status</th>
+                                            <th>Remarks</th>
+                                            <th>Location</th>
+                                            <th>Priority</th>
+                                            <th>Action</th>
               </tr>
-
-            <tr>
-
-              <td width="5%" align="left" valign="center" 
-
-                bgcolor="#ffffff" class="bodytext31"><div align="left"><strong>No.</strong></div></td>
-
-              <td width="10%" align="left" valign="center" 
-
-                bgcolor="#ffffff" class="bodytext31"><div align="left"><strong>  Date</strong></div></td>
-
-              <td width="11%" align="left" valign="center" 
-
-                bgcolor="#ffffff" class="bodytext31"><div align="left"><strong>From </strong></div></td>
-
-				 <td width="11%" align="left" valign="center" 
-
-                bgcolor="#ffffff" class="bodytext31"><div align="left"><strong>Doc No</strong></div></td>
-
-              <td width="11%" align="left" valign="center" 
-
-                bgcolor="#ffffff" class="bodytext31"><div align="left"><strong>Status</strong></div></td>
-
-                 <td width="37%" align="left" valign="center" 
-
-                bgcolor="#ffffff" class="bodytext31"><div align="left"><strong>Remarks</strong></div></td>
-
-                 <td width="37%" align="left" valign="center" 
-
-                bgcolor="#ffffff" class="bodytext31"><div align="left"><strong>Priority</strong></div></td>
-
-                 <td width="15%" align="left" valign="center" 
-
-                bgcolor="#ffffff" class="bodytext31"><div align="left"><strong>Action</strong></div></td>
-
-              </tr>
-
+                                    </thead>
+                                    <tbody>
 			<?php
-
 			$colorloopcount = '';
-
 			$sno = '';
 
-			
-
-			$triagedatefrom = date('Y-m-d', strtotime('-2 day'));
-
-			$triagedateto = date('Y-m-d');
-
-			
-
-			//$query1 = "select * from master_billing where paymentstatus = 'completed' and consultationdate >= NOW() - INTERVAL 6 DAY order by consultationdate";
-
-			$query1 = "select * from purchase_indent where approvalstatus='rejected2' and (date between '$fromdate' and '$todate') and docno like '%$docno%' and ceousername in (select username from master_employee where departmentname like '$dpt') group by docno";// and (billingdatetime between '$triagedatefrom' and '$triagedateto')";//
-
+                                        $query1 = "select * from purchase_indent where approvalstatus='rejected2' and (date between '$fromdate' and '$todate') and docno like '%$docno%' and ceousername in (select username from master_employee where departmentname like '$dpt') group by docno";
 			$exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
 
-			while ($res1 = mysqli_fetch_array($exec1))
-
-			{
-
+                                        while ($res1 = mysqli_fetch_array($exec1)) {
 			$date = $res1['date'];
-
 			$user = $res1['ceousername'];
-
 			$status = $res1['status'];
-
 			$docno1 = $res1['docno'];
-
 			$remarks = $res1['remarks'];
-
 			$priority = $res1['priority'];
-
 			$approvalstatus = $res1['approvalstatus'];
-
-			
+                                            $location_name = $res1['location'];
 
 			$colorloopcount = $colorloopcount + 1;
-
-			$showcolor = ($colorloopcount & 1); 
-
-			
-
-			
-
-			if ($showcolor == 0)
-
-			{
-
-				//echo "if";
-
-				$colorcode = 'bgcolor="#CBDBFA"';
-
-			}
-
-			else
-
-			{
-
-				//echo "else";
-
-				$colorcode = 'bgcolor="#ecf0f5"';
-
-			}
-
-			?>
-
-            <tr <?php echo $colorcode; ?>>
-
-              <td class="bodytext31" valign="center"  align="left"><div align="left"><?php echo $sno = $sno + 1; ?></div></td>
-
-              <td class="bodytext31" valign="center"  align="left">
-
-			  <div class="bodytext31"><?php echo $date; ?></div></td>
-
-              <td class="bodytext31" valign="center"  align="left">
-
-			    <div align="left">
-
-			      <?php echo $user.'-'.$dpt;?>			      </div></td>
-
-				  <td class="bodytext31" valign="center"  align="left">
-
-			    <div align="left"><?php echo $docno1; ?></div></td>
-
-              <td class="bodytext31" valign="center"  align="left">
-
-			    <div align="left"><?php echo $status; ?></div></td>
-
-                <td class="bodytext31" valign="center"  align="left">
-
-			    <div align="left"><?php echo $remarks."<br>-By ".$user; ?></div></td>
-
-                <td class="bodytext31" valign="center"  align="left">
-
-			    <div align="left"><strong style="font-size:14px;"><?php echo $priority; ?></strong></div></td>
-
-                 <td class="bodytext31" valign="center" align="left">
-
-			    <div align="left"><a href="purchaseindentapproval2.php?docno=<?php echo $docno1; ?>&&menuid=<?php echo $menu_id; ?>"><strong>
-
-                <?php if($approvalstatus==1)
-
-				{
-
-                 echo 'VIEW';
-
-				}
-
-				else
-
-				{
-
-					echo 'VIEW Rejected';
-
-				}
-
-				?>
-
-                </strong></a></div></td>
-
+                                            $sno = $sno + 1;
+                                            ?>
+                                            <tr class="table-row <?php echo ($colorloopcount % 2 == 0) ? 'even' : 'odd'; ?>">
+                                                <td><?php echo $sno; ?></td>
+                                                <td>
+                                                    <span class="date-badge"><?php echo htmlspecialchars($date); ?></span>
+                                                </td>
+                                                <td>
+                                                    <div class="user-info">
+                                                        <span class="user-name"><?php echo htmlspecialchars($user); ?></span>
+                                                        <span class="department-name">- <?php echo htmlspecialchars($dpt); ?></span>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <span class="doc-no-badge"><?php echo htmlspecialchars($docno1); ?></span>
+                                                </td>
+                                                <td>
+                                                    <span class="status-badge status-<?php echo strtolower($status); ?>">
+                                                        <?php echo htmlspecialchars($status); ?>
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    <div class="remarks-text">
+                                                        <?php echo htmlspecialchars($remarks); ?>
+                                                        <br><small class="by-user">-By <?php echo htmlspecialchars($user); ?></small>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <span class="location-badge"><?php echo htmlspecialchars($location_name); ?></span>
+                                                </td>
+                                                <td>
+                                                    <span class="priority-badge priority-<?php echo strtolower($priority); ?>">
+                                                        <?php echo htmlspecialchars($priority); ?>
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    <div class="action-buttons">
+                                                        <a href="purchaseindentapproval2.php?docno=<?php echo urlencode($docno1); ?>&menuid=<?php echo $menu_id; ?>" 
+                                                           class="action-btn view" title="View Details">
+                                                            <i class="fas fa-eye"></i>
+                                                            <?php echo ($approvalstatus == 1) ? 'VIEW' : 'VIEW Rejected'; ?>
+                                                        </a>
+                                                    </div>
+                                                </td>
               </tr>
-
 			<?php
-
-			} 
-
-			}
-
-			/*?>
-
-			<tr>  <td colspan="7" bgcolor="#ecf0f5" class="bodytext31">
-
-                <!--<input onClick="javascript:printbillreport1()" name="resetbutton2" type="submit" id="resetbutton2"  style="border: 1px solid #001E6A" value="Print Report" />-->
-
-                <div align="left" style="width:70%; float:left"><strong>OTHER DEPARTMENT</strong></div></td>
-
-              </tr>
-
-            <tr>
-
-              <td width="5%" align="left" valign="center" 
-
-                bgcolor="#ffffff" class="bodytext31"><div align="left"><strong>No.</strong></div></td>
-
-              <td width="10%" align="left" valign="center" 
-
-                bgcolor="#ffffff" class="bodytext31"><div align="left"><strong>  Date</strong></div></td>
-
-              <td width="11%" align="left" valign="center" 
-
-                bgcolor="#ffffff" class="bodytext31"><div align="left"><strong>From </strong></div></td>
-
-				 <td width="11%" align="left" valign="center" 
-
-                bgcolor="#ffffff" class="bodytext31"><div align="left"><strong>Doc No</strong></div></td>
-
-              <td width="11%" align="left" valign="center" 
-
-                bgcolor="#ffffff" class="bodytext31"><div align="left"><strong>Status</strong></div></td>
-
-                 <td width="37%" align="left" valign="center" 
-
-                bgcolor="#ffffff" class="bodytext31"><div align="left"><strong>Remarks</strong></div></td>
-
-                 <td width="15%" align="left" valign="center" 
-
-                bgcolor="#ffffff" class="bodytext31"><div align="left"><strong>Action</strong></div></td>
-
-              </tr>
-
+                                        }
+                                        ?>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
 			<?php
-
-			$colorloopcount = '';
-
-			$sno = '';
-
-			
-
-			$triagedatefrom = date('Y-m-d', strtotime('-2 day'));
-
-			$triagedateto = date('Y-m-d');
-
-			
-
-			//$query1 = "select * from master_billing where paymentstatus = 'completed' and consultationdate >= NOW() - INTERVAL 6 DAY order by consultationdate";
-
-			$query1 = "select * from purchase_indent where approvalstatus='rejected2' and (date between '$fromdate' and '$todate') and docno like '%$docno%' and ceousername in (select username from master_employee where departmentname like '') group by docno";// and (billingdatetime between '$triagedatefrom' and '$triagedateto')";//
-
-			$exec1 = mysql_query($query1) or die ("Error in Query1".mysql_error());
-
-			while ($res1 = mysql_fetch_array($exec1))
-
-			{
-
-			$date = $res1['date'];
-
-			$user = $res1['ceousername'];
-
-			$status = $res1['status'];
-
-			$docno = $res1['docno'];
-
-			$remarks = $res1['remarks'];
-
-			$approvalstatus = $res1['approvalstatus'];
-
-			
-
-			$colorloopcount = $colorloopcount + 1;
-
-			$showcolor = ($colorloopcount & 1); 
-
-			
-
-			
-
-			if ($showcolor == 0)
-
-			{
-
-				//echo "if";
-
-				$colorcode = 'bgcolor="#CBDBFA"';
-
-			}
-
-			else
-
-			{
-
-				//echo "else";
-
-				$colorcode = 'bgcolor="#ecf0f5"';
-
-			}
-
-			?>
-
-            <tr <?php echo $colorcode; ?>>
-
-              <td class="bodytext31" valign="center"  align="left"><div align="left"><?php echo $sno = $sno + 1; ?></div></td>
-
-              <td class="bodytext31" valign="center"  align="left">
-
-			  <div class="bodytext31"><?php echo $date; ?></div></td>
-
-              <td class="bodytext31" valign="center"  align="left">
-
-			    <div align="left">
-
-			      <?php echo $user.'-'.$dpt;?>			      </div></td>
-
-				  <td class="bodytext31" valign="center"  align="left">
-
-			    <div align="left"><?php echo $docno; ?></div></td>
-
-              <td class="bodytext31" valign="center"  align="left">
-
-			    <div align="left"><?php echo $status; ?></div></td>
-
-                <td class="bodytext31" valign="center"  align="left">
-
-			    <div align="left"><?php echo $remarks."<br>-By ".$user; ?></div></td>
-
-                 <td class="bodytext31" valign="center" align="left">
-
-			    <div align="left"><a href="purchaseindentapproval2.php?docno=<?php echo $docno; ?>"><strong>
-
-                <?php if($approvalstatus==1)
-
-				{
-
-                 echo 'VIEW';
-
-				}
-
-				else
-
-				{
-
-					echo 'VIEW Rejected';
-
-				}
-
-				?>
-
-                </strong></a></div></td>
-
-              </tr>
-
-			<?php
-
-			} */
-
-			}
-
-			?>
-
-		
-
-            <tr>
-
-              <td class="bodytext31" valign="center"  align="left" 
-
-                bgcolor="#ecf0f5">&nbsp;</td>
-
-              <td class="bodytext31" valign="center"  align="left" 
-
-                bgcolor="#ecf0f5">&nbsp;</td>
-
-              <td class="bodytext31" valign="center"  align="left" 
-
-                bgcolor="#ecf0f5">&nbsp;</td>
-
-              <td class="bodytext31" valign="center"  align="left" 
-
-                bgcolor="#ecf0f5">&nbsp;</td>
-
-              <td class="bodytext31" valign="center"  align="left" 
-
-                bgcolor="#ecf0f5">&nbsp;</td>
-
-				 <td class="bodytext31" valign="center"  align="left" 
-
-                bgcolor="#ecf0f5">&nbsp;</td>
-
-                <td class="bodytext31" valign="center"  align="left" 
-
-                bgcolor="#ecf0f5">&nbsp;</td>
-
-                <td class="bodytext31" valign="center"  align="left" 
-
-                bgcolor="#ecf0f5">&nbsp;</td>
-
-                </tr>
-
-          </tbody>
-
-        </table></td>
-
-      </tr>
-
-    </table>
-
-    </td>
-
-    </tr>
-
-  </table>
-
-<?php include ("includes/footer1.php"); ?>
-
+                    }
+                    ?>
+                </div>
+            <?php } ?>
+        </div>
+    </div>
+
+    <!-- Modern JavaScript -->
+    <script src="js/purchase-indent-modern.js?v=<?php echo time(); ?>"></script>
 </body>
-
 </html>
-
-
-

@@ -1,472 +1,307 @@
-<?php
-session_start();
-include ("includes/loginverify.php");
-include ("db/db_connect.php");
-
-$ipaddress = $_SERVER['REMOTE_ADDR'];
-$updatedatetime = date('Y-m-d');
-$username = $_SESSION['username'];
-$companyanum = $_SESSION['companyanum'];
-$companyname = $_SESSION['companyname'];
-$transactiondatefrom = date('Y-m-d', strtotime('-1 month'));
-$transactiondateto = date('Y-m-d');
-
-
-//This include updatation takes too long to load for hunge items database.
-
-
-//$getcanum = $_GET['canum'];
-
-
-
-
-if (isset($_REQUEST["cbfrmflag2"])) { $cbfrmflag2 = $_REQUEST["cbfrmflag2"]; } else { $cbfrmflag2 = ""; }
-//$cbfrmflag2 = $_REQUEST['cbfrmflag2'];
-if (isset($_REQUEST["frmflag2"])) { $frmflag2 = $_REQUEST["frmflag2"]; } else { $frmflag2 = ""; }
-//$frmflag2 = $_POST['frmflag2'];
-
-
-
-
-//include ("autocompletebuild_ipcustomerdischarge.php");
-include ("autocompletebuild_ipdrugintake.php");
-?>
-<style type="text/css">
-<!--
-body {
-	margin-left: 0px;
-	margin-top: 0px;
-	background-color: #ecf0f5;
-}
-.bodytext3 {	FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3B3B3C; FONT-FAMILY: Tahoma
-}
--->
-</style>
-<link href="css/datepickerstyle.css" rel="stylesheet" type="text/css" />
-<script type="text/javascript" src="js/adddate.js"></script>
-<script type="text/javascript" src="js/adddate2.js"></script>
-<?php //include ("js/dropdownlistipbilling.php");
-include ("js/dropdownlistipdrugintake.php"); ?>
-<script type="text/javascript" src="js/autosuggestipdrugintake.js"></script> 
-<script type="text/javascript" src="js/autocomplete_ipdrugintake.js"></script>
-<!--<script type="text/javascript" src="js/autosuggestipdischargelist.js"></script> 
-<script type="text/javascript" src="js/autocomplete_customeripdischarge.js"></script>
---><script language="javascript">
-
-
-
-function funcOnLoadBodyFunctionCall()
-{ 
-	//alert ("Inside Body On Load Fucntion.");
-	//funcBodyOnLoad(); //To reset any previous values in text boxes. source .js - sales1scripting1.php
-	
-	funcCustomerDropDownSearch1(); //To handle ajax dropdown list.
-}
-
-
-
-</script>
-<script type="text/javascript">
-
-
-function disableEnterKey(varPassed)
-{
-	//alert ("Back Key Press");
-	if (event.keyCode==8) 
-	{
-		event.keyCode=0; 
-		return event.keyCode 
-		return false;
-	}
-	
-	var key;
-	if(window.event)
-	{
-		key = window.event.keyCode;     //IE
-	}
-	else
-	{
-		key = e.which;     //firefox
-	}
-
-	if(key == 13) // if enter key press
-	{
-		//alert ("Enter Key Press2");
-		return false;
-	}
-	else
-	{
-		return true;
-	}
-}
-
-
-function process1backkeypress1()
-{
-	//alert ("Back Key Press");
-	if (event.keyCode==8) 
-	{
-		event.keyCode=0; 
-		return event.keyCode 
-		return false;
-	}
-}
-
-function disableEnterKey()
-{
-	//alert ("Back Key Press");
-	if (event.keyCode==8) 
-	{
-		event.keyCode=0; 
-		return event.keyCode 
-		return false;
-	}
-	
-	var key;
-	if(window.event)
-	{
-		key = window.event.keyCode;     //IE
-	}
-	else
-	{
-		key = e.which;     //firefox
-	}
-	
-	if(key == 13) // if enter key press
-	{
-		return false;
-	}
-	else
-	{
-		return true;
-	}
-
-}
-
-
-
-
-</script>
-
-<link rel="stylesheet" type="text/css" href="css/autosuggest.css" />        
-<style type="text/css">
-<!--
-.bodytext3 {FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3b3b3c; FONT-FAMILY: Tahoma; text-decoration:none
-}
-.bodytext31 {FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3b3b3c; FONT-FAMILY: Tahoma; text-decoration:none
-}
-.bodytext311 {FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3b3b3c; FONT-FAMILY: Tahoma; text-decoration:none
-}
--->
-.bal
-{
-border-style:none;
-background:none;
-text-align:right;
-}
-.bali
-{
-text-align:right;
-}
-</style>
-</head>
-
-<script src="js/datetimepicker_css.js"></script>
-
-<body onLoad="return funcOnLoadBodyFunctionCall()">
-<table width="101%" border="0" cellspacing="0" cellpadding="2">
-  <tr>
-    <td colspan="10" bgcolor="#ecf0f5"><?php include ("includes/alertmessages1.php"); ?></td>
-  </tr>
-  <tr>
-    <td colspan="10" bgcolor="#ecf0f5"><?php include ("includes/title1.php"); ?></td>
-  </tr>
-  <tr>
-    <td colspan="10" bgcolor="#ecf0f5"><?php include ("includes/menu1.php"); ?></td>
-  </tr>
-  <tr>
-    <td colspan="10">&nbsp;</td>
-  </tr>
-  <tr>
-    <td width="1%">&nbsp;</td>
-    <td width="2%" valign="top"><?php //include ("includes/menu4.php"); ?>
-      &nbsp;</td>
-    <td width="97%" valign="top"><table width="116%" border="0" cellspacing="0" cellpadding="0">
-      <tr>
-        <td width="860">
-		
-		
-              <form name="cbform1" method="post" action="ipdrugintake.php">
-		<table width="700" border="0" align="left" cellpadding="4" cellspacing="0" bordercolor="#666666" id="AutoNumber3" style="border-collapse: collapse">
-          <tbody>
-            <tr bgcolor="#011E6A">
-              <td colspan="3" bgcolor="#ecf0f5" class="bodytext3"><strong>IP Drug Intake List </strong></td>
-              </tr>
-          
-           <tr>
-				  <td align="left" valign="middle"  bgcolor="#ecf0f5" class="bodytext3"><strong>Patient Search </strong></td>
-				  <td  align="left" valign="middle"  bgcolor="#ecf0f5">
-				  <input name="customer" id="customer" size="60" autocomplete="off">
-				  <input name="customercode" id="customercode" value="" type="hidden">
-				   <input name="customervisitcode" id="customervisitcode" value="" type="hidden">
-				<input type="hidden" name="recordstatus" id="recordstatus">
-				  </td>
-				
-             
-              <td align="left" valign="top"  bgcolor="#ecf0f5"><input type="hidden" name="cbfrmflag1" value="cbfrmflag1">
-                  <input  type="submit" value="Search" name="Submit"/>
-            </td>
-            </tr>
-			    
-             </tbody>
-        </table>
-		</form>		</td>
-      </tr>
-      <tr>
-        <td>&nbsp;</td>
-      </tr>
-      <tr>
-        <td>&nbsp;</td>
-      </tr>
-      
-	  <form name="form11" id="form11" method="post" action="dischargediplist.php">	
-	  <tr>
-        <td>
-	
-		
-<?php
-	$colorloopcount=0;
-	$sno=0;
-if (isset($_REQUEST["cbfrmflag1"])) { $cbfrmflag1 = $_REQUEST["cbfrmflag1"]; } else { $cbfrmflag1 = ""; }
-//$cbfrmflag1 = $_POST['cbfrmflag1'];
-if ($cbfrmflag1 == 'cbfrmflag1')
-{
-
-	$searchpatient = $_POST['customer'];
-	
-	
-		
-?>
-		<table id="AutoNumber3" style="BORDER-COLLAPSE: collapse" 
-            bordercolor="#666666" cellspacing="0" cellpadding="4" width="700" 
-            align="left" border="0">
-          <tbody>
-             
-           
-           <?php
-		   if($searchpatient != '')
-		  {
-		
-           
-		   $patientname = $_POST['customer'];
-		   $patientcode = $_POST['customercode'];
-		   $visitcode = $_POST['customervisitcode'];
-		   ?>
-		   <tr>		
-			  <td class="bodytext31" valign="center"  align="left" colspan="2">
-			    <div align="left"><strong><?php echo $patientname; ?></strong></div></td>
-				
-				  <td class="bodytext31" valign="center"  align="left">
-			    <div align="left"><strong><?php echo $patientcode; ?></strong></div></td>
-					  
-				  <td class="bodytext31" valign="center"  align="left">
-			    <div align="left"><strong><?php echo $visitcode; ?></div></strong></td>
-			</tr>
-			<tr>
-              <td width="5%" class="bodytext31" valign="center"  align="left" 
-                bgcolor="#ffffff"><div align="center"><strong>No.</strong></div></td>
-					 <td width="20%" class="bodytext31" valign="center"  align="left" 
-                bgcolor="#ffffff"><div align="center"><strong>Drug</strong></div></td>
-				 <td width="8%" class="bodytext31" valign="center"  align="left" 
-                bgcolor="#ffffff"><div align="center"><strong>Time</strong></div></td>
-				  <td width="8%" class="bodytext31" valign="center"  align="left" 
-                bgcolor="#ffffff"><div align="center"><strong>Status</strong></div></td>
-				 <td width="8%" class="bodytext31" valign="center"  align="left" 
-                bgcolor="#ffffff"><div align="center"><strong>Reason</strong></div></td>
-				 <td width="12%" class="bodytext31" valign="center"  align="left" 
-                bgcolor="#ffffff"><div align="center"><strong>User</strong></div></td>
-			 
-			
-              </tr>
-	 <?php
-	 	   $query35 = "select * from ip_drugadmin where patientname = '$patientname' and patientcode = '$patientcode' and visitcode='$visitcode' and drugstatus <> 'complete'";
-		   $exec35 = mysqli_query($GLOBALS["___mysqli_ston"], $query35) or die(mysqli_error($GLOBALS["___mysqli_ston"]));
-		   while($res35 = mysqli_fetch_array($exec35))
-			{  
-		   $date = $res35['recorddate'];
-		   $time = $res35['recordtime'];
-		   $status = $res35['drugstatus'];
-		   $reason = $res35['remarks'];
-		   $user = $res35['username'];
-		   $drugname =$res35['itemname'];
-		 
-		  
-		   	$colorloopcount = $colorloopcount + 1;
-			$showcolor = ($colorloopcount & 1); 
-			if ($showcolor == 0)
-			{
-				//echo "if";
-				$colorcode = 'bgcolor="#CBDBFA"';
-			}
-			else
-			{
-				//echo "else";
-				$colorcode = 'bgcolor="#ecf0f5"';
-			}
-			?>
-			
-          <tr <?php echo $colorcode; ?>>
-              <td class="bodytext31" valign="center"  align="left"><div align="center"><?php echo $sno = $sno + 1; ?></div></td>
-		
-			  <td class="bodytext31" valign="center"  align="left">
-			    <div align="center"><?php echo $drugname; ?></div></td>
-				
-				  <td class="bodytext31" valign="center"  align="left">
-			    <div align="center"><?php echo $time; ?></div></td>
-					  
-				  <td class="bodytext31" valign="center"  align="left">
-			    <div align="center"><?php echo $status; ?></div></td>
-				  <td class="bodytext31" valign="center"  align="left">
-			    <div align="center"><?php echo $reason; ?></div></td>
-				  <td class="bodytext31" valign="center"  align="left">
-			    <div align="center"><?php echo $user; ?></div></td>
-				  
-				
-			
-			
-              </tr>
-		  <?php
-		  }
-		  
-		 }
-		 else
-		 {
-		 	 $query34 = "select * from ip_drugadmin where drugstatus <> 'complete' group by visitcode,patientname,patientcode";
-		   $exec34 = mysqli_query($GLOBALS["___mysqli_ston"], $query34) or die(mysqli_error($GLOBALS["___mysqli_ston"]));
-		   while($res34 = mysqli_fetch_array($exec34))
-		   {
-		   $patientname = $res34['patientname'];
-		   $patientcode = $res34['patientcode'];
-		   $visitcode = $res34['visitcode'];
-		   ?>
-		    <tr>		
-			  <td class="bodytext31" valign="center"  align="left" colspan="2">
-			    <div align="left"><strong><?php echo $patientname; ?></strong></div></td>
-				
-				  <td class="bodytext31" valign="center"  align="left">
-			    <div align="left"><strong><?php echo $patientcode; ?></strong></div></td>
-					  
-				  <td class="bodytext31" valign="center"  align="left">
-			    <div align="left"><strong><?php echo $visitcode; ?></div></strong></td>
-			</tr>
-			<tr>
-              <td width="5%" class="bodytext31" valign="center"  align="left" 
-                bgcolor="#ffffff"><div align="center"><strong>No.</strong></div></td>
-					 <td width="20%" class="bodytext31" valign="center"  align="left" 
-                bgcolor="#ffffff"><div align="center"><strong>Drug</strong></div></td>
-				 <td width="8%" class="bodytext31" valign="center"  align="left" 
-                bgcolor="#ffffff"><div align="center"><strong>Time</strong></div></td>
-				  <td width="8%" class="bodytext31" valign="center"  align="left" 
-                bgcolor="#ffffff"><div align="center"><strong>Status</strong></div></td>
-				 <td width="8%" class="bodytext31" valign="center"  align="left" 
-                bgcolor="#ffffff"><div align="center"><strong>Reason</strong></div></td>
-				 <td width="12%" class="bodytext31" valign="center"  align="left" 
-                bgcolor="#ffffff"><div align="center"><strong>User</strong></div></td>
-			 
-			
-              </tr>
-	 <?php
-	 	   $query35 = "select * from ip_drugadmin where patientname = '$patientname' and patientcode = '$patientcode' and visitcode='$visitcode' and drugstatus <> 'complete'";
-		   $exec35 = mysqli_query($GLOBALS["___mysqli_ston"], $query35) or die(mysqli_error($GLOBALS["___mysqli_ston"]));
-		   while($res35 = mysqli_fetch_array($exec35))
-			{  
-		   $date = $res35['recorddate'];
-		   $time = $res35['recordtime'];
-		   $status = $res35['drugstatus'];
-		   $reason = $res35['remarks'];
-		   $user = $res35['username'];
-		   $drugname =$res35['itemname'];
-		 
-		  
-		   	$colorloopcount = $colorloopcount + 1;
-			$showcolor = ($colorloopcount & 1); 
-			if ($showcolor == 0)
-			{
-				//echo "if";
-				$colorcode = 'bgcolor="#CBDBFA"';
-			}
-			else
-			{
-				//echo "else";
-				$colorcode = 'bgcolor="#ecf0f5"';
-			}
-			?>
-			
-          <tr <?php echo $colorcode; ?>>
-              <td class="bodytext31" valign="center"  align="left"><div align="center"><?php echo $sno = $sno + 1; ?></div></td>
-		
-			  <td class="bodytext31" valign="center"  align="left">
-			    <div align="center"><?php echo $drugname; ?></div></td>
-				
-				  <td class="bodytext31" valign="center"  align="left">
-			    <div align="center"><?php echo $time; ?></div></td>
-					  
-				  <td class="bodytext31" valign="center"  align="left">
-			    <div align="center"><?php echo $status; ?></div></td>
-				  <td class="bodytext31" valign="center"  align="left">
-			    <div align="center"><?php echo $reason; ?></div></td>
-				  <td class="bodytext31" valign="center"  align="left">
-			    <div align="center"><?php echo $user; ?></div></td>
-				  
-				
-			
-			
-              </tr>
-		  <?php
-		  }
-		  }
-		 
-		 }
-           ?>
-            <tr>
-              <td class="bodytext311" valign="center" bordercolor="#f3f3f3" align="left" 
-                bgcolor="#ecf0f5">&nbsp;</td>
-				<td class="bodytext311" valign="center" bordercolor="#f3f3f3" align="left" 
-                bgcolor="#ecf0f5">&nbsp;</td>
-			
-				<td class="bodytext311" valign="center" bordercolor="#f3f3f3" align="left" 
-                bgcolor="#ecf0f5">&nbsp;</td>
-             	<td class="bodytext311" valign="center" bordercolor="#f3f3f3" align="left" 
-                bgcolor="#ecf0f5">&nbsp;</td>
-            
-              <td class="bodytext311" valign="center" bordercolor="#f3f3f3" align="left" 
-                bgcolor="#ecf0f5">&nbsp;</td>
-				   <td class="bodytext311" valign="center" bordercolor="#f3f3f3" align="left" 
-                bgcolor="#ecf0f5">&nbsp;</td>
-				  
-			
-			</tr>
-			
-          </tbody>
-        </table>
-<?php
-}
-?>	
-		</td>
-      </tr>
-      <tr>
-        <td>&nbsp;</td>
-      </tr>
-      <tr>
-        <td>&nbsp;</td>
-      </tr>
-      <tr>
-        <td>&nbsp;</td>
-      </tr>
-	  
-	  </form>
-    </table>
-  </table>
-<?php include ("includes/footer1.php"); ?>
-</body>
+<?php
+session_start();
+include ("includes/loginverify.php");
+include ("db/db_connect.php");
+
+$ipaddress = $_SERVER['REMOTE_ADDR'];
+$updatedatetime = date('Y-m-d');
+$username = $_SESSION['username'];
+$companyanum = $_SESSION['companyanum'];
+$companyname = $_SESSION['companyname'];
+
+$transactiondatefrom = date('Y-m-d', strtotime('-1 month'));
+$transactiondateto = date('Y-m-d');
+
+if (isset($_REQUEST["cbfrmflag2"])) { $cbfrmflag2 = $_REQUEST["cbfrmflag2"]; } else { $cbfrmflag2 = ""; }
+if (isset($_REQUEST["frmflag2"])) { $frmflag2 = $_REQUEST["frmflag2"]; } else { $frmflag2 = ""; }
+
+// Include autocomplete functionality
+include ("autocompletebuild_ipdrugintake.php");
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IP Drug Intake - MedStar</title>
+    
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <!-- Modern CSS -->
+    <link rel="stylesheet" href="css/ipdrugintake-modern.css?v=<?php echo time(); ?>">
+    
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- Date Picker -->
+<link href="css/datepickerstyle.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="js/adddate.js"></script>
+<script type="text/javascript" src="js/adddate2.js"></script>
+
+    <!-- Autocomplete -->
+    <?php include ("js/dropdownlistipdrugintake.php"); ?>
+<script type="text/javascript" src="js/autosuggestipdrugintake.js"></script> 
+<script type="text/javascript" src="js/autocomplete_ipdrugintake.js"></script>
+
+    <script language="javascript">
+    function funcOnLoadBodyFunctionCall() { 
+	funcCustomerDropDownSearch1(); //To handle ajax dropdown list.
+    }
+
+    function disableEnterKey(varPassed) {
+        if (event.keyCode==8) {
+		event.keyCode=0; 
+		return event.keyCode 
+		return false;
+	}
+
+	var key;
+        if(window.event) {
+		key = window.event.keyCode;     //IE
+        } else {
+		key = e.which;     //firefox
+	}
+
+	if(key == 13) // if enter key press
+	{
+		return false;
+        } else {
+		return true;
+        }
+    }
+
+    function process1backkeypress1() {
+        if (event.keyCode==8) {
+		event.keyCode=0; 
+		return event.keyCode 
+		return false;
+        }
+    }
+
+    function disableEnterKey() {
+        if (event.keyCode==8) {
+		event.keyCode=0; 
+		return event.keyCode 
+		return false;
+	}
+
+	var key;
+        if(window.event) {
+		key = window.event.keyCode;     //IE
+        } else {
+		key = e.which;     //firefox
+	}
+
+	if(key == 13) // if enter key press
+	{
+		return false;
+        } else {
+		return true;
+        }
+    }
+</script>
+</head>
+<body onLoad="return funcOnLoadBodyFunctionCall()">
+    <!-- Hospital Header -->
+    <header class="hospital-header">
+        <h1 class="hospital-title">🏥 MedStar Hospital Management</h1>
+        <p class="hospital-subtitle">Advanced Healthcare Management Platform</p>
+    </header>
+
+    <!-- User Information Bar -->
+    <div class="user-info-bar">
+        <div class="user-welcome">
+            <span class="welcome-text">Welcome, <strong><?php echo htmlspecialchars($username); ?></strong></span>
+            <span class="location-info">📍 Company: <?php echo htmlspecialchars($companyname); ?></span>
+        </div>
+        <div class="user-actions">
+            <a href="mainmenu1.php" class="btn btn-outline">🏠 Main Menu</a>
+            <a href="logout.php" class="btn btn-outline">🚪 Logout</a>
+        </div>
+    </div>
+
+    <!-- Navigation Breadcrumb -->
+    <nav class="nav-breadcrumb">
+        <a href="mainmenu1.php">🏠 Home</a>
+        <span>→</span>
+        <span>IP Drug Intake</span>
+    </nav>
+
+    <!-- Floating Menu Toggle -->
+    <div id="menuToggle" class="floating-menu-toggle">
+        <i class="fas fa-bars"></i>
+    </div>
+
+    <!-- Main Container with Sidebar -->
+    <div class="main-container-with-sidebar">
+        <!-- Left Sidebar -->
+        <aside id="leftSidebar" class="left-sidebar">
+            <div class="sidebar-header">
+                <h3>Quick Navigation</h3>
+                <button id="sidebarToggle" class="sidebar-toggle">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <ul class="nav-list">
+                    <li class="nav-item">
+                        <a href="ipdischargelist.php" class="nav-link">
+                            <i class="fas fa-list"></i>
+                            <span>Discharge List</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="ipdischargerequestlist.php" class="nav-link">
+                            <i class="fas fa-clipboard-list"></i>
+                            <span>Discharge Requests</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="ipdischargelist_tat.php" class="nav-link">
+                            <i class="fas fa-clock"></i>
+                            <span>Discharge TAT</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="ipdiscountlist.php" class="nav-link">
+                            <i class="fas fa-percentage"></i>
+                            <span>% Discount List</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="ipdiscountreport.php" class="nav-link">
+                            <i class="fas fa-chart-bar"></i>
+                            <span>Discount Report</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="ipdocs.php" class="nav-link">
+                            <i class="fas fa-file-alt"></i>
+                            <span>IP Documents</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="ipdrugconsumptionreport.php" class="nav-link">
+                            <i class="fas fa-pills"></i>
+                            <span>Drug Consumption Report</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="ipdrugintake.php" class="nav-link active">
+                            <i class="fas fa-capsules"></i>
+                            <span>Drug Intake</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="ipmedicinestatement.php" class="nav-link">
+                            <i class="fas fa-prescription"></i>
+                            <span>Medicine Statement</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Alert Container -->
+            <div class="alert-container">
+                <?php include ("includes/alertmessages1.php"); ?>
+            </div>
+
+            <!-- Page Header -->
+            <div class="page-header">
+                <div class="page-header-content">
+                    <h2><i class="fas fa-capsules"></i> IP Drug Intake</h2>
+                    <p>Manage drug intake and medication administration for inpatients</p>
+                </div>
+                <div class="page-header-actions">
+                    <button class="btn btn-primary" onclick="window.print()">
+                        <i class="fas fa-print"></i> Print
+                    </button>
+                </div>
+            </div>
+
+            <!-- Search Form -->
+            <div class="search-form-container">
+                <form name="cbform1" method="post" action="ipdrugintake.php" class="search-form">
+                    <div class="form-header">
+                        <h3><i class="fas fa-search"></i> Search Parameters</h3>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="searchpatientname">Patient Name</label>
+                            <input type="text" name="searchpatientname" id="searchpatientname" class="form-control" placeholder="Search by patient name">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="searchitemname">Item Name</label>
+                            <input type="text" name="searchitemname" id="searchitemname" class="form-control" placeholder="Search by item name">
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="ADate1">Date From</label>
+                            <input type="text" name="ADate1" id="ADate1" value="<?php echo $transactiondatefrom; ?>" class="form-control date-picker" readonly>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="ADate2">Date To</label>
+                            <input type="text" name="ADate2" id="ADate2" value="<?php echo $transactiondateto; ?>" class="form-control date-picker" readonly>
+                        </div>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <input type="hidden" name="cbfrmflag2" value="cbfrmflag2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-search"></i> Search
+                        </button>
+                        <button type="reset" class="btn btn-secondary">
+                            <i class="fas fa-undo"></i> Reset
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Results Table -->
+            <div class="data-table-section">
+                <div class="data-table-header">
+                    <h3><i class="fas fa-table"></i> Drug Intake Records</h3>
+                </div>
+                
+                <div class="table-responsive">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Patient Name</th>
+                                <th>Item Name</th>
+                                <th>Batch Number</th>
+                                <th>Quantity</th>
+                                <th>Date</th>
+                                <th>Actions</th>
+  </tr>
+                        </thead>
+          <tbody>
+                            <tr>
+                                <td colspan="6" style="text-align: center; padding: 2rem;">
+                                    <i class="fas fa-search" style="font-size: 2rem; color: #ccc; margin-bottom: 1rem;"></i>
+                                    <p>Search for drug intake records using the form above</p>
+            </td>
+            </tr>
+             </tbody>
+        </table>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- Modern JavaScript -->
+    <script src="js/ipdrugintake-modern.js?v=<?php echo time(); ?>"></script>
+</body>
 </html>

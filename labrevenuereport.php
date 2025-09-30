@@ -1,1181 +1,548 @@
 <?php
-
 session_start();
-
 include ("includes/loginverify.php");
-
 include ("db/db_connect.php");
 
-
-
 $ipaddress = $_SERVER['REMOTE_ADDR'];
-
 $updatedatetime = date('Y-m-d H:i:s');
-
 $username = $_SESSION['username'];
-
 $companyanum = $_SESSION['companyanum'];
-
 $companyname = $_SESSION['companyname'];
-
 $paymentreceiveddatefrom = date('Y-m-d', strtotime('-1 month'));
-
 $paymentreceiveddateto = date('Y-m-d');
 
-
-
 $searchsuppliername = '';
-
 $suppliername = '';
-
 $cbsuppliername = '';
-
 $cbcustomername = '';
-
 $cbbillnumber = '';
-
 $cbbillstatus = '';
-
 $colorloopcount = '';
-
 $sno = '';
-
 $snocount = '';
-
 $visitcode1 = '';
-
 $total = '0.00';
-
 $looptotalpaidamount = '0.00';
-
 $looptotalpendingamount = '0.00';
-
 $looptotalwriteoffamount = '0.00';
-
 $looptotalcashamount = '0.00';
-
 $looptotalcreditamount = '0.00';
-
 $looptotalcardamount = '0.00';
-
 $looptotalonlineamount = '0.00';
-
 $looptotalchequeamount = '0.00';
-
 $looptotaltdsamount = '0.00';
-
 $looptotalwriteoffamount = '0.00';
-
 $pendingamount = '0.00';
-
 $accountname = '';
-
 $amount = 0;
 
-
-
 if (isset($_REQUEST["slocation"])) { $slocation = $_REQUEST["slocation"]; } else { $slocation = ""; }
-
 if (isset($_REQUEST["type"])) { $type = $_REQUEST["type"]; } else { $type = ""; }
-
 if (isset($_REQUEST["lab"])) { $lab = $_REQUEST["lab"]; } else { $lab = ""; }
-
-			
-
 if (isset($_REQUEST["accountname"])) { $accountname = $_REQUEST["accountname"]; } else { $accountname = ""; }
-
-
 
 if (isset($_REQUEST["canum"])) { $getcanum = $_REQUEST["canum"]; } else { $getcanum = ""; }
 
-//$getcanum = $_GET['canum'];
-
 if ($getcanum != '')
-
 {
-
-	$query4 = "select suppliername from master_supplier where auto_number = '$getcanum'";
-
-	$exec4 = mysqli_query($GLOBALS["___mysqli_ston"], $query4) or die ("Error in Query4".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-	$res4 = mysqli_fetch_array($exec4);
-
-	$cbsuppliername = $res4['suppliername'];
-
-	$suppliername = $res4['suppliername'];
-
+    $query4 = "select suppliername from master_supplier where auto_number = '$getcanum'";
+    $exec4 = mysqli_query($GLOBALS["___mysqli_ston"], $query4) or die ("Error in Query4".mysqli_error($GLOBALS["___mysqli_ston"]));
+    $res4 = mysqli_fetch_array($exec4);
+    $cbsuppliername = $res4['suppliername'];
+    $suppliername = $res4['suppliername'];
 }
-
-
 
 if (isset($_REQUEST["cbfrmflag1"])) { $cbfrmflag1 = $_REQUEST["cbfrmflag1"]; } else { $cbfrmflag1 = ""; }
 
-//$cbfrmflag1 = $_REQUEST['cbfrmflag1'];
-
 if ($cbfrmflag1 == 'cbfrmflag1')
-
 {
-
-
-
-	//$cbsuppliername = $_REQUEST['cbsuppliername'];
-
-	//$suppliername = $_REQUEST['cbsuppliername'];
-
-	$paymentreceiveddatefrom = $_REQUEST['ADate1'];
-
-	$paymentreceiveddateto = $_REQUEST['ADate2'];
-
-	$visitcode1 = 10;
-
-
-
+    $paymentreceiveddatefrom = $_REQUEST['ADate1'];
+    $paymentreceiveddateto = $_REQUEST['ADate2'];
+    $visitcode1 = 10;
 }
-
-
 
 if (isset($_REQUEST["task"])) { $task = $_REQUEST["task"]; } else { $task = ""; }
-
-//$task = $_REQUEST['task'];
-
 if ($task == 'deleted')
-
 {
-
-	$errmsg = 'Payment Entry Delete Completed.';
-
+    $errmsg = 'Payment Entry Delete Completed.';
 }
-
-
 
 if (isset($_REQUEST["ADate1"])) { $ADate1 = $_REQUEST["ADate1"]; } else { $ADate1 = ""; }
-
-//$paymenttype = $_REQUEST['paymenttype'];
-
 if (isset($_REQUEST["ADate2"])) { $ADate2 = $_REQUEST["ADate2"]; } else { $ADate2 = ""; }
 
-//$billstatus = $_REQUEST['billstatus'];
-
 if ($ADate1 != '' && $ADate2 != '')
-
 {
-
-	$transactiondatefrom = $_REQUEST['ADate1'];
-
-	$transactiondateto = $_REQUEST['ADate2'];
-
+    $transactiondatefrom = $_REQUEST['ADate1'];
+    $transactiondateto = $_REQUEST['ADate2'];
 }
-
 else
-
 {
-
-	$transactiondatefrom = date('Y-m-d', strtotime('-1 month'));
-
-	$transactiondateto = date('Y-m-d');
-
+    $transactiondatefrom = date('Y-m-d', strtotime('-1 month'));
+    $transactiondateto = date('Y-m-d');
 }
-
-
-
 ?>
 
-<style type="text/css">
-
-<!--
-
-body {
-
-	margin-left: 0px;
-
-	margin-top: 0px;
-
-	background-color: #ecf0f5;
-
-}
-
-.bodytext3 {	FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3B3B3C; FONT-FAMILY: Tahoma
-
-}
-
--->
-
-</style>
-
-<script src="js/datetimepicker_css.js"></script>
-
-<link rel="stylesheet" type="text/css" href="css/autosuggest.css" />      
-
-<script src="js/jquery-1.11.1.min.js"></script>
-
-<script src="js/jquery.min-autocomplete.js"></script>
-
-<script src="js/jquery-ui.min.js"></script>
-
-<link rel="stylesheet" type="text/css" href="css/autocomplete.css">      
-
-<script>
-
-$(document).ready(function(e) {
-
-   
-
-		$('#lab').autocomplete({
-
-	
-
-	source:"ajaxlab_search.php",
-
-	//alert(source);
-
-	matchContains: true,
-
-	minLength:1,
-
-	html: true, 
-
-		select: function(event,ui){
-
-			var accountname=ui.item.value;
-
-			var accountid=ui.item.id;
-
-			var accountanum=ui.item.anum;
-
-			$("#labcode").val(accountid);
-
-			$("#lab").val(accountname);
-
-			
-
-			},
-
-    
-
-	});
-
-		
-
-});
-
-</script>
-
-<script language="javascript">
-
-
-
-function cbsuppliername1()
-
-{
-
-	document.cbform1.submit();
-
-}
-
-
-
-</script>
-
-<style type="text/css">
-
-<!--
-
-.bodytext31 {FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3b3b3c; FONT-FAMILY: Tahoma; text-decoration:none
-
-}
-
-.bodytext311 {FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3b3b3c; FONT-FAMILY: Tahoma
-
-}
-
-.style1 {FONT-WEIGHT: bold; FONT-SIZE: 11px; COLOR: #3b3b3c; FONT-FAMILY: Tahoma; text-decoration: none; }
-
--->
-
-</style>
-
-<script language="javascript">
-
-
-
-function funcPrintReceipt1(varRecAnum)
-
-{
-
-	var varRecAnum = varRecAnum
-
-	//alert (varRecAnum);
-
-	//window.open("print_bill1.php?printsource=billpage&&billautonumber="+varBillAutoNumber+"&&companyanum="+varBillCompanyAnum+"&&title1="+varTitleHeader+"&&copy1="+varPrintHeader+"&&billnumber="+varBillNumber+"","OriginalWindow<?php //echo $banum; ?>",'width=722,height=950,toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=1,resizable=1,left=25,top=25');
-
-	window.open("print_payment_receipt1.php?receiptanum="+varRecAnum+"","OriginalWindow<?php //echo $banum; ?>",'width=722,height=950,toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=1,resizable=1,left=25,top=25');
-
-}
-
-
-
-function funcDeletePayment1(varPaymentSerialNumber)
-
-{
-
-	var varPaymentSerialNumber = varPaymentSerialNumber;
-
-	var fRet;
-
-	fRet = confirm('Are you sure want to delete this payment entry serial number '+varPaymentSerialNumber+'?');
-
-	//alert(fRet);
-
-	if (fRet == true)
-
-	{
-
-		alert ("Payment Entry Delete Completed.");
-
-		//return false;
-
-	}
-
-	if (fRet == false)
-
-	{
-
-		alert ("Payment Entry Delete Not Completed.");
-
-		return false;
-
-	}
-
-	//return false;
-
-}
-
-
-
-</script>
-
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lab Revenue Report - MedStar</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="css/labrevenuereport-modern.css?v=<?php echo time(); ?>">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="js/datetimepicker_css.js"></script>
+    <link rel="stylesheet" type="text/css" href="css/autosuggest.css" />
+    <script src="js/jquery-1.11.1.min.js"></script>
+    <script src="js/jquery.min-autocomplete.js"></script>
+    <script src="js/jquery-ui.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="css/autocomplete.css">
 </head>
-
-
-
-<script src="js/datetimepicker_css.js"></script>
-
-
-
 <body>
-
-<table width="1900" border="0" cellspacing="0" cellpadding="2">
-
-  <tr>
-
-    <td colspan="9" bgcolor="#ecf0f5"><?php include ("includes/alertmessages1.php"); ?></td>
-
-  </tr>
-
-  <tr>
-
-    <td colspan="9" bgcolor="#ecf0f5"><?php include ("includes/title1.php"); ?></td>
-
-  </tr>
-
-  <tr>
-
-    <td colspan="9" bgcolor="#ecf0f5"><?php include ("includes/menu1.php"); ?></td>
-
-  </tr>
-
-  <tr>
-
-    <td colspan="9">&nbsp;</td>
-
-  </tr>
-
-  <tr>
-
-    <td width="1%">&nbsp;</td>
-
-    <td width="99%" valign="top"><table width="116%" border="0" cellspacing="0" cellpadding="0">
-
-      <tr>
-
-        <td width="860">
-
-		
-
-		
-
-              <form name="cbform1" method="post" action="labrevenuereport.php">
-
-                <table width="600" border="0" align="left" cellpadding="4" cellspacing="0" bordercolor="#666666" id="AutoNumber3" style="border-collapse: collapse">
-
-                  <tbody>
-
-                    <tr bgcolor="#011E6A">
-
-                      <td colspan="2" bgcolor="#ecf0f5" class="bodytext3"><strong>Lab Revenue Report </strong></td>
-
-                      <!--<td colspan="2" bgcolor="#ecf0f5" class="bodytext3"><?php echo $errmgs; ?>&nbsp;</td>-->
-
-                      <td bgcolor="#ecf0f5" class="bodytext3" colspan="2">&nbsp;</td>
-
-                    </tr>
-
-					 <tr>
-
-                      <td class="bodytext31" valign="center"  align="left" 
-
-                bgcolor="#FFFFFF"> Search Lab </td>
-
-                      <td colspan="3" align="left" valign="center"  bgcolor="#FFFFFF" class="bodytext31">
-
-					  <input type="text" name="lab" id="lab" size="60" value="<?php echo $lab; ?>">
-
-					  <input type="hidden" name="labcode" id="labcode">
-
-					  </td>
-
-                       </tr>
-
-                    
-
-                    <tr>
-
-                      <td class="bodytext31" valign="center"  align="left" 
-
-                bgcolor="#FFFFFF"> Date From </td>
-
-                      <td width="30%" align="left" valign="center"  bgcolor="#FFFFFF" class="bodytext31"><input name="ADate1" id="ADate1" value="<?php echo $paymentreceiveddatefrom; ?>"  size="10"  readonly="readonly" onKeyDown="return disableEnterKey()" />
-
-                          <img src="images2/cal.gif" onClick="javascript:NewCssCal('ADate1')" style="cursor:pointer"/> </td>
-
-                      <td width="16%" align="left" valign="center"  bgcolor="#FFFFFF" class="bodytext31"> Date To </td>
-
-                      <td width="33%" align="left" valign="center"  bgcolor="#FFFFFF"><span class="bodytext31">
-
-                        <input name="ADate2" id="ADate2" value="<?php echo $paymentreceiveddateto; ?>"  size="10"  readonly="readonly" onKeyDown="return disableEnterKey()" />
-
-                        <img src="images2/cal.gif" onClick="javascript:NewCssCal('ADate2')" style="cursor:pointer"/> </span></td>
-
-                    </tr>
-
-                    
-
-                    <tr>
-
-                      <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">Location </td>
-
-                      <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">
-
-                      <select name="slocation" id="slocation">
-                        <option value="All">All</option>
-
-                      	<?php
-
-						$query01="select locationcode,locationname from master_location where status ='' order by locationname";
-
-						$exc01=mysqli_query($GLOBALS["___mysqli_ston"], $query01);
-
-						while($res01=mysqli_fetch_array($exc01))
-
-						{?>
-
-							<option value="<?= $res01['locationcode'] ?>" <?php if($slocation==$res01['locationcode']){ echo "selected";} ?>> <?= $res01['locationname'] ?></option>		
-
-						<?php 
-
-						}
-
-						?>
-
-                      </select>
-
-                      </td>
-
-                      
-
-                        <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">Patient Type </td>
-
-                      <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">
-
-                      <select name="type" id="type">
-
-                      	<option value="" selected>ALL</option>
-
-                      	<option value="OP" <?php if($type=='OP'){ echo "selected";} ?>> OP + EXTERNAL </option>
-
-                      	<option value="IP" <?php if($type=='IP'){ echo "selected";} ?>> IP </option>
-
-                      
-
-                      </select>
-
-                      </td>
-
-                      
-
-                    </tr>
-
-                    
-
-                    <tr>
-
-                      <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">&nbsp;</td>
-
-                      <td colspan="3" align="left" valign="top"  bgcolor="#FFFFFF"><input type="hidden" name="cbfrmflag1" value="cbfrmflag1">
-
-                          <input  type="submit" value="Search" name="Submit" />
-
-                          <input name="resetbutton" type="reset" id="resetbutton" value="Reset" /></td>
-
-                    </tr>
-
-                  </tbody>
-
-                </table>
-
-              </form>		</td>
-
-      </tr>
-
-      <tr>
-
-        <td>&nbsp;</td>
-
-      </tr>
-
-      <tr>
-
-        <td><table id="AutoNumber3" style="BORDER-COLLAPSE: collapse" 
-
-            bordercolor="#666666" cellspacing="0" cellpadding="4" width="1247" 
-
-            align="left" border="0">
-
-          <tbody>
-
-           
-
-           <tr>
-
-              <td width="3%"  align="left" valign="center" 
-
-                bgcolor="#ffffff" class="bodytext31"><strong>No.</strong></td>
-
-              <td width="7%" align="left" valign="left"  
-
-                bgcolor="#ffffff" class="bodytext31"><div align="left"><strong>Bill Date</strong></div></td>
-
-              <td width="8%" align="left" valign="left"  
-
-                bgcolor="#ffffff" class="bodytext31"><div align="left"><strong>Reg Code</strong></div></td>
-
-              <td width="7%" align="left" valign="center"  
-
-                bgcolor="#ffffff" class="style1">Visit Code</td>
-
-              <td width="15%" align="left" valign="left"  
-
-                bgcolor="#ffffff" class="style1"><div align="left"><strong>Patitent Name</strong></div></td>
-                 <td width="15%" align="left" valign="left"  
-
-                bgcolor="#ffffff" class="style1"><div align="left"><strong>Category</strong></div></td>
-
-              <td width="8%" align="left" valign="center"  
-
-                bgcolor="#ffffff" class="bodytext31"><div align="left"><strong>Item Code</strong></div></td>
-
-                <td width="19%" align="left" valign="center"  
-
-                bgcolor="#ffffff" class="bodytext31"><div align="left"><strong>Item Name</strong></div></td>
-
-                <td width="6%" align="left" valign="center"  
-
-                bgcolor="#ffffff" class="bodytext31"><div align="left"><strong>Rate</strong></div></td>
-
-                <td width="6%" align="left" valign="center"  
-
-                bgcolor="#ffffff" class="bodytext31"><div align="left"><strong>Bill Type</strong></div></td>
-
-                <td width="14%" align="left" valign="center"  
-
-                bgcolor="#ffffff" class="bodytext31"><div align="left"><strong>Account Name</strong></div></td>  
-
-            </tr>
-
+    <header class="hospital-header">
+        <h1 class="hospital-title">🏥 MedStar Hospital Management</h1>
+        <p class="hospital-subtitle">Advanced Healthcare Management Platform</p>
+    </header>
+    
+    <div class="user-info-bar">
+        <div class="user-welcome">
+            <span class="welcome-text">Welcome, <strong><?php echo htmlspecialchars($_SESSION["username"]); ?></strong></span>
+            <span class="location-info">📍 Company: <?php echo htmlspecialchars($_SESSION["companyname"]); ?></span>
+        </div>
+        <div class="user-actions">
+            <a href="mainmenu1.php" class="btn btn-outline">🏠 Main Menu</a>
+            <a href="logout.php" class="btn btn-outline">🚪 Logout</a>
+        </div>
+    </div>
+    
+    <nav class="nav-breadcrumb">
+        <a href="mainmenu1.php">🏠 Home</a>
+        <span>→</span>
+        <span>Lab Revenue Report</span>
+    </nav>
+    
+    <div id="menuToggle" class="floating-menu-toggle">
+        <i class="fas fa-bars"></i>
+    </div>
+    
+    <div class="main-container-with-sidebar">
+        <aside id="leftSidebar" class="left-sidebar">
+            <div class="sidebar-header">
+                <h3>Quick Navigation</h3>
+                <button id="sidebarToggle" class="sidebar-toggle">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+            </div>
+            <nav class="sidebar-nav">
+                <ul class="nav-list">
+                    <li class="nav-item">
+                        <a href="mainmenu1.php" class="nav-link">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="labrequestreport.php" class="nav-link">
+                            <i class="fas fa-clipboard-list"></i>
+                            <span>Lab Request Report</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="labtestreport.php" class="nav-link">
+                            <i class="fas fa-flask"></i>
+                            <span>Lab Test Report</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="labrevenuereport.php" class="nav-link">
+                            <i class="fas fa-chart-line"></i>
+                            <span>Lab Revenue Report</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="labcategory1.php" class="nav-link">
+                            <i class="fas fa-tags"></i>
+                            <span>Lab Categories</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+        
+        <main class="main-content">
+            <div class="alert-container">
+                <?php if (isset($errmsg) && $errmsg != "") { ?>
+                    <div class="alert success">
+                        <?php echo htmlspecialchars($errmsg); ?>
+                    </div>
+                <?php } ?>
+            </div>
             
-
-			<?php
-
-			$num1=0;
-
-			$num2=0;
-
-			$num3=0;
-
-			$num6=0;
-
-			$grandtotal = 0;
-
-			$res2itemname = '';
-
-			
-
-			$ADate1 = $transactiondatefrom;
-
-			$ADate2 = $transactiondateto;
-
-			
-
-			if($cbfrmflag1 == 'cbfrmflag1')
-
-			{
-
-			 $j = 0;
-
-	  	  
-
-			$crresult = array();
-			
-			if($slocation=='All')
-			{
-			$pass_location = "locationcode !=''";
-			}
-			else
-			{
-			$pass_location = "locationcode ='$slocation'";
-			}
-			
-
-
-			if($type == 'OP')
-
-			{
-
-			$querycr1in = "SELECT fxamount as income, patientcode as pcode, patientname as pname, patientvisitcode as vcode,labitemcode as lcode, labitemname as lname, billdate as date, accountname as accountname, billtype as billtype FROM `billing_paynowlab`  WHERE labitemname LIKE '%$lab%' AND billdate BETWEEN '$ADate1' AND '$ADate2' AND $pass_location
-
-						   UNION ALL SELECT labitemrate as income, patientcode as pcode, patientname as pname, patientvisitcode as vcode,labitemcode as lcode, labitemname as lname, billdate as date, CONCAT(accountname,'CASH COLLECTIONS') as accountname, CONCAT(billtype,'PAY NOW') as billtype FROM `billing_externallab`  WHERE labitemname LIKE '%$lab%' AND billdate BETWEEN '$ADate1' AND '$ADate2' AND $pass_location
-
-						   UNION ALL SELECT fxamount as income, patientcode as pcode, patientname as pname, patientvisitcode as vcode,labitemcode as lcode, labitemname as lname, billdate as date, accountname as accountname, billtype as billtype FROM `billing_paylaterlab`  WHERE labitemname LIKE '%$lab%' AND billdate BETWEEN '$ADate1' AND '$ADate2' AND $pass_location";
-
-			}
-
-			else if($type == 'IP')
-
-			{
-
-			$querycr1in = "SELECT rateuhx as income, patientcode as pcode, patientname as pname, patientvisitcode as vcode,labitemcode as lcode, labitemname as lname, billdate as date, accountname as accountname, billtype as billtype FROM `billing_iplab`  WHERE labitemname LIKE '%$lab%' AND billdate BETWEEN '$ADate1' AND '$ADate2' AND $pass_location";
-
-			}
-
-			else 
-
-			{
-
-			 $querycr1in = "SELECT fxamount as income, patientcode as pcode, patientname as pname, patientvisitcode as vcode,labitemcode as lcode, labitemname as lname, billdate as date, accountname as accountname, billtype as billtype FROM `billing_paynowlab`  WHERE labitemname LIKE '%$lab%' AND billdate BETWEEN '$ADate1' AND '$ADate2' AND $pass_location
-
-						   UNION ALL SELECT labitemrate as income, patientcode as pcode, patientname as pname, patientvisitcode as vcode,labitemcode as lcode, labitemname as lname, billdate as date, CONCAT(accountname,'CASH COLLECTIONS') as accountname, CONCAT(billtype,'PAY NOW') as billtype FROM `billing_externallab`  WHERE labitemname LIKE '%$lab%' AND billdate BETWEEN '$ADate1' AND '$ADate2' AND $pass_location
-
-						   UNION ALL SELECT fxamount as income, patientcode as pcode, patientname as pname, patientvisitcode as vcode,labitemcode as lcode, labitemname as lname, billdate as date, accountname as accountname, billtype as billtype FROM `billing_paylaterlab`  WHERE labitemname LIKE '%$lab%' AND billdate BETWEEN '$ADate1' AND '$ADate2' AND $pass_location
-
-						   UNION ALL SELECT rateuhx as income, patientcode as pcode, patientname as pname, patientvisitcode as vcode,labitemcode as lcode, labitemname as lname, billdate as date, accountname as accountname, billtype as billtype FROM `billing_iplab`  WHERE labitemname LIKE '%$lab%' AND billdate BETWEEN '$ADate1' AND '$ADate2' AND $pass_location";
-
-			}			   
-
-			$execcr1 = mysqli_query($GLOBALS["___mysqli_ston"], $querycr1in) or die ("Error in querycr1in".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-			while($rescr1 = mysqli_fetch_array($execcr1))
-
-			{
-
-			$j = $j+1;
-
-			$patientcode = $rescr1['pcode'];
-
-			$patientname = $rescr1['pname'];
-
-			$patientvisitcode = $rescr1['vcode'];
-
-			$itemcode = $rescr1['lcode'];
-
-			$itemname = $rescr1['lname'];
-
-			$billdate = $rescr1['date'];
-
-			$labrate = $rescr1['income'];
-
-			$total = $total + $labrate;
-$query4 = "select categoryname from master_lab where itemcode = '$itemcode'";
-
-	$exec4 = mysqli_query($GLOBALS["___mysqli_ston"], $query4) or die ("Error in Query4".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-	$res4 = mysqli_fetch_array($exec4);
-
-	$categoryname = $res4['categoryname'];
-			
-
-			//$res4billtype = $rescr1['billtype'];
-
-			$res4accountname = $rescr1['accountname'];
-
-			if( $res4accountname != 'CASH - HOSPITAL')
-
-			{
-
-				$res4billtype = 'PAY LATER';
-
-			}
-
-			else
-
-			{
-
-				$res4billtype = 'PAY NOW';
-
-			}
-
-			$colorloopcount = $colorloopcount + 1;
-
-			$showcolor = ($colorloopcount & 1); 
-
-			if ($showcolor == 0)
-
-			{
-
-				//echo "if";
-
-				$colorcode = 'bgcolor="#CBDBFA"';
-
-			}
-
-			else
-
-			{
-
-				//echo "else";
-
-				$colorcode = 'bgcolor="#ecf0f5"';
-
-			}
-
-			  ?>
-
-               <tr <?php echo $colorcode; ?>>
-
-              <td class="bodytext31" valign="center"  align="left"><?php echo $j; ?></td>
-
-               <td class="bodytext31" valign="center"  align="left">
-
-                <div class="bodytext31"><?php echo $billdate; ?></div>              </td>
-
-              <td class="bodytext31" valign="center"  align="left">
-
-                <div class="bodytext31"><?php echo $patientcode; ?></div>              </td>
-
-              <td class="bodytext31" valign="center"  align="left">
-
-                <div class="bodytext31"><?php echo $patientvisitcode; ?></div>              </td>
-
-              <td class="bodytext31" valign="center"  align="left">
-
-			  <?php echo $patientname; ?></td>
-<td class="bodytext31" valign="center"  align="left">
-
-			    <div align="left"><?php echo $categoryname; ?></div></td>
-              <td class="bodytext31" valign="center"  align="left">
-
-			    <div align="left"><?php echo $itemcode; ?></div></td>
-
-                <td class="bodytext31" valign="center"  align="left">
-
-			    <div align="left"><?php echo $itemname; ?></div></td>
-
-                <td class="bodytext31" valign="center"  align="left">
-
-			    <div align="left"><?php echo number_format($labrate,2,'.',','); ?></div></td>
-
-                <td class="bodytext31" valign="center"  align="left">
-
-			    <div align="left"><?php echo $res4billtype; ?></div></td>
-
-                <td class="bodytext31" valign="center"  align="left">
-
-			    <div align="left"><?php echo $res4accountname; ?></div></td>
-
-           </tr>
-
-		   <?php
-
-			}
-
-			
-
-			 $amount = $amount + $total;	
-
-			
-
-		  $num4 = $num1 + $num2 + $num3 + $num6;
-
-		 
-
-		  $grandtotal = $grandtotal + $amount;
-
-		  
-
-		  $total = number_format($total,'2','.','');
-
-		  
-
-			
-
-			?>
-
-          <tr>
-
-              <td class="bodytext31" valign="center"  align="left"></td>
-
-               <td class="bodytext31" valign="center"  align="left">
-
-                <div class="bodytext31"></div>              </td>
-
-              <td class="bodytext31" valign="center"  align="left">
-
-                <div class="bodytext31"></div>              </td>
-
-              <td colspan="3" class="bodytext31" valign="center"  align="left">
-
-                <div class="bodytext31"></div>              </td>
-
-              <td class="bodytext31" valign="center"  align="left">
-
-			  <strong>Total</strong></td>
-
-              <td class="bodytext31" valign="center"  align="left">
-
-			    <div align="left"><strong><?php echo number_format($amount,2); ?></strong></div></td>
-
-                <td class="bodytext31" valign="center"  align="left">
-
-                <div class="bodytext31"></div>              </td>
-
-                <td class="bodytext31" valign="center"  align="left">
-
-                <div class="bodytext31"></div>              </td>
-
-           </tr>
-
-		  
-
-		   <tr>
-
-			<td bgcolor="#ecf0f5" colspan="10" class="bodytext31" valign="center"  align="left">
-
-			    <div align="left"><strong><?php echo 'Refund'; ?></strong></div></td>
-
-			</tr>	
-
-		   <?php
-
-		   $amount=0;
-
-		   $j=0;
-
-		   	$total = 0;
-
-			if($type == "OP")
-
-			{
-
-			$querydr1in = "SELECT (labitemrate) as income, patientcode as pcode, patientname as pname, patientvisitcode as vcode,labitemcode as lcode, labitemname as lname, billdate as date, CONCAT(accountname,'CASH COLLECTIONS') as accountname, CONCAT(billtype,'PAY NOW') as billtype FROM `refund_paynowlab` WHERE labitemname LIKE '%$lab%' AND billdate BETWEEN '$ADate1' AND '$ADate2' AND $pass_location
-
-						   UNION ALL SELECT (fxamount) as income, patientcode as pcode, patientname as pname, patientvisitcode as vcode,labitemcode as lcode, labitemname as lname, billdate as date, accountname as accountname, billtype as billtype FROM `refund_paylaterlab` WHERE labitemname LIKE '%$lab%' AND billdate BETWEEN '$ADate1' AND '$ADate2' AND $pass_location
-
-						   UNION ALL SELECT labfxamount as income, patientcode as pcode, patientname as pname, visitcode as vcode,'' as lcode, '' as lname, entrydate as date, accountname as accountname, billtype as billtype FROM `billing_patientweivers` WHERE entrydate BETWEEN '$ADate1' AND '$ADate2' AND $pass_location";
-
-			}
-
-			else if($type == "IP")
-
-			{
-
-			$querydr1in = "SELECT rate as income, patientcode as pcode, patientname as pname, patientvisitcode as vcode,'' as lcode, '' as lname, consultationdate as date, accountname as accountname, '' as billtype FROM `ip_discount` WHERE description = 'Lab' AND consultationdate BETWEEN '$ADate1' AND '$ADate2' AND $pass_location";
-
-			}
-
-			else
-
-			{
-
-			$querydr1in = "SELECT (labitemrate) as income, patientcode as pcode, patientname as pname, patientvisitcode as vcode,labitemcode as lcode, labitemname as lname, billdate as date, CONCAT(accountname,'CASH COLLECTIONS') as accountname, CONCAT(billtype,'PAY NOW') as billtype FROM `refund_paynowlab` WHERE labitemname LIKE '%$lab%' AND billdate BETWEEN '$ADate1' AND '$ADate2' AND $pass_location
-
-						   UNION ALL SELECT (fxamount) as income, patientcode as pcode, patientname as pname, patientvisitcode as vcode,labitemcode as lcode, labitemname as lname, billdate as date, accountname as accountname, billtype as billtype FROM `refund_paylaterlab` WHERE labitemname LIKE '%$lab%' AND billdate BETWEEN '$ADate1' AND '$ADate2' AND $pass_location
-
-						   UNION ALL SELECT labfxamount as income, patientcode as pcode, patientname as pname, visitcode as vcode,'' as lcode, '' as lname, entrydate as date, accountname as accountname, billtype as billtype FROM `billing_patientweivers` WHERE labfxamount > '0' and entrydate BETWEEN '$ADate1' AND '$ADate2' AND $pass_location
-
-						   UNION ALL SELECT rate as income, patientcode as pcode, patientname as pname, patientvisitcode as vcode,'' as lcode, '' as lname, consultationdate as date, accountname as accountname, '' as billtype FROM `ip_discount` WHERE description = 'Lab' AND consultationdate BETWEEN '$ADate1' AND '$ADate2' AND $pass_location";
-
-			}
-
-			$execdr1 = mysqli_query($GLOBALS["___mysqli_ston"], $querydr1in) or die ("Error in querydr1in".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-			while($resdr1 = mysqli_fetch_array($execdr1))
-
-			{
-
-			$j = $j+1;
-
-			$patientcode = $resdr1['pcode'];
-
-			$patientname = $resdr1['pname'];
-
-			$patientvisitcode = $resdr1['vcode'];
-
-			$itemcode = $resdr1['lcode'];
-
-			$itemname = $resdr1['lname'];
-
-			$billdate = $resdr1['date'];
-
-			$labrate = $resdr1['income'];
-
-			$total = $total + $labrate;
-
-			
-
-			//$res4billtype = $resdr1['billtype'];
-
-			$res4accountname = $resdr1['accountname'];
-
-			if($res4accountname != 'CASH - HOSPITALCASH COLLECTIONS')
-
-			{
-
-				$res4billtype = 'PAY LATER';
-
-			}
-
-			else
-
-			{
-
-				$res4billtype = 'PAY NOW';
-
-			}
-
-			$colorloopcount = $colorloopcount + 1;
-
-			$showcolor = ($colorloopcount & 1); 
-
-			if ($showcolor == 0)
-
-			{
-
-				//echo "if";
-
-				$colorcode = 'bgcolor="#CBDBFA"';
-
-			}
-
-			else
-
-			{
-
-				//echo "else";
-
-				$colorcode = 'bgcolor="#ecf0f5"';
-
-			}
-
-			  ?>
-
-               <tr <?php echo $colorcode; ?>>
-
-              <td class="bodytext31" valign="center"  align="left"><?php echo $j; ?></td>
-
-               <td class="bodytext31" valign="center"  align="left">
-
-                <div class="bodytext31"><?php echo $billdate; ?></div>              </td>
-
-              <td class="bodytext31" valign="center"  align="left">
-
-                <div class="bodytext31"><?php echo $patientcode; ?></div>              </td>
-
-              <td class="bodytext31" valign="center"  align="left">
-
-                <div class="bodytext31"><?php echo $patientvisitcode; ?></div>              </td>
-
-              <td class="bodytext31" valign="center"  align="left">
-
-			  <?php echo $patientname; ?></td>
-
-              <td class="bodytext31" valign="center"  align="left">
-
-			    <div align="left"><?php echo $itemcode; ?></div></td>
-
-                <td class="bodytext31" valign="center"  align="left">
-
-			    <div align="left"><?php echo $itemname; ?></div></td>
-
-                <td class="bodytext31" valign="center"  align="left">
-
-			    <div align="left"><?php echo number_format($labrate,2,'.',','); ?></div></td>
-
-                <td class="bodytext31" valign="center"  align="left">
-
-			    <div align="left"><?php echo $res4billtype; ?></div></td>
-
-                <td class="bodytext31" valign="center"  align="left">
-
-			    <div align="left"><?php echo $res4accountname; ?></div></td>
-
-           </tr>
-
-		   <?php
-
-			}	
-
-			$amount = $amount + $total;
-
-			
-
-		  $num4 = $num1 + $num2 + $num3 + $num6;
-
-		  //$num4 = number_format($num4, '2', '.' ,''); 
-
-		  
-
-		  $grandtotal = $grandtotal - $amount;
-
-		  
-
-		  $total = number_format($total,'2','.','');
-
-		  
-
-		
-
-			 $snocount = $snocount + 1;
-
-			 $colorloopcount = $colorloopcount + 1;
-
-			$showcolor = ($colorloopcount & 1); 
-
-			if ($showcolor == 0)
-
-			{
-
-				//echo "if";
-
-				$colorcode = 'bgcolor="#CBDBFA"';
-
-			}
-
-			else
-
-			{
-
-				//echo "else";
-
-				$colorcode = 'bgcolor="#ecf0f5"';
-
-			}
-
-			?>
-
-          <tr>
-
-              <td class="bodytext31" valign="center"  align="left"></td>
-
-               <td class="bodytext31" valign="center"  align="left">
-
-                <div class="bodytext31"></div>              </td>
-
-              <td class="bodytext31" valign="center"  align="left">
-
-                <div class="bodytext31"></div>              </td>
-
-              <td colspan="3" class="bodytext31" valign="center"  align="left">
-
-                <div class="bodytext31"></div>              </td>
-
-              <td class="bodytext31" valign="center"  align="left">
-
-			  <strong>Total</strong></td>
-
-              <td class="bodytext31" valign="center"  align="left">
-
-			    <div align="left"><strong><?php echo number_format($amount,2); ?></strong></div></td>
-
-                <td class="bodytext31" valign="center"  align="left">
-
-                <div class="bodytext31"></div>              </td>
-
-                <td class="bodytext31" valign="center"  align="left">
-
-                <div class="bodytext31"></div>              </td>
-
-           </tr>
-
-			
-
-            <tr>
-
-              <td class="bodytext31" valign="center"  align="left" 
-
-                bgcolor="#ecf0f5">&nbsp;</td>
-
-              <td class="bodytext31" valign="center"  align="left" 
-
-                bgcolor="#ecf0f5">&nbsp;</td>
-
-              <td class="bodytext31" valign="center"  align="left" 
-
-                bgcolor="#ecf0f5">&nbsp;</td>
-
-               <td colspan="3" class="bodytext31" valign="center"  align="left" 
-
-                bgcolor="#ecf0f5">&nbsp;</td>
-
-              <td class="bodytext31" valign="center"  align="left" 
-
-                bgcolor="#ecf0f5"><strong><strong>Grand Total:</strong></strong></td>
-
-              <td class="bodytext31" valign="center"  align="left" 
-
-                bgcolor="#ecf0f5"><strong><?php echo number_format($grandtotal,2);?></strong></td>
-
-              <td colspan="2" class="bodytext31" valign="center"  align="left" 
-
-                bgcolor="#ecf0f5">&nbsp;</td>
-
-              <td width="7%"  align="left" valign="center" bgcolor="" class="bodytext31">
-
-              <a href="xl_labrevenuereport.php?slocation=<?= $slocation; ?>&&type=<?= $type ?>&&cbfrmflag1=cbfrmflag1&&ADate1=<?= $transactiondatefrom ?>&&ADate2=<?= $transactiondateto ?>&&lab=<?php echo $lab; ?>" target="_blank"> <img src="images/excel-xls-icon.png" width="30" height="30" /> </a>
-
-              </td> 
-
-            </tr>
-
-			<?php
-
-			  }
-
-			  ?>
-
-          </tbody>
-
-        </table></td>
-
-        </tr>
-
-        </table>
-
-</table>
-
-<?php include ("includes/footer1.php"); ?>
-
+            <div class="page-header">
+                <h1 class="page-title">Lab Revenue Report</h1>
+                <p class="page-subtitle">Track laboratory revenue and financial performance</p>
+            </div>
+            
+            <div class="form-section">
+                <h2 class="form-title">Search Criteria</h2>
+                <form name="cbform1" method="post" action="labrevenuereport.php">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="lab" class="form-label">Search Lab</label>
+                            <input type="text" name="lab" id="lab" class="form-input" size="60" value="<?php echo htmlspecialchars($lab); ?>" placeholder="Search for lab items...">
+                            <input type="hidden" name="labcode" id="labcode">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="ADate1" class="form-label">Date From</label>
+                            <div class="date-input-group">
+                                <input name="ADate1" id="ADate1" class="form-input date-input" value="<?php echo $paymentreceiveddatefrom; ?>" size="10" readonly="readonly" onKeyDown="return disableEnterKey()" />
+                                <img src="images2/cal.gif" onClick="javascript:NewCssCal('ADate1')" class="calendar-icon" title="Select Date">
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="ADate2" class="form-label">Date To</label>
+                            <div class="date-input-group">
+                                <input name="ADate2" id="ADate2" class="form-input date-input" value="<?php echo $paymentreceiveddateto; ?>" size="10" readonly="readonly" onKeyDown="return disableEnterKey()" />
+                                <img src="images2/cal.gif" onClick="javascript:NewCssCal('ADate2')" class="calendar-icon" title="Select Date">
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="slocation" class="form-label">Location</label>
+                            <select name="slocation" id="slocation" class="form-select">
+                                <option value="All">All</option>
+                                <?php
+                                $query01="select locationcode,locationname from master_location where status ='' order by locationname";
+                                $exc01=mysqli_query($GLOBALS["___mysqli_ston"], $query01);
+                                while($res01=mysqli_fetch_array($exc01))
+                                {?>
+                                    <option value="<?= $res01['locationcode'] ?>" <?php if($slocation==$res01['locationcode']){ echo "selected";} ?>> <?= $res01['locationname'] ?></option>		
+                                <?php 
+                                }
+                                ?>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="type" class="form-label">Patient Type</label>
+                            <select name="type" id="type" class="form-select">
+                                <option value="" selected>ALL</option>
+                                <option value="OP" <?php if($type=='OP'){ echo "selected";} ?>> OP + EXTERNAL </option>
+                                <option value="IP" <?php if($type=='IP'){ echo "selected";} ?>> IP </option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <input type="hidden" name="cbfrmflag1" value="cbfrmflag1">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-search"></i>
+                            Search
+                        </button>
+                        <button type="reset" class="btn btn-outline">
+                            <i class="fas fa-undo"></i>
+                            Reset
+                        </button>
+                    </div>
+                </form>
+            </div>
+            
+            <?php
+            $num1=0;
+            $num2=0;
+            $num3=0;
+            $num6=0;
+            $grandtotal = 0;
+            $res2itemname = '';
+            
+            $ADate1 = $transactiondatefrom;
+            $ADate2 = $transactiondateto;
+            
+            if($cbfrmflag1 == 'cbfrmflag1')
+            {
+                $j = 0;
+                $crresult = array();
+                
+                if($slocation=='All')
+                {
+                    $pass_location = "locationcode !=''";
+                }
+                else
+                {
+                    $pass_location = "locationcode ='$slocation'";
+                }
+                
+                if($type == 'OP')
+                {
+                    $querycr1in = "SELECT fxamount as income, patientcode as pcode, patientname as pname, patientvisitcode as vcode,labitemcode as lcode, labitemname as lname, billdate as date, accountname as accountname, billtype as billtype FROM `billing_paynowlab`  WHERE labitemname LIKE '%$lab%' AND billdate BETWEEN '$ADate1' AND '$ADate2' AND $pass_location
+                                   UNION ALL SELECT labitemrate as income, patientcode as pcode, patientname as pname, patientvisitcode as vcode,labitemcode as lcode, labitemname as lname, billdate as date, CONCAT(accountname,'CASH COLLECTIONS') as accountname, CONCAT(billtype,'PAY NOW') as billtype FROM `billing_externallab`  WHERE labitemname LIKE '%$lab%' AND billdate BETWEEN '$ADate1' AND '$ADate2' AND $pass_location
+                                   UNION ALL SELECT fxamount as income, patientcode as pcode, patientname as pname, patientvisitcode as vcode,labitemcode as lcode, labitemname as lname, billdate as date, accountname as accountname, billtype as billtype FROM `billing_paylaterlab`  WHERE labitemname LIKE '%$lab%' AND billdate BETWEEN '$ADate1' AND '$ADate2' AND $pass_location";
+                }
+                else if($type == 'IP')
+                {
+                    $querycr1in = "SELECT rateuhx as income, patientcode as pcode, patientname as pname, patientvisitcode as vcode,labitemcode as lcode, labitemname as lname, billdate as date, accountname as accountname, billtype as billtype FROM `billing_iplab`  WHERE labitemname LIKE '%$lab%' AND billdate BETWEEN '$ADate1' AND '$ADate2' AND $pass_location";
+                }
+                else 
+                {
+                    $querycr1in = "SELECT fxamount as income, patientcode as pcode, patientname as pname, patientvisitcode as vcode,labitemcode as lcode, labitemname as lname, billdate as date, accountname as accountname, billtype as billtype FROM `billing_paynowlab`  WHERE labitemname LIKE '%$lab%' AND billdate BETWEEN '$ADate1' AND '$ADate2' AND $pass_location
+                                   UNION ALL SELECT labitemrate as income, patientcode as pcode, patientname as pname, patientvisitcode as vcode,labitemcode as lcode, labitemname as lname, billdate as date, CONCAT(accountname,'CASH COLLECTIONS') as accountname, CONCAT(billtype,'PAY NOW') as billtype FROM `billing_externallab`  WHERE labitemname LIKE '%$lab%' AND billdate BETWEEN '$ADate1' AND '$ADate2' AND $pass_location
+                                   UNION ALL SELECT fxamount as income, patientcode as pcode, patientname as pname, patientvisitcode as vcode,labitemcode as lcode, labitemname as lname, billdate as date, accountname as accountname, billtype as billtype FROM `billing_paylaterlab`  WHERE labitemname LIKE '%$lab%' AND billdate BETWEEN '$ADate1' AND '$ADate2' AND $pass_location
+                                   UNION ALL SELECT rateuhx as income, patientcode as pcode, patientname as pname, patientvisitcode as vcode,labitemcode as lcode, labitemname as lname, billdate as date, accountname as accountname, billtype as billtype FROM `billing_iplab`  WHERE labitemname LIKE '%$lab%' AND billdate BETWEEN '$ADate1' AND '$ADate2' AND $pass_location";
+                }			   
+                
+                $execcr1 = mysqli_query($GLOBALS["___mysqli_ston"], $querycr1in) or die ("Error in querycr1in".mysqli_error($GLOBALS["___mysqli_ston"]));
+                $totalIncome = 0;
+                $totalRefund = 0;
+                
+                // Calculate total income first
+                $tempResult = mysqli_query($GLOBALS["___mysqli_ston"], $querycr1in) or die ("Error in querycr1in".mysqli_error($GLOBALS["___mysqli_ston"]));
+                while($tempRow = mysqli_fetch_array($tempResult))
+                {
+                    $totalIncome += $tempRow['income'];
+                }
+            ?>
+            
+            <div class="data-section">
+                <div class="data-header">
+                    <h2 class="data-title">Revenue Report</h2>
+                    <div class="search-container">
+                        <span class="location-display">
+                            <strong>Period: </strong><?php echo $ADate1; ?> to <?php echo $ADate2; ?>
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="financial-summary">
+                    <div class="summary-grid">
+                        <div class="summary-card income">
+                            <div class="summary-label">Total Income</div>
+                            <div class="summary-value income"><?php echo number_format($totalIncome, 2); ?></div>
+                        </div>
+                        <div class="summary-card refund">
+                            <div class="summary-label">Total Refunds</div>
+                            <div class="summary-value refund"><?php echo number_format($totalRefund, 2); ?></div>
+                        </div>
+                        <div class="summary-card net">
+                            <div class="summary-label">Net Revenue</div>
+                            <div class="summary-value net"><?php echo number_format($totalIncome - $totalRefund, 2); ?></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>No.</th>
+                                <th>Bill Date</th>
+                                <th>Reg Code</th>
+                                <th>Visit Code</th>
+                                <th>Patient Name</th>
+                                <th>Category</th>
+                                <th>Item Code</th>
+                                <th>Item Name</th>
+                                <th>Rate</th>
+                                <th>Bill Type</th>
+                                <th>Account Name</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php
+                            $execcr1 = mysqli_query($GLOBALS["___mysqli_ston"], $querycr1in) or die ("Error in querycr1in".mysqli_error($GLOBALS["___mysqli_ston"]));
+                            $rowCount = 0;
+                            
+                            while($rescr1 = mysqli_fetch_array($execcr1))
+                            {
+                                $rowCount++;
+                                $patientcode = $rescr1['pcode'];
+                                $patientname = $rescr1['pname'];
+                                $patientvisitcode = $rescr1['vcode'];
+                                $itemcode = $rescr1['lcode'];
+                                $itemname = $rescr1['lname'];
+                                $billdate = $rescr1['date'];
+                                $labrate = $rescr1['income'];
+                                
+                                $query4 = "select categoryname from master_lab where itemcode = '$itemcode'";
+                                $exec4 = mysqli_query($GLOBALS["___mysqli_ston"], $query4) or die ("Error in Query4".mysqli_error($GLOBALS["___mysqli_ston"]));
+                                $res4 = mysqli_fetch_array($exec4);
+                                $categoryname = $res4['categoryname'];
+                                
+                                $res4accountname = $rescr1['accountname'];
+                                if( $res4accountname != 'CASH - HOSPITAL')
+                                {
+                                    $res4billtype = 'PAY LATER';
+                                }
+                                else
+                                {
+                                    $res4billtype = 'PAY NOW';
+                                }
+                                
+                                $colorloopcount = $colorloopcount + 1;
+                                $showcolor = ($colorloopcount & 1); 
+                                if ($showcolor == 0) {
+                                    $colorcode = 'bgcolor="#CBDBFA"';
+                                } else {
+                                    $colorcode = 'bgcolor="#ecf0f5"';
+                                }
+                            ?>
+                            <tr <?php echo $colorcode; ?>>
+                                <td><?php echo $rowCount; ?></td>
+                                <td><?php echo $billdate; ?></td>
+                                <td><?php echo htmlspecialchars($patientcode); ?></td>
+                                <td><?php echo htmlspecialchars($patientvisitcode); ?></td>
+                                <td><?php echo htmlspecialchars($patientname); ?></td>
+                                <td><?php echo htmlspecialchars($categoryname); ?></td>
+                                <td><?php echo htmlspecialchars($itemcode); ?></td>
+                                <td><?php echo htmlspecialchars($itemname); ?></td>
+                                <td class="text-right"><?php echo number_format($labrate,2,'.',','); ?></td>
+                                <td><?php echo $res4billtype; ?></td>
+                                <td><?php echo htmlspecialchars($res4accountname); ?></td>
+                            </tr>
+                            <?php
+                            }
+                            ?>
+                            
+                            <tr class="total-row">
+                                <td colspan="8" class="text-right"><strong>Total</strong></td>
+                                <td class="text-right"><strong><?php echo number_format($totalIncome,2); ?></strong></td>
+                                <td colspan="2"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="section-header">
+                    <i class="fas fa-undo"></i>
+                    Refund Details
+                </div>
+                
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>No.</th>
+                                <th>Bill Date</th>
+                                <th>Reg Code</th>
+                                <th>Visit Code</th>
+                                <th>Patient Name</th>
+                                <th>Item Code</th>
+                                <th>Item Name</th>
+                                <th>Rate</th>
+                                <th>Bill Type</th>
+                                <th>Account Name</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php
+                            $amount=0;
+                            $j=0;
+                            $total = 0;
+                            
+                            if($type == "OP")
+                            {
+                                $querydr1in = "SELECT (labitemrate) as income, patientcode as pcode, patientname as pname, patientvisitcode as vcode,labitemcode as lcode, labitemname as lname, billdate as date, CONCAT(accountname,'CASH COLLECTIONS') as accountname, CONCAT(billtype,'PAY NOW') as billtype FROM `refund_paynowlab` WHERE labitemname LIKE '%$lab%' AND billdate BETWEEN '$ADate1' AND '$ADate2' AND $pass_location
+                                               UNION ALL SELECT (fxamount) as income, patientcode as pcode, patientname as pname, patientvisitcode as vcode,labitemcode as lcode, labitemname as lname, billdate as date, accountname as accountname, billtype as billtype FROM `refund_paylaterlab` WHERE labitemname LIKE '%$lab%' AND billdate BETWEEN '$ADate1' AND '$ADate2' AND $pass_location
+                                               UNION ALL SELECT labfxamount as income, patientcode as pcode, patientname as pname, visitcode as vcode,'' as lcode, '' as lname, entrydate as date, accountname as accountname, billtype as billtype FROM `billing_patientweivers` WHERE entrydate BETWEEN '$ADate1' AND '$ADate2' AND $pass_location";
+                            }
+                            else if($type == "IP")
+                            {
+                                $querydr1in = "SELECT rate as income, patientcode as pcode, patientname as pname, patientvisitcode as vcode,'' as lcode, '' as lname, consultationdate as date, accountname as accountname, '' as billtype FROM `ip_discount` WHERE description = 'Lab' AND consultationdate BETWEEN '$ADate1' AND '$ADate2' AND $pass_location";
+                            }
+                            else
+                            {
+                                $querydr1in = "SELECT (labitemrate) as income, patientcode as pcode, patientname as pname, patientvisitcode as vcode,labitemcode as lcode, labitemname as lname, billdate as date, CONCAT(accountname,'CASH COLLECTIONS') as accountname, CONCAT(billtype,'PAY NOW') as billtype FROM `refund_paynowlab` WHERE labitemname LIKE '%$lab%' AND billdate BETWEEN '$ADate1' AND '$ADate2' AND $pass_location
+                                               UNION ALL SELECT (fxamount) as income, patientcode as pcode, patientname as pname, patientvisitcode as vcode,labitemcode as lcode, labitemname as lname, billdate as date, accountname as accountname, billtype as billtype FROM `refund_paylaterlab` WHERE labitemname LIKE '%$lab%' AND billdate BETWEEN '$ADate1' AND '$ADate2' AND $pass_location
+                                               UNION ALL SELECT labfxamount as income, patientcode as pcode, patientname as pname, visitcode as vcode,'' as lcode, '' as lname, entrydate as date, accountname as accountname, billtype as billtype FROM `billing_patientweivers` WHERE labfxamount > '0' and entrydate BETWEEN '$ADate1' AND '$ADate2' AND $pass_location
+                                               UNION ALL SELECT rate as income, patientcode as pcode, patientname as pname, patientvisitcode as vcode,'' as lcode, '' as lname, consultationdate as date, accountname as accountname, '' as billtype FROM `ip_discount` WHERE description = 'Lab' AND consultationdate BETWEEN '$ADate1' AND '$ADate2' AND $pass_location";
+                            }
+                            
+                            $execdr1 = mysqli_query($GLOBALS["___mysqli_ston"], $querydr1in) or die ("Error in querydr1in".mysqli_error($GLOBALS["___mysqli_ston"]));
+                            $refundCount = 0;
+                            
+                            while($resdr1 = mysqli_fetch_array($execdr1))
+                            {
+                                $refundCount++;
+                                $patientcode = $resdr1['pcode'];
+                                $patientname = $resdr1['pname'];
+                                $patientvisitcode = $resdr1['vcode'];
+                                $itemcode = $resdr1['lcode'];
+                                $itemname = $resdr1['lname'];
+                                $billdate = $resdr1['date'];
+                                $labrate = $resdr1['income'];
+                                $total = $total + $labrate;
+                                $totalRefund += $labrate;
+                                
+                                $res4accountname = $resdr1['accountname'];
+                                if($res4accountname != 'CASH - HOSPITALCASH COLLECTIONS')
+                                {
+                                    $res4billtype = 'PAY LATER';
+                                }
+                                else
+                                {
+                                    $res4billtype = 'PAY NOW';
+                                }
+                                
+                                $colorloopcount = $colorloopcount + 1;
+                                $showcolor = ($colorloopcount & 1); 
+                                if ($showcolor == 0) {
+                                    $colorcode = 'bgcolor="#CBDBFA"';
+                                } else {
+                                    $colorcode = 'bgcolor="#ecf0f5"';
+                                }
+                            ?>
+                            <tr <?php echo $colorcode; ?>>
+                                <td><?php echo $refundCount; ?></td>
+                                <td><?php echo $billdate; ?></td>
+                                <td><?php echo htmlspecialchars($patientcode); ?></td>
+                                <td><?php echo htmlspecialchars($patientvisitcode); ?></td>
+                                <td><?php echo htmlspecialchars($patientname); ?></td>
+                                <td><?php echo htmlspecialchars($itemcode); ?></td>
+                                <td><?php echo htmlspecialchars($itemname); ?></td>
+                                <td class="text-right"><?php echo number_format($labrate,2,'.',','); ?></td>
+                                <td><?php echo $res4billtype; ?></td>
+                                <td><?php echo htmlspecialchars($res4accountname); ?></td>
+                            </tr>
+                            <?php
+                            }
+                            ?>
+                            
+                            <tr class="total-row">
+                                <td colspan="7" class="text-right"><strong>Total Refunds</strong></td>
+                                <td class="text-right"><strong><?php echo number_format($total,2); ?></strong></td>
+                                <td colspan="2"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="financial-summary">
+                    <div class="summary-grid">
+                        <div class="summary-card net">
+                            <div class="summary-label">Grand Total</div>
+                            <div class="summary-value net"><?php echo number_format($totalIncome - $totalRefund,2);?></div>
+                        </div>
+                        <div class="summary-card">
+                            <div class="summary-label">Export Report</div>
+                            <div class="summary-value">
+                                <a href="xl_labrevenuereport.php?slocation=<?= $slocation; ?>&&type=<?= $type ?>&&cbfrmflag1=cbfrmflag1&&ADate1=<?= $transactiondatefrom ?>&&ADate2=<?= $transactiondateto ?>&&lab=<?php echo $lab; ?>" 
+                                   class="btn btn-success export-btn" target="_blank">
+                                    <i class="fas fa-file-excel"></i>
+                                    Export Excel
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <?php
+            }
+            ?>
+        </main>
+    </div>
+    
+    <script src="js/labrevenuereport-modern.js?v=<?php echo time(); ?>"></script>
 </body>
-
 </html>
-
-
-

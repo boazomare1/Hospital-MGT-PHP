@@ -1,16 +1,16 @@
 <?php
 session_start();
-$pagename = '';
-//include ("includes/loginverify.php"); //to prevent indefinite loop, loginverify is disabled.
-if (!isset($_SESSION['username'])) header ("location:index.php");
+include ("includes/loginverify.php");
 include ("db/db_connect.php");
+include ("includes/check_user_access.php");
 
-$ipaddress = $_SERVER['REMOTE_ADDR'];
+$username = $_SESSION["username"];
+$companyanum = $_SESSION["companyanum"];
+$companyname = $_SESSION["companyname"];
+
+$ipaddress = $_SERVER["REMOTE_ADDR"];
 $updatedatetime = date('Y-m-d H:i:s');
-$sessionusername = $_SESSION['username'];
-$username = $_SESSION['username'];
-$companyanum = $_SESSION['companyanum'];
-$errmsg = '';
+$errmsg = "";
 $bgcolorcode = "";
 $colorloopcount = "";
 $res15amount = '0.00';
@@ -25,312 +25,544 @@ $res81 = mysqli_fetch_array($exec81);
 $companycode = $res81['pinnumber'];
 $companyname = $res81['employername'];
 
-if (isset($_REQUEST["frmflag1"])) { $frmflag1 = $_REQUEST["frmflag1"]; } else { $frmflag1 = ""; }
-if (isset($_REQUEST["searchemployee"])) { $searchemployee = $_REQUEST["searchemployee"]; } else { $searchemployee = ""; }
-if (isset($_REQUEST["searchmonth"])) { $searchmonth = $_REQUEST["searchmonth"]; } else { $searchmonth = date('M'); }
-if (isset($_REQUEST["searchyear"])) { $searchyear = $_REQUEST["searchyear"]; } else { $searchyear = date('Y'); }
-
-//$frmflag1 = $_REQUEST['frmflag1'];
-if ($frmflag1 == 'frmflag1')
-{
-	
+// Handle form submission
+if (isset($_REQUEST["frmflag1"])) { 
+    $frmflag1 = $_REQUEST["frmflag1"]; 
+} else { 
+    $frmflag1 = ""; 
 }
 
-if (isset($_REQUEST["st"])) { $st = $_REQUEST["st"]; } else { $st = ""; }
-//$st = $_REQUEST['st'];
-if ($st == 'success')
-{
-		$errmsg = "";
+if (isset($_REQUEST["searchemployee"])) { 
+    $searchemployee = $_REQUEST["searchemployee"]; 
+} else { 
+    $searchemployee = ""; 
 }
-else if ($st == 'failed')
-{
-		$errmsg = "";
+
+if (isset($_REQUEST["searchmonth"])) { 
+    $searchmonth = $_REQUEST["searchmonth"]; 
+} else { 
+    $searchmonth = date('M'); 
+}
+
+if (isset($_REQUEST["searchyear"])) { 
+    $searchyear = $_REQUEST["searchyear"]; 
+} else { 
+    $searchyear = date('Y'); 
+}
+
+if (isset($_REQUEST["searchbank"])) { 
+    $searchbank = $_REQUEST["searchbank"]; 
+} else { 
+    $searchbank = ""; 
+}
+
+// Check for URL messages
+if (isset($_GET['msg'])) {
+    if ($_GET['msg'] == 'success') {
+        $errmsg = "Payroll report generated successfully.";
+        $bgcolorcode = 'success';
+    } elseif ($_GET['msg'] == 'failed') {
+        $errmsg = "Failed to generate payroll report.";
+        $bgcolorcode = 'failed';
+    }
 }
 
 ?>
-<style type="text/css">
-<!--
-body {
-	margin-left: 0px;
-	margin-top: 0px;
-	background-color: #ecf0f5;
-}
-.bodytext3 {	FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3B3B3C; FONT-FAMILY: Tahoma
-}
--->
-</style>
-<link href="datepickerstyle.css" rel="stylesheet" type="text/css" />
-<link rel="stylesheet" type="text/css" href="css/autosuggest.css" /> 
-<script type="text/javascript" src="js/autosuggestemployeereportsearch1.js"></script>
-<script type="text/javascript" src="js/autocomplete_jobdescription2.js"></script>
-<script type="text/javascript" src="js/disablebackenterkey.js"></script>
-<script language="javascript">
 
-function process1backkeypress1() 
-{
-	//alert ("Back Key Press");
-	if (event.keyCode==8) 
-	{
-		event.keyCode=0; 
-		return event.keyCode 
-		return false;
-	}
-}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payroll Report - MedStar</title>
+    
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <!-- Modern CSS -->
+    <link rel="stylesheet" href="css/payroll-modern.css?v=<?php echo time(); ?>">
+    
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- Legacy CSS for compatibility -->
+    <link href="datepickerstyle.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="css/autosuggest.css" /> 
+    
+    <!-- Legacy JavaScript -->
+    <script type="text/javascript" src="js/autosuggestemployeereportsearch1.js"></script>
+    <script type="text/javascript" src="js/autocomplete_jobdescription2.js"></script>
+    <script type="text/javascript" src="js/disablebackenterkey.js"></script>
+    <script src="js/datetimepicker1_css.js"></script>
+    
+    <script language="javascript">
+    function process1backkeypress1() {
+        if (event.keyCode==8) {
+            event.keyCode=0; 
+            return event.keyCode 
+            return false;
+        }
+    }
 
-</script>
+    function captureEscapeKey1() {
+        if (event.keyCode==8) {
+            // Handle escape key if needed
+        }
+    }
 
-<script language="javascript">
+    function from1submit1() {
+        // Form validation if needed
+        return true;
+    }
 
-function captureEscapeKey1()
-{
-	//alert ("Back Key Press");
-	if (event.keyCode==8) 
-	{
-		//alert ("Escape Key Press.");
-		//event.keyCode=0; 
-		//return event.keyCode 
-		//return false;
-	}
-}
-
-window.onload = function () 
-{
-	var oTextbox = new AutoSuggestControl(document.getElementById("searchemployee"), new StateSuggestions());
-  	
-}
-
-</script>
-
-<style type="text/css">
-<!--
-.bodytext31 {FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3b3b3c; FONT-FAMILY: Tahoma
-}
--->
-</style>
+    window.onload = function () {
+        var oTextbox = new AutoSuggestControl(document.getElementById("searchemployee"), new StateSuggestions());
+    }
+    </script>
 </head>
-<script language="javascript">
+    <!-- Hospital Header -->
+    <header class="hospital-header">
+        <h1 class="hospital-title">🏥 MedStar Hospital Management</h1>
+        <p class="hospital-subtitle">Advanced Healthcare Management Platform</p>
+    </header>
 
-function from1submit1()
-{
+    <!-- User Information Bar -->
+    <div class="user-info-bar">
+        <div class="user-welcome">
+            <span class="welcome-text">Welcome, <strong><?php echo htmlspecialchars($username); ?></strong></span>
+            <span class="location-info">📍 Company: <?php echo htmlspecialchars($companyname); ?></span>
+        </div>
+        <div class="user-actions">
+            <a href="mainmenu1.php" class="btn btn-outline">🏠 Main Menu</a>
+            <a href="logout.php" class="btn btn-outline">🚪 Logout</a>
+        </div>
+    </div>
 
-}
+    <!-- Navigation Breadcrumb -->
+    <nav class="nav-breadcrumb">
+        <a href="mainmenu1.php">🏠 Home</a>
+        <span>→</span>
+        <span>Payroll Report</span>
+    </nav>
 
-</script>
-<script src="js/datetimepicker1_css.js"></script>
-<body>
-<table width="101%" align="left" border="0" cellspacing="0" cellpadding="2">
-  <tr>
-    <td colspan="10" bgcolor="#ecf0f5"><?php include ("includes/alertmessages1.php"); ?></td>
-  </tr>
-  <tr>
-    <td colspan="10" bgcolor="#ecf0f5"><?php include ("includes/title1.php"); ?></td>
-  </tr>
-  <tr>
-    <td colspan="10" bgcolor="#ecf0f5">
-	<?php 
-	
-		include ("includes/menu1.php"); 
-	
-	//	include ("includes/menu2.php"); 
-	
-	?>	</td>
-  </tr>
-  <tr>
-    <td height="25" colspan="10">&nbsp;</td>
-  </tr>
-  <tr>
-   <td width="1%" align="left" valign="top">&nbsp;</td>
-    <td  valign="top">
-	<form name="form1" id="form1" method="post" action="payrollmonthwiseinterim.php" onSubmit="return from1submit1()">
-	<table width="900" border="0" align="left" cellpadding="4" cellspacing="0" bordercolor="#666666" id="AutoNumber3" style="border-collapse: collapse">
-	<tbody>
-	<tr bgcolor="#999999">
-	<td colspan="30" align="left" class="bodytext3"><strong>Payroll Report</strong></td>
-	</tr>
-	<tr>
-	<td width="95" align="left" class="bodytext3">Search Bank</td>
-	<td colspan="4" align="left" class="bodytext3">
-	<input type="text" name="searchbank" id="searchbank" autocomplete="off" value="<?php echo $searchbank; ?>" size="50" style="border:solid 1px #001E6A;"></td>
-	</tr>
-	<tr>
-	<td width="95" align="left" class="bodytext3">Search Employee</td>
-	<td colspan="4" align="left" class="bodytext3">
-	<input type="hidden" name="autobuildemployee" id="autobuildemployee">
-	<input type="hidden" name="searchemployeecode" id="searchemployeecode">
-	<input type="text" name="searchemployee" id="searchemployee" autocomplete="off" value="<?php echo $searchemployee; ?>" size="50" style="border:solid 1px #001E6A;"></td>
-	<td width="560" align="left" class="bodytext3">
-	<input type="hidden" name="frmflag1" id="frmflag1" value="frmflag1">
-	<input type="submit" name="Search" value="Submit" style="border:solid 1px #001E6A;"></td>
-	</tr>
-	<tr>
-	<td align="left" colspan="5">&nbsp;</td>
-	</td>
-	</tbody>
-	</table>
-	</form>
-	</td>
-	</tr>
-  <tr>
-   <td width="1%" align="left" valign="top">&nbsp;</td>
-    <td  valign="top">
-	<?php
-	if ($frmflag1 == 'frmflag1')
-	{	
-		if (isset($_REQUEST["frmflag1"])) { $frmflag1 = $_REQUEST["frmflag1"]; } else { $frmflag1 = ""; }
-		if (isset($_REQUEST["searchemployee"])) { $searchemployee = $_REQUEST["searchemployee"]; } else { $searchemployee = ""; }
-		if (isset($_REQUEST["searchbank"])) { $searchbank = $_REQUEST["searchbank"]; } else { $searchbank = ""; }
-		if (isset($_REQUEST["searchmonth"])) { $searchmonth = $_REQUEST["searchmonth"]; } else { $searchmonth = date('M'); }
-		if (isset($_REQUEST["searchyear"])) { $searchyear = $_REQUEST["searchyear"]; } else { $searchyear = date('Y'); }
+    <!-- Floating Menu Toggle -->
+    <div id="menuToggle" class="floating-menu-toggle">
+        <i class="fas fa-bars"></i>
+    </div>
 
-		$searchmonthyear = $searchmonth.'-'.$searchyear;
-		
-		$urlpath = "frmflag1=$frmflag1&&searchmonth=$searchmonth&&searchyear=$searchyear&&searchemployee=$searchemployee&&searchbank=$searchbank";
-	?>
-	<table border="0" align="left" cellpadding="4" cellspacing="0" bordercolor="#666666" id="AutoNumber3" style="border-collapse: collapse">
-	<tbody>
-	<tr bgcolor="#ecf0f5">
-	<td colspan="30" align="left" class="bodytext3"><strong>PAYROLL REPORT</strong></td>
-	</tr>
-	<tr bgcolor="#FFFFFF">
-	<td colspan="30" align="left" class="bodytext3"><strong>EMPLOYER'S PIN : <?php echo $companycode; ?></strong></td>
-	</tr>
-	<tr bgcolor="#FFFFFF">
-	<td colspan="30" align="left" class="bodytext3"><strong>EMPLOYER'S NAME : <?php echo $companyname; ?></strong></td>
-	</tr>
-	<tr>
-	<td width="26" align="center" bgcolor="#ecf0f5" class="bodytext3"><strong>S.No</strong></td>
-	<td width="101" align="center" bgcolor="#ecf0f5" class="bodytext3"><strong>EMPLOYEE CODE</strong></td>
-	<td width="99" align="center" bgcolor="#ecf0f5" class="bodytext3"><strong>EMPLOYEE NAME</strong></td>
-	<td width="99" align="center" bgcolor="#ecf0f5" class="bodytext3"><strong>DEPARTMENT</strong></td>
-	<?php
-	$totalamount = '0.00';
-	$query1 = "select auto_number,componentname from master_payrollcomponent where recordstatus <> 'deleted' and typecode = '10' order by auto_number";
-	$exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
-	while($res1 = mysqli_fetch_array($exec1))
-	{
-	$componentanum = $res1['auto_number'];
-	$componentname = $res1['componentname'];
-	
-	$datatotal[$componentanum] = array();
-	$totnhif10 = 0;
-	$totloan = 0;
-	$totgross = 0;
-	$totdeduct = 0;
-	$totnett = 0;	
-	$totinsurance = 0;
-	?>
-	<td align="center" bgcolor="#ecf0f5" class="bodytext3" width="184"><strong><?php echo $componentname; ?></strong></td>
-	<?php
-	}
-	?>
-	<td align="center" bgcolor="#ecf0f5" class="bodytext3" width="84"><strong>GROSS PAY</strong></td>
-	<?php
-	$query1d = "select auto_number,componentname from master_payrollcomponent where recordstatus <> 'deleted' and typecode = '20' order by auto_number";
-	$exec1d = mysqli_query($GLOBALS["___mysqli_ston"], $query1d) or die ("Error in Query1d".mysqli_error($GLOBALS["___mysqli_ston"]));
-	while($res1d = mysqli_fetch_array($exec1d))
-	{
-	$componentanum = $res1d['auto_number'];
-	$componentname = $res1d['componentname'];
-	
-	$datatotal[$componentanum] = array();
-	?>
-	<td align="center" bgcolor="#ecf0f5" class="bodytext3" width="184"><strong><?php echo $componentname; ?></strong></td>
-	<?php
-	}
-	?>
-	<td align="center" bgcolor="#ecf0f5" class="bodytext3" width="84"><strong><?php echo 'LOAN DEDUCTION'; ?></strong></td>
-    <td align="center" bgcolor="#ecf0f5" class="bodytext3" width="84"><strong><?php echo 'INSURANCE RELIEF'; ?></strong></td>
-	<td align="center" bgcolor="#ecf0f5" class="bodytext3" width="84"><strong>DEDUCTIONS</strong></td>
-	<td align="center" bgcolor="#ecf0f5" class="bodytext3" width="84"><strong>NETT PAY</strong></td>
-	<td align="center" bgcolor="#ecf0f5" class="bodytext3" width="84"><strong>AMOUNT TO BANK</strong></td>
-	<td align="center" bgcolor="#ecf0f5" class="bodytext3" width="84"><strong>ACCOUNT NO</strong></td>
-	</tr>
-	<?php
-	$totalamount = '0.00'; $old_bankname = '';$bankname = '';
-	$query2 = "select a.employeecode as employeecode, a.employeename as employeename, b.bankname, b.accountnumber, a.departmentname as departmentname, a.payrollstatus as payrollstatus, a.dateofjoining as doj, b.dateofbirth as dob from master_employee AS a JOIN master_employeeinfo AS b ON (a.employeecode = b.employeecode) where a.employeename like '%$searchemployee%' and b.bankname like '%$searchbank%' and a.employeecode <> '' and (a.payrollstatus = 'Active' or a.payrollstatus = 'Prorata') group by a.employeecode order by b.bankname, cast(b.payrollno as unsigned) asc";
-	$exec2 = mysqli_query($GLOBALS["___mysqli_ston"], $query2) or die ("Error in Query2".mysqli_error($GLOBALS["___mysqli_ston"]));
-	while($res2 = mysqli_fetch_array($exec2))
-	{	
-		$searchemployeename = $res2['employeename'];
-		$departmentname = $res2['departmentname'];
-		$res2employeecode = $res2['employeecode'];
-		$bankname = $res2['bankname'];
-		$accountnumber = $res2['accountnumber'];
-		$dob = $res2['dob'];
-		if($dob == '0000-00-00')
-		{
-			$dob = date('Y-m-d');
-		}
-		
+    <!-- Main Container with Sidebar -->
+    <div class="main-container-with-sidebar">
+        <!-- Left Sidebar -->
+        <aside id="leftSidebar" class="left-sidebar">
+            <div class="sidebar-header">
+                <h3>Quick Navigation</h3>
+                <button id="sidebarToggle" class="sidebar-toggle">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <ul class="nav-list">
+                    <li class="nav-item">
+                        <a href="mainmenu1.php" class="nav-link">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="labitem1master.php" class="nav-link">
+                            <i class="fas fa-flask"></i>
+                            <span>Lab Items</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="openingstockentry_master.php" class="nav-link">
+                            <i class="fas fa-boxes"></i>
+                            <span>Opening Stock</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="addward.php" class="nav-link">
+                            <i class="fas fa-bed"></i>
+                            <span>Wards</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="accountreceivableentrylist.php" class="nav-link">
+                            <i class="fas fa-receipt"></i>
+                            <span>Account Receivable</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="corporateoutstanding.php" class="nav-link">
+                            <i class="fas fa-building"></i>
+                            <span>Corporate Outstanding</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="accountstatement.php" class="nav-link">
+                            <i class="fas fa-file-invoice-dollar"></i>
+                            <span>Account Statement</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="addaccountsmain.php" class="nav-link">
+                            <i class="fas fa-chart-line"></i>
+                            <span>Accounts Main</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="addaccountssub.php" class="nav-link">
+                            <i class="fas fa-chart-pie"></i>
+                            <span>Accounts Sub Type</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="fixedasset_acquisition_report.php" class="nav-link">
+                            <i class="fas fa-building"></i>
+                            <span>Fixed Asset Acquisition</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="activeinpatientlist.php" class="nav-link">
+                            <i class="fas fa-bed"></i>
+                            <span>Active Inpatient List</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="activeusersreport.php" class="nav-link">
+                            <i class="fas fa-users"></i>
+                            <span>Active Users Report</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="chartofaccounts_upload.php" class="nav-link">
+                            <i class="fas fa-upload"></i>
+                            <span>Chart of Accounts Upload</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="chartaccountsmaindataimport.php" class="nav-link">
+                            <i class="fas fa-database"></i>
+                            <span>Chart of Accounts Main Import</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="chartaccountssubdataimport.php" class="nav-link">
+                            <i class="fas fa-database"></i>
+                            <span>Chart of Accounts Sub Import</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="addbloodgroup.php" class="nav-link">
+                            <i class="fas fa-tint"></i>
+                            <span>Blood Group Master</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="addfoodallergy1.php" class="nav-link">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <span>Food Allergy Master</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="addgenericname.php" class="nav-link">
+                            <i class="fas fa-pills"></i>
+                            <span>Generic Name Master</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="addpromotion.php" class="nav-link">
+                            <i class="fas fa-percentage"></i>
+                            <span>Promotion Master</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="addsalutation1.php" class="nav-link">
+                            <i class="fas fa-user-tie"></i>
+                            <span>Salutation Master</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="vat.php" class="nav-link">
+                            <i class="fas fa-receipt"></i>
+                            <span>VAT Master</span>
+                        </a>
+                    </li>
+                    <li class="nav-item active">
+                        <a href="payrollmonthwiseinterim.php" class="nav-link">
+                            <i class="fas fa-money-bill-wave"></i>
+                            <span>Payroll Report</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
 
-	    $from=date_create($dob);
-		$to=date_create(date('Y-m-d'));
-		$diff=date_diff($to,$from);
-		//print_r($diff);
-		$y = $diff->y;
-		
-		$totalpercentcalc = '0.00';
-		$sumoftotalearningsfinal = '0.00';
-		$sumoftotalearnings = '0.00';
-		$sumofnotional = '0.00';
-		$totgrossamount = '0.00';
-		$totdeductamount = '0.00';
-		$totdeductamount1 = '0.00';
-		$totaldeductearning = 0;
-		
-		$query777 = mysqli_query($GLOBALS["___mysqli_ston"], "select payrollno from master_employeeinfo where employeecode = '$res2employeecode'") or die ("Error in Queryinfo".mysqli_error($GLOBALS["___mysqli_ston"]));
-		$res777 = mysqli_fetch_array($query777);
-		$payrollno = $res777['payrollno'];
-		
-		$query777 = "select employeecode from payroll_assign where employeecode = '$res2employeecode'";
-		$exec777 = mysqli_query($GLOBALS["___mysqli_ston"], $query777) or die ("Error in Query777".mysqli_error($GLOBALS["___mysqli_ston"]));
-		$res777 = mysqli_fetch_array($exec777);
-		$res777employeecode = $res777['employeecode'];
-		
-		if($res777employeecode != '')
-		{
-			$res2employeecode = $res777employeecode;
-			$res2employeename = $res2['employeename'];
-		
-	$colorloopcount = $colorloopcount + 1;
-	$showcolor = ($colorloopcount & 1); 
-	if ($showcolor == 0)
-	{
-		$colorcode = 'bgcolor="#CBDBFA"';
-	}
-	else
-	{
-		$colorcode = 'bgcolor="#ecf0f5"';
-	}
-	  
-		if($colorloopcount == 1 || $old_bankname != $bankname)
-		{
-		?>
-	<tr bgcolor="#FFFFFF">
-	<td colspan="30" align="left" class="bodytext3"><strong>BANK : <?php echo $bankname; ?></strong></td>
-	</tr>			
-	<?php }
-	$old_bankname = $bankname;	  
-		$query1 = "select auto_number from master_payrollcomponent where recordstatus <> 'deleted' and auto_number = '1' order by typecode, auto_number";
-	$exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
-	while($res1 = mysqli_fetch_array($exec1))
-	{
-	$componentanum = $res1['auto_number'];
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Alert Container -->
+            <div id="alertContainer">
+                <?php if (!empty($errmsg)): ?>
+                    <div class="alert alert-<?php echo $bgcolorcode === 'success' ? 'success' : ($bgcolorcode === 'failed' ? 'error' : 'info'); ?>">
+                        <i class="fas fa-<?php echo $bgcolorcode === 'success' ? 'check-circle' : ($bgcolorcode === 'failed' ? 'exclamation-triangle' : 'info-circle'); ?> alert-icon"></i>
+                        <span><?php echo htmlspecialchars($errmsg); ?></span>
+                    </div>
+                <?php endif; ?>
+            </div>
 
-	$query3 = "select `$componentanum` as componentamount from details_employeepayroll where employeecode = '$res2employeecode' and paymonth = '$searchmonthyear' and status <> 'deleted'";
-	$exec3 = mysqli_query($GLOBALS["___mysqli_ston"], $query3) or die ("Error in Query3".mysqli_error($GLOBALS["___mysqli_ston"]));
-	$res3 = mysqli_fetch_array($exec3);
-	$componentamount = $res3['componentamount'];
-	//if($componentamount < 1){continue;}
-	} 
-	
-  
-	?>
-	<tr <?php echo $colorcode; ?>>
-	<td align="center" class="bodytext3"><?php echo $colorloopcount; ?></td>
-	<td align="left" class="bodytext3"><?php echo $payrollno; ?></td>
-	<td align="left" class="bodytext3"><?php echo $res2employeename; ?></td>
-	<td align="left" class="bodytext3"><?php echo $departmentname; ?></td>
+            <!-- Page Header -->
+            <div class="page-header">
+                <div class="page-header-content">
+                    <h2>Payroll Report</h2>
+                    <p>Generate and view comprehensive payroll reports for employees by month and year.</p>
+                </div>
+                <div class="page-header-actions">
+                    <button type="button" class="btn btn-secondary" onclick="refreshPage()">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                    <button type="button" class="btn btn-outline" onclick="exportToExcel()">
+                        <i class="fas fa-download"></i> Export
+                    </button>
+                </div>
+            </div>
+
+            <!-- Search Form Section -->
+            <div class="search-form-section">
+                <div class="search-form-header">
+                    <i class="fas fa-search search-form-icon"></i>
+                    <h3 class="search-form-title">Payroll Report Search</h3>
+                </div>
+                
+                <form name="form1" id="form1" method="post" action="payrollmonthwiseinterim.php" onSubmit="return from1submit1()" class="search-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="searchbank" class="form-label">Search Bank</label>
+                            <input type="text" name="searchbank" id="searchbank" class="form-input" 
+                                   autocomplete="off" value="<?php echo htmlspecialchars($searchbank); ?>" 
+                                   placeholder="Enter bank name to filter">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="searchemployee" class="form-label">Search Employee</label>
+                            <input type="hidden" name="autobuildemployee" id="autobuildemployee">
+                            <input type="hidden" name="searchemployeecode" id="searchemployeecode">
+                            <input type="text" name="searchemployee" id="searchemployee" class="form-input" 
+                                   autocomplete="off" value="<?php echo htmlspecialchars($searchemployee); ?>" 
+                                   placeholder="Enter employee name to search">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="searchmonth" class="form-label">Month</label>
+                            <select name="searchmonth" id="searchmonth" class="form-input">
+                                <option value="Jan" <?php echo ($searchmonth == 'Jan') ? 'selected' : ''; ?>>January</option>
+                                <option value="Feb" <?php echo ($searchmonth == 'Feb') ? 'selected' : ''; ?>>February</option>
+                                <option value="Mar" <?php echo ($searchmonth == 'Mar') ? 'selected' : ''; ?>>March</option>
+                                <option value="Apr" <?php echo ($searchmonth == 'Apr') ? 'selected' : ''; ?>>April</option>
+                                <option value="May" <?php echo ($searchmonth == 'May') ? 'selected' : ''; ?>>May</option>
+                                <option value="Jun" <?php echo ($searchmonth == 'Jun') ? 'selected' : ''; ?>>June</option>
+                                <option value="Jul" <?php echo ($searchmonth == 'Jul') ? 'selected' : ''; ?>>July</option>
+                                <option value="Aug" <?php echo ($searchmonth == 'Aug') ? 'selected' : ''; ?>>August</option>
+                                <option value="Sep" <?php echo ($searchmonth == 'Sep') ? 'selected' : ''; ?>>September</option>
+                                <option value="Oct" <?php echo ($searchmonth == 'Oct') ? 'selected' : ''; ?>>October</option>
+                                <option value="Nov" <?php echo ($searchmonth == 'Nov') ? 'selected' : ''; ?>>November</option>
+                                <option value="Dec" <?php echo ($searchmonth == 'Dec') ? 'selected' : ''; ?>>December</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="searchyear" class="form-label">Year</label>
+                            <select name="searchyear" id="searchyear" class="form-input">
+                                <?php
+                                $currentYear = date('Y');
+                                for ($year = $currentYear - 5; $year <= $currentYear + 1; $year++) {
+                                    $selected = ($searchyear == $year) ? 'selected' : '';
+                                    echo "<option value='$year' $selected>$year</option>";
+                                }
+                                ?>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group form-group-submit">
+                            <button type="submit" name="Search" class="submit-btn">
+                                <i class="fas fa-search"></i>
+                                Generate Report
+                            </button>
+                            <input type="hidden" name="frmflag1" id="frmflag1" value="frmflag1">
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Payroll Report Results -->
+            <?php if ($frmflag1 == 'frmflag1'): ?>
+            <div class="payroll-report-section">
+                <?php
+                if (isset($_REQUEST["frmflag1"])) { $frmflag1 = $_REQUEST["frmflag1"]; } else { $frmflag1 = ""; }
+                if (isset($_REQUEST["searchemployee"])) { $searchemployee = $_REQUEST["searchemployee"]; } else { $searchemployee = ""; }
+                if (isset($_REQUEST["searchbank"])) { $searchbank = $_REQUEST["searchbank"]; } else { $searchbank = ""; }
+                if (isset($_REQUEST["searchmonth"])) { $searchmonth = $_REQUEST["searchmonth"]; } else { $searchmonth = date('M'); }
+                if (isset($_REQUEST["searchyear"])) { $searchyear = $_REQUEST["searchyear"]; } else { $searchyear = date('Y'); }
+
+                $searchmonthyear = $searchmonth.'-'.$searchyear;
+                $urlpath = "frmflag1=$frmflag1&&searchmonth=$searchmonth&&searchyear=$searchyear&&searchemployee=$searchemployee&&searchbank=$searchbank";
+                ?>
+
+                <!-- Report Header -->
+                <div class="report-header">
+                    <div class="report-title">
+                        <h3><i class="fas fa-file-invoice-dollar"></i> Payroll Report</h3>
+                    </div>
+                    <div class="report-info">
+                        <div class="report-info-item">
+                            <strong>Employer's PIN:</strong> <?php echo htmlspecialchars($companycode); ?>
+                        </div>
+                        <div class="report-info-item">
+                            <strong>Employer's Name:</strong> <?php echo htmlspecialchars($companyname); ?>
+                        </div>
+                        <div class="report-info-item">
+                            <strong>Report Period:</strong> <?php echo htmlspecialchars($searchmonth . ' ' . $searchyear); ?>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Responsive Table Container -->
+                <div class="table-container">
+                    <table class="payroll-table">
+                        <thead>
+                            <tr>
+                                <th>S.No</th>
+                                <th>Employee Code</th>
+                                <th>Employee Name</th>
+                                <th>Department</th>
+                                <?php
+                                $totalamount = '0.00';
+                                $query1 = "select auto_number,componentname from master_payrollcomponent where recordstatus <> 'deleted' and typecode = '10' order by auto_number";
+                                $exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
+                                while($res1 = mysqli_fetch_array($exec1))
+                                {
+                                    $componentanum = $res1['auto_number'];
+                                    $componentname = $res1['componentname'];
+                                    
+                                    $datatotal[$componentanum] = array();
+                                    $totnhif10 = 0;
+                                    $totloan = 0;
+                                    $totgross = 0;
+                                    $totdeduct = 0;
+                                    $totnett = 0;	
+                                    $totinsurance = 0;
+                                    ?>
+                                    <th class="component-header"><?php echo htmlspecialchars($componentname); ?></th>
+                                    <?php
+                                }
+                                ?>
+                                <th class="total-header">Gross Pay</th>
+                                <?php
+                                $query1d = "select auto_number,componentname from master_payrollcomponent where recordstatus <> 'deleted' and typecode = '20' order by auto_number";
+                                $exec1d = mysqli_query($GLOBALS["___mysqli_ston"], $query1d) or die ("Error in Query1d".mysqli_error($GLOBALS["___mysqli_ston"]));
+                                while($res1d = mysqli_fetch_array($exec1d))
+                                {
+                                    $componentanum = $res1d['auto_number'];
+                                    $componentname = $res1d['componentname'];
+                                    
+                                    $datatotal[$componentanum] = array();
+                                    ?>
+                                    <th class="deduction-header"><?php echo htmlspecialchars($componentname); ?></th>
+                                    <?php
+                                }
+                                ?>
+                                <th class="deduction-header">Loan Deduction</th>
+                                <th class="deduction-header">Insurance Relief</th>
+                                <th class="total-header">Deductions</th>
+                                <th class="total-header">Net Pay</th>
+                                <th class="total-header">Amount to Bank</th>
+                                <th class="account-header">Account No</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php
+                            $totalamount = '0.00'; $old_bankname = '';$bankname = '';
+                            $query2 = "select a.employeecode as employeecode, a.employeename as employeename, b.bankname, b.accountnumber, a.departmentname as departmentname, a.payrollstatus as payrollstatus, a.dateofjoining as doj, b.dateofbirth as dob from master_employee AS a JOIN master_employeeinfo AS b ON (a.employeecode = b.employeecode) where a.employeename like '%$searchemployee%' and b.bankname like '%$searchbank%' and a.employeecode <> '' and (a.payrollstatus = 'Active' or a.payrollstatus = 'Prorata') group by a.employeecode order by b.bankname, cast(b.payrollno as unsigned) asc";
+                            $exec2 = mysqli_query($GLOBALS["___mysqli_ston"], $query2) or die ("Error in Query2".mysqli_error($GLOBALS["___mysqli_ston"]));
+                            while($res2 = mysqli_fetch_array($exec2))
+                            {	
+                                $searchemployeename = $res2['employeename'];
+                                $departmentname = $res2['departmentname'];
+                                $res2employeecode = $res2['employeecode'];
+                                $bankname = $res2['bankname'];
+                                $accountnumber = $res2['accountnumber'];
+                                $dob = $res2['dob'];
+                                if($dob == '0000-00-00')
+                                {
+                                    $dob = date('Y-m-d');
+                                }
+                                
+
+                                $from=date_create($dob);
+                                $to=date_create(date('Y-m-d'));
+                                $diff=date_diff($to,$from);
+                                //print_r($diff);
+                                $y = $diff->y;
+                                
+                                $totalpercentcalc = '0.00';
+                                $sumoftotalearningsfinal = '0.00';
+                                $sumoftotalearnings = '0.00';
+                                $sumofnotional = '0.00';
+                                $totgrossamount = '0.00';
+                                $totdeductamount = '0.00';
+                                $totdeductamount1 = '0.00';
+                                $totaldeductearning = 0;
+                                
+                                $query777 = mysqli_query($GLOBALS["___mysqli_ston"], "select payrollno from master_employeeinfo where employeecode = '$res2employeecode'") or die ("Error in Queryinfo".mysqli_error($GLOBALS["___mysqli_ston"]));
+                                $res777 = mysqli_fetch_array($query777);
+                                $payrollno = $res777['payrollno'];
+                                
+                                $query777 = "select employeecode from payroll_assign where employeecode = '$res2employeecode'";
+                                $exec777 = mysqli_query($GLOBALS["___mysqli_ston"], $query777) or die ("Error in Query777".mysqli_error($GLOBALS["___mysqli_ston"]));
+                                $res777 = mysqli_fetch_array($exec777);
+                                $res777employeecode = $res777['employeecode'];
+                                
+                                if($res777employeecode != '')
+                                {
+                                    $res2employeecode = $res777employeecode;
+                                    $res2employeename = $res2['employeename'];
+                                
+                                $colorloopcount = $colorloopcount + 1;
+                                
+                                if($colorloopcount == 1 || $old_bankname != $bankname)
+                                {
+                                ?>
+                                <tr class="bank-header-row">
+                                    <td colspan="100" class="bank-header">
+                                        <i class="fas fa-university"></i> Bank: <?php echo htmlspecialchars($bankname); ?>
+                                    </td>
+                                </tr>			
+                                <?php } 
+                                $old_bankname = $bankname;
+                                $query1 = "select auto_number from master_payrollcomponent where recordstatus <> 'deleted' and auto_number = '1' order by typecode, auto_number";
+                                $exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
+                                while($res1 = mysqli_fetch_array($exec1))
+                                {
+                                    $componentanum = $res1['auto_number'];
+
+                                    $query3 = "select `$componentanum` as componentamount from details_employeepayroll where employeecode = '$res2employeecode' and paymonth = '$searchmonthyear' and status <> 'deleted'";
+                                    $exec3 = mysqli_query($GLOBALS["___mysqli_ston"], $query3) or die ("Error in Query3".mysqli_error($GLOBALS["___mysqli_ston"]));
+                                    $res3 = mysqli_fetch_array($exec3);
+                                    $componentamount = $res3['componentamount'];
+                                    //if($componentamount < 1){continue;}
+                                } 
+                                
+                              
+                                ?>
+                                <tr class="employee-row <?php echo ($colorloopcount % 2 == 0) ? 'even' : 'odd'; ?>">
+                                    <td class="serial-number"><?php echo $colorloopcount; ?></td>
+                                    <td class="employee-code">
+                                        <span class="code-badge"><?php echo htmlspecialchars($payrollno); ?></span>
+                                    </td>
+                                    <td class="employee-name"><?php echo htmlspecialchars($res2employeename); ?></td>
+                                    <td class="department">
+                                        <span class="department-badge"><?php echo htmlspecialchars($departmentname); ?></span>
+                                    </td>
 	<?php
 	$query3 = "select auto_number,componentname,amounttype,typecode,monthly,formula,deductearning,notional from master_payrollcomponent where recordstatus <> 'deleted' order by auto_number";
 	$exec3 = mysqli_query($GLOBALS["___mysqli_ston"], $query3) or die ("Error in Query3".mysqli_error($GLOBALS["___mysqli_ston"]));
@@ -772,12 +1004,16 @@ function from1submit1()
 		{
 			array_push($datatotal[$componentanum],$componentvalue);
 	?>
-	<td align="right" class="bodytext3" width="184"><?php if($componentvalue > 0) { echo number_format($componentvalue,2,'.',','); } ?></td>
-	<?php
-		}
-	}
-	?>
-	<td align="right" class="bodytext3" width="184"><?php if(true) { echo number_format($totgrossamount,2,'.',','); } ?></td>
+                                    <td class="component-amount">
+                                        <?php if($componentvalue > 0) { echo number_format($componentvalue,2,'.',','); } ?>
+                                    </td>
+                                    <?php
+                                        }
+                                    }
+                                    ?>
+                                    <td class="total-amount gross-pay">
+                                        <?php if(true) { echo number_format($totgrossamount,2,'.',','); } ?>
+                                    </td>
 	<?php
 	$totgross += $totgrossamount;
 
@@ -1263,96 +1499,117 @@ function from1submit1()
 	$totnett += $totnettpay;
 	$totinsurance += $insurancerelief;
 	?>
-	<td align="right" class="bodytext3"><?php if($loanamount > 0) { echo number_format($loanamount,2,'.',','); } ?></td>	
-    <td align="right" class="bodytext3"><?php if($insurancerelief > 0) { echo number_format($insurancerelief,2,'.',','); } ?></td>	
-	<td align="right" class="bodytext3"><?php if($totdeductamount > 0) { echo number_format($totdeductamount,2,'.',','); } ?></td>	
-	<td align="right" class="bodytext3"><?php if($totnettpay > 0) { echo number_format($totnettpay,2,'.',','); } ?></td>
+                                    <td class="deduction-amount loan-deduction">
+                                        <?php if($loanamount > 0) { echo number_format($loanamount,2,'.',','); } ?>
+                                    </td>	
+                                    <td class="deduction-amount insurance-relief">
+                                        <?php if($insurancerelief > 0) { echo number_format($insurancerelief,2,'.',','); } ?>
+                                    </td>	
+                                    <td class="total-amount total-deductions">
+                                        <?php if($totdeductamount > 0) { echo number_format($totdeductamount,2,'.',','); } ?>
+                                    </td>	
+                                    <td class="total-amount net-pay">
+                                        <?php if($totnettpay > 0) { echo number_format($totnettpay,2,'.',','); } ?>
+                                    </td>
 
+                                    <?php
+                                    $totaldeduct = 0;
+                                    $totalgrossper = 0;
+                                    $query12 = "select auto_number as ganum, typecode from master_payrollcomponent where recordstatus <> 'deleted'";
+                                    $exec12 = mysqli_query($GLOBALS["___mysqli_ston"], $query12) or die ("Error in Query12".mysqli_error($GLOBALS["___mysqli_ston"]));
+                                    while($res12 = mysqli_fetch_array($exec12))
+                                    {
+                                        $ganum = $res12['ganum'];
+                                        $typecode = $res12['typecode'];
+                                        
+                                        $querygg = "select `$ganum` as res12value from details_employeepayroll where employeecode = '$res2employeecode' and paymonth = '$searchmonthyear' and status <> 'deleted'";
+                                        $execgg = mysqli_query($GLOBALS["___mysqli_ston"], $querygg) or die ("Error in Querygg".mysqli_error($GLOBALS["___mysqli_ston"]));
+                                        $resgg = mysqli_fetch_array($execgg);
+                                        $res12value = $resgg['res12value'];
+                                        if($typecode == 10){
+                                        $totalgrossper = $totalgrossper + $res12value; }
+                                        else  { 
+                                        $totaldeduct = $totaldeduct + $res12value; }
+                                    }
+                                    
+                                    
+                                    $componentamount = $totalgrossper - $totaldeduct;
+                                    $totalamount = $totalamount + $componentamount;
+                                    ?>
+                                    <td class="total-amount bank-amount">
+                                        <?php echo number_format($componentamount,0,'.',','); ?>
+                                    </td>
+                                    <td class="account-number">
+                                        <span class="account-badge"><?php echo htmlspecialchars($accountnumber); ?></span>
+                                    </td>
+                                </tr>	
 	<?php
-	$totaldeduct = 0;
-	$totalgrossper = 0;
-	$query12 = "select auto_number as ganum, typecode from master_payrollcomponent where recordstatus <> 'deleted'";
-	$exec12 = mysqli_query($GLOBALS["___mysqli_ston"], $query12) or die ("Error in Query12".mysqli_error($GLOBALS["___mysqli_ston"]));
-	while($res12 = mysqli_fetch_array($exec12))
-	{
-		$ganum = $res12['ganum'];
-		$typecode = $res12['typecode'];
-		
-		$querygg = "select `$ganum` as res12value from details_employeepayroll where employeecode = '$res2employeecode' and paymonth = '$searchmonthyear' and status <> 'deleted'";
-		$execgg = mysqli_query($GLOBALS["___mysqli_ston"], $querygg) or die ("Error in Querygg".mysqli_error($GLOBALS["___mysqli_ston"]));
-		$resgg = mysqli_fetch_array($execgg);
-		$res12value = $resgg['res12value'];
-		if($typecode == 10){
-		$totalgrossper = $totalgrossper + $res12value; }
-		else  { 
-		$totaldeduct = $totaldeduct + $res12value; }
 	}
-	
-	
-	$componentamount = $totalgrossper - $totaldeduct;
-	$totalamount = $totalamount + $componentamount;
+	}
 	?>
-	<td align="right" class="bodytext3" width="77"><?php echo number_format($componentamount,0,'.',','); ?></td>
-	<td align="right" class="bodytext3" width="184"><?php echo $accountnumber;  ?></td>
+	
+                            <tr class="totals-row">
+                                <td colspan="4" class="totals-label"><strong>Total : </strong></td>
+                                <?php
+                                $query_f = "select auto_number,componentname from master_payrollcomponent where recordstatus <> 'deleted' and typecode = '10' order by auto_number";
+                                $exec_f = mysqli_query($GLOBALS["___mysqli_ston"], $query_f) or die ("Error in Query_f".mysqli_error($GLOBALS["___mysqli_ston"]));
+                                while($res_f = mysqli_fetch_array($exec_f))
+                                {
+                                    $i = $res_f['auto_number'];		
+                                    ?>
+                                    <td class="totals-amount component-total">
+                                        <strong><?php if(array_sum($datatotal[$i]) > 0) { echo number_format(array_sum($datatotal[$i]),2); } ?></strong>
+                                    </td>
+                                    <?php
+                                }
+                                ?>
+                                <td class="totals-amount gross-total">
+                                    <strong><?php if($totgross > 0) { echo number_format($totgross,2); } ?></strong>
+                                </td>
+                                <?php
+                                $query_fd = "select auto_number,componentname from master_payrollcomponent where recordstatus <> 'deleted' and typecode = '20' order by auto_number";
+                                $exec_fd = mysqli_query($GLOBALS["___mysqli_ston"], $query_fd) or die ("Error in Query_fd".mysqli_error($GLOBALS["___mysqli_ston"]));
+                                while($res_fd = mysqli_fetch_array($exec_fd))
+                                {
+                                    $j = $res_fd['auto_number'];		
+                                    ?>
+                                    <td class="totals-amount deduction-total">
+                                        <strong><?php if(array_sum($datatotal[$j]) > 0) { echo number_format(array_sum($datatotal[$j]),2); } ?></strong>
+                                    </td>
+                                    <?php
+                                }
+                                ?>
+                                <td class="totals-amount loan-total">
+                                    <strong><?php if($totloan > 0) { echo number_format($totloan,2); } ?></strong>
+                                </td>
+                                <td class="totals-amount insurance-total">
+                                    <strong><?php if($totinsurance > 0) { echo number_format($totinsurance,2); } ?></strong>
+                                </td>
+                                <td class="totals-amount deductions-total">
+                                    <strong><?php if($totdeduct > 0) { echo number_format($totdeduct,2); } ?></strong>
+                                </td>
+                                <td class="totals-amount net-total">
+                                    <strong><?php if($totnett > 0) { echo number_format($totnett,2); } ?></strong>
+                                </td>
+                                <td class="totals-amount bank-total">
+                                    <strong><?php if($totalamount > 0) { echo number_format($totalamount,2); } ?></strong>
+                                </td>
+                                <td class="export-actions">
+                                    <a href="print_payrollmonthwiseinterim.php?<?php echo $urlpath; ?>" class="export-btn" title="Export to Excel">
+                                        <i class="fas fa-file-excel"></i>
+                                    </a>
+                                </td>
+                            </tr>  
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <?php endif; ?>
+        </main>
+    </div>
 
-	<td align="right" class="bodytext3" width="77">    <?php 
-	$net_salary = $componentamount;
-	
-	if(($net_salary*3) < $basic_salary ){
-		//echo '<font style="color:red;">Net salary ('.number_format($net_salary,0,'.',',').') is less than a third of Basic Salary ('.number_format($basic_salary,0,'.',',').')</font>';
-	}
-	 ?>
-</td>
-	</tr>	
-	<?php
-	}
-	}
-	?>
-	
-	<tr>
-	<td colspan="4"  bgcolor="#ecf0f5" align="right" class="bodytext3"><strong>Total : </strong></td>
-	<?php
-	$query_f = "select auto_number,componentname from master_payrollcomponent where recordstatus <> 'deleted' and typecode = '10' order by auto_number";
-	$exec_f = mysqli_query($GLOBALS["___mysqli_ston"], $query_f) or die ("Error in Query_f".mysqli_error($GLOBALS["___mysqli_ston"]));
-	while($res_f = mysqli_fetch_array($exec_f))
-	{
-	$i = $res_f['auto_number'];		
-	?>
-	<td align="right" bgcolor="#ecf0f5" class="bodytext3"><strong><?php if(array_sum($datatotal[$i]) > 0) { echo number_format(array_sum($datatotal[$i]),2); } ?></strong></td>
-	<?php
-	}
-	?>
-	<td align="right" bgcolor="#ecf0f5" class="bodytext3"><strong><?php if($totgross > 0) { echo number_format($totgross,2); } ?></strong></td>
-	<?php
-	$query_fd = "select auto_number,componentname from master_payrollcomponent where recordstatus <> 'deleted' and typecode = '20' order by auto_number";
-	$exec_fd = mysqli_query($GLOBALS["___mysqli_ston"], $query_fd) or die ("Error in Query_fd".mysqli_error($GLOBALS["___mysqli_ston"]));
-	while($res_fd = mysqli_fetch_array($exec_fd))
-	{
-	$j = $res_fd['auto_number'];		
-	?>
-	<td align="right" bgcolor="#ecf0f5" class="bodytext3"><strong><?php if(array_sum($datatotal[$j]) > 0) { echo number_format(array_sum($datatotal[$j]),2); } ?></strong></td>
-	<?php
-	}
-	?>
-	<td align="right" bgcolor="#ecf0f5" class="bodytext3"><strong><?php if($totloan > 0) { echo number_format($totloan,2); } ?></strong></td>
-    <td align="right" bgcolor="#ecf0f5" class="bodytext3"><strong><?php if($totinsurance > 0) { echo number_format($totinsurance,2); } ?></strong></td>
-	<td align="right" bgcolor="#ecf0f5" class="bodytext3"><strong><?php if($totdeduct > 0) { echo number_format($totdeduct,2); } ?></strong></td>
-	<td align="right" bgcolor="#ecf0f5" class="bodytext3"><strong><?php if($totnett > 0) { echo number_format($totnett,2); } ?></strong></td>
-	<td align="right" bgcolor="#ecf0f5" class="bodytext3"><strong><?php if($totalamount > 0) { echo number_format($totalamount,2); } ?></strong></td>
-	<td align="right" bgcolor="#ecf0f5" class="bodytext3"></td>
-	</tr>
-	<tr>
-	<td class="bodytext31" valign="center"  align="right"><a href="print_payrollmonthwiseinterim.php?<?php echo $urlpath; ?>"><img  width="40" height="40" src="images/excel-xls-icon.png" style="cursor:pointer;"></a></td>
-	</tr>  
-	</tbody>
-	</table> 
-	<?php
-	}
-	?>
-	</td>
-  	</tr>
-    </table>
-<?php include ("includes/footer1.php"); ?>
+    <!-- Modern JavaScript -->
+    <script src="js/payroll-modern.js?v=<?php echo time(); ?>"></script>
 </body>
 </html>
 

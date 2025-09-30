@@ -1,305 +1,386 @@
-<?php
-session_start();
-include ("includes/loginverify.php");
-include ("db/db_connect.php");
-$username = $_SESSION["username"];
-$companyanum = $_SESSION["companyanum"];
-$companyname = $_SESSION["companyname"];
- 
-$ipaddress = $_SERVER["REMOTE_ADDR"];
-$updatedatetime = date('Y-m-d H:i:s');
-$errmsg = "";
-$bgcolorcode = "";
-$colorloopcount = "";
-
-if (isset($_POST["frmflag1"])) { $frmflag1 = $_POST["frmflag1"]; } else { $frmflag1 = ""; }
-if ($frmflag1 == 'frmflag1')
-{
-
-	$categoryname = $_REQUEST["categoryname"];
-	$categoryname = strtoupper($categoryname);
-	$categoryname = trim($categoryname);
-	$length=strlen($categoryname);
-	//echo $length;
-	if ($length<=100)
-	{
-	$query2 = "select * from master_categorylab where categoryname = '$categoryname'";
-	$exec2 = mysqli_query($GLOBALS["___mysqli_ston"], $query2) or die ("Error in Query2".mysqli_error($GLOBALS["___mysqli_ston"]));
-	$res2 = mysqli_num_rows($exec2);
-	if ($res2 == 0)
-	{
-		$query1 = "insert into master_categorylab(categoryname, ipaddress, updatetime) 
-		values ('$categoryname', '$ipaddress', '$updatedatetime')";
-		$exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
-		$errmsg = "Success. New Lab Category Updated.";
-		$bgcolorcode = 'success';
-		
-	}
-	//exit();
-	else
-	{
-		$errmsg = "Failed. Lab Category Already Exists.";
-		$bgcolorcode = 'failed';
-	}
-	}
-	else
-	{
-		$errmsg = "Failed. Only 100 Characters Are Allowed.";
-		$bgcolorcode = 'failed';
-	}
-
-}
-
-if (isset($_REQUEST["st"])) { $st = $_REQUEST["st"]; } else { $st = ""; }
-if ($st == 'del')
-{
-	$delanum = $_REQUEST["anum"];
-	$query3 = "update master_categorylab set status = 'deleted' where auto_number = '$delanum'";
-	$exec3 = mysqli_query($GLOBALS["___mysqli_ston"], $query3) or die ("Error in Query3".mysqli_error($GLOBALS["___mysqli_ston"]));
-}
-if ($st == 'activate')
-{
-	$delanum = $_REQUEST["anum"];
-	$query3 = "update master_categorylab set status = '' where auto_number = '$delanum'";
-	$exec3 = mysqli_query($GLOBALS["___mysqli_ston"], $query3) or die ("Error in Query3".mysqli_error($GLOBALS["___mysqli_ston"]));
-}
-if ($st == 'default')
-{
-	$delanum = $_REQUEST["anum"];
-	$query4 = "update master_categorylab set defaultstatus = '' where cstid='$custid' and cstname='$custname'";
-	$exec4 = mysqli_query($GLOBALS["___mysqli_ston"], $query4) or die ("Error in Query4".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-	$query5 = "update master_categorylab set defaultstatus = 'DEFAULT' where auto_number = '$delanum'";
-	$exec5 = mysqli_query($GLOBALS["___mysqli_ston"], $query5) or die ("Error in Query5".mysqli_error($GLOBALS["___mysqli_ston"]));
-}
-if ($st == 'removedefault')
-{
-	$delanum = $_REQUEST["anum"];
-	$query6 = "update master_categorylab set defaultstatus = '' where auto_number = '$delanum'";
-	$exec6 = mysqli_query($GLOBALS["___mysqli_ston"], $query6) or die ("Error in Query6".mysqli_error($GLOBALS["___mysqli_ston"]));
-}
-
-
-if (isset($_REQUEST["svccount"])) { $svccount = $_REQUEST["svccount"]; } else { $svccount = ""; }
-if ($svccount == 'firstentry')
-{
-	$errmsg = "Please Add Lab Category To Proceed For Billing.";
-	$bgcolorcode = 'failed';
-}
-
-
-?>
-<style type="text/css">
-<!--
-body {
-	margin-left: 0px;
-	margin-top: 0px;
-	background-color: #ecf0f5;
-}
-.bodytext3 {	FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3B3B3C; FONT-FAMILY: Tahoma; text-decoration:none
-}
--->
-</style>
-<link href="../hospitalmillennium/datepickerstyle.css" rel="stylesheet" type="text/css" />
-<script type="text/javascript" src="../hospitalmillennium/js/adddate.js"></script>
-<script type="text/javascript" src="../hospitalmillennium/js/adddate2.js"></script>
-<style type="text/css">
-<!--
-.bodytext31 {FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3b3b3c; FONT-FAMILY: Tahoma
-}
--->
-</style>
-</head>
-<script language="javascript">
-
-function addcategory1process1()
-{
-	//alert ("Inside Funtion");
-	if (document.form1.categoryname.value == "")
-	{
-		alert ("Pleae Enter Lab Category Name.");
-		document.form1.categoryname.focus();
-		return false;
-	}
-	if (document.form1.categoryname.value != "")
-	{	
-		var data = document.form1.categoryname.value;
-		//alert(data);
-		// var iChars = "!%^&*()+=[];,.{}|\:<>?~"; //All special characters.*
-		//var iChars = "!^+=[];,{}|\<>?~$'\"@#%&*()-_`. "; 
-		var iChars = "!^+=[];,{}|\<>?~$'\"@#%*()_`."; //To allow hypen and blank space.
-		for (var i = 0; i < data.length; i++) 
-		{
-			if (iChars.indexOf(data.charAt(i)) != -1) 
-			{
-				//alert ("Your Lab Item Name Has Blank White Spaces Or Special Characters. Like ! ^ + = [ ] ; , { } | \ < > ? ~ $ ' \" These are not allowed.");
-				alert ("Category Name Has Blank White Spaces Or Special Characters. These Are Not Allowed.");
-				return false;
-			}
-		}
-	}
-}
-
-</script>
-<body>
-<table width="101%" border="0" cellspacing="0" cellpadding="2">
-  <tr>
-    <td colspan="10" bgcolor="#ecf0f5"><?php include ("includes/alertmessages1.php"); ?></td>
-  </tr>
-  <tr>
-    <td colspan="10" bgcolor="#ecf0f5"><?php include ("includes/title1.php"); ?></td>
-  </tr>
-  <tr>
-    <td colspan="10" bgcolor="#ecf0f5"><?php include ("includes/menu1.php"); ?></td>
-  </tr>
-  <tr>
-    <td colspan="10">&nbsp;</td>
-  </tr>
-  <tr>
-    <td width="1%">&nbsp;</td>
-    <td width="2%" valign="top"><?php //include ("includes/menu4.php"); ?>
-      &nbsp;</td>
-    <td width="97%" valign="top"><table width="100%" border="0" cellspacing="0" cellpadding="0">
-      <tr>
-        <td width="860"><table width="100%" border="0" cellspacing="0" cellpadding="0" class="tablebackgroundcolor1">
-            <tr>
-              <td><form name="form1" id="form1" method="post" action="labcategory1.php" onSubmit="return addcategory1process1()">
-                  <table width="600" border="0" align="center" cellpadding="4" cellspacing="0" bordercolor="#666666" id="AutoNumber3" style="border-collapse: collapse">
-                    <tbody>
-                      <tr bgcolor="#011E6A">
-                        <td colspan="2" bgcolor="#ecf0f5" class="bodytext3"><strong>Lab Category Master - Add New </strong></td>
-                      </tr>
-					  <tr>
-                        <td colspan="2" align="left" valign="middle"   
-						bgcolor="<?php if ($bgcolorcode == '') { echo '#FFFFFF'; } else if ($bgcolorcode == 'success') { echo '#FFBF00'; } else if ($bgcolorcode == 'failed') { echo '#AAFF00'; } ?>" class="bodytext3"><div align="left"><?php echo $errmsg; ?></div></td>
-                      </tr>
-                      <tr>
-                        <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3"><div align="right">Add New Item / Service Lab Category </div></td>
-                        <td align="left" valign="top"  bgcolor="#FFFFFF">
-						<input name="categoryname" id="categoryname" style="border: 1px solid #001E6A;text-transform: uppercase;" size="20" /></td>
-                      </tr>
-                      <tr>
-                        <td width="42%" align="left" valign="top"  bgcolor="#FFFFFF" class="bodytext3">&nbsp;</td>
-                        <td width="58%" align="left" valign="top"  bgcolor="#FFFFFF">
-						<input type="hidden" name="frmflag" value="addnew" />
-                            <input type="hidden" name="frmflag1" value="frmflag1" />
-                            <input type="submit" name="Submit" value="Submit" style="border: 1px solid #001E6A" />
-                          <span class="bodytext3">(* You cannot change name later) </span> </td>
-                      </tr>
-                      <tr>
-                        <td align="middle" colspan="2" >&nbsp;</td>
-                      </tr>
-                    </tbody>
-                  </table>
-                <table width="600" border="0" align="center" cellpadding="4" cellspacing="0" bordercolor="#666666" id="AutoNumber3" style="border-collapse: collapse">
-                    <tbody>
-                      <tr bgcolor="#011E6A">
-                        <td colspan="3" bgcolor="#ecf0f5" class="bodytext3"><strong>Lab Category Master - Existing List </strong></td>
-                      </tr>
-                      <?php
-	    $query1 = "select * from master_categorylab where status <> 'deleted' order by categoryname ";
-		$exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
-		while ($res1 = mysqli_fetch_array($exec1))
-		{
-		$categoryname = $res1["categoryname"];
-		$auto_number = $res1["auto_number"];
-		$defaultstatus = $res1["defaultstatus"];
-
-		$colorloopcount = $colorloopcount + 1;
-		$showcolor = ($colorloopcount & 1); 
-		if ($showcolor == 0)
-		{
-			$colorcode = 'bgcolor="#CBDBFA"';
-		}
-		else
-		{
-			$colorcode = 'bgcolor="#ecf0f5"';
-		}
-		  
-		?>
-        <tr <?php echo $colorcode; ?>>
-                        <td width="6%" align="left" valign="top"  class="bodytext3"><div align="center"><a href="labcategory1.php?st=del&&anum=<?php echo $auto_number; ?>"><img src="images/b_drop.png" width="16" height="16" border="0" /></a></div></td>
-                        <td width="76%" align="left" valign="top"  class="bodytext3"><?php echo $categoryname; ?> </td>
-                        <td width="18%" align="left" valign="top"  class="bodytext3">
-						<?php 
-						if ($defaultstatus == '') 
-						{ 
-						?>
-						<a href="labcategory1.php?st=default&&anum=<?php echo $auto_number; ?>">
-						<span class="bodytext3"><!--Set Default --></span></a>
-						<?php 
-						} 
-						else 
-						{ 
-						?>
-						<a href="labcategory1.php?st=removedefault&&anum=<?php echo $auto_number; ?>">
-						<span class="bodytext3"><!--Remove Default --></span></a>
-						<?php 
-						}  
-						?>						</td>
-                      </tr>
-                      <?php
-		}
-		?>
-                      <tr>
-                        <td align="middle" colspan="3" >&nbsp;</td>
-                      </tr>
-                    </tbody>
-                  </table>
-                <table width="600" border="0" align="center" cellpadding="4" cellspacing="0" bordercolor="#666666" id="AutoNumber3" style="border-collapse: collapse">
-                    <tbody>
-                      <tr bgcolor="#011E6A">
-                        <td colspan="2" bgcolor="#ecf0f5" class="bodytext3"><strong>Lab Category Master - Deleted </strong></td>
-                      </tr>
-                      <?php
-		
-	    $query1 = "select * from master_categorylab where status = 'deleted' order by categoryname ";
-		$exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
-		while ($res1 = mysqli_fetch_array($exec1))
-		{
-		$categoryname = $res1["categoryname"];
-		$auto_number = $res1["auto_number"];
-
-		$colorloopcount = $colorloopcount + 1;
-		$showcolor = ($colorloopcount & 1); 
-		if ($showcolor == 0)
-		{
-			$colorcode = 'bgcolor="#CBDBFA"';
-		}
-		else
-		{
-			$colorcode = 'bgcolor="#ecf0f5"';
-		}
-		?>
-        <tr <?php echo $colorcode; ?>>
-                        <td width="11%" align="left" valign="top"  class="bodytext3">
-						<a href="labcategory1.php?st=activate&&anum=<?php echo $auto_number; ?>" class="bodytext3">
-                          <div align="center" class="bodytext3">Activate</div>
-                        </a></td>
-                        <td align="left" valign="top"  class="bodytext3"><?php echo $categoryname; ?></td>
-                        </tr>
-                      <?php
-		}
-		?>
-                      <tr>
-                        <td align="middle" colspan="2" >&nbsp;</td>
-                      </tr>
-                    </tbody>
-                  </table>
-              </form>
-                </td>
-            </tr>
-            <tr>
-              <td>&nbsp;</td>
-            </tr>
-        </table></td>
-      </tr>
-      <tr>
-        <td>&nbsp;</td>
-      </tr>
-    </table>
-  </table>
-<?php include ("includes/footer1.php"); ?>
-</body>
-</html>
-
+<?php
+session_start();
+include ("includes/loginverify.php");
+include ("db/db_connect.php");
+$username = $_SESSION["username"];
+$companyanum = $_SESSION["companyanum"];
+$companyname = $_SESSION["companyname"];
+$ipaddress = $_SERVER["REMOTE_ADDR"];
+$updatedatetime = date('Y-m-d H:i:s');
+$errmsg = "";
+$bgcolorcode = "";
+$colorloopcount = "";
+
+if (isset($_POST["frmflag1"])) { $frmflag1 = $_POST["frmflag1"]; } else { $frmflag1 = ""; }
+if ($frmflag1 == 'frmflag1')
+{
+    $categoryname = $_REQUEST["categoryname"];
+    $categoryname = strtoupper($categoryname);
+    $categoryname = trim($categoryname);
+    $length=strlen($categoryname);
+    if ($length<=100)
+    {
+        $query2 = "select * from master_categorylab where categoryname = '$categoryname'";
+        $exec2 = mysqli_query($GLOBALS["___mysqli_ston"], $query2) or die ("Error in Query2".mysqli_error($GLOBALS["___mysqli_ston"]));
+        $res2 = mysqli_num_rows($exec2);
+        if ($res2 == 0)
+        {
+            $query1 = "insert into master_categorylab(categoryname, ipaddress, updatetime)
+            values ('$categoryname', '$ipaddress', '$updatedatetime')";
+            $exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
+            $errmsg = "Success. New Lab Category Updated.";
+            $bgcolorcode = 'success';
+        }
+        else
+        {
+            $errmsg = "Failed. Lab Category Already Exists.";
+            $bgcolorcode = 'failed';
+        }
+    }
+    else
+    {
+        $errmsg = "Failed. Only 100 Characters Are Allowed.";
+        $bgcolorcode = 'failed';
+    }
+}
+
+if (isset($_REQUEST["st"])) { $st = $_REQUEST["st"]; } else { $st = ""; }
+if ($st == 'del')
+{
+    $delanum = $_REQUEST["anum"];
+    $query3 = "update master_categorylab set status = 'deleted' where auto_number = '$delanum'";
+    $exec3 = mysqli_query($GLOBALS["___mysqli_ston"], $query3) or die ("Error in Query3".mysqli_error($GLOBALS["___mysqli_ston"]));
+}
+if ($st == 'activate')
+{
+    $delanum = $_REQUEST["anum"];
+    $query3 = "update master_categorylab set status = '' where auto_number = '$delanum'";
+    $exec3 = mysqli_query($GLOBALS["___mysqli_ston"], $query3) or die ("Error in Query3".mysqli_error($GLOBALS["___mysqli_ston"]));
+}
+
+if (isset($_REQUEST["defaultstatus"])) { $defaultstatus = $_REQUEST["defaultstatus"]; } else { $defaultstatus = ""; }
+if ($defaultstatus == 'setdefault')
+{
+    $delanum = $_REQUEST["anum"];
+    $query4 = "update master_categorylab set defaultstatus = '' where auto_number = '$delanum'";
+    $exec4 = mysqli_query($GLOBALS["___mysqli_ston"], $query4) or die ("Error in Query4".mysqli_error($GLOBALS["___mysqli_ston"]));
+}
+if ($defaultstatus == 'removedefault')
+{
+    $delanum = $_REQUEST["anum"];
+    $query4 = "update master_categorylab set defaultstatus = 'deleted' where auto_number = '$delanum'";
+    $exec4 = mysqli_query($GLOBALS["___mysqli_ston"], $query4) or die ("Error in Query4".mysqli_error($GLOBALS["___mysqli_ston"]));
+}
+
+if (isset($_REQUEST["svccount"])) { $svccount = $_REQUEST["svccount"]; } else { $svccount = ""; }
+if ($svccount == 'firstentry')
+{
+    $errmsg = "Please Add lab Category To Proceed For Billing.";
+    $bgcolorcode = 'failed';
+}
+
+if (isset($_REQUEST["searchflag1"])) { $searchflag1 = $_REQUEST["searchflag1"]; } else { $searchflag1 = ""; }
+if (isset($_REQUEST["search1"])) { $search1 = $_REQUEST["search1"]; } else { $search1 = ""; }
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lab Category Master - MedStar</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="css/labcategory1-modern.css?v=<?php echo time(); ?>">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <header class="hospital-header">
+        <h1 class="hospital-title">🏥 MedStar Hospital Management</h1>
+        <p class="hospital-subtitle">Advanced Healthcare Management Platform</p>
+    </header>
+    
+    <div class="user-info-bar">
+        <div class="user-welcome">
+            <span class="welcome-text">Welcome, <strong><?php echo htmlspecialchars($username); ?></strong></span>
+            <span class="location-info">📍 Company: <?php echo htmlspecialchars($companyname); ?></span>
+        </div>
+        <div class="user-actions">
+            <a href="mainmenu1.php" class="btn btn-outline">🏠 Main Menu</a>
+            <a href="logout.php" class="btn btn-outline">🚪 Logout</a>
+        </div>
+    </div>
+    
+    <nav class="nav-breadcrumb">
+        <a href="mainmenu1.php">🏠 Home</a>
+        <span>→</span>
+        <span>Lab Category Master</span>
+    </nav>
+    
+    <div id="menuToggle" class="floating-menu-toggle">
+        <i class="fas fa-bars"></i>
+    </div>
+    
+    <div class="main-container-with-sidebar">
+        <aside id="leftSidebar" class="left-sidebar">
+            <div class="sidebar-header">
+                <h3>Quick Navigation</h3>
+                <button id="sidebarToggle" class="sidebar-toggle">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+            </div>
+            <nav class="sidebar-nav">
+                <ul class="nav-list">
+                    <li class="nav-item">
+                        <a href="mainmenu1.php" class="nav-link">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="labcategory1.php" class="nav-link">
+                            <i class="fas fa-tags"></i>
+                            <span>Lab Categories</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="labitem1interpret.php" class="nav-link">
+                            <i class="fas fa-flask"></i>
+                            <span>Lab Items</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="labitem1temp.php" class="nav-link">
+                            <i class="fas fa-file-medical"></i>
+                            <span>Lab Templates</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="lab_dataimport.php" class="nav-link">
+                            <i class="fas fa-upload"></i>
+                            <span>Data Import</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+        
+        <main class="main-content">
+            <div class="alert-container">
+                <?php if ($errmsg != "") { ?>
+                    <div class="alert <?php echo $bgcolorcode; ?>">
+                        <?php echo htmlspecialchars($errmsg); ?>
+                    </div>
+                <?php } ?>
+            </div>
+            
+            <div class="page-header">
+                <h1 class="page-title">Lab Category Master</h1>
+                <p class="page-subtitle">Manage laboratory test categories and classifications</p>
+            </div>
+            
+            <div class="form-section">
+                <h2 class="form-title">Add New Category</h2>
+                <form method="post" action="">
+                    <input type="hidden" name="frmflag1" value="frmflag1">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="categoryname" class="form-label">Category Name *</label>
+                            <input type="text" 
+                                   id="categoryname" 
+                                   name="categoryname" 
+                                   class="form-input" 
+                                   placeholder="Enter category name"
+                                   maxlength="100"
+                                   required>
+                        </div>
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-plus"></i>
+                                Add Category
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            
+            <div class="data-section">
+                <div class="data-header">
+                    <h2 class="data-title">Active Categories</h2>
+                    <div class="search-container">
+                        <form method="get" action="">
+                            <input type="text" 
+                                   name="search1" 
+                                   class="search-input" 
+                                   placeholder="Search categories..."
+                                   value="<?php echo htmlspecialchars($search1); ?>">
+                            <button type="submit" name="searchflag1" value="searchflag1" class="search-btn">
+                                <i class="fas fa-search"></i>
+                                Search
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Category Name</th>
+                                <th>Default Status</th>
+                                <th>Created Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php
+                            if ($searchflag1 == 'searchflag1') {
+                                $query1 = "select * from master_categorylab where categoryname like '%$search1%' and status <> 'deleted' order by auto_number desc";
+                            } else {
+                                $query1 = "select * from master_categorylab where status <> 'deleted' order by auto_number desc";
+                            }
+                            
+                            $exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
+                            
+                            if (mysqli_num_rows($exec1) > 0) {
+                                while ($res1 = mysqli_fetch_array($exec1)) {
+                                    $categoryname = $res1["categoryname"];
+                                    $defaultstatus = $res1["defaultstatus"];
+                                    $updatetime = $res1["updatetime"];
+                                    $auto_number = $res1["auto_number"];
+                                    
+                                    $colorloopcount = $colorloopcount + 1;
+                                    $showcolor = ($colorloopcount & 1);
+                                    
+                                    if ($showcolor == 0) {
+                                        $colorcode = 'bgcolor="#CBDBFA"';
+                                    } else {
+                                        $colorcode = 'bgcolor="#ecf0f5"';
+                                    }
+                            ?>
+                            <tr <?php echo $colorcode; ?>>
+                                <td><?php echo htmlspecialchars($categoryname); ?></td>
+                                <td>
+                                    <?php if ($defaultstatus == '') { ?>
+                                        <span class="status-badge status-active">Default</span>
+                                    <?php } else { ?>
+                                        <span class="status-badge status-deleted">Not Default</span>
+                                    <?php } ?>
+                                </td>
+                                <td><?php echo date('M d, Y H:i', strtotime($updatetime)); ?></td>
+                                <td>
+                                    <div class="action-buttons">
+                                        <?php if ($defaultstatus == '') { ?>
+                                            <a href="labcategory1.php?defaultstatus=removedefault&&anum=<?php echo $auto_number; ?>" 
+                                               class="btn btn-sm btn-outline"
+                                               onclick="return confirmRemoveDefault('<?php echo htmlspecialchars($categoryname); ?>', this.href)">
+                                                <i class="fas fa-star"></i>
+                                                Remove Default
+                                            </a>
+                                        <?php } else { ?>
+                                            <a href="labcategory1.php?defaultstatus=setdefault&&anum=<?php echo $auto_number; ?>" 
+                                               class="btn btn-sm btn-success"
+                                               onclick="return confirmSetDefault('<?php echo htmlspecialchars($categoryname); ?>', this.href)">
+                                                <i class="fas fa-star"></i>
+                                                Set Default
+                                            </a>
+                                        <?php } ?>
+                                        <a href="labcategory1.php?st=del&&anum=<?php echo $auto_number; ?>" 
+                                           class="btn btn-sm btn-danger"
+                                           onclick="return confirmDelete('<?php echo htmlspecialchars($categoryname); ?>', this.href)">
+                                            <i class="fas fa-trash"></i>
+                                            Delete
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            <?php
+                                }
+                            } else {
+                            ?>
+                            <tr>
+                                <td colspan="4" class="empty-state">
+                                    <i class="fas fa-tags"></i>
+                                    <h3>No Categories Found</h3>
+                                    <p>No lab categories match your search criteria.</p>
+                                </td>
+                            </tr>
+                            <?php
+                            }
+                            ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <div class="data-section">
+                <div class="data-header">
+                    <h2 class="data-title">Deleted Categories</h2>
+                </div>
+                
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Category Name</th>
+                                <th>Deleted Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php
+                            $query2 = "select * from master_categorylab where status = 'deleted' order by auto_number desc";
+                            $exec2 = mysqli_query($GLOBALS["___mysqli_ston"], $query2) or die ("Error in Query2".mysqli_error($GLOBALS["___mysqli_ston"]));
+                            
+                            if (mysqli_num_rows($exec2) > 0) {
+                                while ($res2 = mysqli_fetch_array($exec2)) {
+                                    $categoryname = $res2["categoryname"];
+                                    $updatetime = $res2["updatetime"];
+                                    $auto_number = $res2["auto_number"];
+                                    
+                                    $colorloopcount = $colorloopcount + 1;
+                                    $showcolor = ($colorloopcount & 1);
+                                    
+                                    if ($showcolor == 0) {
+                                        $colorcode = 'bgcolor="#CBDBFA"';
+                                    } else {
+                                        $colorcode = 'bgcolor="#ecf0f5"';
+                                    }
+                            ?>
+                            <tr <?php echo $colorcode; ?>>
+                                <td><?php echo htmlspecialchars($categoryname); ?></td>
+                                <td><?php echo date('M d, Y H:i', strtotime($updatetime)); ?></td>
+                                <td>
+                                    <div class="action-buttons">
+                                        <a href="labcategory1.php?st=activate&&anum=<?php echo $auto_number; ?>" 
+                                           class="btn btn-sm btn-success"
+                                           onclick="return confirmActivate('<?php echo htmlspecialchars($categoryname); ?>', this.href)">
+                                            <i class="fas fa-undo"></i>
+                                            Activate
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            <?php
+                                }
+                            } else {
+                            ?>
+                            <tr>
+                                <td colspan="3" class="empty-state">
+                                    <i class="fas fa-trash"></i>
+                                    <h3>No Deleted Categories</h3>
+                                    <p>There are no deleted categories to display.</p>
+                                </td>
+                            </tr>
+                            <?php
+                            }
+                            ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <script src="js/labcategory1-modern.js?v=<?php echo time(); ?>"></script>
+</body>
+</html>

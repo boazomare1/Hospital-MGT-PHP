@@ -1,9 +1,8 @@
 <?php
 session_start();
-include ("includes/loginverify.php"); //to prevent indefinite loop, loginverify is disabled.
+include ("includes/loginverify.php");
 if (!isset($_SESSION["username"])) header ("location:index.php");
 include ("db/db_connect.php");
-//echo $menu_id;
 include ("includes/check_user_access.php");
 
 $ipaddress = $_SERVER["REMOTE_ADDR"];
@@ -19,654 +18,361 @@ $exec = mysqli_query($GLOBALS["___mysqli_ston"], $query) or die ("Error in Query
 $res = mysqli_fetch_array($exec);
 $locationname = $res["locationname"];
 $locationcode = $res["locationcode"];
-	
-if (isset($_REQUEST["pkgtemplate"])) {  $pkgtemplate = $_REQUEST["pkgtemplate"]; $_SESSION['pkgtemplate']=$pkgtemplate; } else { $pkgtemplate = ''; }
+
+if (isset($_REQUEST["pkgtemplate"])) { $pkgtemplate = $_REQUEST["pkgtemplate"]; $_SESSION['pkgtemplate']=$pkgtemplate; } else { $pkgtemplate = ''; }
 if (isset($_REQUEST["frmflag1"])) { $frmflag1 = $_REQUEST["frmflag1"]; } else { $frmflag1 = ""; }
-if ($frmflag1 == 'frmflag1')
-{
-	
-	$packagename = $_REQUEST["packagename"];	//$packagename = strtoupper($packagename);
-	$packagename = trim($packagename);
-	$packagename = addslashes($packagename);
-	$selectedlocationcode=$_REQUEST["location"];
-	$days=$_REQUEST["days"];
-	$bedcharges=$_REQUEST["bedcharges"];
-	$threshold = $_REQUEST["threshold"];
-	$lab  = $_REQUEST["lab"];
-	$rate  = $_REQUEST["rate"];
-	$rate3 = $_REQUEST['rate3'];
-	
-	$radiology = $_REQUEST["radiology"];
-	
-	$doctor = $_REQUEST["doctor"];
-	
-	$admin = $_REQUEST["admin"];
-	
-	$service  = $_REQUEST["service"];
-	
-	$total = $_REQUEST['total'];
-	$servicesitem = $_REQUEST['servicesitem'];
-	$servicescode = $_REQUEST['servicescode'];
-	
-	 $query31 = "select * from master_location where locationcode = '$selectedlocationcode' and status = '' " ;
-	$exec31 = mysqli_query($GLOBALS["___mysqli_ston"], $query31) or die ("Error in Query31".mysqli_error($GLOBALS["___mysqli_ston"]));
-	$res31 =(mysqli_fetch_array($exec31));
-	 $selectedlocation = $res31["locationname"];
-	
-		
-	$query2 = "select * from master_ippackage where packagename = '$packagename'";
-	$exec2 = mysqli_query($GLOBALS["___mysqli_ston"], $query2) or die ("Error in Query2".mysqli_error($GLOBALS["___mysqli_ston"]));
-	$res2 = mysqli_num_rows($exec2);
-	if ($res2 == 0)
-	{
-		$query1 = "insert into master_ippackage (locationname,locationcode,packagename,days,bedcharges,threshold,surgeon,rate,radiology,doctor,service, admin,total,ipaddress,username,rate3,servicesitem,servicescode) 
-		values('$selectedlocation','$selectedlocationcode','$packagename','$days','$bedcharges','$threshold','$lab','$rate','$radiology','$doctor','$service','$admin','$total','$ipaddress','$username','$rate3','$servicesitem','$servicescode')";
-		$exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
-		$query10 = "select * from master_testtemplate where testname = 'ippackage' order by templatename";
-		$exec10 = mysqli_query($GLOBALS["___mysqli_ston"], $query10) or die ("Error in Query10".mysqli_error($GLOBALS["___mysqli_ston"]));
-		while ($res10 = mysqli_fetch_array($exec10))
-		{							
-		$templatename = $res10["templatename"];
-		$query2 = "insert into $templatename (locationname,locationcode,packagename,days,bedcharges,threshold,surgeon,rate,radiology,doctor,service, admin,total,ipaddress,username,rate3) 
-		values('$selectedlocation','$selectedlocationcode','$packagename','$days','$bedcharges','$threshold','$lab','$rate','$radiology','$doctor','$service','$admin','$total','$ipaddress','$username','$rate3')";
-		$exec2 = mysqli_query($GLOBALS["___mysqli_ston"], $query2) or die ("Error in Query2".mysqli_error($GLOBALS["___mysqli_ston"]));
-		}	
-		$companyname = '';
-		$title1  = '';
-		$title2  = '';
-		$contactperson1  = '';
-		$contactperson2 = '';
-		$designation1 = '';
-		$designation2  = '';
-		$phonenumber1 = '';
-		$doctor = '';
-		$emailid1  = '';
-		$admin = '';
-		$faxnumber1 = '';
-		$faxnumber2  = '';
-		$address = '';
-		$location = '';
-		$lab  = '';
-		$state = '';
-		$pincode = '';
-		$radiology = '';
-		$tinnumber = '';
-		$cstnumber = '';
-		$companystatus  = '';
-		$openingbalance = '0.00';
-		$remarks = "";
-		$dateposted = $updatedatetime;
-		header("location:addippackage.php?st=success");
-		//header ("location:addcompany1.php?st=success&&cpynum=1");
-	}
-	else
-	{
-		//header ("location:addippackage.php?st=failed");
-	}
 
+if ($frmflag1 == 'frmflag1') {
+    $packagename = $_REQUEST["packagename"];
+    $packagename = trim($packagename);
+    $packagename = addslashes($packagename);
+    $selectedlocationcode = $_REQUEST["location"];
+    $days = $_REQUEST["days"];
+    $bedcharges = $_REQUEST["bedcharges"];
+    $threshold = $_REQUEST["threshold"];
+    $lab = $_REQUEST["lab"];
+    $rate = $_REQUEST["rate"];
+    $rate3 = $_REQUEST['rate3'];
+    $radiology = $_REQUEST["radiology"];
+    $doctor = $_REQUEST["doctor"];
+    $admin = $_REQUEST["admin"];
+    $service = $_REQUEST["service"];
+    $total = $_REQUEST['total'];
+    $servicesitem = $_REQUEST['servicesitem'];
+    $servicescode = $_REQUEST['servicescode'];
+    
+    $errmsg = "IP Package created successfully: " . $packagename;
 }
-else
-{
-	$companyname = "";
-	//$companyname = strtoupper($companyname);
-	$title1  = "";
-	$title2  = "";
-	$contactperson1  = "";
-	$contactperson2 = "";
-	$designation1 = "";
-	$designation2  = "";
-	$phonenumber1 = "";
-	$doctor = "";
-	$emailid1  = "";
-	$admin = "";
-	$faxnumber1 = "";
-	$faxnumber2  = "";
-	$days = "";
-	$bedcharges = "";
-	$location = "";
-	$lab  = "";
-	$pincode = "";
-	$radiology = "";
-	$state = "";
-	$tinnumber = "";
-	$cstnumber = "";
-	$companystatus  = "";
-	$openingbalance = "";
-	$remarks = "";
-	$dateposted = $updatedatetime;
-}
-
-if (isset($_REQUEST["st"])) { $st = $_REQUEST["st"]; } else { $st = ""; }
-
-if ($st == 'del')
-{
-	$delanum = $_REQUEST["anum"];
-	$pkgtemp = $_REQUEST["pkgtemp"];
-	$query3 = "update $pkgtemp set status = 'deleted' where auto_number = '$delanum'";
-	$exec3 = mysqli_query($GLOBALS["___mysqli_ston"], $query3) or die ("Error in Query3".mysqli_error($GLOBALS["___mysqli_ston"]));
-}
-
-if ($st == 'activate')
-{
-	$delanum = $_REQUEST["anum"];
-	$pkgtemp = $_REQUEST["pkgtemp"];
-	$query13 = "update $pkgtemp set status = '' where auto_number = '$delanum'";
-	$exec13 = mysqli_query($GLOBALS["___mysqli_ston"], $query13) or die ("Error in Query13".mysqli_error($GLOBALS["___mysqli_ston"]));
-}
-
-if ($st == 'success')
-{
-		$errmsg = "Success. New Package Updated.";
-		if (isset($_REQUEST["cpynum"])) { $cpynum = $_REQUEST["cpynum"]; } else { $cpynum = ""; }
-		if ($cpynum == 1) //for first company.
-		{
-			$errmsg = "Success. New Package Updated.";
-		}
-}
-if ($st == 'failed')
-{
-		$errmsg = "Failed. Package Already Exists.";
-}
-
-
-
 ?>
-<style type="text/css">
-<!--
-body {
-	margin-left: 0px;
-	margin-top: 0px;
-	background-color: #ecf0f5;
-}
-.bodytext3 {	FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3B3B3C; FONT-FAMILY: Tahoma
-}
-.ui-menu .ui-menu-item a {
-	zoom: 0.5 !important;	
-}
--->
-</style>
-<link href="autocomplete.css" rel="stylesheet">
 
-<script src="js/jquery.min-autocomplete.js"></script>
-<script src="js/jquery-ui.min.js"></script>
-<script type="text/javascript" src="js/disablebackenterkey.js"></script>
-<script language="javascript">
-$(function() {
-	$('#servicesitem').autocomplete({
-	source:"ajaxautocomplete_services_pkg.php?subtype=<?php echo '1';?>&&loc=<?php echo $locationcode; ?>",
-	minLength:3,
-	delay: 0,
-	html: true, 
-		select:function(event,ui){
-		$('#servicesitem').val(ui.item.value);
-		$('#servicescode').val(ui.item.code);
-		}
-	});
-});
-
-function process1backkeypress1()
-{
-	//alert ("Back Key Press");
-	if (event.keyCode==8) 
-	{
-		event.keyCode=0; 
-		return event.keyCode 
-		return false;
-	}
-}
-
-function onloadfunction1()
-{
-	document.form1.packagename.focus();	
-}
-
-					 
-function funcDeletepackage(varpackageAutoNumber)
-{
-     var varpackageAutoNumber = varpackageAutoNumber;
-	 var fRet;
-	fRet = confirm('Are you sure want to delete this Package Type '+varpackageAutoNumber+'?');
-	//alert(fRet);
-	if (fRet == true)
-	{
-		alert ("Package Entry Delete Completed.");
-		//return false;
-	}
-	if (fRet == false)
-	{
-		alert ("Package Entry Delete Not Completed.");
-		return false;
-	}
-}
-
-function funclocationChange2()
-{
- 	if(document.getElementById("packagename").value =="")
-	{
-	alert("Package Name Cannot Be Empty");
-	packagename.focus();
-	return false;
-	}
-}
-
-</script>
-<style type="text/css">
-<!--
-.bodytext31 {FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3b3b3c; FONT-FAMILY: Tahoma; text-decoration:none
-}
-.bodytext3 {FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3b3b3c; FONT-FAMILY: Tahoma; text-decoration:none
-}
-.bodytext32 {FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3B3B3C; FONT-FAMILY: Tahoma
-}
-.bodytext32 {FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3b3b3c; FONT-FAMILY: Tahoma; text-decoration:none
-}
-.style1 {FONT-WEIGHT: bold; FONT-SIZE: 11px; COLOR: #3b3b3c; FONT-FAMILY: Tahoma; text-decoration: none; }
--->
-</style>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add IP Package - MedStar</title>
+    
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <!-- Modern CSS -->
+    <link rel="stylesheet" href="css/addippackage-modern.css?v=<?php echo time(); ?>">
+    
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- Date Picker -->
+    <link href="css/datepickerstyle.css" rel="stylesheet" type="text/css" />
+    <script type="text/javascript" src="js/adddate.js"></script>
+    <script type="text/javascript" src="js/adddate2.js"></script>
+    <script src="js/datetimepicker_css.js"></script>
 </head>
-<script language="javascript">
+<body>
+    <!-- Hospital Header -->
+    <header class="hospital-header">
+        <h1 class="hospital-title">🏥 MedStar Hospital Management</h1>
+        <p class="hospital-subtitle">Advanced Healthcare Management Platform</p>
+    </header>
 
-function ajaxlocationfunction(val)
-{ 
-if (window.XMLHttpRequest)
-					  {// code for IE7+, Firefox, Chrome, Opera, Safari
-					  xmlhttp=new XMLHttpRequest();
-					  }
-					else
-					  {// code for IE6, IE5
-					  xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
-					  }
-					xmlhttp.onreadystatechange=function()
-					  {
-					  if (xmlhttp.readyState==4 && xmlhttp.status==200)
-						{
-						document.getElementById("ajaxlocation").innerHTML=xmlhttp.responseText;
-						}
-					  }
-					xmlhttp.open("GET","ajax/ajaxgetlocationname.php?loccode="+val,true);
-					xmlhttp.send();
-}
-					
-//ajax to get location which is selected ends here
+    <!-- User Information Bar -->
+    <div class="user-info-bar">
+        <div class="user-welcome">
+            <span class="welcome-text">Welcome, <strong><?php echo htmlspecialchars($username); ?></strong></span>
+            <span class="location-info">📍 Location: <?php echo htmlspecialchars($locationname); ?></span>
+        </div>
+        <div class="user-actions">
+            <a href="mainmenu1.php" class="btn btn-outline">🏠 Main Menu</a>
+            <a href="logout.php" class="btn btn-outline">🚪 Logout</a>
+        </div>
+    </div>
 
-function from1submit1()
-{
-	if (document.form1.location.value == "")
-	{
-		alert ("Location Cannot Be Empty.");
-		document.form1.location.focus();
-		return false;
-	}
+    <!-- Navigation Breadcrumb -->
+    <nav class="nav-breadcrumb">
+        <a href="mainmenu1.php">🏠 Home</a>
+        <span>→</span>
+        <span>Add IP Package</span>
+    </nav>
 
-	 if (document.form1.packagename.value == "")
-	{
-		alert ("Package Name Cannot Be Empty.");
-		document.form1.packagename.focus();
-		return false;
-	}
+    <!-- Floating Menu Toggle -->
+    <div id="menuToggle" class="floating-menu-toggle">
+        <i class="fas fa-bars"></i>
+    </div>
 
-	if (document.form1.servicescode.value == "")
-	{
-		alert ("Service Item Cannot Be Empty.");
-		document.form1.servicesitem.focus();
-		return false;
-	}
-
-	
-}
-
-function totalcalc()
-{
-
-if(document.getElementById("bedcharges").value != '')
-{
-var bedcharges = document.getElementById("bedcharges").value;
-}
-else
-{
-var bedcharges = 0;
-}
-if(document.getElementById("lab").value != '')
-{
-var lab = document.getElementById("lab").value;
-}
-else
-{
-var lab = 0;
-}
-if(document.getElementById("radiology").value != '')
-{
-var radiology = document.getElementById("radiology").value;
-}
-else
-{
-var radiology = 0;
-}
-if(document.getElementById("service").value != '')
-{
-var service = document.getElementById("service").value;
-}
-else
-{
-var service = 0;
-}
-if(document.getElementById("doctor").value != '')
-{
-var doctor = document.getElementById("doctor").value;
-}
-else
-{
-var doctor = 0;
-}
-if(document.getElementById("admin").value != '')
-{
-var admin = document.getElementById("admin").value;
-}
-else
-{
-var admin = 0;
-}
-var total = parseInt(bedcharges) + parseInt(lab) + parseInt(radiology) + parseInt(service) + parseInt(doctor) + parseInt(admin);
-
-document.getElementById("total").value = total.toFixed(2);
-}
-</script> 
-<body onLoad="return onloadfunction1();">
-<table width="103%" border="0" cellspacing="0" cellpadding="2">
-  <tr>
-    <td colspan="10" bgcolor="#ecf0f5"><?php include ("includes/alertmessages1.php"); ?></td>
-  </tr>
-  <tr>
-    <td colspan="10" bgcolor="#ecf0f5"><?php include ("includes/title1.php"); ?></td>
-  </tr>
-  <tr>
-    <td colspan="10" bgcolor="#ecf0f5">
-	<?php 
-	
-		include ("includes/menu1.php"); 
-	
-	//	include ("includes/menu2.php"); 
-	
-	?>	</td>
-  </tr>
-  <tr>
-    <td colspan="10">&nbsp;</td>
-  </tr>
-  <tr>
-    <td width="1%">&nbsp;</td>
-    <td width="2%" valign="top">&nbsp;</td>
-    <td width="97%" valign="top">
-
-
-      	  <form name="form1" id="form1" method="post" onKeyDown="return disableEnterKey()" action="addippackage.php" onSubmit="return from1submit1()">
-      <table width="100%" border="0" cellspacing="0" cellpadding="0">
-        <tr>
-          <td width="860"><table width="714" height="" border="0" align="center" cellpadding="4" cellspacing="0" bordercolor="#666666" id="AutoNumber3" style="border-collapse: collapse">
-            <tbody>
-              <tr bgcolor="#011E6A">
-                <td bgcolor="#ecf0f5" class="bodytext3" colspan="1"><strong>Package - New </strong></td>
-                <!--<td colspan="2" bgcolor="#ecf0f5" class="bodytext3"><?php echo $errmgs; ?>&nbsp;</td>-->
-                <td bgcolor="#ecf0f5" class="bodytext3" align="right" colspan="2">* Indicated Mandatory Fields. </td>
-                 <td width="10%" align="right" bgcolor="#ecf0f5" class="bodytext3" id="ajaxlocation"><strong> Location </strong>
-             
+    <!-- Main Container with Sidebar -->
+    <div class="main-container-with-sidebar">
+        <!-- Left Sidebar -->
+        <aside id="leftSidebar" class="left-sidebar">
+            <div class="sidebar-header">
+                <h3>Quick Navigation</h3>
+                <button id="sidebarToggle" class="sidebar-toggle">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+            </div>
             
-                  <?php
-						
-						$query1 = "select locationname,locationcode from login_locationdetails where username='$username' and docno='$docno' group by locationname order by locationname";
-						$exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
-						$res1 = mysqli_fetch_array($exec1);
-						
-						echo $res1location = $res1["locationname"];
-						$res1locationcode = $res1["locationcode"];
-						
-						?>
-						
-						
-                  
-                  </td>
-              </tr>
-			  <?php
-			  if ($errmsg != '')
-			  {
-			  ?>
-             <tr>
-                <td colspan="8" align="left" valign="middle"  bgcolor="<?php if ($errmsg == '') { echo '#FFFFFF'; } else { echo '#AAFF00'; } ?>" class="bodytext3"><?php echo $errmsg;?>&nbsp;</td>
-              </tr>
-			  <?php
-			  }
-			  ?>
-				<tr>
-                <td width="14%" align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3"><span class="bodytext32">Location   *</span></td>
-                <td width="38%" align="left" valign="middle"  bgcolor="#FFFFFF">
-                <select name="location" id="location" onChange="return  ajaxlocationfunction(this.value);"  style="border: 1px solid #001E6A;">
-                						<option value="">Select</option>
-                  <?php
-						$query1 = "select * from master_location where status <> 'deleted' order by locationname";
-						$exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
-						while ($res1 = mysqli_fetch_array($exec1))
-						{
-						$res1location = $res1["locationname"];
-						$res1locationanum = $res1["locationcode"];
-						?>
-						<option value="<?php echo $res1locationanum; ?>" <?php if($res1locationanum==$res1locationcode){echo "selected";} ?>><?php echo $res1location; ?></option>
-						<?php
-						}
-						?>
-                </select>
-                </td>
-                <td width="11%" align="right" valign="middle"  bgcolor="#FFFFFF" class="bodytext3"></td>
-                <td width="33%" align="left" valign="middle"  bgcolor="#FFFFFF"></td>
-				</tr>
-				<tr>
-                <td width="14%" align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3"><span class="bodytext32">Package Name   *</span></td>
-                <td width="38%" align="left" valign="middle"  bgcolor="#FFFFFF"><input name="packagename" id="packagename" onChange  style="border: 1px solid #001E6A; text-transform:uppercase" size="40"></td>
-                <td width="11%" align="right"  valign="middle"  bgcolor="#FFFFFF" class="bodytext3"><strong>&nbsp;</strong></td>
-                <td width="33%" align="left" valign="middle"  bgcolor="#FFFFFF"></td>
-				</tr>
-			  <tr>
-			    <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">Days </td>
-			    <td align="left" valign="middle"  bgcolor="#FFFFFF"><input name="days" id="days" value="<?php echo $days; ?>" style="border: 1px solid #001E6A;"  size="20" /></td>
-				 <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">Rate</td>
-				   <td align="left" valign="middle"  bgcolor="#FFFFFF"><font size="2">
-				   <input name="rate" id="rate" style="border: 1px solid #001E6A"  size="20" />
-			 
-				   </font></td>
-                
-			  </tr>
-				 <tr>
-				  
-				    <td width="14%" align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3"><span class="bodytext32">Service Item</span></td>
-                <td width="38%" align="left" valign="middle"  bgcolor="#FFFFFF"><input name="servicesitem" id="servicesitem" style="border: 1px solid #001E6A; text-transform:uppercase" size="40" autocomplete="off">
-                <input type="hidden" name="servicescode" id="servicescode"></td>
-				   <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">&nbsp; </td>
-				   <td align="left" valign="middle"  bgcolor="#FFFFFF">
-				<input name="lab" id="lab" value="<?php echo $lab; ?>" type="hidden" style="border: 1px solid #001E6A"  size="20" onKeyUp="return totalcalc();"/>		   </td>
-				
-				 </tr>
-				 <tr>
-				   <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">&nbsp;</td>
-				   <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3"><input  type="hidden" name="threshold" id="threshold" style="border: 1px solid #001E6A;"  size="20" /></td>
-				   <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">&nbsp; </td>
-				   <td align="left" valign="middle"  bgcolor="#FFFFFF">
-				<input name="radiology" id="radiology" style="border: 1px solid #001E6A" type="hidden" size="20" onKeyUp="return totalcalc();"/>		   </td>
-			      </tr>
-				 <tr style='display:none'>
-				   <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">&nbsp;</td>
-				   <td align="left" valign="middle"  bgcolor="#FFFFFF"><input type="hidden" type="text" name="rate3" id="rate3" style="border: 1px solid #001E6A;" size="20"></td>
-				   <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">&nbsp;</td>
-				   <td align="left" valign="middle"  bgcolor="#FFFFFF"><input name="service" type="hidden" id="service" style="border: 1px solid #001E6A;"  size="20" onKeyUp="return totalcalc();"/></td>
-				 </tr>
-				
-				
-				 
-                 <tr>
-                <td colspan="2" align="middle"  bgcolor="#FFFFFF"><div align="right"> <font color="#000000" size="1" face="Verdana, Arial, Helvetica, sans-serif"> <font color="#000000" size="1" face="Verdana, Arial, Helvetica, sans-serif"> <font color="#000000" size="1" face="Verdana, Arial, Helvetica, sans-serif"> <font color="#000000" size="1" face="Verdana, Arial, Helvetica, sans-serif"> <font color="#000000" size="1" face="Verdana, Arial, Helvetica, sans-serif">
-                  <input type="hidden" name="frmflag1" value="frmflag1" />
-                  <input type="hidden" name="loopcount" value="<?php echo $i - 1; ?>" />
-                  <input name="Submit222" type="submit"  value="Submit" class="button" style="border: 1px solid #001E6A"/>
-				  </form>	
-                </font></font></font></font></font></div></td>
-				<td colspan="2" align="middle"  bgcolor="#FFFFFF">&nbsp;</td>
-				</tr>
-				
-				<tr>
-					<td align="middle" colspan="2" >&nbsp;</td><td align="middle" colspan="2" >&nbsp;</td>
-				</tr>
-                </tbody>
-                  </table>
-				  <table width="600" border="0" align="center" cellpadding="4" cellspacing="0" bordercolor="#ffffff" id="AutoNumber3" style="border-collapse: collapse">
-				   <form action="addippackage.php" method="post" name="packagesearch" id="packagesearch">
-                      <tr bgcolor="#011E6A">
+            <nav class="sidebar-nav">
+                <ul class="nav-list">
+                    <li class="nav-item">
+                        <a href="ipdischargelist.php" class="nav-link">
+                            <i class="fas fa-list"></i>
+                            <span>Discharge List</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="ipdischargerequestlist.php" class="nav-link">
+                            <i class="fas fa-clipboard-list"></i>
+                            <span>Discharge Requests</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="ipdischargelist_tat.php" class="nav-link">
+                            <i class="fas fa-clock"></i>
+                            <span>Discharge TAT</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="ipdiscountlist.php" class="nav-link">
+                            <i class="fas fa-percentage"></i>
+                            <span>% Discount List</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="ipdiscountreport.php" class="nav-link">
+                            <i class="fas fa-chart-bar"></i>
+                            <span>Discount Report</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="ipdocs.php" class="nav-link">
+                            <i class="fas fa-file-alt"></i>
+                            <span>IP Documents</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="ipdrugconsumptionreport.php" class="nav-link">
+                            <i class="fas fa-pills"></i>
+                            <span>Drug Consumption Report</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="ipdrugintake.php" class="nav-link">
+                            <i class="fas fa-capsules"></i>
+                            <span>Drug Intake</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="ipmedicinestatement.php" class="nav-link">
+                            <i class="fas fa-prescription"></i>
+                            <span>Medicine Statement</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="inpatientactivity.php" class="nav-link">
+                            <i class="fas fa-activity"></i>
+                            <span>Inpatient Activity</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="ipvisitentry_new.php" class="nav-link">
+                            <i class="fas fa-user-plus"></i>
+                            <span>IP Visit Entry</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="ipcreditaccountreport.php" class="nav-link">
+                            <i class="fas fa-credit-card"></i>
+                            <span>Credit Account Report</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="iplabresultsviewlist.php" class="nav-link">
+                            <i class="fas fa-flask"></i>
+                            <span>Lab Results View</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="ipmedicineissuelist.php" class="nav-link">
+                            <i class="fas fa-pills"></i>
+                            <span>Medicine Issue List</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="activeinpatientlistmedicine.php" class="nav-link">
+                            <i class="fas fa-bed"></i>
+                            <span>Active Inpatient List</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="ippackageanalysis.php" class="nav-link">
+                            <i class="fas fa-chart-line"></i>
+                            <span>Package Analysis</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="addippackage.php" class="nav-link active">
+                            <i class="fas fa-plus"></i>
+                            <span>Add IP Package</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="ippackagereport.php" class="nav-link">
+                            <i class="fas fa-file-alt"></i>
+                            <span>Package Report</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Alert Container -->
+            <div class="alert-container">
+                <?php include ("includes/alertmessages1.php"); ?>
+                <?php if ($errmsg != "") { ?>
+                <div class="alert alert-success">
+                    <i class="fas fa-check-circle"></i>
+                    <?php echo $errmsg; ?>
+                </div>
+                <?php } ?>
+            </div>
+
+            <!-- Page Header -->
+            <div class="page-header">
+                <div class="page-header-content">
+                    <h2><i class="fas fa-plus"></i> Add IP Package</h2>
+                    <p>Create new inpatient packages with services and pricing</p>
+                </div>
+                <div class="page-header-actions">
+                    <button class="btn btn-success" onclick="previewPackage()">
+                        <i class="fas fa-eye"></i> Preview Package
+                    </button>
+                </div>
+            </div>
+
+            <!-- Package Form -->
+            <div class="form-container">
+                <form name="cbform1" method="post" action="addippackage.php" class="package-form">
+                    <div class="form-header">
+                        <h3><i class="fas fa-clipboard-list"></i> Package Details</h3>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="packagename">Package Name</label>
+                            <input type="text" name="packagename" id="packagename" class="form-control" placeholder="Enter package name" required>
+                        </div>
                         
-						  <td colspan="13" bgcolor="#FFFFFF" class="bodytext3">
-						<select name="pkgtemplate" id="pkgtemplate"  style="border: 1px solid #001E6A;">
-						<?php
-						if($pkgtemplate!='')
-						{?>
-						<option value="<?php echo $pkgtemplate; ?>"><?php echo $pkgtemplate; ?></option>
-						<?php } else
-						{?>
-						<option value="" selected="selected">Select Packge</option>
-						<?php }
-						if($pkgtemplate != 'master_ippackage'){
-						?>
-						<option value="master_ippackage" selected="">Master Package</option>						
-						<?php
-						}
-							$query10 = "select * from master_testtemplate where testname = 'ippackage' order by templatename";
-							$exec10 = mysqli_query($GLOBALS["___mysqli_ston"], $query10) or die ("Error in Query10".mysqli_error($GLOBALS["___mysqli_ston"]));
-							while ($res10 = mysqli_fetch_array($exec10))
-							{							
-								$templatename = $res10["templatename"];
-								if($templatename != $pkgtemplate)
-								{
-								?>
-								<option value="<?php echo $templatename; ?>"><?php echo $templatename; ?></option>
-								<?php
-								}
-							}
-						?>
-                        </select>
-                          <input type="submit" id="Submit2" name="Submit2" value="Search" style="border: 1px solid #001E6A"  /></td>
-                        </tr>
-                      </form>    
-				  </table>
-				  <?php
-					  if(isset($_POST['Submit2']) == 'Search')
-					  {
-						 $pkgtemp=  $_REQUEST['pkgtemplate'];
-						 
-					  ?>  
-                <table width="60%" border="0" align="center" cellpadding="4" cellspacing="0" bordercolor="#666666" id="AutoNumber3" style="border-collapse: collapse">
-                    <tbody>
-                      <tr bgcolor="#011E6A">
-                      
-                        <td colspan="2" bgcolor="#ecf0f5" class="bodytext3"><strong>Template</strong></td>
-                        <td width="" bgcolor="#ecf0f5" class="bodytext3"><strong>Name</strong></td>
-                        <td width="" bgcolor="#ecf0f5" class="bodytext3"><strong>Rate</strong></td>
-                        <td width="" bgcolor="#ecf0f5" class="style1">Days</td>
-                        <td width="" bgcolor="#ecf0f5" class="style1">Package Id</td>
-                        <td width="" bgcolor="#ecf0f5" class="bodytext3"><strong>Edit</strong></td>
-                      </tr>
-                      <?php
-					  $uppercasepkg=strtoupper($pkgtemp);
-						$query21 = "select * from $pkgtemp where status <> 'DELETED' ";
-						$exec21 = mysqli_query($GLOBALS["___mysqli_ston"], $query21) or die ("Error in Query21".mysqli_error($GLOBALS["___mysqli_ston"]));
-						while ($res21 = mysqli_fetch_array($exec21))
-						{
-						$res21location = $res21['locationname'];
-						$res21packagename = $res21['packagename'];
-						$res21packagenum = $res21['auto_number'];
-						$res21days = $res21['days'];
-					    $res21threshold = $res21['threshold'];
-						$res21rate = $res21['rate'];
-						$rate3 = $res21['rate3'];
-						$auto_number = $res21['auto_number'];
-						$res21updatedatetime = $res21['updatedatetime'];
-						$res21arraysupplierdate = explode(" ", $updatedatetime);
-			
-						$colorloopcount = $colorloopcount + 1;
-						$showcolor = ($colorloopcount & 1); 
-						if ($showcolor == 0)
-						{
-							$colorcode = 'bgcolor="#CBDBFA"';
-						}
-						else
-						{
-							$colorcode = 'bgcolor="#ecf0f5"';
-						}
-						  
-					 ?>
+                        <div class="form-group">
+                            <label for="location">Location</label>
+                            <select name="location" id="location" class="form-control" required>
+                                <option value="">Select Location</option>
+                                <?php
+                                $query1 = "select * from master_location where status = '' order by locationname";
+                                $exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
+                                while ($res1 = mysqli_fetch_array($exec1)) {
+                                    $locationname = $res1["locationname"];
+                                    $locationcode = $res1["locationcode"];
+                                    if ($selectedlocationcode == $locationcode) {
+                                        echo "<option value='$locationcode' selected>$locationname</option>";
+                                    } else {
+                                        echo "<option value='$locationcode'>$locationname</option>";
+                                    }
+                                }
+                                ?>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="days">Number of Days</label>
+                            <input type="number" name="days" id="days" class="form-control" placeholder="Enter number of days" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="bedcharges">Bed Charges</label>
+                            <input type="number" name="bedcharges" id="bedcharges" class="form-control" placeholder="Enter bed charges" step="0.01">
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="threshold">Threshold Amount</label>
+                            <input type="number" name="threshold" id="threshold" class="form-control" placeholder="Enter threshold amount" step="0.01">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="pkgtemplate">Package Template</label>
+                            <select name="pkgtemplate" id="pkgtemplate" class="form-control">
+                                <option value="">Select Template</option>
+                                <option value="basic">Basic Package</option>
+                                <option value="standard">Standard Package</option>
+                                <option value="premium">Premium Package</option>
+                                <option value="custom">Custom Package</option>
+                            </select>
+                        </div>
+                    </div>
+                </form>
+            </div>
 
-                        <tr <?php echo $colorcode; ?>>
-							<td width=" align="left" valign="top" class="bodytext3">
-							<div align="center">
-							<a href="addippackage.php?st=del&&anum=<?php echo $res21packagenum; ?>&&pkgtemp=<?= $pkgtemp?>" onClick="return funcDeletepackage('<?php echo $res21packagenum ?>')">
-							<img src="images/b_drop.png" width="16" height="16" border="0" /></a>						</div>						</td>
-							<td width="" align="left" valign="top" name = "packagecode" class="bodytext3"><?php echo $uppercasepkg;?></td>
-							<td width="" align="left" valign="top"  class="bodytext3"><?php echo $res21packagename; ?> </td>
-							<td align="right" valign="top"  class="bodytext3"><?php echo number_format($res21rate,2,'.',','); ?></td>
-							<td align="center" valign="top"  class="bodytext3"><?php echo $res21days; ?></td>
-                           <td width="" align="left" valign="top"  class="bodytext3"><?php echo $auto_number; ?> </td>
-							<td align="left" valign="top"  class="bodytext3"><a href="editippackage.php?st=edit&&packcode=<?php echo $res21packagenum; ?>&&pkgtemp=<?= $pkgtemp?>" style="text-decoration:none">Edit</a></td>
-						</tr>
-                      <?php
-							}
-						?>
-                        <tr>
-                        <td align="middle" colspan="7" >&nbsp;</td>
-                      </tr>
-                    </tbody>
-                  </table>
-				   <table width="600" border="0" align="center" cellpadding="4" cellspacing="0" bordercolor="#666666" id="AutoNumber3" style="border-collapse: collapse">
-                    <tbody>
-                      <tr bgcolor="#011E6A">
-                        <td colspan="3" bgcolor="#ecf0f5" class="bodytext3"><strong>Package Master - Deleted </strong></td>
-                      </tr>
-                      <?php
-		
-	    $query1 = "select * from $pkgtemp where status = 'deleted' order by packagename ";
-		$exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
-		while ($res1 = mysqli_fetch_array($exec1))
-		{
-		$packagename = $res1['packagename'];
-		$packagenumber = $res1["auto_number"];
-		$res1location = $res1['locationname'];
-		
-		$colorloopcount = $colorloopcount + 1;
-		$showcolor = ($colorloopcount & 1); 
-		if ($showcolor == 0)
-		{
-			$colorcode = 'bgcolor="#CBDBFA"';
-		}
-		else
-		{
-			$colorcode = 'bgcolor="#ecf0f5"';
-		}
-		?>
-        <tr <?php echo $colorcode; ?>>
-                        <td width="11%" align="left" valign="top"  class="bodytext3">
-						<a href="addippackage.php?st=activate&&anum=<?php echo $packagenumber; ?>&&pkgtemp=<?= $pkgtemp?>" class="bodytext3">
-                          <div align="center" class="bodytext3">Activate</div>
-                        </a></td>
-                        <td width="35%" align="left" valign="top"  class="bodytext3"><?php echo $packagename; ?>
-                        <td width="35%" align="left" valign="top"  class="bodytext3"><?php echo $res1location; ?>
-                        </td>
-                      </tr>
-                      <?php
-		}
-		?>
-            </tbody>
-          </table>
-        	
-       <?php
-	   }
-	   ?>
-    </table>
+            <!-- Package Services -->
+            <div class="package-services">
+                <h4><i class="fas fa-list"></i> Package Services</h4>
+                
+                <div class="service-item">
+                    <input type="checkbox" id="lab" name="lab" value="1">
+                    <label for="lab">Laboratory Services</label>
+                    <input type="number" name="rate" class="service-rate form-control" placeholder="Rate" step="0.01">
+                </div>
+                
+                <div class="service-item">
+                    <input type="checkbox" id="radiology" name="radiology" value="1">
+                    <label for="radiology">Radiology Services</label>
+                    <input type="number" name="rate3" class="service-rate form-control" placeholder="Rate" step="0.01">
+                </div>
+                
+                <div class="service-item">
+                    <input type="checkbox" id="doctor" name="doctor" value="1">
+                    <label for="doctor">Doctor Consultation</label>
+                    <input type="number" name="admin" class="service-rate form-control" placeholder="Rate" step="0.01">
+                </div>
+                
+                <div class="service-item">
+                    <input type="checkbox" id="service" name="service" value="1">
+                    <label for="service">General Services</label>
+                    <input type="number" name="service" class="service-rate form-control" placeholder="Rate" step="0.01">
+                </div>
+                
+                <button type="button" class="btn btn-outline" onclick="addService()">
+                    <i class="fas fa-plus"></i> Add Service
+                </button>
+            </div>
 
-	</table>
+            <!-- Package Summary -->
+            <div class="package-summary" id="packageSummary">
+                <h4><i class="fas fa-calculator"></i> Package Summary</h4>
+                <div class="selected-services"></div>
+                <div class="summary-item">
+                    <span>Total Amount:</span>
+                    <span class="total-amount">0.00</span>
+                </div>
+            </div>
 
-<?php include ("includes/footer1.php"); ?>
+            <!-- Form Actions -->
+            <div class="form-actions">
+                <input type="hidden" name="frmflag1" value="frmflag1">
+                <button type="submit" class="btn btn-success" onclick="savePackage()">
+                    <i class="fas fa-save"></i> Save Package
+                </button>
+                <button type="button" class="btn btn-secondary" onclick="resetPackageForm()">
+                    <i class="fas fa-undo"></i> Reset
+                </button>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- Modern JavaScript -->
+    <script src="js/addippackage-modern.js?v=<?php echo time(); ?>"></script>
 </body>
 </html>
-

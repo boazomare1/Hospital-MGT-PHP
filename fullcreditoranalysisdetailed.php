@@ -1,1 +1,863 @@
-<?phpsession_start();error_reporting(0);include ("includes/loginverify.php");include ("db/db_connect.php");$ipaddress = $_SERVER['REMOTE_ADDR'];$updatedatetime = date('Y-m-d');$username = $_SESSION['username'];$companyanum = $_SESSION['companyanum'];$companyname = $_SESSION['companyname'];$paymentreceiveddatefrom = date('Y-m-d', strtotime('-1 month'));$paymentreceiveddateto = date('Y-m-d');$transactiondatefrom = date('Y-m-d', strtotime('-1 month'));$transactiondateto = date('Y-m-d');$errmsg = "";$banum = "1";$supplieranum = "";$custid = "";$custname = "";$balanceamount = "0.00";$openingbalance = "0.00";$total = '0.00';$searchsuppliername = "";$searchsuppliername1 = "";$cbsuppliername = "";$snocount = "";$colorloopcount="";$range = "";$totalamount = "0.00";$totalamount30 = "0.00";$total60 = "0.00";$total90 = "0.00";$total120 = "0.00";$total180 = "0.00";$total210 = "0.00";$totalamount1 = "0.00";$totalamount301 = "0.00";$totalamount601 = "0.00";$totalamount901 = "0.00";$totalamount1201 = "0.00";$totalamount1801 = "0.00";$totalamount2101 = "0.00";$totalamount2401 = "0.00";//This include updatation takes too long to load for hunge items database.//include("autocompletebuild_subtype.php");//include ("autocompletebuild_account3.php");if (isset($_REQUEST["searchsuppliername1"])) { $searchsuppliername1 = $_REQUEST["searchsuppliername1"]; } else { $searchsuppliername1 = ""; }if (isset($_REQUEST["searchsuppliername"])) { $searchsuppliername = $_REQUEST["searchsuppliername"]; } else { $searchsuppliername = ""; }if (isset($_REQUEST["searchsuppliercode"])) { $searchsuppliercode = $_REQUEST["searchsuppliercode"]; } else { $searchsuppliercode = ""; }//echo $searchsuppliername;if (isset($_REQUEST["ADate1"])) { $ADate1 = $_REQUEST["ADate1"]; } else { $ADate1 = $transactiondatefrom; }//echo $ADate1;if (isset($_REQUEST["ADate2"])) { $ADate2 = $_REQUEST["ADate2"]; } else { $ADate2 = $transactiondateto; }//echo $ADate2;if (isset($_REQUEST["range"])) { $range = $_REQUEST["range"]; } else { $range = ""; }//echo $range;if (isset($_REQUEST["amount"])) { $amount = $_REQUEST["amount"]; } else { $amount = ""; }//echo $amount;if (isset($_REQUEST["cbfrmflag2"])) { $cbfrmflag2 = $_REQUEST["cbfrmflag2"]; } else { $cbfrmflag2 = ""; }//$cbfrmflag2 = $_REQUEST['cbfrmflag2'];if (isset($_REQUEST["frmflag2"])) { $frmflag2 = $_REQUEST["frmflag2"]; } else { $frmflag2 = ""; }//$frmflag2 = $_POST['frmflag2'];if (isset($_REQUEST["accountssub"])) { $accountssubanum = $_REQUEST["accountssub"]; } else { $accountssubanum = ""; }		// by Kenique 22 Nov 2018?><style type="text/css">th {            background-color: #ffffff;            position: sticky;            top: 0;            z-index: 1;        }.bodytext31:hover { font-size:14px; }<!--body {	margin-left: 0px;	margin-top: 0px;	background-color: #ecf0f5;}.bodytext3 {	FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3B3B3C; FONT-FAMILY: Tahoma}--></style><!--<link href="css/datepickerstyle.css" rel="stylesheet" type="text/css" />--><!--<script type="text/javascript" src="js/adddate.js"></script>--><!--<script type="text/javascript" src="js/adddate2.js"></script>--><!--<script type="text/javascript" src="js/autocomplete_subtype.js"></script><script type="text/javascript" src="js/autosuggestsubtype.js"></script><script type="text/javascript" src="js/autocomplete_accounts3.js"></script><script type="text/javascript" src="js/autosuggest5accounts.js"></script><script type="text/javascript">window.onload = function () {	var oTextbox = new AutoSuggestControl1(document.getElementById("searchsuppliername1"), new StateSuggestions1());	var oTextbox = new AutoSuggestControl(document.getElementById("searchsuppliername"), new StateSuggestions());        }</script>--><script src="js/jquery-1.11.1.min.js"></script><script src="js/jquery.min-autocomplete.js"></script><script src="js/jquery-ui.min.js"></script><link rel="stylesheet" type="text/css" href="css/autocomplete.css"> <script type="text/javascript">/*window.onload = function () {	var oTextbox = new AutoSuggestControl(document.getElementById("searchsuppliername"), new StateSuggestions());        }*/$(document).ready(function(e) {		$('#searchsuppliername').autocomplete({	source:"ajaxsupplieraccount_new.php?accountssub="+$("#accountssub").val()+"",			// by Kenique 22 Nov 2018	//alert(source);	matchContains: true,	minLength:1,	html: true, 		select: function(event,ui){			var accountname=ui.item.value;			var accountid=ui.item.id;			$("#searchsuppliercode").val(accountid);			},	});	});function setaccountmainanum(){		// by Kenique 22 Nov 2018	var accountssub = $("#accountssub").val();		$('#searchsuppliername').autocomplete({		source:"ajaxsupplieraccount_new.php?accountssub="+accountssub+"",	//alert(source);	matchContains: true,	minLength:1,	html: true, 		select: function(event,ui){			var accountname=ui.item.value;			var accountid=ui.item.id;			$("#searchsuppliercode").val(accountid);			},	});} </script><link rel="stylesheet" type="text/css" href="css/autosuggest.css" />        <style type="text/css"><!--.bodytext3 {FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3b3b3c; FONT-FAMILY: Tahoma; text-decoration:none}.bodytext31 {FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3b3b3c; FONT-FAMILY: Tahoma; text-decoration:none}.bodytext311 {FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3b3b3c; FONT-FAMILY: Tahoma; text-decoration:none}-->.bal{border-style:none;background:none;text-align:right;}.bali{text-align:right;}</style></head><script src="js/datetimepicker_css.js"></script><script language="javascript"></script><body><table width="101%" border="0" cellspacing="0" cellpadding="2">  <tr>    <td colspan="10" bgcolor="#ecf0f5"><?php include ("includes/alertmessages1.php"); ?></td>  </tr>  <tr>    <td colspan="10" bgcolor="#ecf0f5"><?php include ("includes/title1.php"); ?></td>  </tr>  <tr>    <td colspan="10" bgcolor="#ecf0f5"><?php include ("includes/menu1.php"); ?></td>  </tr>  <tr>    <td colspan="10">&nbsp;</td>  </tr>  <tr>    <td width="1%">&nbsp;</td>    <td width="2%" valign="top"><?php //include ("includes/menu4.php"); ?>      &nbsp;</td>    <td width="97%" valign="top"><table width="116%" border="0" cellspacing="0" cellpadding="0">      <tr>        <td width="860">				              <form name="cbform1" method="post" action="fullcreditoranalysisdetailed.php">		<table width="800" border="0" align="left" cellpadding="4" cellspacing="0" bordercolor="#666666" id="AutoNumber3" style="border-collapse: collapse">          <tbody>            <tr bgcolor="#011E6A">              <td colspan="4" bgcolor="#ecf0f5" class="bodytext3"><strong>Full Creditor Analysis Detailed</strong></td>              </tr>            <!--<tr>              <td colspan="4" align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">			  <input name="printreceipt1" type="reset" id="printreceipt1" onClick="return funcPrintReceipt1()" style="border: 1px solid #001E6A" value="Print Receipt - Previous Payment Entry" />                 *To Print Other Receipts Please Go To Menu:	Reports	-&gt; Payments Given 				</td>              </tr>-->			  <!-- <tr>              <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">Search Subtype </td>              <td width="82%" colspan="3" align="left" valign="top"  bgcolor="#FFFFFF"><span class="bodytext3">              <input name="searchsuppliername1" type="text" id="searchsuppliername1" value="<?php echo $searchsuppliername1; ?>" size="50" autocomplete="off">              <input name="searchsuppliername1hiddentextbox" id="searchsuppliername1hiddentextbox" type="hidden" value="">			  <input name="searchsubtypeanum1" id="searchsubtypeanum1" value="" type="hidden">			  </span></td>           </tr>-->		<!-- // Added by Kenique 22 Nov 2018 -->	<!-- 	  <tr>              <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">Type </td>              <td width="82%" colspan="3" align="left" valign="top"  bgcolor="#FFFFFF"><span class="bodytext3">              <select name="accountssub" id="accountssub" onchange="setaccountmainanum();">			  <option value="">Select</option>			  <?php			  $query51 = "SELECT auto_number,accountssub FROM `master_accountssub` WHERE `accountsmain` = '7' AND recordstatus <> 'deleted' ORDER BY `master_accountssub`.`accountssub` ASC ";			  $exec51 = mysqli_query($GLOBALS["___mysqli_ston"], $query51) or die(mysqli_error($GLOBALS["___mysqli_ston"]));			  while($res51 = mysqli_fetch_array($exec51))			  {			  $accountssub = $res51['accountssub'];			  $anum = $res51['auto_number'];			  ?>			  <option value="<?php echo $anum; ?>" <?php if($anum == $accountssubanum){ echo "selected"; }?>><?php echo $accountssub; ?></option>			  <?php			  }			  ?>			  </select>			  </span></td>            </tr> --> <!-- //  Added by Kenique 22 Nov 2018 -->		  				<input type="hidden" name="accountssub" id="accountssub" value="">            <tr>              <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">Search Supplier </td>              <td width="82%" colspan="3" align="left" valign="top"  bgcolor="#FFFFFF"><span class="bodytext3">              <input name="searchsuppliername" type="text" id="searchsuppliername"  value="<?php echo $searchsuppliername; ?>" size="50" autocomplete="off">              <input name="searchsuppliernamehiddentextbox" id="searchsuppliernamehiddentextbox" value="" type="hidden">			  <input name="searchaccountnameanum1" id="searchaccountnameanum1" value="" type="hidden">			  </span></td>           </tr>		   			  <tr>                      <td class="bodytext31" valign="center"  align="left"                 bgcolor="#FFFFFF"> Date From </td>                      <td width="30%" align="left" valign="center"  bgcolor="#FFFFFF" class="bodytext31"><input name="ADate1" id="ADate1" value="<?php echo $ADate1; ?>"  size="10"  readonly="readonly" onKeyDown="return disableEnterKey()" />                          <img src="images2/cal.gif" onClick="javascript:NewCssCal('ADate1')" style="cursor:pointer"/> </td>                      <td width="16%" align="left" valign="center"  bgcolor="#FFFFFF" class="bodytext31"> Date To </td>                      <td width="33%" align="left" valign="center"  bgcolor="#FFFFFF"><span class="bodytext31">                        <input name="ADate2" id="ADate2" value="<?php echo $ADate2; ?>"  size="10"  readonly="readonly" onKeyDown="return disableEnterKey()" />                        <img src="images2/cal.gif" onClick="javascript:NewCssCal('ADate2')" style="cursor:pointer"/> </span></td>                    </tr>	            <tr>              <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3"><input type="hidden" name="searchsuppliercode" onBlur="return suppliercodesearch1()" onKeyDown="return suppliercodesearch2()" id="searchsuppliercode" style="text-transform:uppercase" value="<?php echo $searchsuppliercode; ?>" size="20" /></td>              <td colspan="3" align="left" valign="top"  bgcolor="#FFFFFF">			  <input type="hidden" name="cbfrmflag1" value="cbfrmflag1">                  <input type="submit" value="Search" name="Submit" />                  <input name="resetbutton" type="reset" id="resetbutton" value="Reset" /></td>            </tr>          </tbody>        </table>		</form>		</td>      </tr>      <tr>        <td>&nbsp;</td>      </tr>       <tr>        <td><table id="AutoNumber3" style="BORDER-COLLAPSE: collapse"             bordercolor="#666666" cellspacing="0" cellpadding="4" width="1100"             align="left" border="0">          <tbody>            <tr>              <td width="4%" bgcolor="#ecf0f5" class="bodytext31">&nbsp;</td>              <td colspan="12" bgcolor="#ecf0f5" class="bodytext31"><span class="bodytext311">              <?php				if (isset($_REQUEST["cbfrmflag1"])) { $cbfrmflag1 = $_REQUEST["cbfrmflag1"]; } else { $cbfrmflag1 = ""; }				//$cbfrmflag1 = $_REQUEST['cbfrmflag1'];				if ($cbfrmflag1 == 'cbfrmflag1')				{					if (isset($_REQUEST["cbcustomername"])) { $cbcustomername = $_REQUEST["cbcustomername"]; } else { $cbcustomername = ""; }					//$cbbillnumber = $_REQUEST['cbbillnumber'];					if (isset($_REQUEST["customername"])) { $customername = $_REQUEST["customername"]; } else { $customername = ""; }					//$cbbillstatus = $_REQUEST['cbbillstatus'];										if (isset($_REQUEST["cbbillnumber"])) { $cbbillnumber = $_REQUEST["cbbillnumber"]; } else { $cbbillnumber = ""; }					//$cbbillnumber = $_REQUEST['cbbillnumber'];					if (isset($_REQUEST["cbbillstatus"])) { $cbbillstatus = $_REQUEST["cbbillstatus"]; } else { $cbbillstatus = ""; }					//$cbbillstatus = $_REQUEST['cbbillstatus'];										//$transactiondatefrom = $_REQUEST['ADate1'];					//$transactiondateto = $_REQUEST['ADate2'];										//$paymenttype = $_REQUEST['paymenttype'];					//$billstatus = $_REQUEST['billstatus'];										$urlpath = "ADate1=$transactiondatefrom&&ADate2=$transactiondateto&&username=$username&&companyanum=$companyanum";//&&companyname=$companyname";				}				else				{					$urlpath = "ADate1=$transactiondatefrom&&ADate2=$transactiondateto&&username=$username&&companyanum=$companyanum";//&&companyname=$companyname";				}				?>              <script language="javascript">				function printbillreport1()				{					window.open("print_paymentgivenreport1.php?<?php echo $urlpath; ?>","Window1",'width=900,height=950,toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=1,resizable=1,left=25,top=25');					//window.open("message_popup.php?anum="+anum,"Window1",'toolbar=0,scrollbars=0,location=0,statusbar=0,menubar=0,resizable=1,width=200,height=400,left=312,top=84');				}				function printbillreport2()				{					window.location = "dbexcelfiles/PaymentGivenToSupplier.xls"				}				</script>              <!--<input  value="Print Report" onClick="javascript:printbillreport1()" name="resetbutton2" type="submit" id="resetbutton2"  style="border: 1px solid #001E6A" />&nbsp;				<input  value="Export Excel" onClick="javascript:printbillreport2()" name="resetbutton22" type="button" id="resetbutton22"  style="border: 1px solid #001E6A" />--></span></td>              </tr>            <tr>              <th class="bodytext31" valign="center"  align="left"                 bgcolor="#ffffff"><strong>No.</strong></th>              <th width="22%" align="left" valign="center"                  bgcolor="#ffffff" class="bodytext31"><div align="left"><strong>Supplier Name</strong></div></th>				<th width="10%" align="left" valign="center"                  bgcolor="#ffffff" class="bodytext31"><div align="left"><strong>GRN No</strong></div></th>             <!-- <th width="22%" align="left" valign="right"                  bgcolor="#ffffff" class="bodytext31"><strong> Patient </strong></th>-->                <th width="10%" align="left" valign="center" bgcolor="#ffffff" class="bodytext31"><strong>Invoice No</strong></th>              <th width="10%" align="left" valign="center"  bgcolor="#ffffff" class="bodytext31"><strong> Invoice Date </strong></th>              <th width="10%" align="left" valign="center"   bgcolor="#ffffff" class="bodytext31"><div align="right"><strong>Invoice Amt</strong></div></th>				<th width="6%" align="left" valign="center"                  bgcolor="#ffffff" class="bodytext31"><div align="right"><strong>Bal. Amt</strong></div></th>				<th width="5%" align="left" valign="center"                  bgcolor="#ffffff" class="bodytext31"><div align="right"><strong>30 days</strong></div></th>              <th width="5%" align="left" valign="center"                  bgcolor="#ffffff" class="bodytext31"><div align="right"><strong>60 days </strong></div></th>				<th width="6%" align="left" valign="center"                  bgcolor="#ffffff" class="bodytext31"><div align="right"><strong>90 days </strong></div></th>			<th width="6%" align="left" valign="center"                  bgcolor="#ffffff" class="bodytext31"><div align="right"><strong>120 days </strong></div></th>				<th width="6%" align="left" valign="center"                  bgcolor="#ffffff" class="bodytext31"><div align="right"><strong>180 days </strong></div></th>				<th width="7%" align="left" valign="center"                  bgcolor="#ffffff" class="bodytext31"><div align="right"><strong>180+ days </strong></div></th>			  </tr>			<?php			if (isset($_REQUEST["cbfrmflag1"])) { $cbfrmflag1 = $_REQUEST["cbfrmflag1"]; } else { $cbfrmflag1 = ""; }			//$cbfrmflag1 = $_REQUEST['cbfrmflag1'];			if ($cbfrmflag1 == 'cbfrmflag1')			{						$arraysupplier = $searchsuppliername;			$arraysuppliername = $arraysupplier;			$searchsuppliername = trim($arraysuppliername);			$arraysuppliercode = trim($_REQUEST['searchsuppliercode']);			$searchsuppliername = trim($searchsuppliername);			if($searchsuppliername==''){ $arraysuppliercode=''; }						if($arraysuppliercode == '') {			// $query212 = "select suppliercode,suppliername from master_transactionpharmacy where transactiondate between '$ADate1' and '$ADate2' and transactiontype = 'PURCHASE' group by suppliername order by suppliername desc ";								$query212 = "select * from master_accountname where accountssub='12' group by id";			} else {			// $query212 = "select suppliercode,suppliername from master_transactionpharmacy where suppliercode = '$arraysuppliercode' and transactiondate between '$ADate1' and '$ADate2' and transactiontype = 'PURCHASE' group by suppliername order by suppliername desc ";								$query212 = "select * from master_accountname where id = '$arraysuppliercode' and accountssub='12' group by id";			}			$exec212 = mysqli_query($GLOBALS["___mysqli_ston"], $query212) or die ("Error in Query21".mysqli_error($GLOBALS["___mysqli_ston"]));			while ($res212 = mysqli_fetch_array($exec212))			{			// $res21suppliername = $res212['suppliername'];			// $res21suppliercode = $res212['suppliercode'];				$res21suppliername = $res212['accountname'];				$res21suppliercode = $res212['id'];						$query222 = "select * from master_accountname where id = '$res21suppliercode' and recordstatus <>'DELETED' ";			$exec222 = mysqli_query($GLOBALS["___mysqli_ston"], $query222) or die ("Error in Query22".mysqli_error($GLOBALS["___mysqli_ston"]));			$res222 = mysqli_fetch_array($exec222);			$res22accountname = $res222['accountname'];			$id = $res222['id'];			if( $res21suppliername != '')			{				//////////////// for opening Balance //////////				// $querycr1op = "SELECT sum(-1*`transactionamount`) as payables, suppliercode as code, CONCAT('Payment - ',remarks) as name, docno as docno, transactiondate as date,chequenumber as chequenum FROM `master_transactionpharmacy` WHERE `suppliercode` = '$id' AND `transactionmodule` = 'PAYMENT' AND (`docno` LIKE 'SP%' or `docno` LIKE 'SPE%'  or `docno` LIKE 'SDBT%') AND `transactiondate` < '$ADate1'  and billnumber NOT LIKE 'PV%'						 				// 		 UNION ALL SELECT sum(-1*`totalamount`) as payables,suppliercode as code, CONCAT('Return - ',suppliername) as name, billnumber as docno, entrydate as date,typeofreturn as chequenum FROM `purchasereturn_details` WHERE `suppliercode` = '$id' AND billnumber NOT LIKE 'SPCA%' AND `entrydate` < '$ADate1'						 				// 		 UNION ALL SELECT sum(-1*`debitamount`) as payables, locationcode as code, CONCAT('Journal - ',ledgername) as name, docno as docno, entrydate as date,vouchertype as chequenum FROM `master_journalentries` WHERE `ledgerid` = '$id' AND selecttype = 'Dr' AND `entrydate` < '$ADate1'						 				// 		 UNION ALL SELECT sum(-1*`transactionamount`) as payables,expensecoa as code, remarks as name, docnumber as docno, transactiondate as date, chequenumber as chequenum FROM `expensesub_details` WHERE `expensecoa` = '$id' AND transactionmode <> 'ADJUSTMENT' AND transactiondate < '$ADate1'										// 		 UNION ALL SELECT sum(-1*`openbalanceamount`) as payables, docno as code, CONCAT('Opening Balance as of may 1st - ',accountname) as name, docno as docno, entrydate as date, 'Opening Balance' as chequenum FROM `openingbalanceaccount` WHERE `accountcode` = '$id' AND `entrydate` < '$ADate1'										// 		UNION ALL SELECT sum(`openbalanceamount`) as payables, docno as code, CONCAT('Opening Balance as of may 1st - ',accountname) as name, docno as docno, entrydate as date, 'Opening Balance' as chequenum FROM `openingbalancesupplier` WHERE `accountcode` = '$id' AND `entrydate` < '$ADate1' and payablestatus ='1'										// 		 UNION ALL SELECT sum(`transactionamount`) as payables, suppliercode as code, CONCAT('Purchase - ',suppliername) as name, billnumber as docno, transactiondate as date,chequenumber as chequenum FROM `master_transactionpharmacy` WHERE `suppliercode` = '$id' AND `billnumber` NOT LIKE 'SUPO%' AND `transactiontype` = 'PURCHASE' AND `transactiondate` < '$ADate1'  and billnumber NOT LIKE 'PV%'				// 		 UNION ALL SELECT sum(`creditamount`) as payables, locationcode as code, CONCAT('Journal - ',ledgername) as name, docno as docno, entrydate as date,vouchertype as chequenum FROM `master_journalentries` WHERE `ledgerid` = '$id' AND selecttype = 'Cr' AND `entrydate` < '$ADate1'				// 		 UNION ALL SELECT sum(`totalamount`) as payables,suppliercode as code, CONCAT('Payable Credit - ',suppliername) as name, billnumber as docno, entrydate as date,typeofreturn as chequenum FROM `purchasereturn_details` WHERE `suppliercode` = '$id' AND billnumber LIKE 'SPCA%' AND `entrydate` < '$ADate1'				// 		 union all select sum(-1*wh_tax_value) as payables,'' as code,'' as name, billnumber as docno, entrydate as date,'' as chequenum from purchase_details where suppliercode = '$id' and entrydate < '$ADate1'  				// 		 union all select sum(-1*total_amount) as payables,'' as code,'' as name, '' as docno, '' as date,'' as chequenum from supplier_debit_transactions where supplier_id = '$id' and date(created_at) < '$ADate1' 				// 		 ";				// 		$execcr1 = mysql_query($querycr1op) or die ("Error in querycr1op".mysql_error());				// 		while($rescr1 = mysql_fetch_array($execcr1))				// 		{				// 			$payables = $rescr1['payables'];				// 			// $payables = $payables / $exchange_rate;				// 		    $openingbalance += $payables;				// 		}				//////////////// for opening Balance //////////						// $queryqwe = "select suppliercode,suppliername from master_transactionpharmacy where suppliercode = '$arraysuppliercode' and transactiondate between '$ADate1' and '$ADate2' and transactiontype = 'PURCHASE' group by suppliername order by suppliername desc ";						// $execqwe = mysql_query($queryqwe) or die ("Error in querycr1op".mysql_error());						// // while($rescr1 = mysql_fetch_array($execcr1))						// 	$numqwe=mysql_num_rows($execqwe);							// if($numqwe>0){							if(false){			?>			<!-- <tr bgcolor="#ecf0f5">            <td colspan="10"  align="left" valign="center" bgcolor="#ecf0f5" class="bodytext31"><strong><?php echo $res22accountname;?> (Date From: <?php echo $ADate1; ?> Date To: <?php echo $ADate2;?>)</strong></td>            <td colspan="2"  align="left" valign="center" bgcolor="#ecf0f5" class="bodytext31"  onClick="showsub(<?=$res22accountautonum?>)"><strong>Opening Balance : </strong></td>            <td colspan="1"  align="right" valign="center" bgcolor="#ecf0f5" class="bodytext31"><strong><?php echo number_format($openingbalance,2,'.',','); $openingbalance=0;?></strong></td>            </tr>  -->						<?php		}									$dotarray = explode("-", $paymentreceiveddateto);			$dotyear = $dotarray[0];			$dotmonth = $dotarray[1];			$dotday = $dotarray[2];			$paymentreceiveddateto = date("Y-m-d", mktime(0, 0, 0, $dotmonth, $dotday + 1, $dotyear));			$searchsuppliername1 = trim($searchsuppliername1);			$res21suppliername = trim($res21suppliername);		  		  //$query1 = "select * from master_transactionpharmacy where suppliercode = '$res21suppliercode' and transactiondate between '$ADate1' and '$ADate2' group by billnumber order by suppliername";		   $query1 = "select * from master_purchase where suppliercode = '$res21suppliercode' and recordstatus <> 'deleted' and billdate between '$ADate1' and '$ADate2'  and companyanum = '$companyanum' group by billnumber order by billdate asc";		  $exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));		   $num1 = mysqli_num_rows($exec1);		   if($num1>0){		   ?>		   <tr bgcolor="#ecf0f5">            	<td colspan="13"  align="left" valign="center" bgcolor="#ecf0f5" class="bodytext31"><strong><?php echo $res22accountname;?> (Date From: <?php echo $ADate1; ?> Date To: <?php echo $ADate2;?>)</strong></td>            	</td>        	</tr>		   <?php }		  while($res1 = mysqli_fetch_array($exec1))		  {		  $res1suppliername = $res1['suppliername'];		  $res1suppliercode = $res1['suppliercode'];		  $res1transactiondate  = $res1['billdate'];		  $res1billnumber = $res1['billnumber'];		  $res2transactionamount1 = $res1['totalamount'];		  $supplierbillnumber = $res1['supplierbillnumber'];		  /*$res1patientname = $res1['patientname'];		  $res1visitcode = $res1['visitcode'];*/		  		  // $query2 = "select sum(transactionamount) as transactionamount1 from master_transactionpharmacy where suppliercode = '$res1suppliercode' and billnumber = '$res1billnumber' and transactiontype = 'PURCHASE' and transactiondate between '$ADate1' and '$ADate2'";		  // $exec2 = mysql_query($query2) or die ("Error in Query2".mysql_error());		  // $res2 = mysql_fetch_array($exec2);		  //$res2transactionamount = $res2['transactionamount1'];		  		  $query3 = "select sum(transactionamount) as transactionamount1 from master_transactionpharmacy where suppliercode = '$res1suppliercode' and billnumber = '$res1billnumber'  and transactiontype = 'PAYMENT' and recordstatus = 'allocated' and transactiondate between '$ADate1' and '$ADate2'";		  $exec3 = mysqli_query($GLOBALS["___mysqli_ston"], $query3) or die ("Error in Query3".mysqli_error($GLOBALS["___mysqli_ston"]));		  $res3 = mysqli_fetch_array($exec3);		   $res3transactionamount = $res3['transactionamount1'];		   /////////////// for wht //////////////		  $wh_tax_value=0;		   $query222 = "select sum(wh_tax_value) as wh_tax_value from purchase_details where billnumber='$res1billnumber' and suppliercode = '$res1suppliercode' and entrydate between '$ADate1' and '$ADate2' group by billnumber";		  $exec222 = mysqli_query($GLOBALS["___mysqli_ston"], $query222) or die ("Error in Query222".mysqli_error($GLOBALS["___mysqli_ston"]));		  $res222 = mysqli_fetch_array($exec222);		  $wh_tax_value = $res222['wh_tax_value'];		  //////////////// for wht //////////////		  $res2transactionamount=$res2transactionamount1-$wh_tax_value;		  		  $res4return = 0;		  $query4 = "select sum(subtotal) as totalreturn from purchasereturn_details where suppliercode = '$res1suppliercode' and grnbillnumber = '$res1billnumber' and entrydate between '$ADate1' and '$ADate2'		  UNION ALL select sum(subtotal) as totalreturn from purchasereturn_details where suppliercode = '$res1suppliercode' and grnbillnumber IN (select mrnno from master_transactionpharmacy where billnumber = '$res1billnumber' and transactiontype = 'PURCHASE' and transactiondate between '$ADate1' and '$ADate2')";		  $exec4 = mysqli_query($GLOBALS["___mysqli_ston"], $query4) or die ("Error in Query4".mysqli_error($GLOBALS["___mysqli_ston"]));		  while($res4 = mysqli_fetch_array($exec4))		  {		  	$res4return += $res4['totalreturn'];		  }		  		  /*$query4 = "select * from master_transactionpharmacy where suppliercode = '$res1suppliercode' and billnumber = '$res1billnumber'  and transactiontype = 'paylatercredit'";		  $exec4 = mysql_query($query4) or die ("Error in Query4".mysql_error());		  $res4 = mysql_fetch_array($exec4);		  $res4transactionamount = $res4['transactionamount'];		  		  $query5 = "select * from master_transactionpharmacy where suppliercode = '$res1suppliercode' and billnumber = '$res1billnumber'  and transactiontype = 'pharmacycredit'";		  $exec5 = mysql_query($query5) or die ("Error in Query5".mysql_error());		  $res5 = mysql_fetch_array($exec5);		  $res5transactionamount = $res5['transactionamount'];*/		  		  		  		  		  $invoicevalue =  $res2transactionamount - ($res3transactionamount + $res4return);		  if($invoicevalue>0)		  {		  $date1 = 30;		  $date2 = date('Y-m-d',strtotime($ADate2) - (24*3600*$date1)); 		  		  $query8 = "select sum(transactionamount) as transactionamount1 from master_transactionpharmacy where suppliercode = '$res1suppliercode' and billnumber = '$res1billnumber' and transactiontype = 'PURCHASE' and transactiondate between '$date2' and '$ADate2' ";		  $exec8 = mysqli_query($GLOBALS["___mysqli_ston"], $query8) or die ("Error in Query8".mysqli_error($GLOBALS["___mysqli_ston"]));		  $res8 = mysqli_fetch_array($exec8);		  $res8transactionamount1 = $res8['transactionamount1'];		   /////////////// for wht //////////////		  $wh_tax_value=0;		   $query222 = "select sum(wh_tax_value) as wh_tax_value from purchase_details where billnumber='$res1billnumber' and suppliercode = '$res1suppliercode' and entrydate between '$date2' and '$ADate2' group by billnumber";		  $exec222 = mysqli_query($GLOBALS["___mysqli_ston"], $query222) or die ("Error in Query222".mysqli_error($GLOBALS["___mysqli_ston"]));		  $res222 = mysqli_fetch_array($exec222);		  $wh_tax_value = $res222['wh_tax_value'];		  //////////////// for wht //////////////		  $res8transactionamount=$res8transactionamount1-$wh_tax_value;	      		  $query9 = "select sum(transactionamount) as transactionamount1 from master_transactionpharmacy where suppliercode = '$res1suppliercode' and billnumber = '$res1billnumber' and transactiontype = 'PAYMENT'  and transactiondate between '$date2' and '$ADate2' and recordstatus = 'allocated'";		  $exec9 = mysqli_query($GLOBALS["___mysqli_ston"], $query9) or die ("Error in Query9".mysqli_error($GLOBALS["___mysqli_ston"]));		  $res9 = mysqli_fetch_array($exec9);		  $res9transactionamount = $res9['transactionamount1'];		  		  $res10return = 0;		  $query10 = "select sum(subtotal) as totalreturn from purchasereturn_details where suppliercode = '$res1suppliercode' and grnbillnumber = '$res1billnumber' and entrydate between '$date2' and '$ADate2' 		  UNION ALL select sum(subtotal) as totalreturn from purchasereturn_details where suppliercode = '$res1suppliercode' and grnbillnumber IN (select mrnno from master_transactionpharmacy where billnumber = '$res1billnumber' and transactiontype = 'PURCHASE' and transactiondate between '$date2' and '$ADate2')";		  $exec10 = mysqli_query($GLOBALS["___mysqli_ston"], $query10) or die ("Error in Query10".mysqli_error($GLOBALS["___mysqli_ston"]));		  while($res10 = mysqli_fetch_array($exec10))		  {		  $res10return += $res10['totalreturn'];		  }		  		  /*$query10 = "select * from master_transactionpharmacy where suppliercode = '$res1suppliercode' and billnumber = '$res1billnumber' and transactiontype = 'paylatercredit'  and transactiondate between '$date2' and '$ADate2'";		  $exec10 = mysql_query($query10) or die ("Error in Query10".mysql_error());		  $res10 = mysql_fetch_array($exec10);		  $res10transactionamount = $res10['transactionamount'];			  $query12 = "select * from master_transactionpharmacy where suppliercode = '$res1suppliercode' and billnumber = '$res1billnumber' and transactiontype = 'pharmacycredit'  and transactiondate between '$date2' and '$ADate2'";		  $exec12 = mysql_query($query12) or die ("Error in Query12".mysql_error());		  $res12 = mysql_fetch_array($exec12);		  $res12transactionamount = $res12['transactionamount'];*/		  		  $totalamount30 = $res8transactionamount - ($res9transactionamount + $res10return);		  		  $t1 = strtotime($res1transactiondate);    	  $t2 = strtotime($ADate2);		  $days_between = ceil(abs($t2 - $t1) / 86400);		  		  if($days_between>30 && $days_between<=60)		  {		  $date3 = 60;		  $date4 = date('Y-m-d',strtotime($ADate2) - (24*3600*$date3)); 		  		  $query13 = "select sum(transactionamount) as transactionamount1 from master_transactionpharmacy where suppliercode = '$res1suppliercode' and billnumber = '$res1billnumber' and transactiontype = 'PURCHASE' and transactiondate between '$date4' and '$ADate2' ";		  $exec13 = mysqli_query($GLOBALS["___mysqli_ston"], $query13) or die ("Error in Query13".mysqli_error($GLOBALS["___mysqli_ston"]));		  $res13 = mysqli_fetch_array($exec13);		  $res13transactionamount1 = $res13['transactionamount1'];		  /////////////// for wht //////////////		  $wh_tax_value=0;		   $query222 = "select sum(wh_tax_value) as wh_tax_value from purchase_details where billnumber='$res1billnumber' and suppliercode = '$res1suppliercode' and entrydate between '$date4' and '$ADate2' group by billnumber";		  $exec222 = mysqli_query($GLOBALS["___mysqli_ston"], $query222) or die ("Error in Query222".mysqli_error($GLOBALS["___mysqli_ston"]));		  $res222 = mysqli_fetch_array($exec222);		  $wh_tax_value = $res222['wh_tax_value'];		  //////////////// for wht //////////////		  $res13transactionamount=$res13transactionamount1-$wh_tax_value;	      		  $query14 = "select sum(transactionamount) as transactionamount1 from master_transactionpharmacy where suppliercode = '$res1suppliercode' and billnumber = '$res1billnumber' and transactiontype = 'PAYMENT' and transactiondate between '$date4' and '$ADate2' and recordstatus = 'allocated'";		  $exec14 = mysqli_query($GLOBALS["___mysqli_ston"], $query14) or die ("Error in Query14".mysqli_error($GLOBALS["___mysqli_ston"]));		  $res14 = mysqli_fetch_array($exec14);		  $res14transactionamount = $res14['transactionamount1'];		  		  $res15return = 0;		  $query15 = "select sum(subtotal) as totalreturn from purchasereturn_details where suppliercode = '$res1suppliercode' and grnbillnumber IN (select mrnno from master_transactionpharmacy where billnumber = '$res1billnumber' and transactiontype = 'PURCHASE' and transactiondate between '$date4' and '$ADate2')		  UNION ALL select sum(subtotal) as totalreturn from purchasereturn_details where suppliercode = '$res1suppliercode' and grnbillnumber = '$res1billnumber' and entrydate between '$date4' and '$ADate2' ";		  $exec15 = mysqli_query($GLOBALS["___mysqli_ston"], $query15) or die ("Error in Query15".mysqli_error($GLOBALS["___mysqli_ston"]));		  while($res15 = mysqli_fetch_array($exec15))		  {		  $res15return += $res15['totalreturn'];		  }		  		  $totalamount60 = $res13transactionamount - ($res14transactionamount + $res15return);		  		  $total60 = $totalamount60 - $totalamount30;		  }		  		  if($days_between>60 && $days_between<=90)		  {		  $date5 = 90;		  $date6 = date('Y-m-d',strtotime($ADate2) - (24*3600*$date5));		  		  $query17 = "select sum(transactionamount) as transactionamount1 from master_transactionpharmacy where suppliercode = '$res1suppliercode' and billnumber = '$res1billnumber' and transactiontype = 'PURCHASE' and transactiondate between '$date6' and '$ADate2' ";		  $exec17 = mysqli_query($GLOBALS["___mysqli_ston"], $query17) or die ("Error in Query17".mysqli_error($GLOBALS["___mysqli_ston"]));		  $res17 = mysqli_fetch_array($exec17);		  $res17transactionamount1 = $res17['transactionamount1'];	      /////////////// for wht //////////////		  $wh_tax_value=0;		   $query222 = "select sum(wh_tax_value) as wh_tax_value from purchase_details where billnumber='$res1billnumber' and suppliercode = '$res1suppliercode' and entrydate between '$date6' and '$ADate2' group by billnumber";		  $exec222 = mysqli_query($GLOBALS["___mysqli_ston"], $query222) or die ("Error in Query222".mysqli_error($GLOBALS["___mysqli_ston"]));		  $res222 = mysqli_fetch_array($exec222);		  $wh_tax_value = $res222['wh_tax_value'];		  //////////////// for wht //////////////		  $res17transactionamount=$res17transactionamount1-$wh_tax_value;		  $query18 = "select sum(transactionamount) as transactionamount1 from master_transactionpharmacy where suppliercode = '$res1suppliercode' and billnumber = '$res1billnumber'  and transactiontype = 'PAYMENT' and transactiondate between '$date6' and '$ADate2' and recordstatus = 'allocated'";		  $exec18 = mysqli_query($GLOBALS["___mysqli_ston"], $query18) or die ("Error in Query18".mysqli_error($GLOBALS["___mysqli_ston"]));		  $res18 = mysqli_fetch_array($exec18);		  $res18transactionamount = $res18['transactionamount1'];		  		  $res19return = 0;		  $query19 = "select sum(subtotal) as totalreturn from purchasereturn_details where suppliercode = '$res1suppliercode' and grnbillnumber IN (select mrnno from master_transactionpharmacy where billnumber = '$res1billnumber' and transactiontype = 'PURCHASE' and transactiondate between '$date6' and '$ADate2')		  UNION ALL select sum(subtotal) as totalreturn from purchasereturn_details where suppliercode = '$res1suppliercode' and grnbillnumber = '$res1billnumber' and entrydate between '$date6' and '$ADate2'";		  $exec19 = mysqli_query($GLOBALS["___mysqli_ston"], $query19) or die ("Error in Query19".mysqli_error($GLOBALS["___mysqli_ston"]));		  while($res19 = mysqli_fetch_array($exec19))		  {		  $res19return += $res19['totalreturn'];		  }		  		  /*$query19 = "select * from master_transactionpharmacy where suppliercode = '$res1suppliercode' and billnumber = '$res1billnumber' and transactiontype = 'paylatercredit' and transactiondate between '$date6' and '$ADate2'";		  $exec19 = mysql_query($query19) or die ("Error in Query19".mysql_error());		  $res19 = mysql_fetch_array($exec19);		  $res19transactionamount = $res19['transactionamount'];			  $query20 = "select * from master_transactionpharmacy where suppliercode = '$res1suppliercode' and billnumber = '$res1billnumber'  and transactiontype = 'pharmacycredit' and transactiondate between '$date6' and '$ADate2'";		  $exec20 = mysql_query($query20) or die ("Error in Query20".mysql_error());		  $res20 = mysql_fetch_array($exec20);		  $res20transactionamount = $res20['transactionamount'];*/		  		  $totalamount90 = $res17transactionamount - ($res18transactionamount + $res19return) /* + $res19transactionamount + $res20transactionamount*/;		  		  $total90 = $totalamount90 - $totalamount60;		  }		  		  if($days_between>90 && $days_between<=120)		  {		  $date7 = 120;		  $date8 = date('Y-m-d',strtotime($ADate2) - (24*3600*$date7));		  		  $query21 = "select sum(transactionamount) as transactionamount1 from master_transactionpharmacy where suppliercode = '$res1suppliercode' and billnumber = '$res1billnumber' and transactiontype = 'PURCHASE' and transactiondate between '$date8' and '$ADate2' ";		  $exec21 = mysqli_query($GLOBALS["___mysqli_ston"], $query21) or die ("Error in Query21".mysqli_error($GLOBALS["___mysqli_ston"]));		  $res21 = mysqli_fetch_array($exec21);		  $res21transactionamount1 = $res21['transactionamount1'];		  /////////////// for wht //////////////		  $wh_tax_value=0;		   $query222 = "select sum(wh_tax_value) as wh_tax_value from purchase_details where billnumber='$res1billnumber' and suppliercode = '$res1suppliercode' and entrydate between '$date8' and '$ADate2' group by billnumber";		  $exec222 = mysqli_query($GLOBALS["___mysqli_ston"], $query222) or die ("Error in Query222".mysqli_error($GLOBALS["___mysqli_ston"]));		  $res222 = mysqli_fetch_array($exec222);		  $wh_tax_value = $res222['wh_tax_value'];		  //////////////// for wht //////////////		  $res21transactionamount=$res21transactionamount1-$wh_tax_value;	      		  $query22 = "select sum(transactionamount) as transactionamount1 from master_transactionpharmacy where suppliercode = '$res1suppliercode' and billnumber = '$res1billnumber'  and transactiontype = 'PAYMENT' and transactiondate between '$date8' and '$ADate2' and recordstatus = 'allocated'";		  $exec22 = mysqli_query($GLOBALS["___mysqli_ston"], $query22) or die ("Error in Query22".mysqli_error($GLOBALS["___mysqli_ston"]));		  $res22 = mysqli_fetch_array($exec22);		  $res22transactionamount = $res22['transactionamount1'];		  		  $res23return = 0;		  $query23 = "select sum(subtotal) as totalreturn from purchasereturn_details where suppliercode = '$res1suppliercode' and grnbillnumber IN (select mrnno from master_transactionpharmacy where billnumber = '$res1billnumber' and transactiontype = 'PURCHASE' and transactiondate between '$date8' and '$ADate2')		  UNION ALL select sum(subtotal) as totalreturn from purchasereturn_details where suppliercode = '$res1suppliercode' and grnbillnumber = '$res1billnumber' and entrydate between '$date8' and '$ADate2'";		  $exec23 = mysqli_query($GLOBALS["___mysqli_ston"], $query23) or die ("Error in Query23".mysqli_error($GLOBALS["___mysqli_ston"]));		  while($res23 = mysqli_fetch_array($exec23))		  {		  $res23return += $res23['totalreturn'];		  }		  /*$query23 = "select * from master_transactionpharmacy where suppliercode = '$res1suppliercode' and billnumber = '$res1billnumber' and transactiontype = 'paylatercredit' and transactiondate between '$date8' and '$ADate2'";		  $exec23 = mysql_query($query23) or die ("Error in Query23".mysql_error());		  $res23 = mysql_fetch_array($exec23);		  $res23transactionamount = $res23['transactionamount'];			  $query24 = "select * from  master_transactionpharmacy where suppliercode = '$res1suppliercode' and billnumber = '$res1billnumber'  and transactiontype = 'pharmacycredit' and transactiondate between '$date8' and '$ADate2'";		  $exec24 = mysql_query($query24) or die ("Error in Query24".mysql_error());		  $res24 = mysql_fetch_array($exec24);		  $res24transactionamount = $res24['transactionamount'];*/		  		  $totalamount120 = $res21transactionamount - ($res22transactionamount + $res23return)/* + $res23transactionamount + $res24transactionamount*/;		  		  $total120 = $totalamount120 - $totalamount90;		  }		  		  if($days_between>120 && $days_between<=180)		  {		  $date9 = 180;		  $date10 = date('Y-m-d',strtotime($ADate2) - (24*3600*$date9));		  		  $query25 = "select sum(transactionamount) as transactionamount1 from master_transactionpharmacy where suppliercode = '$res1suppliercode' and billnumber = '$res1billnumber' and transactiontype = 'PURCHASE' and transactiondate between '$date10' and '$ADate2' ";		  $exec25 = mysqli_query($GLOBALS["___mysqli_ston"], $query25) or die ("Error in Query25".mysqli_error($GLOBALS["___mysqli_ston"]));		  $res25 = mysqli_fetch_array($exec25);		  $res25transactionamount1 = $res25['transactionamount1'];		  /////////////// for wht //////////////		  $wh_tax_value=0;		   $query222 = "select sum(wh_tax_value) as wh_tax_value from purchase_details where billnumber='$res1billnumber' and suppliercode = '$res1suppliercode' and entrydate between '$date10' and '$ADate2' group by billnumber";		  $exec222 = mysqli_query($GLOBALS["___mysqli_ston"], $query222) or die ("Error in Query222".mysqli_error($GLOBALS["___mysqli_ston"]));		  $res222 = mysqli_fetch_array($exec222);		  $wh_tax_value = $res222['wh_tax_value'];		  //////////////// for wht //////////////		  $res25transactionamount=$res25transactionamount1-$wh_tax_value;	      		  $query26 = "select sum(transactionamount) as transactionamount1 from master_transactionpharmacy where suppliercode = '$res1suppliercode' and billnumber = '$res1billnumber'  and transactiontype = 'PAYMENT' and transactiondate between '$date10' and '$ADate2' and recordstatus = 'allocated'";		  $exec26 = mysqli_query($GLOBALS["___mysqli_ston"], $query26) or die ("Error in Query26".mysqli_error($GLOBALS["___mysqli_ston"]));		  $res26 = mysqli_fetch_array($exec26);		  $res26transactionamount = $res26['transactionamount1'];		  		  $res27return = 0;		  $query27 = "select sum(subtotal) as totalreturn from purchasereturn_details where suppliercode = '$res1suppliercode' and grnbillnumber = '$res1billnumber' and entrydate between '$date10' and '$ADate2'		  UNION ALL select sum(subtotal) as totalreturn from purchasereturn_details where suppliercode = '$res1suppliercode' and grnbillnumber IN (select mrnno from master_transactionpharmacy where billnumber = '$res1billnumber' and transactiontype = 'PURCHASE' and transactiondate between '$date10' and '$ADate2')";		  $exec27 = mysqli_query($GLOBALS["___mysqli_ston"], $query27) or die ("Error in Query27".mysqli_error($GLOBALS["___mysqli_ston"]));		  while($res27 = mysqli_fetch_array($exec27))		  {		  $res27return += $res27['totalreturn'];		  }		  		  /*$query27 = "select * from master_transactionpharmacy where suppliercode = '$res1suppliercode' and billnumber = '$res1billnumber' and transactiontype = 'paylatercredit' and transactiondate between '$date10' and '$ADate2'";		  $exec27 = mysql_query($query27) or die ("Error in Query27".mysql_error());		  $res27 = mysql_fetch_array($exec27);		  $res27transactionamount = $res27['transactionamount'];			  $query28 = "select * from master_transactionpharmacy where suppliercode = '$res1suppliercode' and billnumber = '$res1billnumber'  and transactiontype = 'pharmacycredit' and transactiondate between '$date10' and '$ADate2'";		  $exec28 = mysql_query($query28) or die ("Error in Query28".mysql_error());		  $res28 = mysql_fetch_array($exec28);		  $res28transactionamount = $res28['transactionamount'];*/		  		  $totalamount180 = $res25transactionamount - ($res26transactionamount + $res27return)/* + $res27transactionamount + $res28transactionamount*/;		  		  $total180 = $totalamount180 - $totalamount120;		  }		  		  if($days_between>180)		  {		  $date11 = 2100;		  $date12 = date('Y-m-d',strtotime($ADate2) - (24*3600*$date11));		  		  $query29 = "select sum(transactionamount) as transactionamount1 from master_transactionpharmacy where suppliercode = '$res1suppliercode' and billnumber = '$res1billnumber' and transactiontype = 'PURCHASE' and transactiondate between '$date12' and '$ADate2' ";		  $exec29 = mysqli_query($GLOBALS["___mysqli_ston"], $query29) or die ("Error in Query29".mysqli_error($GLOBALS["___mysqli_ston"]));		  $res29 = mysqli_fetch_array($exec29);		  $res29transactionamount1 = $res29['transactionamount1'];		  /////////////// for wht //////////////		  $wh_tax_value=0;		   $query222 = "select sum(wh_tax_value) as wh_tax_value from purchase_details where billnumber='$res1billnumber' and suppliercode = '$res1suppliercode' and entrydate between '$date12' and '$ADate2' group by billnumber";		  $exec222 = mysqli_query($GLOBALS["___mysqli_ston"], $query222) or die ("Error in Query222".mysqli_error($GLOBALS["___mysqli_ston"]));		  $res222 = mysqli_fetch_array($exec222);		  $wh_tax_value = $res222['wh_tax_value'];		  //////////////// for wht //////////////		  $res29transactionamount=$res29transactionamount1-$wh_tax_value;	      		  $query30 = "select sum(transactionamount) as transactionamount1 from master_transactionpharmacy where suppliercode = '$res1suppliercode' and billnumber = '$res1billnumber'  and transactiontype = 'PAYMENT' and transactiondate between '$date12' and '$ADate2' and recordstatus = 'allocated'";		  $exec30 = mysqli_query($GLOBALS["___mysqli_ston"], $query30) or die ("Error in Query30".mysqli_error($GLOBALS["___mysqli_ston"]));		  $res30 = mysqli_fetch_array($exec30);		  $res30transactionamount = $res30['transactionamount1'];		  		  $res31return = 0;		  $query31 = "select sum(subtotal) as totalreturn from purchasereturn_details where suppliercode = '$res1suppliercode' and grnbillnumber = '$res1billnumber' and entrydate between '$date12' and '$ADate2'		  UNION ALL select sum(subtotal) as totalreturn from purchasereturn_details where suppliercode = '$res1suppliercode' and grnbillnumber IN (select mrnno from master_transactionpharmacy where billnumber = '$res1billnumber' and transactiontype = 'PURCHASE' and transactiondate between '$date12' and '$ADate2')";		  $exec31 = mysqli_query($GLOBALS["___mysqli_ston"], $query31) or die ("Error in Query31".mysqli_error($GLOBALS["___mysqli_ston"]));		  while($res31 = mysqli_fetch_array($exec31))		  {		  $res31return += $res31['totalreturn'];		  }		  		  /*$query31 = "select * from master_transactionpharmacy where suppliercode = '$res1suppliercode' and billnumber = '$res1billnumber' and transactiontype = 'paylatercredit' and transactiondate between '$date12' and '$ADate2'";		  $exec31 = mysql_query($query31) or die ("Error in Query31".mysql_error());		  $res31 = mysql_fetch_array($exec31);		  $res31transactionamount = $res31['transactionamount2'];			  $query32 = "select * from master_transactionpharmacy where suppliercode = '$res1suppliercode' and billnumber = '$res1billnumber'  and transactiontype = 'pharmacycredit' and transactiondate between '$date12' and '$ADate2'";		  $exec32 = mysql_query($query32) or die ("Error in Query32".mysql_error());		  $res32 = mysql_fetch_array($exec32);		  $res32transactionamount = $res32['transactionamount2'];*/		  		  $totalamount210 = $res29transactionamount - ($res30transactionamount + $res31return)/* + $res31transactionamount + $res32transactionamount*/;		  		  $total210 = $totalamount210 - $totalamount180;		  }		  }		  else		  {				$totalamount30=0;				$total60=0;				$$totalamount60=0;				$total90=0;				$totalamount90=0;				$total120=0;				$totalamount120=0;				$total180=0;				$totalamount180=0;				$total210=0;				$totalamount210=0;  		  }		  if($res2transactionamount !=''){		  $snocount = $snocount + 1;						//echo $cashamount;			$colorloopcount = $colorloopcount + 1;			$showcolor = ($colorloopcount & 1); 			if ($showcolor == 0)			{				//echo "if";				$colorcode = 'bgcolor="#CBDBFA"';			}			else			{				//echo "else";				$colorcode = 'bgcolor="#ecf0f5"';			}						?>           <tr <?php echo $colorcode; ?>>              <td class="bodytext31" valign="center"  align="left"><?php echo $snocount; ?></td>               <td class="bodytext31" valign="center"  align="left">                <div class="bodytext31"><?php echo $res21suppliername; ?></div></td>				<td class="bodytext31" valign="center"  align="left">                <div class="bodytext31"><?php echo $res1billnumber; ?></div></td>              <!--<td class="bodytext31" valign="center"  align="left">                <div class="bodytext31"><?php echo $res21suppliername; ?></div></td>-->                <td class="bodytext31" valign="center"  align="left">  <div class="bodytext31"><?php echo $supplierbillnumber; ?></div></td>              	<td class="bodytext31" valign="center"  align="left"> <div class="bodytext31"><?php echo $res1transactiondate; ?></div></td>                           <td class="bodytext31" valign="center"  align="right">			    <div align="right"><?php echo number_format($res2transactionamount,2,'.',','); ?></div></td>               <td class="bodytext31" valign="center"  align="right">			    <div align="right"><?php echo number_format($invoicevalue,2,'.',','); ?></div></td>				<td class="bodytext31" valign="center"  align="left">			    <div align="right"><?php echo number_format($totalamount30,2,'.',','); ?></div></td>              <td class="bodytext31" valign="center"  align="left">			  <div align="right"><?php echo number_format($total60,2,'.',','); ?></div></td>              <td class="bodytext31" valign="center"  align="left">			  <div align="right"><?php echo number_format($total90,2,'.',','); ?></div></td>			  <td class="bodytext31" valign="center"  align="left">			  <div align="right"><?php echo number_format($total120,2,'.',','); ?></div></td>			  <td class="bodytext31" valign="center"  align="left">			  <div align="right"><?php echo number_format($total180,2,'.',','); ?></div></td>			  <td class="bodytext31" valign="center"  align="left">			  <div align="right"><?php echo number_format($total210,2,'.',','); ?></div></td>           </tr>			<?php			}				$totalamount1 = $totalamount1 + $res2transactionamount;				$totalamount301 = $totalamount301 + $invoicevalue;				$totalamount601 = $totalamount601 + $totalamount30;				$totalamount901 = $totalamount901 + $total60;				$totalamount1201 = $totalamount1201 + $total90;				$totalamount1801 = $totalamount1801 + $total120;				$totalamount2101 = $totalamount2101 + $total180;				$totalamount2401 = $totalamount2401 + $total210;								$res2transactionamount=0;				$invoicevalue=0;				$totalamount30=0;				$total60=0;				$$totalamount60=0;				$total90=0;				$totalamount90=0;				$total120=0;				$totalamount120=0;				$total180=0;				$totalamount180=0;				$total210=0;				$totalamount210=0;   			}					 	$query2="select sum(creditamount-debitamount) as creditamount,ledgername,entrydate,docno from master_journalentries where ledgerid='$res21suppliercode' and entrydate between '$ADate1' and '$ADate2' group by docno";			$exe2=mysqli_query($GLOBALS["___mysqli_ston"], $query2);			while($res2=mysqli_fetch_array($exe2))			{		 	$creditamount=$res2['creditamount'];			$ledgername=$res2['ledgername'];			$entrydate=$res2['entrydate'];			$docno=$res2['docno'];						$t1 = strtotime($entrydate);    	  $t2 = strtotime($ADate2);		  $days_between = ceil(abs($t2 - $t1) / 86400);		    if($days_between<30)			{			$totalamount30=$totalamount30+$creditamount;			}						if($days_between>30 && $days_between<=60)			{			$total60=$total60+$creditamount;			}			if($days_between>60 && $days_between<=90)			{			$total90=$total90+$creditamount;			}			if($days_between>90 && $days_between<=120)			{			$total120=$total120+$creditamount;			}			if($days_between>120 && $days_between<=180)			{			$total180=$total180+$creditamount;			}			if($days_between>180)			{			$total210=$total210+$creditamount;			}		  						  if($creditamount !=''){		  $snocount = $snocount + 1;									$totalamount1=$totalamount1+$creditamount;			$totalamount301=$totalamount301+$creditamount;			$totalamount601=$totalamount601+$totalamount30;			$totalamount901=$totalamount901+$total60;			$totalamount1201=$totalamount1201+$total90;			$totalamount1801=$totalamount1801+$total120;			$totalamount2101=$totalamount2101+$total180;			$totalamount2401=$totalamount2401+$total210;			//echo $cashamount;			$colorloopcount = $colorloopcount + 1;			$showcolor = ($colorloopcount & 1); 			if ($showcolor == 0)			{				//echo "if";				$colorcode = 'bgcolor="#CBDBFA"';			}			else			{				//echo "else";				$colorcode = 'bgcolor="#ecf0f5"';			}						?>           <tr <?php echo $colorcode; ?>>              <td class="bodytext31" valign="center"  align="left"><?php echo $snocount; ?></td>               <td class="bodytext31" valign="center"  align="left">                <div class="bodytext31"><?php echo $res21suppliername; ?></div></td>				<td class="bodytext31" valign="center"  align="left">                <div class="bodytext31"><?php echo $docno; ?></div></td>              <!--<td class="bodytext31" valign="center"  align="left">                <div class="bodytext31"><?php echo $ledgername; ?></div></td>-->                <td class="bodytext31" valign="center"  align="left"> <div class="bodytext31"><?php //echo $entrydate; ?></div></td>              <td class="bodytext31" valign="center"  align="left"> <div class="bodytext31"><?php echo $entrydate; ?></div></td>                            <td class="bodytext31" valign="center"  align="right">			    <div align="right"><?php echo number_format($creditamount,2,'.',','); ?></div></td>               <td class="bodytext31" valign="center"  align="right">			    <div align="right"><?php echo number_format($creditamount,2,'.',','); ?></div></td>				<td class="bodytext31" valign="center"  align="left">			    <div align="right"><?php echo number_format($totalamount30,2,'.',','); ?></div></td>              <td class="bodytext31" valign="center"  align="left">			  <div align="right"><?php echo number_format($total60,2,'.',','); ?></div></td>              <td class="bodytext31" valign="center"  align="left">			  <div align="right"><?php echo number_format($total90,2,'.',','); ?></div></td>			  <td class="bodytext31" valign="center"  align="left">			  <div align="right"><?php echo number_format($total120,2,'.',','); ?></div></td>			  <td class="bodytext31" valign="center"  align="left">			  <div align="right"><?php echo number_format($total180,2,'.',','); ?></div></td>			  <td class="bodytext31" valign="center"  align="left">			  <div align="right"><?php echo number_format($total210,2,'.',','); ?></div></td>           </tr>			<?php$totalamount30=0;				$total60=0;							$total90=0;							$total120=0;							$total180=0;							$total210=0;			}}////////////////////// for sdbt bills ///////////////////////$total_debit=0;				// $arraysuppliercode = $_POST['searchsuppliercode'];				$query5 = "SELECT * from supplier_debit_transactions where supplier_id = '$res21suppliercode'  and date(created_at) between '$ADate1' and '$ADate2' order by created_at ASC";		  $exec5 = mysqli_query($GLOBALS["___mysqli_ston"], $query5) or die ("Error in Query5".mysqli_error($GLOBALS["___mysqli_ston"]));		  // $num5 = mysql_num_rows($exec5);		  while($res5 = mysqli_fetch_array($exec5))		  {		   $res5docnumber = $res5['approve_id'];		  $created_at = $res5['created_at'];		  $ref_no = $res5['ref_no'];		   $res5transactionamount = $res5['total_amount'];		 	 $timestamp = strtotime($created_at);			 $entrydate = date('Y-m-d', $timestamp); // d.m.YYYY		 			$transactionamount='0';			 $query3 = "SELECT * from master_transactionpharmacy where  docno = '$res5docnumber' and recordstatus = 'allocated'";				$exec3 = mysqli_query($GLOBALS["___mysqli_ston"], $query3) or die ("Error in Query3".mysqli_error($GLOBALS["___mysqli_ston"]));				// $num=mysql_num_rows($exec3);				while ($res3 = mysqli_fetch_array($exec3))				{  $transactionamount += $res3['transactionamount'];				}				 $pending12 = $res5transactionamount-$transactionamount;				 	$t1 = strtotime($entrydate);    	  $t2 = strtotime($ADate2);		  $days_between = ceil(abs($t2 - $t1) / 86400);		    if($days_between<=30)			{			$totalamount30=$totalamount30-$pending12;			}			if($days_between>30 && $days_between<=60)			{			$total60=$total60-$pending12;			}			if($days_between>60 && $days_between<=90)			{			$total90=$total90-$pending12;			}			if($days_between>90 && $days_between<=120)			{			$total120=$total120-$pending12;			}			if($days_between>120 && $days_between<=180)			{			$total180=$total180-$pending12;			}			if($days_between>180)			{			$total210=$total210-$pending12;			}			  if($pending12 !=''){				  	 $snocount = $snocount + 1;				$totalamount1 = $totalamount1 - $res5transactionamount;				$totalamount301 = $totalamount301 - $pending12;				$totalamount601 = $totalamount601 + $totalamount30;				$totalamount901 = $totalamount901 + $total60;				$totalamount1201 = $totalamount1201 + $total90;				$totalamount1801 = $totalamount1801 + $total120;				$totalamount2101 = $totalamount2101 + $total180;				$totalamount2401 = $totalamount2401 + $total210;							//echo $cashamount;				$colorloopcount = $colorloopcount + 1;			$showcolor = ($colorloopcount & 1); 			if ($showcolor == 0)			{				$colorcode = 'bgcolor="#CBDBFA"';			}			else			{				$colorcode = 'bgcolor="#ecf0f5"';			}			?>           <tr <?php echo $colorcode; ?>>              <td class="bodytext31" valign="center"  align="left"><?php echo $snocount; ?></td>               <td class="bodytext31" valign="center"  align="left">                <div class="bodytext31"><?php echo $res21suppliername; ?></div></td>				<td class="bodytext31" valign="center"  align="left">                <div class="bodytext31"><?php echo $res5docnumber; ?></div></td>              <!--<td class="bodytext31" valign="center"  align="left">                <div class="bodytext31"><?php echo $ledgername; ?></div></td>-->                <td class="bodytext31" valign="center"  align="left"> <div class="bodytext31"><?php //echo $entrydate; ?></div></td>              <td class="bodytext31" valign="center"  align="left"> <div class="bodytext31"><?php echo $entrydate; ?></div></td>                            <td class="bodytext31" valign="center"  align="right">			    <div align="right">-<?php echo number_format($res5transactionamount,2,'.',','); ?></div></td>               <td class="bodytext31" valign="center"  align="right">			    <div align="right">-<?php echo number_format($pending12,2,'.',','); ?></div></td>				<td class="bodytext31" valign="center"  align="left">			    <div align="right"><?php echo number_format($totalamount30,2,'.',','); ?></div></td>              <td class="bodytext31" valign="center"  align="left">			  <div align="right"><?php echo number_format($total60,2,'.',','); ?></div></td>              <td class="bodytext31" valign="center"  align="left">			  <div align="right"><?php echo number_format($total90,2,'.',','); ?></div></td>			  <td class="bodytext31" valign="center"  align="left">			  <div align="right"><?php echo number_format($total120,2,'.',','); ?></div></td>			  <td class="bodytext31" valign="center"  align="left">			  <div align="right"><?php echo number_format($total180,2,'.',','); ?></div></td>			  <td class="bodytext31" valign="center"  align="left">			  <div align="right"><?php echo number_format($total210,2,'.',','); ?></div></td>           </tr>			<?php			}				$totalamount30=0;				$total60=0;				$total90=0;				$total120=0;				$total180=0;				$total210=0;			}			///////////////////////////////////////////// for sdbt bills ///////////////////////						// }						}			}			}			?>            <tr>              <td class="bodytext31" valign="center"  align="left"                 bgcolor="#ecf0f5">&nbsp;</td>              				<td class="bodytext31" valign="center"  align="center"                 bgcolor="#ecf0f5">&nbsp;</td>              <td class="bodytext31" valign="center"  align="center"                 bgcolor="#ecf0f5">&nbsp;</td>                 <td class="bodytext31" valign="center"  align="center"                 bgcolor="#ecf0f5">&nbsp;</td>              <td class="bodytext31" valign="center"  align="left"                 bgcolor="#ecf0f5"><strong>Total:</strong></td>				<td class="bodytext31" valign="center"  align="right"                 bgcolor="#ecf0f5"><strong><?php echo number_format($totalamount1,2,'.',','); ?></strong></td>              <td class="bodytext31" valign="center"  align="right"                 bgcolor="#ecf0f5"><strong><?php echo number_format($totalamount301,2,'.',','); ?></strong></td>				 <td class="bodytext31" valign="center"  align="right"                 bgcolor="#ecf0f5"><strong><?php echo number_format($totalamount601,2,'.',','); ?></strong></td>              <td class="bodytext31" valign="center"  align="right"                 bgcolor="#ecf0f5"><strong><?php echo number_format($totalamount901,2,'.',','); ?></strong></td>				<td class="bodytext31" valign="center"  align="right"                 bgcolor="#ecf0f5"><strong><?php echo number_format($totalamount1201,2,'.',','); ?></strong></td>				<td class="bodytext31" valign="center"  align="right"                 bgcolor="#ecf0f5"><strong><?php echo number_format($totalamount1801,2,'.',','); ?></strong></td>				<td class="bodytext31" valign="center"  align="right"                 bgcolor="#ecf0f5"><strong><?php echo number_format($totalamount2101,2,'.',','); ?></strong></td>				<td class="bodytext31" valign="center"  align="right"                 bgcolor="#ecf0f5"><strong><?php echo number_format($totalamount2401,2,'.',','); ?></strong></td>                    </tr>			<tr>			<?php							$urlpath = "cbfrmflag1=cbfrmflag1&&ADate1=$ADate1&&ADate2=$ADate2&&searchsuppliercode=$arraysuppliercode&&searchsuppliername=$searchsuppliername";						?>			 <td colspan="11"></td>		   	 <td colspan="2" class="bodytext31" valign="center"  align="right"><a href="print_fullcreditoranalysisdetailed.php?<?php echo $urlpath; ?>"><img  width="40" height="40" src="images/excel-xls-icon.png" style="cursor:pointer;"></a>             <a href="print_fullcreditoranalysisdetailedpdf.php?<?php echo $urlpath; ?>"><img src="images/pdfdownload.jpg" width="40" height="40"></a></td>			</tr>              </tbody>        </table></td>      </tr>	      </table></table><?php include ("includes/footer1.php"); ?></body></html>
+<?php
+session_start();
+error_reporting(0);
+include ("includes/loginverify.php");
+include ("db/db_connect.php");
+
+$ipaddress = $_SERVER['REMOTE_ADDR'];
+$updatedatetime = date('Y-m-d');
+$username = $_SESSION['username'];
+$companyanum = $_SESSION['companyanum'];
+$companyname = $_SESSION['companyname'];
+$paymentreceiveddatefrom = date('Y-m-d', strtotime('-1 month'));
+$paymentreceiveddateto = date('Y-m-d');
+$transactiondatefrom = date('Y-m-d', strtotime('-1 month'));
+$transactiondateto = date('Y-m-d');
+
+// Initialize variables
+$errmsg = "";
+$banum = "1";
+$supplieranum = "";
+$custid = "";
+$custname = "";
+$balanceamount = "0.00";
+$openingbalance = "0.00";
+$total = '0.00';
+$searchsuppliername = "";
+$searchsuppliername1 = "";
+$cbsuppliername = "";
+$snocount = "";
+$colorloopcount = "";
+$range = "";
+$totalamount = "0.00";
+$totalamount30 = "0.00";
+$total60 = "0.00";
+$total90 = "0.00";
+$total120 = "0.00";
+$total180 = "0.00";
+$total210 = "0.00";
+$totalamount1 = "0.00";
+$totalamount301 = "0.00";
+$totalamount601 = "0.00";
+$totalamount901 = "0.00";
+$totalamount1201 = "0.00";
+$totalamount1801 = "0.00";
+$totalamount2101 = "0.00";
+$totalamount2401 = "0.00";
+
+// Handle form parameters
+if (isset($_REQUEST["searchsuppliername1"])) { 
+    $searchsuppliername1 = $_REQUEST["searchsuppliername1"]; 
+} else { 
+    $searchsuppliername1 = ""; 
+}
+
+if (isset($_REQUEST["searchsuppliername"])) { 
+    $searchsuppliername = $_REQUEST["searchsuppliername"]; 
+} else { 
+    $searchsuppliername = ""; 
+}
+
+if (isset($_REQUEST["searchsuppliercode"])) { 
+    $searchsuppliercode = $_REQUEST["searchsuppliercode"]; 
+} else { 
+    $searchsuppliercode = ""; 
+}
+
+if (isset($_REQUEST["ADate1"])) { 
+    $ADate1 = $_REQUEST["ADate1"]; 
+} else { 
+    $ADate1 = $transactiondatefrom; 
+}
+
+if (isset($_REQUEST["ADate2"])) { 
+    $ADate2 = $_REQUEST["ADate2"]; 
+} else { 
+    $ADate2 = $transactiondateto; 
+}
+
+if (isset($_REQUEST["range"])) { 
+    $range = $_REQUEST["range"]; 
+} else { 
+    $range = ""; 
+}
+
+if (isset($_REQUEST["amount"])) { 
+    $amount = $_REQUEST["amount"]; 
+} else { 
+    $amount = ""; 
+}
+
+if (isset($_REQUEST["cbfrmflag2"])) { 
+    $cbfrmflag2 = $_REQUEST["cbfrmflag2"]; 
+} else { 
+    $cbfrmflag2 = ""; 
+}
+
+if (isset($_REQUEST["frmflag2"])) { 
+    $frmflag2 = $_REQUEST["frmflag2"]; 
+} else { 
+    $frmflag2 = ""; 
+}
+
+if (isset($_REQUEST["accountssub"])) { 
+    $accountssubanum = $_REQUEST["accountssub"]; 
+} else { 
+    $accountssubanum = ""; 
+}
+
+// Initialize report data
+$reportData = [];
+$summaryData = [
+    'total_amount' => 0,
+    'total_balance' => 0,
+    'total_30' => 0,
+    'total_60' => 0,
+    'total_90' => 0,
+    'total_120' => 0,
+    'total_180' => 0,
+    'total_210' => 0
+];
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Full Creditor Analysis Detailed - MedStar</title>
+    
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <!-- Modern CSS -->
+    <link rel="stylesheet" href="css/creditor-analysis-modern.css?v=<?php echo time(); ?>">
+    
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- Date picker styles -->
+    <link href="css/datepickerstyle.css" rel="stylesheet" type="text/css" />
+    
+    <!-- Scripts -->
+    <script type="text/javascript" src="js/adddate.js"></script>
+    <script type="text/javascript" src="js/adddate2.js"></script>
+    <script src="js/datetimepicker_css.js"></script>
+    
+    <!-- Autocomplete -->
+    <script src="js/jquery.min-autocomplete.js"></script>
+    <script src="js/jquery-ui.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="css/autocomplete.css">
+</head>
+<body>
+    <!-- Hospital Header -->
+    <header class="hospital-header">
+        <h1 class="hospital-title">🏥 MedStar Hospital Management</h1>
+        <p class="hospital-subtitle">Full Creditor Analysis Detailed Report</p>
+    </header>
+
+    <!-- User Information Bar -->
+    <div class="user-info-bar">
+        <div class="user-welcome">
+            <span class="welcome-text">Welcome, <strong><?php echo htmlspecialchars($username); ?></strong></span>
+            <span class="location-info">📍 Company: <?php echo htmlspecialchars($companyname); ?></span>
+        </div>
+        <div class="user-actions">
+            <a href="mainmenu1.php" class="btn btn-outline">🏠 Main Menu</a>
+            <a href="logout.php" class="btn btn-outline">🚪 Logout</a>
+        </div>
+    </div>
+
+    <!-- Navigation Breadcrumb -->
+    <nav class="nav-breadcrumb">
+        <a href="mainmenu1.php">🏠 Home</a>
+        <span>→</span>
+        <span>Full Creditor Analysis Detailed</span>
+    </nav>
+
+    <!-- Floating Menu Toggle -->
+    <div id="menuToggle" class="floating-menu-toggle">
+        <i class="fas fa-bars"></i>
+    </div>
+
+    <!-- Main Container with Sidebar -->
+    <div class="main-container-with-sidebar">
+        <!-- Left Sidebar -->
+        <aside id="leftSidebar" class="left-sidebar">
+            <div class="sidebar-header">
+                <h3>Quick Navigation</h3>
+                <button id="sidebarToggle" class="sidebar-toggle">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <ul class="nav-list">
+                    <li class="nav-item">
+                        <a href="mainmenu1.php" class="nav-link">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="labitem1master.php" class="nav-link">
+                            <i class="fas fa-flask"></i>
+                            <span>Lab Items</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="openingstockentry_master.php" class="nav-link">
+                            <i class="fas fa-boxes"></i>
+                            <span>Opening Stock</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="addward.php" class="nav-link">
+                            <i class="fas fa-bed"></i>
+                            <span>Wards</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="accountreceivableentrylist.php" class="nav-link">
+                            <i class="fas fa-receipt"></i>
+                            <span>Account Receivable</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="corporateoutstanding.php" class="nav-link">
+                            <i class="fas fa-building"></i>
+                            <span>Corporate Outstanding</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="accountstatement.php" class="nav-link">
+                            <i class="fas fa-file-invoice-dollar"></i>
+                            <span>Account Statement</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="addaccountsmain.php" class="nav-link">
+                            <i class="fas fa-chart-line"></i>
+                            <span>Accounts Main</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="addaccountssub.php" class="nav-link">
+                            <i class="fas fa-chart-pie"></i>
+                            <span>Accounts Sub Type</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="fixedasset_acquisition_report.php" class="nav-link">
+                            <i class="fas fa-building"></i>
+                            <span>Fixed Asset Acquisition</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="activeinpatientlist.php" class="nav-link">
+                            <i class="fas fa-bed"></i>
+                            <span>Active Inpatient List</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="activeusersreport.php" class="nav-link">
+                            <i class="fas fa-users"></i>
+                            <span>Active Users Report</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="chartofaccounts_upload.php" class="nav-link">
+                            <i class="fas fa-upload"></i>
+                            <span>Chart of Accounts Upload</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="chartaccountsmaindataimport.php" class="nav-link">
+                            <i class="fas fa-database"></i>
+                            <span>Chart of Accounts Main Import</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="chartaccountssubdataimport.php" class="nav-link">
+                            <i class="fas fa-database"></i>
+                            <span>Chart of Accounts Sub Import</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="addbloodgroup.php" class="nav-link">
+                            <i class="fas fa-tint"></i>
+                            <span>Blood Group Master</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="addfoodallergy1.php" class="nav-link">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <span>Food Allergy Master</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="addgenericname.php" class="nav-link">
+                            <i class="fas fa-pills"></i>
+                            <span>Generic Name Master</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="addpromotion.php" class="nav-link">
+                            <i class="fas fa-percentage"></i>
+                            <span>Promotion Master</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="addsalutation1.php" class="nav-link">
+                            <i class="fas fa-user-tie"></i>
+                            <span>Salutation Master</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="vat.php" class="nav-link">
+                            <i class="fas fa-receipt"></i>
+                            <span>VAT Master</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="assetregister.php" class="nav-link">
+                            <i class="fas fa-building"></i>
+                            <span>Asset Register</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="fixedasset_upload.php" class="nav-link">
+                            <i class="fas fa-upload"></i>
+                            <span>Fixed Asset Upload</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="revenue_vs_footfall.php" class="nav-link">
+                            <i class="fas fa-chart-bar"></i>
+                            <span>Revenue vs Footfall</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="freeqtyvariancereport.php" class="nav-link">
+                            <i class="fas fa-balance-scale"></i>
+                            <span>Free Qty Variance</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="frontdesk.php" class="nav-link">
+                            <i class="fas fa-desktop"></i>
+                            <span>Front Desk Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="nav-item active">
+                        <a href="fullcreditoranalysisdetailed.php" class="nav-link">
+                            <i class="fas fa-file-invoice"></i>
+                            <span>Creditor Analysis</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Alert Container -->
+            <div id="alertContainer">
+                <?php include ("includes/alertmessages1.php"); ?>
+            </div>
+
+            <!-- Page Header -->
+            <div class="page-header">
+                <div class="page-header-content">
+                    <h2>Full Creditor Analysis Detailed</h2>
+                    <p>Comprehensive analysis of creditor balances with aging buckets.</p>
+                </div>
+                <div class="page-header-actions">
+                    <button type="button" class="btn btn-secondary" onclick="exportToExcel()">
+                        <i class="fas fa-download"></i> Export Excel
+                    </button>
+                    <button type="button" class="btn btn-outline" onclick="printReport()">
+                        <i class="fas fa-print"></i> Print
+                    </button>
+                </div>
+            </div>
+
+            <!-- Search Form Section -->
+            <div class="search-form-section">
+                <div class="search-form-header">
+                    <i class="fas fa-search search-form-icon"></i>
+                    <h3 class="search-form-title">Report Parameters</h3>
+                </div>
+                
+                <form name="cbform1" method="post" action="fullcreditoranalysisdetailed.php" class="search-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="searchsuppliername" class="form-label">
+                                <i class="fas fa-user"></i>
+                                Search Supplier
+                            </label>
+                            <input name="searchsuppliername" type="text" id="searchsuppliername" 
+                                   value="<?php echo htmlspecialchars($searchsuppliername); ?>" 
+                                   class="form-input" autocomplete="off" placeholder="Type supplier name...">
+                            <input name="searchsuppliernamehiddentextbox" id="searchsuppliernamehiddentextbox" value="" type="hidden">
+                            <input name="searchaccountnameanum1" id="searchaccountnameanum1" value="" type="hidden">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="ADate1" class="form-label">
+                                <i class="fas fa-calendar-alt"></i>
+                                Date From
+                            </label>
+                            <div class="date-input-group">
+                                <input name="ADate1" id="ADate1" class="form-input date-input" 
+                                       value="<?php echo htmlspecialchars($ADate1); ?>" 
+                                       readonly onKeyDown="return disableEnterKey()">
+                                <img src="images2/cal.gif" onClick="javascript:NewCssCal('ADate1')"
+                                     class="date-picker-icon" alt="Select Date">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="ADate2" class="form-label">
+                                <i class="fas fa-calendar"></i>
+                                Date To
+                            </label>
+                            <div class="date-input-group">
+                                <input name="ADate2" id="ADate2" class="form-input date-input" 
+                                       value="<?php echo htmlspecialchars($ADate2); ?>" 
+                                       readonly onKeyDown="return disableEnterKey()">
+                                <img src="images2/cal.gif" onClick="javascript:NewCssCal('ADate2')"
+                                     class="date-picker-icon" alt="Select Date">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <input type="hidden" name="searchsuppliercode" id="searchsuppliercode" value="<?php echo htmlspecialchars($searchsuppliercode); ?>">
+                        <input type="hidden" name="cbfrmflag1" value="cbfrmflag1">
+                        <button type="submit" name="Submit" class="btn btn-primary">
+                            <i class="fas fa-search"></i> Generate Report
+                        </button>
+                        <button type="reset" class="btn btn-secondary">
+                            <i class="fas fa-undo"></i> Reset
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <?php
+            if (isset($_REQUEST["cbfrmflag1"])) { 
+                $cbfrmflag1 = $_REQUEST["cbfrmflag1"]; 
+            } else { 
+                $cbfrmflag1 = ""; 
+            }
+
+            if ($cbfrmflag1 == 'cbfrmflag1') {
+                $arraysupplier = $searchsuppliername;
+                $arraysuppliername = $arraysupplier;
+                $searchsuppliername = trim($arraysuppliername);
+                $arraysuppliercode = trim($_REQUEST['searchsuppliercode']);
+                $searchsuppliername = trim($searchsuppliername);
+                
+                if($searchsuppliername == '') { 
+                    $arraysuppliercode = ''; 
+                }
+
+                if($arraysuppliercode == '') {
+                    $query212 = "select * from master_accountname where accountssub='12' group by id";
+                } else {
+                    $query212 = "select * from master_accountname where id = '$arraysuppliercode' and accountssub='12' group by id";
+                }
+
+                $exec212 = mysqli_query($GLOBALS["___mysqli_ston"], $query212) or die ("Error in Query21" . mysqli_error($GLOBALS["___mysqli_ston"]));
+                
+                while ($res212 = mysqli_fetch_array($exec212)) {
+                    $res21suppliername = $res212['accountname'];
+                    $res21suppliercode = $res212['id'];
+
+                    $query222 = "select * from master_accountname where id = '$res21suppliercode' and recordstatus <>'DELETED' ";
+                    $exec222 = mysqli_query($GLOBALS["___mysqli_ston"], $query222) or die ("Error in Query22" . mysqli_error($GLOBALS["___mysqli_ston"]));
+                    $res222 = mysqli_fetch_array($exec222);
+                    $res22accountname = $res222['accountname'];
+                    $id = $res222['id'];
+
+                    if($res21suppliername != '') {
+                        // Process purchase data for this supplier
+                        $query1 = "select * from master_purchase where suppliercode = '$res21suppliercode' and recordstatus <> 'deleted' and billdate between '$ADate1' and '$ADate2' and companyanum = '$companyanum' group by billnumber order by billdate asc";
+                        $exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die ("Error in Query1" . mysqli_error($GLOBALS["___mysqli_ston"]));
+                        $num1 = mysqli_num_rows($exec1);
+                        
+                        if($num1 > 0) {
+                            $supplierData = [
+                                'supplier_name' => $res22accountname,
+                                'supplier_code' => $res21suppliercode,
+                                'transactions' => []
+                            ];
+
+                            while($res1 = mysqli_fetch_array($exec1)) {
+                                $res1suppliername = $res1['suppliername'];
+                                $res1suppliercode = $res1['suppliercode'];
+                                $res1transactiondate = $res1['billdate'];
+                                $res1billnumber = $res1['billnumber'];
+                                $res2transactionamount1 = $res1['totalamount'];
+                                $supplierbillnumber = $res1['supplierbillnumber'];
+
+                                // Calculate payments and returns
+                                $query3 = "select sum(transactionamount) as transactionamount1 from master_transactionpharmacy where suppliercode = '$res1suppliercode' and billnumber = '$res1billnumber' and transactiontype = 'PAYMENT' and recordstatus = 'allocated' and transactiondate between '$ADate1' and '$ADate2'";
+                                $exec3 = mysqli_query($GLOBALS["___mysqli_ston"], $query3) or die ("Error in Query3" . mysqli_error($GLOBALS["___mysqli_ston"]));
+                                $res3 = mysqli_fetch_array($exec3);
+                                $res3transactionamount = isset($res3['transactionamount1']) ? $res3['transactionamount1'] : 0;
+
+                                // Calculate WHT
+                                $wh_tax_value = 0;
+                                $query222 = "select sum(wh_tax_value) as wh_tax_value from purchase_details where billnumber='$res1billnumber' and suppliercode = '$res1suppliercode' and entrydate between '$ADate1' and '$ADate2' group by billnumber";
+                                $exec222 = mysqli_query($GLOBALS["___mysqli_ston"], $query222) or die ("Error in Query222" . mysqli_error($GLOBALS["___mysqli_ston"]));
+                                $res222 = mysqli_fetch_array($exec222);
+                                $wh_tax_value = isset($res222['wh_tax_value']) ? $res222['wh_tax_value'] : 0;
+
+                                $res2transactionamount = $res2transactionamount1 - $wh_tax_value;
+
+                                // Calculate returns
+                                $res4return = 0;
+                                $query4 = "select sum(subtotal) as totalreturn from purchasereturn_details where suppliercode = '$res1suppliercode' and grnbillnumber = '$res1billnumber' and entrydate between '$ADate1' and '$ADate2'
+                                          UNION ALL select sum(subtotal) as totalreturn from purchasereturn_details where suppliercode = '$res1suppliercode' and grnbillnumber IN (select mrnno from master_transactionpharmacy where billnumber = '$res1billnumber' and transactiontype = 'PURCHASE' and transactiondate between '$ADate1' and '$ADate2')";
+                                $exec4 = mysqli_query($GLOBALS["___mysqli_ston"], $query4) or die ("Error in Query4" . mysqli_error($GLOBALS["___mysqli_ston"]));
+                                while($res4 = mysqli_fetch_array($exec4)) {
+                                    $res4return += isset($res4['totalreturn']) ? $res4['totalreturn'] : 0;
+                                }
+
+                                $invoicevalue = $res2transactionamount - ($res3transactionamount + $res4return);
+
+                                if($invoicevalue > 0) {
+                                    // Calculate aging
+                                    $t1 = strtotime($res1transactiondate);
+                                    $t2 = strtotime($ADate2);
+                                    $days_between = ceil(abs($t2 - $t1) / 86400);
+
+                                    $aging_buckets = [
+                                        '30' => 0,
+                                        '60' => 0,
+                                        '90' => 0,
+                                        '120' => 0,
+                                        '180' => 0,
+                                        '210' => 0
+                                    ];
+
+                                    // Simplified aging calculation
+                                    if($days_between <= 30) {
+                                        $aging_buckets['30'] = $invoicevalue;
+                                    } elseif($days_between <= 60) {
+                                        $aging_buckets['60'] = $invoicevalue;
+                                    } elseif($days_between <= 90) {
+                                        $aging_buckets['90'] = $invoicevalue;
+                                    } elseif($days_between <= 120) {
+                                        $aging_buckets['120'] = $invoicevalue;
+                                    } elseif($days_between <= 180) {
+                                        $aging_buckets['180'] = $invoicevalue;
+                                    } else {
+                                        $aging_buckets['210'] = $invoicevalue;
+                                    }
+
+                                    $transactionData = [
+                                        'grn_no' => $res1billnumber,
+                                        'invoice_no' => $supplierbillnumber,
+                                        'invoice_date' => $res1transactiondate,
+                                        'invoice_amount' => $res2transactionamount,
+                                        'balance_amount' => $invoicevalue,
+                                        'days_between' => $days_between,
+                                        'aging_buckets' => $aging_buckets
+                                    ];
+
+                                    $supplierData['transactions'][] = $transactionData;
+
+                                    // Update summary totals
+                                    $summaryData['total_amount'] += $res2transactionamount;
+                                    $summaryData['total_balance'] += $invoicevalue;
+                                    $summaryData['total_30'] += $aging_buckets['30'];
+                                    $summaryData['total_60'] += $aging_buckets['60'];
+                                    $summaryData['total_90'] += $aging_buckets['90'];
+                                    $summaryData['total_120'] += $aging_buckets['120'];
+                                    $summaryData['total_180'] += $aging_buckets['180'];
+                                    $summaryData['total_210'] += $aging_buckets['210'];
+                                }
+                            }
+
+                            if(!empty($supplierData['transactions'])) {
+                                $reportData[] = $supplierData;
+                            }
+                        }
+                    }
+                }
+            }
+            ?>
+
+            <?php if (!empty($reportData)): ?>
+                <!-- Summary Cards -->
+                <div class="summary-cards">
+                    <div class="summary-card total-invoice">
+                        <div class="summary-icon">
+                            <i class="fas fa-file-invoice-dollar"></i>
+                        </div>
+                        <div class="summary-content">
+                            <h3><?php echo number_format($summaryData['total_amount'], 2, '.', ','); ?></h3>
+                            <p>Total Invoice Amount</p>
+                        </div>
+                    </div>
+                    
+                    <div class="summary-card total-balance">
+                        <div class="summary-icon">
+                            <i class="fas fa-balance-scale"></i>
+                        </div>
+                        <div class="summary-content">
+                            <h3><?php echo number_format($summaryData['total_balance'], 2, '.', ','); ?></h3>
+                            <p>Total Balance</p>
+                        </div>
+                    </div>
+                    
+                    <div class="summary-card aging-30">
+                        <div class="summary-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="summary-content">
+                            <h3><?php echo number_format($summaryData['total_30'], 2, '.', ','); ?></h3>
+                            <p>0-30 Days</p>
+                        </div>
+                    </div>
+                    
+                    <div class="summary-card aging-60">
+                        <div class="summary-icon">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                        <div class="summary-content">
+                            <h3><?php echo number_format($summaryData['total_60'], 2, '.', ','); ?></h3>
+                            <p>31-60 Days</p>
+                        </div>
+                    </div>
+                    
+                    <div class="summary-card aging-90">
+                        <div class="summary-icon">
+                            <i class="fas fa-exclamation-circle"></i>
+                        </div>
+                        <div class="summary-content">
+                            <h3><?php echo number_format($summaryData['total_90'], 2, '.', ','); ?></h3>
+                            <p>61-90 Days</p>
+                        </div>
+                    </div>
+                    
+                    <div class="summary-card aging-120">
+                        <div class="summary-icon">
+                            <i class="fas fa-times-circle"></i>
+                        </div>
+                        <div class="summary-content">
+                            <h3><?php echo number_format($summaryData['total_120'], 2, '.', ','); ?></h3>
+                            <p>91-120 Days</p>
+                        </div>
+                    </div>
+                    
+                    <div class="summary-card aging-180">
+                        <div class="summary-icon">
+                            <i class="fas fa-ban"></i>
+                        </div>
+                        <div class="summary-content">
+                            <h3><?php echo number_format($summaryData['total_180'], 2, '.', ','); ?></h3>
+                            <p>121-180 Days</p>
+                        </div>
+                    </div>
+                    
+                    <div class="summary-card aging-210">
+                        <div class="summary-icon">
+                            <i class="fas fa-skull-crossbones"></i>
+                        </div>
+                        <div class="summary-content">
+                            <h3><?php echo number_format($summaryData['total_210'], 2, '.', ','); ?></h3>
+                            <p>180+ Days</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Report Section -->
+                <div class="report-section">
+                    <div class="report-header">
+                        <div class="report-title-section">
+                            <i class="fas fa-file-invoice report-icon"></i>
+                            <h3 class="report-title">Creditor Analysis Report</h3>
+                            <div class="report-period">
+                                <span><?php echo date('d/m/Y', strtotime($ADate1)); ?> - <?php echo date('d/m/Y', strtotime($ADate2)); ?></span>
+                            </div>
+                        </div>
+                        <div class="report-actions">
+                            <button type="button" class="btn btn-outline btn-sm" onclick="toggleChartView()">
+                                <i class="fas fa-chart-pie"></i> Chart View
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Modern Data Table -->
+                    <div class="modern-table-container">
+                        <table class="modern-data-table">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Supplier Name</th>
+                                    <th>GRN No</th>
+                                    <th>Invoice No</th>
+                                    <th>Invoice Date</th>
+                                    <th>Invoice Amount</th>
+                                    <th>Balance Amount</th>
+                                    <th>0-30 Days</th>
+                                    <th>31-60 Days</th>
+                                    <th>61-90 Days</th>
+                                    <th>91-120 Days</th>
+                                    <th>121-180 Days</th>
+                                    <th>180+ Days</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php 
+                                $rowCount = 0;
+                                foreach ($reportData as $supplier): 
+                                    foreach ($supplier['transactions'] as $transaction): 
+                                        $rowCount++;
+                                        $rowClass = ($rowCount % 2 == 0) ? 'even' : 'odd';
+                                ?>
+                                    <tr class="table-row <?php echo $rowClass; ?>">
+                                        <td><?php echo $rowCount; ?></td>
+                                        <td>
+                                            <span class="supplier-name"><?php echo htmlspecialchars($supplier['supplier_name']); ?></span>
+                                        </td>
+                                        <td>
+                                            <span class="grn-badge"><?php echo htmlspecialchars($transaction['grn_no']); ?></span>
+                                        </td>
+                                        <td><?php echo htmlspecialchars($transaction['invoice_no']); ?></td>
+                                        <td><?php echo date('d/m/Y', strtotime($transaction['invoice_date'])); ?></td>
+                                        <td>
+                                            <span class="amount-badge invoice"><?php echo number_format($transaction['invoice_amount'], 2, '.', ','); ?></span>
+                                        </td>
+                                        <td>
+                                            <span class="amount-badge balance"><?php echo number_format($transaction['balance_amount'], 2, '.', ','); ?></span>
+                                        </td>
+                                        <td>
+                                            <span class="aging-badge aging-30"><?php echo number_format($transaction['aging_buckets']['30'], 2, '.', ','); ?></span>
+                                        </td>
+                                        <td>
+                                            <span class="aging-badge aging-60"><?php echo number_format($transaction['aging_buckets']['60'], 2, '.', ','); ?></span>
+                                        </td>
+                                        <td>
+                                            <span class="aging-badge aging-90"><?php echo number_format($transaction['aging_buckets']['90'], 2, '.', ','); ?></span>
+                                        </td>
+                                        <td>
+                                            <span class="aging-badge aging-120"><?php echo number_format($transaction['aging_buckets']['120'], 2, '.', ','); ?></span>
+                                        </td>
+                                        <td>
+                                            <span class="aging-badge aging-180"><?php echo number_format($transaction['aging_buckets']['180'], 2, '.', ','); ?></span>
+                                        </td>
+                                        <td>
+                                            <span class="aging-badge aging-210"><?php echo number_format($transaction['aging_buckets']['210'], 2, '.', ','); ?></span>
+                                        </td>
+                                    </tr>
+                                <?php 
+                                    endforeach; 
+                                endforeach; 
+                                ?>
+                            </tbody>
+                            <tfoot>
+                                <tr class="totals-row">
+                                    <td colspan="5"><strong>Total:</strong></td>
+                                    <td><strong><?php echo number_format($summaryData['total_amount'], 2, '.', ','); ?></strong></td>
+                                    <td><strong><?php echo number_format($summaryData['total_balance'], 2, '.', ','); ?></strong></td>
+                                    <td><strong><?php echo number_format($summaryData['total_30'], 2, '.', ','); ?></strong></td>
+                                    <td><strong><?php echo number_format($summaryData['total_60'], 2, '.', ','); ?></strong></td>
+                                    <td><strong><?php echo number_format($summaryData['total_90'], 2, '.', ','); ?></strong></td>
+                                    <td><strong><?php echo number_format($summaryData['total_120'], 2, '.', ','); ?></strong></td>
+                                    <td><strong><?php echo number_format($summaryData['total_180'], 2, '.', ','); ?></strong></td>
+                                    <td><strong><?php echo number_format($summaryData['total_210'], 2, '.', ','); ?></strong></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Chart Section (Hidden by default) -->
+                <div class="chart-section" id="chartSection" style="display: none;">
+                    <div class="chart-header">
+                        <i class="fas fa-chart-pie chart-icon"></i>
+                        <h3 class="chart-title">Aging Analysis Chart</h3>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="agingChart"></canvas>
+                    </div>
+                </div>
+            <?php elseif ($cbfrmflag1 == 'cbfrmflag1'): ?>
+                <div class="no-results-message">
+                    <i class="fas fa-file-invoice"></i>
+                    <h3>No Data Found</h3>
+                    <p>No creditor analysis data found for the selected criteria.</p>
+                    <button type="button" class="btn btn-primary" onclick="resetForm()">
+                        <i class="fas fa-undo"></i> Try Different Criteria
+                    </button>
+                </div>
+            <?php endif; ?>
+        </main>
+    </div>
+
+    <!-- Modern JavaScript -->
+    <script src="js/creditor-analysis-modern.js?v=<?php echo time(); ?>"></script>
+    
+    <!-- Chart.js for charts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Autocomplete functionality -->
+    <script type="text/javascript">
+        $(document).ready(function(e) {
+            $('#searchsuppliername').autocomplete({
+                source: "ajaxsupplieraccount_new.php?accountssub=" + $("#accountssub").val() + "",
+                matchContains: true,
+                minLength: 1,
+                html: true, 
+                select: function(event, ui) {
+                    var accountname = ui.item.value;
+                    var accountid = ui.item.id;
+                    $("#searchsuppliercode").val(accountid);
+                },
+            });	
+        });
+
+        function setaccountmainanum() {
+            var accountssub = $("#accountssub").val();
+            $('#searchsuppliername').autocomplete({
+                source: "ajaxsupplieraccount_new.php?accountssub=" + accountssub + "",
+                matchContains: true,
+                minLength: 1,
+                html: true, 
+                select: function(event, ui) {
+                    var accountname = ui.item.value;
+                    var accountid = ui.item.id;
+                    $("#searchsuppliercode").val(accountid);
+                },
+            });
+        }
+        
+        function disableEnterKey() {
+            if (event.keyCode === 13) {
+                return false;
+            }
+            return true;
+        }
+        
+        function exportToExcel() {
+            // TODO: Implement Excel export
+            alert('Excel export will be implemented soon');
+        }
+        
+        function printReport() {
+            window.print();
+        }
+        
+        function resetForm() {
+            document.cbform1.reset();
+            document.getElementById('ADate1').value = '<?php echo date('Y-m-d', strtotime('-1 month')); ?>';
+            document.getElementById('ADate2').value = '<?php echo date('Y-m-d'); ?>';
+        }
+    </script>
+</body>
+</html>

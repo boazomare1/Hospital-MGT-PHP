@@ -1,52 +1,33 @@
 <?php
-
 session_start();
-
 include ("includes/loginverify.php");
-
 include ("db/db_connect.php");
-//echo $menu_id;
 include ("includes/check_user_access.php");
 
+$username = $_SESSION["username"];
+$companyanum = $_SESSION["companyanum"];
+$companyname = $_SESSION["companyname"];
 
-$ipaddress = $_SERVER['REMOTE_ADDR'];
+$ipaddress = $_SERVER["REMOTE_ADDR"];
+$updatedatetime = date('Y-m-d H:i:s');
+$updatedate = date('Y-m-d');
+$updatetime = date('H:i:s');
+$errmsg = "";
+$bgcolorcode = "";
 
-$updatedatetime = date('Y-m-d');
-
-$username = $_SESSION['username'];
-
-$companyanum = $_SESSION['companyanum'];
-
-$companyname = $_SESSION['companyname'];
-
+// Default date ranges
 $transactiondatefrom = date('Y-m-d', strtotime('-1 month'));
-
 $transactiondateto = date('Y-m-d');
 
- $updatedate = date('Y-m-d');
- $updatetime = date('H:i:s');
-// $updatedate = date('Y-m-d H:i:s');
-
-$suppliername="";
-
-$errmsg = "";
-
+// Initialize variables
 $banum = "1";
-
 $supplieranum = "";
-
 $custid = "";
-
 $custname = "";
-
 $balanceamount = "0.00";
-
 $openingbalance = "0.00";
-
 $searchsuppliername = "";
-
 $cbsuppliername = "";
-
 $locdocno = $_SESSION['docno'];
 
 
@@ -339,8 +320,18 @@ foreach($_POST['billnum'] as $key => $value)
 	} /// CHECK BOX CONDITION IF CONDITION
 	}  /// for each check box checked
 	} // for each the names array loop
-// exit();
-	header("location:crdradjustment.php");
+// Check for URL messages
+if (isset($_GET['msg'])) {
+    if ($_GET['msg'] == 'success') {
+        $errmsg = "Credit/Debit adjustment processed successfully.";
+        $bgcolorcode = 'success';
+    } elseif ($_GET['msg'] == 'failed') {
+        $errmsg = "Failed to process credit/debit adjustment.";
+        $bgcolorcode = 'failed';
+    }
+}
+
+header("location:crdradjustment.php?msg=success");
 
 }
 
@@ -350,37 +341,32 @@ foreach($_POST['billnum'] as $key => $value)
 
 
 
- ?>
+?>
 
-<style type="text/css">
-
-<!--
-
-body {
-
-	margin-left: 0px;
-
-	margin-top: 0px;
-
-	background-color: #ecf0f5;
-
-}
-
-.bodytext3 {	FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3B3B3C; FONT-FAMILY: Tahoma
-
-}
-
-.cumtotal{position:fixed}
-
--->
-
-</style>
-
-<link href="css/datepickerstyle.css" rel="stylesheet" type="text/css" />
-
-<script type="text/javascript" src="js/adddate.js"></script>
-
-<script type="text/javascript" src="js/adddate2.js"></script>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Credit/Debit Adjustment - MedStar</title>
+    
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <!-- Modern CSS -->
+    <link rel="stylesheet" href="css/crdr-modern.css?v=<?php echo time(); ?>">
+    
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- Legacy CSS for compatibility -->
+    <link href="css/datepickerstyle.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="css/autosuggest.css" />
+    <link rel="stylesheet" type="text/css" href="css/autocomplete.css">
+    
+    <!-- Legacy JavaScript -->
+    <script type="text/javascript" src="js/adddate.js"></script>
+    <script type="text/javascript" src="js/adddate2.js"></script>
 
 <script>
 
@@ -1649,271 +1635,365 @@ text-align:right;
 
 
 
-<body>
-
-<div align="center" class="imgloader" id="imgloader" style="display:none;">
-
-<div align="center" class="imgloader" id="imgloader1" style="display:;">
-
-<p style="text-align:center;"><strong>Transaction in Progress <br><br> Please be patience...</strong></p>
-
-<img src="images/ajaxloader.gif">
-
-</div>
-
-</div>
-
-<table width="101%" border="0" cellspacing="0" cellpadding="2">
-
-  <tr>
-
-    <td colspan="10" bgcolor="#ecf0f5"><?php include ("includes/alertmessages1.php"); ?></td>
-
-  </tr>
-
-  <tr>
-
-    <td colspan="10" bgcolor="#ecf0f5"><?php include ("includes/title1.php"); ?></td>
-
-  </tr>
-
-  <tr>
-
-    <td colspan="10" bgcolor="#ecf0f5"><?php include ("includes/menu1.php"); ?></td>
-
-  </tr>
-
-  <tr>
-
-    <td colspan="10">&nbsp;</td>
-
-  </tr>
-
-  
-
-  <tr>
-
-    <td width="1%"></td>
-
-    <td width="2%" valign="top"><?php //include ("includes/menu4.php"); ?>
-
-      &nbsp;</td>
-
-    <td width="97%" valign="top"><table border="0" cellspacing="0" cellpadding="0">
-
-	
-
-	<tr>
-
-        <td width="860">
-
-		
-
-		
-
-              <!-- <form name="cbform1" method="post" action="crdradjustment.php"> -->
-              <!-- <form name="cbform1" method="post" action=""> -->
-
-		<table width="800" border="0" align="left" cellpadding="4" cellspacing="0" bordercolor="#666666" id="AutoNumber3" style="border-collapse: collapse">
-
-          <tbody>
-
-            <tr bgcolor="#011E6A">
-              <td colspan="4" bgcolor="#ecf0f5" class="bodytext3"><strong>Cr. Dr. Adjustment </strong></td>
-              </tr>
-
-
-			<tr>
-			<td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">Doc No</td>
-			<td width="82%" colspan="3" align="left" valign="top"  bgcolor="#FFFFFF"><span class="bodytext3">
-				<!-- <input type="hidden" name="docnumber" value="<?=$billnumbercode1;?>"> -->
-					 <?=$billnumbercode1;?>
-				</span>
-			</td>
-			</tr>
-
-            <tr>
-              <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">Subtype</td>
-              <td width="82%" colspan="3" align="left" valign="top"  bgcolor="#FFFFFF"><span class="bodytext3">
-
-                <input name="searchsuppliername" type="text" id="searchsuppliername" value="<?php echo $searchsuppliername; ?>" size="50" autocomplete="off">
-
-				<!-- <input type="hidden" name="searchsuppliercode" id="searchsuppliercode" value="<?php echo $searchsuppliercode; ?>" size="20" /> -->
-
-				<!-- <input type="hidden" name="searchsupplieranum" id="searchsupplieranum" value="<?php echo $searchsupplieranum; ?>" size="20" /> -->
-
-              </span></td>
-
-              </tr> 
-
-			   
-
-			  <tr>
-
-          <td width="76" align="left" valign="center"  
-
-                bgcolor="#ffffff" class="bodytext31"><strong> Date From </strong></td>
-
-          <td width="123" align="left" valign="center"  bgcolor="#ffffff" class="bodytext31"><input name="ADate1" id="ADate1" style="border: 1px solid #001E6A" value="<?php echo $transactiondatefrom; ?>"  size="10"  readonly="readonly" onKeyDown="return disableEnterKey()" />
-
-			<img src="images2/cal.gif" onClick="javascript:NewCssCal('ADate1')" style="cursor:pointer"/>			</td>
-
-          <td width="51" align="left" valign="center"  bgcolor="#FFFFFF" class="style1"><span class="bodytext31"><strong> Date To </strong></span></td>
-
-          <td width="129" align="left" valign="center"  bgcolor="#ffffff"><span class="bodytext31">
-
-            <input name="ADate2" id="ADate2" style="border: 1px solid #001E6A" value="<?php echo $transactiondateto; ?>"  size="10"  readonly="readonly" onKeyDown="return disableEnterKey()" />
-
-			<img src="images2/cal.gif" onClick="javascript:NewCssCal('ADate2')" style="cursor:pointer"/>
-
-		  </span></td>
-
-          </tr>
-
-			   <tr>
-
-              <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3"></td>
-
-              <td colspan="3" align="left" valign="top"  bgcolor="#FFFFFF">
-
-			  <input type="button" name="searchbillno" id="searchbillno" value="Search" onClick="return check_search()">
-
-
-                  <input name="resetbutton" type="reset" id="resetbutton"  style="border: 1px solid #001E6A" value="Reset" /></td>
-
-            </tr>
-
-          </tbody>
-
-        </table>
-
-		<!-- </form>	 -->
-			</td>
-
-      </tr>
-
-	
-
-      
-        <tr>
-
-  <td colspan="4" align="left" valign="top">&nbsp;</td>
-
-  </tr>
-
-<!-- 	<tr>
-		  <td colspan="4" align="left" valign="top">&nbsp;</td>
-		  <?php
-		  $amounttodisp='1000000000';
-		  ?>
-		    <td class="cumtotal">
-		        <table border="1">
-		        <tr><th>&nbsp;Amount&nbsp;</th><th>&nbsp;Cum Total&nbsp;</th></tr>
-		        <input type="hidden" id="amounttodisp" value="<?=$amounttodisp;?>">
-		        <tr><td><?php echo number_format($amounttodisp,2,'.',','); ?></td><td id="cumtotal">0.00</td></tr>
-		        </table></td>  
-		  </tr> -->
-		
-
-	  <tr>
-
-       <td   colspan="10" >&nbsp;
-
-	  <form action="crdradjustment.php" method="post" name="form2">
-			<input type="hidden" name="docnumber" value="<?=$billnumbercode1;?>">
-			<input name="searchsuppliername2" type="hidden" id="searchsuppliername2" value="<?php echo $searchsuppliername; ?>" size="50" autocomplete="off">
-
-			<input type="hidden" name="searchsuppliercode" id="searchsuppliercode" value="<?php echo $searchsuppliercode; ?>" size="20" />
-
-			<input type="hidden" name="searchsupplieranum" id="searchsupplieranum" value="<?php echo $searchsupplieranum; ?>" size="20" />
-
-	  <table id="AutoNumber3" style="BORDER-COLLAPSE: collapse" 
-
-            bordercolor="#666666" cellspacing="0" cellpadding="4" width="952" 
-
-            align="left" border="0">
-
-          <tbody>
-
-
-          
-
-            <tr>
-
-              <td colspan="3" bgcolor="#ecf0f5" class="bodytext311"><strong>Pending Invoices</strong></td>
-
-			  <!-- <input type="hidden" name="paymentmode" value="<?php echo $paymentmode; ?>" size="6" class="bal">
-
-			    <input type="hidden" name="docno1" value="<?php echo $docno; ?>">
-
-			  <input type="hidden" name="paymentmode1" value="<?php echo $paymentmode; ?>" size="6" class="bal">
-
-			  <input type="hidden" name="date1" value="<?php echo $date; ?>" size="6" class="bal">
-
-			  <input type="hidden" name="number1" value="<?php echo $number; ?>" size="6" class="bal">
-
-			  <input type="hidden" name="bankname1" value="<?php echo $bankname; ?>" size="6" class="bal">
-
-			  <input type="hidden" name="receivableamount1" id="receivableamount" value="<?php echo $receivableamount; ?>" size="6" class="bal"> -->
-
-      
-
-              <td width="22%" bgcolor="#ecf0f5" class="bodytext311">&nbsp;</td>
-
-              <td width="10%" bgcolor="#ecf0f5" class="bodytext311">&nbsp;</td>
-
-              <td width="9%" bgcolor="#ecf0f5" class="bodytext311">&nbsp;</td>
-
-              <td width="9%" bgcolor="#ecf0f5" class="bodytext311">&nbsp;</td>
-
-              <td width="8%" bgcolor="#ecf0f5" class="bodytext311">&nbsp;</td>
-              <td width="8%" bgcolor="#ecf0f5" class="bodytext311">&nbsp;</td>
-
-             
-
-          <td width="8%" bgcolor="#ecf0f5" class="bodytext311">&nbsp;</td>
-
-            </tr>
-
+    <!-- Loading Overlay -->
+    <div id="imgloader" class="loading-overlay" style="display:none;">
+        <div class="loading-content">
+            <div class="loading-spinner">
+                <i class="fas fa-spinner fa-spin"></i>
+            </div>
+            <p><strong>Transaction in Progress</strong></p>
+            <p>Please be patient...</p>
+        </div>
+    </div>
+
+    <!-- Hospital Header -->
+    <header class="hospital-header">
+        <h1 class="hospital-title">🏥 MedStar Hospital Management</h1>
+        <p class="hospital-subtitle">Advanced Healthcare Management Platform</p>
+    </header>
+
+    <!-- User Information Bar -->
+    <div class="user-info-bar">
+        <div class="user-welcome">
+            <span class="welcome-text">Welcome, <strong><?php echo htmlspecialchars($username); ?></strong></span>
+            <span class="location-info">📍 Company: <?php echo htmlspecialchars($companyname); ?></span>
+        </div>
+        <div class="user-actions">
+            <a href="mainmenu1.php" class="btn btn-outline">🏠 Main Menu</a>
+            <a href="logout.php" class="btn btn-outline">🚪 Logout</a>
+        </div>
+    </div>
+
+    <!-- Navigation Breadcrumb -->
+    <nav class="nav-breadcrumb">
+        <a href="mainmenu1.php">🏠 Home</a>
+        <span>→</span>
+        <span>Credit/Debit Adjustment</span>
+    </nav>
+
+    <!-- Floating Menu Toggle -->
+    <div id="menuToggle" class="floating-menu-toggle">
+        <i class="fas fa-bars"></i>
+    </div>
+
+    <!-- Main Container with Sidebar -->
+    <div class="main-container-with-sidebar">
+        <!-- Left Sidebar -->
+        <aside id="leftSidebar" class="left-sidebar">
+            <div class="sidebar-header">
+                <h3>Quick Navigation</h3>
+                <button id="sidebarToggle" class="sidebar-toggle">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+            </div>
             
+            <nav class="sidebar-nav">
+                <ul class="nav-list">
+                    <li class="nav-item">
+                        <a href="mainmenu1.php" class="nav-link">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="labitem1master.php" class="nav-link">
+                            <i class="fas fa-flask"></i>
+                            <span>Lab Items</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="openingstockentry_master.php" class="nav-link">
+                            <i class="fas fa-boxes"></i>
+                            <span>Opening Stock</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="addward.php" class="nav-link">
+                            <i class="fas fa-bed"></i>
+                            <span>Wards</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="accountreceivableentrylist.php" class="nav-link">
+                            <i class="fas fa-receipt"></i>
+                            <span>Account Receivable</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="corporateoutstanding.php" class="nav-link">
+                            <i class="fas fa-building"></i>
+                            <span>Corporate Outstanding</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="accountstatement.php" class="nav-link">
+                            <i class="fas fa-file-invoice-dollar"></i>
+                            <span>Account Statement</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="addaccountsmain.php" class="nav-link">
+                            <i class="fas fa-chart-line"></i>
+                            <span>Accounts Main</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="addaccountssub.php" class="nav-link">
+                            <i class="fas fa-chart-pie"></i>
+                            <span>Accounts Sub Type</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="fixedasset_acquisition_report.php" class="nav-link">
+                            <i class="fas fa-building"></i>
+                            <span>Fixed Asset Acquisition</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="activeinpatientlist.php" class="nav-link">
+                            <i class="fas fa-bed"></i>
+                            <span>Active Inpatient List</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="activeusersreport.php" class="nav-link">
+                            <i class="fas fa-users"></i>
+                            <span>Active Users Report</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="chartofaccounts_upload.php" class="nav-link">
+                            <i class="fas fa-upload"></i>
+                            <span>Chart of Accounts Upload</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="chartaccountsmaindataimport.php" class="nav-link">
+                            <i class="fas fa-database"></i>
+                            <span>Chart of Accounts Main Import</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="chartaccountssubdataimport.php" class="nav-link">
+                            <i class="fas fa-database"></i>
+                            <span>Chart of Accounts Sub Import</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="addbloodgroup.php" class="nav-link">
+                            <i class="fas fa-tint"></i>
+                            <span>Blood Group Master</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="addfoodallergy1.php" class="nav-link">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <span>Food Allergy Master</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="addgenericname.php" class="nav-link">
+                            <i class="fas fa-pills"></i>
+                            <span>Generic Name Master</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="addpromotion.php" class="nav-link">
+                            <i class="fas fa-percentage"></i>
+                            <span>Promotion Master</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="addsalutation1.php" class="nav-link">
+                            <i class="fas fa-user-tie"></i>
+                            <span>Salutation Master</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="vat.php" class="nav-link">
+                            <i class="fas fa-receipt"></i>
+                            <span>VAT Master</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="payrollmonthwiseinterim.php" class="nav-link">
+                            <i class="fas fa-money-bill-wave"></i>
+                            <span>Payroll Report</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="internalreferallist.php" class="nav-link">
+                            <i class="fas fa-exchange-alt"></i>
+                            <span>Internal Referral List</span>
+                        </a>
+                    </li>
+                    <li class="nav-item active">
+                        <a href="crdradjustment.php" class="nav-link">
+                            <i class="fas fa-balance-scale"></i>
+                            <span>Credit/Debit Adjustment</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
 
-            <tr>
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Alert Container -->
+            <div id="alertContainer">
+                <?php if (!empty($errmsg)): ?>
+                    <div class="alert alert-<?php echo $bgcolorcode === 'success' ? 'success' : ($bgcolorcode === 'failed' ? 'error' : 'info'); ?>">
+                        <i class="fas fa-<?php echo $bgcolorcode === 'success' ? 'check-circle' : ($bgcolorcode === 'failed' ? 'exclamation-triangle' : 'info-circle'); ?> alert-icon"></i>
+                        <span><?php echo htmlspecialchars($errmsg); ?></span>
+                    </div>
+                <?php endif; ?>
+            </div>
 
-              <td width="3%" align="left" valign="center" bordercolor="#f3f3f3" 
+            <!-- Page Header -->
+            <div class="page-header">
+                <div class="page-header-content">
+                    <h2>Credit/Debit Adjustment</h2>
+                    <p>Process credit and debit adjustments for patient accounts and transactions.</p>
+                </div>
+                <div class="page-header-actions">
+                    <button type="button" class="btn btn-secondary" onclick="refreshPage()">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                    <button type="button" class="btn btn-outline" onclick="exportToExcel()">
+                        <i class="fas fa-download"></i> Export
+                    </button>
+                </div>
+            </div>
 
-                bgcolor="#ffffff" class="bodytext311"><strong>No.</strong></td>
+            <!-- Adjustment Form Section -->
+            <div class="adjustment-form-section">
+                <div class="form-header">
+                    <i class="fas fa-balance-scale form-icon"></i>
+                    <h3 class="form-title">Credit/Debit Adjustment Form</h3>
+                </div>
+                
+                <div class="form-info">
+                    <div class="info-item">
+                        <strong>Document Number:</strong> 
+                        <span class="doc-number"><?php echo $billnumbercode1; ?></span>
+                    </div>
+                </div>
+                
+                <form name="cbform1" method="post" action="crdradjustment.php" class="adjustment-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="searchsuppliername" class="form-label">Subtype</label>
+                            <input name="searchsuppliername" type="text" id="searchsuppliername" 
+                                   class="form-input" value="<?php echo htmlspecialchars($searchsuppliername); ?>" 
+                                   placeholder="Search subtype..." autocomplete="off">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="ADate1" class="form-label">Date From</label>
+                            <div class="date-input-group">
+                                <input name="ADate1" id="ADate1" class="form-input" 
+                                       value="<?php echo $transactiondatefrom; ?>" 
+                                       readonly="readonly" onKeyDown="return disableEnterKey()">
+                                <img src="images2/cal.gif" onClick="javascript:NewCssCal('ADate1')" 
+                                     class="calendar-icon" style="cursor:pointer"/>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="ADate2" class="form-label">Date To</label>
+                            <div class="date-input-group">
+                                <input name="ADate2" id="ADate2" class="form-input" 
+                                       value="<?php echo $transactiondateto; ?>" 
+                                       readonly="readonly" onKeyDown="return disableEnterKey()">
+                                <img src="images2/cal.gif" onClick="javascript:NewCssCal('ADate2')" 
+                                     class="calendar-icon" style="cursor:pointer"/>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group form-group-submit">
+                            <button type="button" name="searchbillno" id="searchbillno" 
+                                    class="submit-btn" onClick="return check_search()">
+                                <i class="fas fa-search"></i>
+                                Search Bills
+                            </button>
+                            <button type="reset" name="resetbutton" class="btn btn-secondary">
+                                <i class="fas fa-undo"></i> Reset
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Hidden fields -->
+                    <input type="hidden" name="searchsuppliercode" id="searchsuppliercode" 
+                           value="<?php echo htmlspecialchars($searchsuppliercode); ?>">
+                    <input type="hidden" name="searchsupplieranum" id="searchsupplieranum" 
+                           value="<?php echo htmlspecialchars($searchsupplieranum); ?>">
+                </form>
+            </div>
 
-				  <td width="5%" align="left" valign="center" bordercolor="#f3f3f3" 
+	
 
-                bgcolor="#ffffff" class="bodytext311"><strong>Select <input type="checkbox" name="checkall" id="checkall" class="checkall" value="1"></strong></td>
-
-              <td width="26%" align="left" valign="center" bordercolor="#f3f3f3" 
-
-                bgcolor="#ffffff" class="bodytext311"><strong>Patient</strong></td>
-
-                <td width="22%" align="left" valign="center" bordercolor="#f3f3f3" 
-
-                bgcolor="#ffffff" class="bodytext311"><strong>Account</strong></td>
-
-              <td class="bodytext311" valign="center" bordercolor="#f3f3f3" align="left" 
-
-                bgcolor="#ffffff"><div align="left"><strong>Bill No </strong></div></td>
-
-              <td class="bodytext311" valign="center" bordercolor="#f3f3f3" align="left" width="13%"  bgcolor="#ffffff"><div align="left"><strong>Bill Date </strong></div></td>
-
-              <td width="9%" align="left" valign="center" bordercolor="#f3f3f3" 
-
-                bgcolor="#ffffff" class="bodytext311"><div align="right"><strong>Pending</strong></div></td>
-
-				 
-				  <!-- <td class="bodytext31" valign="center" bordercolor="#f3f3f3" align="left"   bgcolor="#ffffff"><div align="right"><strong>Discount</strong></div></td> -->
-				   <td class="bodytext31" valign="center" bordercolor="#f3f3f3" align="left"   bgcolor="#ffffff"><div align="right"><strong>Transfer Amt</strong></div></td>
-
-              <td width="8%" align="left" valign="center" bordercolor="#f3f3f3" 
-
-                bgcolor="#ffffff" class="bodytext31"><div align="right"><strong> Bal Amt</strong></div></td>
-
-            </tr>
+      
+            <!-- Pending Invoices Section -->
+            <div class="pending-invoices-section">
+                <div class="section-header">
+                    <i class="fas fa-file-invoice-dollar"></i>
+                    <h3>Pending Invoices for Adjustment</h3>
+                </div>
+                
+                <form action="crdradjustment.php" method="post" name="form2" class="adjustment-form">
+                    <!-- Hidden fields -->
+                    <input type="hidden" name="docnumber" value="<?php echo $billnumbercode1; ?>">
+                    <input name="searchsuppliername2" type="hidden" id="searchsuppliername2" 
+                           value="<?php echo htmlspecialchars($searchsuppliername); ?>">
+                    <input type="hidden" name="searchsuppliercode" id="searchsuppliercode" 
+                           value="<?php echo htmlspecialchars($searchsuppliercode); ?>">
+                    <input type="hidden" name="searchsupplieranum" id="searchsupplieranum" 
+                           value="<?php echo htmlspecialchars($searchsupplieranum); ?>">
+                    
+                    <!-- Table Container -->
+                    <div class="table-container">
+                        <table class="adjustment-table">
+                            <thead>
+                                <tr>
+                                    <th class="serial-header">No.</th>
+                                    <th class="select-header">
+                                        <input type="checkbox" name="checkall" id="checkall" class="checkall" value="1">
+                                        Select All
+                                    </th>
+                                    <th class="patient-header">Patient</th>
+                                    <th class="account-header">Account</th>
+                                    <th class="bill-header">Bill No</th>
+                                    <th class="date-header">Bill Date</th>
+                                    <th class="pending-header">Pending</th>
+                                    <th class="transfer-header">Transfer Amt</th>
+                                    <th class="balance-header">Bal Amt</th>
+                                </tr>
+                            </thead>
+                            <tbody id="rowinsert">
+                                <!-- Dynamic content will be inserted here -->
+                            </tbody>
+                            <tfoot>
+                                <tr class="totals-row">
+                                    <td colspan="6" class="totals-label">Total:</td>
+                                    <td class="totals-amount pending-total">
+                                        <span id="totalPending">0.00</span>
+                                    </td>
+                                    <td class="totals-amount transfer-total">
+                                        <input type="text" name="totaladjamt" id="totaladjamt" 
+                                               class="total-input" readonly>
+                                    </td>
+                                    <td class="totals-amount balance-total">
+                                        <span id="totalBalance">0.00</span>
+                                    </td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                    
+                    <input type="hidden" name="totalrow" id="totalrow" value="0">
+                    <input type="hidden" name="totaldiscount" id="totaldiscount">
+                </form>
+            </div>
 
             
 
@@ -2088,18 +2168,43 @@ text-align:right;
 
       </table>
 
-	</td>
+            <!-- Account Search Section -->
+            <div class="account-search-section">
+                <div class="section-header">
+                    <i class="fas fa-search"></i>
+                    <h3>Target Account Selection</h3>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="searchaccountname" class="form-label">Search Account</label>
+                        <input name="searchaccountname" type="text" id="searchaccountname" 
+                               class="form-input" value="<?php echo htmlspecialchars($searchaccountname); ?>" 
+                               placeholder="Search target account..." autocomplete="off">
+                        <input type="hidden" name="searchaccountcode" id="searchaccountcode" 
+                               value="<?php echo htmlspecialchars($searchaccountcode); ?>">
+                        <input name="searchaccountanum" type="hidden" id="searchaccountanum" 
+                               value="<?php echo htmlspecialchars($searchaccountanum); ?>">
+                    </div>
+                </div>
+            </div>
 
-	</tr>
+            <!-- Submit Section -->
+            <div class="submit-section">
+                <div class="submit-actions">
+                    <input type="hidden" name="frmflag23" value="frmflag23">
+                    <button type="submit" name="Submit" class="submit-btn" id="submit1" onClick="return validation_check();">
+                        <i class="fas fa-save"></i>
+                        Process Adjustment
+                    </button>
+                </div>
+            </div>
+        </main>
+    </div>
 
-  </table>
-
-  
-
-<?php include ("includes/footer1.php"); ?>
-
+    <!-- Modern JavaScript -->
+    <script src="js/crdr-modern.js?v=<?php echo time(); ?>"></script>
 </body>
-
 </html>
 
 

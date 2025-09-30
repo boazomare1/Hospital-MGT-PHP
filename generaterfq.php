@@ -1,363 +1,361 @@
-<?php
-session_start();
-include ("includes/loginverify.php");
-include ("db/db_connect.php");
-
-$ipaddress = $_SERVER['REMOTE_ADDR'];
-$updatedatetime = date('Y-m-d H:i:s');
-$username = $_SESSION['username'];
-$companyanum = $_SESSION['companyanum'];
-$companyname = $_SESSION['companyname'];
-$transactiondatefrom = date('Y-m-d', strtotime('-1 month'));
-$transactiondateto = date('Y-m-d');
-$currentdate = date("Y-m-d");
-
-if (isset($_REQUEST["st"])) { $st = $_REQUEST["st"]; } else { $st = ""; }
-//$st = $_REQUEST['st'];
-if (isset($_REQUEST["billautonumber"])) { $billautonumber = $_REQUEST["billautonumber"]; } else { $billautonumber = ""; }
-//$st = $_REQUEST['st'];
-if (isset($_REQUEST["frm1submit1"])) { $frm1submit1 = $_REQUEST["frm1submit1"]; } else { $frm1submit1 = ""; }
-if ($frm1submit1 == 'frm1submit1')
-{
-
-$paynowbillprefix = 'RFQ-';
-$paynowbillprefix1=strlen($paynowbillprefix);
-$query3 = "select * from purchase_rfq order by auto_number desc limit 0, 1";
-$exec3 = mysqli_query($GLOBALS["___mysqli_ston"], $query3) or die(mysqli_error($GLOBALS["___mysqli_ston"]));
-$num3 = mysqli_num_rows($exec3);
-$res3 = mysqli_fetch_array($exec3);
-$billnumber = $res3['docno'];
-$billdigit=strlen($billnumber);
-if($num3 >0)
-{
-
-	$query24 = "select * from purchase_rfq order by auto_number desc limit 0, 1";
-$exec24 = mysqli_query($GLOBALS["___mysqli_ston"], $query24) or die ("Error in Query2".mysqli_error($GLOBALS["___mysqli_ston"]));
-$res24 = mysqli_fetch_array($exec24);
-$billnumber = $res24['docno'];
-$billdigit=strlen($billnumber);
-	$billnumbercode = substr($billnumber,$paynowbillprefix1, $billdigit);
-	
-	 $billnumbercode = intval($billnumbercode);
-
-	$billnumbercode = $billnumbercode + 1;
-     
-	$maxanum = $billnumbercode;
-	
-	
-	$billnumbercode = $paynowbillprefix .$maxanum;
-	$openingbalance = '0.00';
-	
-}
-else
-{
-$query2 = "select * from purchase_rfq order by auto_number desc limit 0, 1";
-$exec2 = mysqli_query($GLOBALS["___mysqli_ston"], $query2) or die ("Error in Query2".mysqli_error($GLOBALS["___mysqli_ston"]));
-$res2 = mysqli_fetch_array($exec2);
-$billnumber = $res2["docno"];
-$billdigit=strlen($billnumber);
-if ($billnumber == '')
-{
-	$billnumbercode =$paynowbillprefix.'1';
-	$openingbalance = '0.00';
-}
-}
-
-foreach($_POST['docno'] as $key => $value)
-{
-$docno = $_POST['docno'][$key];
-foreach($_POST['select'] as $check)
-		{
-		$acknow=$check;
-		if($acknow == $docno)
-		{
-		$query58 = "update purchase_rfq set status='completed' where status='Process'";
-		$exec58 = mysqli_query($GLOBALS["___mysqli_ston"], $query58) or die(mysqli_error($GLOBALS["___mysqli_ston"]));
-
-$query33 = "select * from purchase_rfqrequest where docno='$docno' and approvalstatus='approved' and grandapprovalstatus='approved' group by medicinecode";
-$exec33 = mysqli_query($GLOBALS["___mysqli_ston"], $query33) or die(mysqli_error($GLOBALS["___mysqli_ston"]));
-while($res33 = mysqli_fetch_array($exec33))
-{
-$itemname = $res33['medicinename'];
-$itemcode = $res33['medicinecode'];
-
-$query331 = "select sum(quantity) as totalquantity from purchase_rfqrequest where medicinecode = '$itemcode' and docno='$docno' and approvalstatus='approved' and grandapprovalstatus='approved'";
-$exec331 = mysqli_query($GLOBALS["___mysqli_ston"], $query331) or die(mysqli_error($GLOBALS["___mysqli_ston"])); 
-$res331 = mysqli_fetch_array($exec331);
-$quantity = $res331['totalquantity'];
-$rate = $res33['rate'];
-
-$amount = $quantity * $rate;
-$packagequantity = $res33['packagequantity'];
- 
-
-
-$query56="insert into purchase_rfq(companyanum,docno,medicinecode,medicinename,rate,quantity,amount,username, ipaddress, date,packagequantity,status)
-          values('$companyanum','$billnumbercode','$itemcode','$itemname','$rate','$quantity','$amount','$username','$ipaddress','$currentdate','$packagequantity','Process')";
-$exec56 = mysqli_query($GLOBALS["___mysqli_ston"], $query56) or die(mysqli_error($GLOBALS["___mysqli_ston"]));		
-
- $query55="update purchase_rfqrequest set rfqgeneration='completed' where docno='$docno' and medicinecode='$itemcode'";
- $exec55=mysqli_query($GLOBALS["___mysqli_ston"], $query55) or die(mysqli_error($GLOBALS["___mysqli_ston"]));
-  
- 
-}
-}
-}
-}
-
-
-header("location:generaterfq.php?st=success");
-exit;
-}
-
-?>
-<?php
-
-
-if($st == 'success')
-{
-
-header("location:print_generaterfq.php");
-
-}
-?>
-<style type="text/css">
-<!--
-body {
-	margin-left: 0px;
-	margin-top: 0px;
-	background-color: #ecf0f5;
-}
-.bodytext3 {	FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3B3B3C; FONT-FAMILY: Tahoma
-}
-.number
-{
-padding-left:690px;
-text-align:right;
-font-weight:bold;
-}
--->
-</style>
-<link href="css/datepickerstyle.css" rel="stylesheet" type="text/css" />
-<script type="text/javascript" src="js/adddate.js"></script>
-<script type="text/javascript" src="js/adddate2.js"></script>
-<script language="javascript">
-
-function cbcustomername1()
-{
-	document.cbform1.submit();
-}
-
-</script>
-<script type="text/javascript" src="js/autocomplete_customer1.js"></script>
-<script type="text/javascript" src="js/autosuggest3.js"></script>
-<script type="text/javascript">
-window.onload = function () 
-{
-	var oTextbox = new AutoSuggestControl(document.getElementById("searchcustomername"), new StateSuggestions());        
-}
-
-
-function disableEnterKey(varPassed)
-{
-	//alert ("Back Key Press");
-	if (event.keyCode==8) 
-	{
-		event.keyCode=0; 
-		return event.keyCode 
-		return false;
-	}
-	
-	var key;
-	if(window.event)
-	{
-		key = window.event.keyCode;     //IE
-	}
-	else
-	{
-		key = e.which;     //firefox
-	}
-
-	if(key == 13) // if enter key press
-	{
-		//alert ("Enter Key Press2");
-		return false;
-	}
-	else
-	{
-		return true;
-	}
-}
-
-
-function loadprintpage1(banum)
-{
-	var banum = banum;
-	window.open("print_bill1_op1.php?billautonumber="+banum+"","Window"+banum+"",'width=722,height=950,toolbar=0,scrollbars=1,location=0,bar=0,menubar=1,resizable=1,left=25,top=25');
-	//window.open("message_popup.php?anum="+anum,"Window1",'toolbar=0,scrollbars=0,location=0,statusbar=0,menubar=0,resizable=1,width=200,height=400,left=312,top=84');
-}
-
-
-</script>
-<link rel="stylesheet" type="text/css" href="css/autosuggest.css" />        
-<style type="text/css">
-<!--
-.bodytext31 {FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3b3b3c; FONT-FAMILY: Tahoma
-}
--->
-</style>
-</head>
-
-<body>
-<form method="post" name="form1" action="generaterfq.php">
-<?php 
-$query34="select * from purchase_rfqrequest where approvalstatus='approved' and grandapprovalstatus='approved' and rfqgeneration='' group by docno";
-		$exec34=mysqli_query($GLOBALS["___mysqli_ston"], $query34) or die(mysqli_error($GLOBALS["___mysqli_ston"]));
-			$resnw1=mysqli_num_rows($exec34);
-?>
-<table width="100%" border="0" cellspacing="0" cellpadding="2">
-  <tr>
-    <td colspan="9" bgcolor="#ecf0f5"><?php include ("includes/alertmessages1.php"); ?></td>
-  </tr>
-  <tr>
-    <td colspan="9" bgcolor="#ecf0f5"><?php include ("includes/title1.php"); ?></td>
-  </tr>
-  <tr>
-    <td colspan="9" bgcolor="#ecf0f5"><?php include ("includes/menu1.php"); ?></td>
-  </tr>
-  <tr>
-    <td colspan="9">&nbsp;</td>
-  </tr>
-  <tr>
-    <td width="1%">&nbsp;</td>
-    <td width="99%" valign="top"><table width="116%" border="0" cellspacing="0" cellpadding="0">
-      <tr>
-        <td><table id="AutoNumber3" style="BORDER-COLLAPSE: collapse" 
-            bordercolor="#666666" cellspacing="0" cellpadding="4" width="900" 
-            align="left" border="0">
-          <tbody>
-            <tr>
-             
-              <td colspan="9" bgcolor="#ecf0f5" class="bodytext31"><script language="javascript">
-				function printbillreport1()
-				{
-					window.open("print_collectionpendingreport1hospital.php?<?php echo $urlpath; ?>","Window1",'width=900,height=950,toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=1,resizable=1,left=25,top=25');
-					//window.open("message_popup.php?anum="+anum,"Window1",'toolbar=0,scrollbars=0,location=0,statusbar=0,menubar=0,resizable=1,width=200,height=400,left=312,top=84');
-				}
-				function printbillreport2()
-				{
-					window.location = "dbexcelfiles/CollectionPendingByPatientHospital.xls"
-				}
-				</script>
-                <!--<input onClick="javascript:printbillreport1()" name="resetbutton2" type="submit" id="resetbutton2"  style="border: 1px solid #001E6A" value="Print Report" />-->
-                <div align="left"><strong>Generate RFQ</strong><label class="number"><<<?php echo $resnw1;?>>></label></div></td>
-              </tr>
-			  
-			<?php
-			if ($st == 'success' && $billautonumber != '')
-			{
-			?>
-            <tr>
-              <td class="bodytext31" valign="center"  align="left" bgcolor="#ffffff">&nbsp;</td>
-              <td colspan="8"  align="left" valign="center" bgcolor="#FFFF00" class="bodytext31">&nbsp;
-			  * Success. Bill Saved. &nbsp;&nbsp;&nbsp;
-			  <input name="billprint" type="button" onClick="return loadprintpage1('<?php echo $billautonumber; ?>')" value="Click Here To Print Invoice" class="button" style="border: 1px solid #001E6A"/>
-			  </td>
-              <td  align="left" valign="center" bgcolor="#ffffff" class="bodytext31">&nbsp;</td>
-            </tr>
-			<?php
-			}
-			?>
-			
-            <tr>
-              <td class="bodytext31" valign="center"  align="left" 
-                bgcolor="#ffffff"><div align="center"><strong>No.</strong></div></td>
-				 <td width="13%"  align="left" valign="center" 
-                bgcolor="#ffffff" class="bodytext31"><div align="center"><strong>Date </strong></div></td>
-				<td width="13%"  align="left" valign="center" 
-                bgcolor="#ffffff" class="bodytext31"><div align="center"><strong>From</strong></div></td>
-				<td width="13%"  align="left" valign="center" 
-                bgcolor="#ffffff" class="bodytext31"><div align="center"><strong>DOC No</strong></div></td>
-              <td width="20%"  align="left" valign="center" 
-                bgcolor="#ffffff" class="bodytext31"><div align="center"><strong>Status</strong></div></td>
-				<td width="20%"  align="left" valign="center" 
-                bgcolor="#ffffff" class="bodytext31"><div align="center"><strong>Select</strong></div></td>
-              
-              </tr>
-			
-            
-			<?php
-			$colorloopcount = '';
-			$sno = '';
-		$query34="select * from purchase_rfqrequest where approvalstatus='approved' and grandapprovalstatus='approved' and rfqgeneration='' group by docno";
-		$exec34=mysqli_query($GLOBALS["___mysqli_ston"], $query34) or die(mysqli_error($GLOBALS["___mysqli_ston"]));
-		while($res34=mysqli_fetch_array($exec34))
-			{
-			$date=$res34['date'];
-			$user=$res34['username'];
-			$docno=$res34['docno'];
-			$colorloopcount = $colorloopcount + 1;
-			$showcolor = ($colorloopcount & 1); 
-			if ($showcolor == 0)
-			{
-				//echo "if";
-				$colorcode = 'bgcolor="#CBDBFA"';
-			}
-			else
-			{
-				//echo "else";
-				$colorcode = 'bgcolor="#ecf0f5"';
-			} 
-			?>
-			  <tr <?php echo $colorcode; ?>>
-              <td class="bodytext31" valign="center"  align="left"><div align="center"><?php echo $sno = $sno + 1; ?></div></td>
-			   <td class="bodytext31" valign="center"  align="left">
-			    <div align="center"><?php echo $date; ?></div></td>
-				<td class="bodytext31" valign="center"  align="left">
-			    <div align="center"><?php echo $user; ?></div></td>
-				<td class="bodytext31" valign="center"  align="left">
-			    <div align="center"><?php echo $docno; ?></div></td>
-				<input type="hidden" name="docno[]" value="<?php echo $docno; ?>"> 
-              <td class="bodytext31" valign="center"  align="left">
-			  <div class="bodytext31" align="center"><?php echo 'Approved' ?></div></td>
-			   <td class="bodytext31" valign="center"  align="left">
-			  <div class="bodytext31" align="center"><input type="checkbox" name="select[]" id="select" checked="checked" value="<?php echo $docno; ?>"></div></td>
-                       </tr>
-			  <?php
-			}
-			?>
-            <tr>
-              <td class="bodytext31" valign="center"  align="left" 
-                bgcolor="#ecf0f5">&nbsp;</td>
-              <td class="bodytext31" valign="center"  align="left" 
-                bgcolor="#ecf0f5">&nbsp;</td>
-              <td class="bodytext31" valign="center"  align="left" 
-                bgcolor="#ecf0f5">&nbsp;</td>
-              <td class="bodytext31" valign="center"  align="left" 
-                bgcolor="#ecf0f5">&nbsp;</td>
-              <td class="bodytext31" valign="center"  align="left" 
-                bgcolor="#ecf0f5">&nbsp;</td>
-				 <td class="bodytext31" valign="center"  align="left" 
-                bgcolor="#ecf0f5">&nbsp;</td>
-             		
-              </tr>
-          </tbody>
-        </table></td>
-      </tr>
-	  <tr>
-	   <td class="bodytext31" valign="center"  align="left">&nbsp;</td>
-	  </tr>
-	  <tr>
-	  <td class="bodytext31" valign="center"  align="center">
-	   <input type="hidden" name="frm1submit1" value="frm1submit1" />
-	   <input type="hidden" name="doccno" value="<?php echo $billnumbercode; ?>">
-	    <input type="submit" name="submit" value="Generate RFQ"></td>
-	  </tr>
-    </table>
-</table>
-</form>
-<?php include ("includes/footer1.php"); ?>
-
-</body>
-</html>
-
+<?php
+session_start();
+include ("includes/loginverify.php");
+include ("db/db_connect.php");
+include ("includes/check_user_access.php");
+
+$username = $_SESSION["username"];
+$companyanum = $_SESSION["companyanum"];
+$companyname = $_SESSION["companyname"];
+
+$ipaddress = $_SERVER["REMOTE_ADDR"];
+$updatedatetime = date('Y-m-d H:i:s');
+$errmsg = "";
+$bgcolorcode = "";
+
+$transactiondatefrom = date('Y-m-d', strtotime('-1 month'));
+$transactiondateto = date('Y-m-d');
+$currentdate = date("Y-m-d");
+
+if (isset($_REQUEST["st"])) { 
+    $st = $_REQUEST["st"]; 
+} else { 
+    $st = ""; 
+}
+
+if (isset($_REQUEST["billautonumber"])) { 
+    $billautonumber = $_REQUEST["billautonumber"]; 
+} else { 
+    $billautonumber = ""; 
+}
+
+if (isset($_REQUEST["frm1submit1"])) { 
+    $frm1submit1 = $_REQUEST["frm1submit1"]; 
+} else { 
+    $frm1submit1 = ""; 
+}
+
+if ($frm1submit1 == 'frm1submit1') {
+    $paynowbillprefix = 'RFQ-';
+    $paynowbillprefix1 = strlen($paynowbillprefix);
+    
+    $query3 = "select * from purchase_rfq order by auto_number desc limit 0, 1";
+    $exec3 = mysqli_query($GLOBALS["___mysqli_ston"], $query3) or die(mysqli_error($GLOBALS["___mysqli_ston"]));
+    $num3 = mysqli_num_rows($exec3);
+    $res3 = mysqli_fetch_array($exec3);
+    $billnumber = $res3['docno'];
+    $billdigit = strlen($billnumber);
+
+    if($num3 > 0) {
+        $query24 = "select * from purchase_rfq order by auto_number desc limit 0, 1";
+        $exec24 = mysqli_query($GLOBALS["___mysqli_ston"], $query24) or die ("Error in Query2".mysqli_error($GLOBALS["___mysqli_ston"]));
+        $res24 = mysqli_fetch_array($exec24);
+        $billnumber = $res24['docno'];
+        $billdigit = strlen($billnumber);
+        $billnumbercode = substr($billnumber, $paynowbillprefix1, $billdigit);
+        $billnumbercode = intval($billnumbercode);
+        $billnumbercode = $billnumbercode + 1;
+        $maxanum = $billnumbercode;
+        $billnumbercode = $paynowbillprefix . $maxanum;
+        $openingbalance = '0.00';
+    } else {
+        $query2 = "select * from purchase_rfq order by auto_number desc limit 0, 1";
+        $exec2 = mysqli_query($GLOBALS["___mysqli_ston"], $query2) or die ("Error in Query2".mysqli_error($GLOBALS["___mysqli_ston"]));
+        $res2 = mysqli_fetch_array($exec2);
+        $billnumber = $res2["docno"];
+        $billdigit = strlen($billnumber);
+        
+        if ($billnumber == '') {
+            $billnumbercode = $paynowbillprefix . '1';
+            $openingbalance = '0.00';
+        }
+    }
+
+    foreach($_POST['docno'] as $key => $value) {
+        $docno = $_POST['docno'][$key];
+        
+        foreach($_POST['select'] as $check) {
+            $acknow = $check;
+            
+            if($acknow == $docno) {
+                $query58 = "update purchase_rfq set status='completed' where status='Process'";
+                $exec58 = mysqli_query($GLOBALS["___mysqli_ston"], $query58) or die(mysqli_error($GLOBALS["___mysqli_ston"]));
+
+                $query33 = "select * from purchase_rfqrequest where docno='$docno' and approvalstatus='approved' and grandapprovalstatus='approved' group by medicinecode";
+                $exec33 = mysqli_query($GLOBALS["___mysqli_ston"], $query33) or die(mysqli_error($GLOBALS["___mysqli_ston"]));
+                
+                while($res33 = mysqli_fetch_array($exec33)) {
+                    $itemname = $res33['medicinename'];
+                    $itemcode = $res33['medicinecode'];
+
+                    $query331 = "select sum(quantity) as totalquantity from purchase_rfqrequest where medicinecode = '$itemcode' and docno='$docno' and approvalstatus='approved' and grandapprovalstatus='approved'";
+                    $exec331 = mysqli_query($GLOBALS["___mysqli_ston"], $query331) or die(mysqli_error($GLOBALS["___mysqli_ston"])); 
+                    $res331 = mysqli_fetch_array($exec331);
+                    $quantity = $res331['totalquantity'];
+                    $rate = $res33['rate'];
+                    $amount = $quantity * $rate;
+                    $packagequantity = $res33['packagequantity'];
+
+                    $query56 = "insert into purchase_rfq(companyanum,docno,medicinecode,medicinename,rate,quantity,amount,username, ipaddress, date,packagequantity,status)
+                              values('$companyanum','$billnumbercode','$itemcode','$itemname','$rate','$quantity','$amount','$username','$ipaddress','$currentdate','$packagequantity','Process')";
+                    $exec56 = mysqli_query($GLOBALS["___mysqli_ston"], $query56) or die(mysqli_error($GLOBALS["___mysqli_ston"]));		
+
+                    $query55 = "update purchase_rfqrequest set rfqgeneration='completed' where docno='$docno' and medicinecode='$itemcode'";
+                    $exec55 = mysqli_query($GLOBALS["___mysqli_ston"], $query55) or die(mysqli_error($GLOBALS["___mysqli_ston"]));
+                }
+            }
+        }
+    }
+
+    $errmsg = "RFQ generated successfully.";
+    $bgcolorcode = 'success';
+    header("location:generaterfq.php?st=success");
+    exit;
+}
+
+// Handle success redirect
+if($st == 'success') {
+    header("location:print_generaterfq.php");
+    exit;
+}
+
+// Check for URL messages
+if (isset($_GET['msg'])) {
+    if ($_GET['msg'] == 'success') {
+        $errmsg = "RFQ generated successfully.";
+        $bgcolorcode = 'success';
+    }
+}
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generate RFQ - MedStar</title>
+    
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <!-- Modern CSS -->
+    <link rel="stylesheet" href="css/generaterfq-modern.css?v=<?php echo time(); ?>">
+    
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- Date picker styles -->
+    <link href="css/datepickerstyle.css" rel="stylesheet" type="text/css" />
+    
+    <!-- AutoComplete styles -->
+    <link rel="stylesheet" type="text/css" href="css/autosuggest.css" />
+    
+    <!-- JavaScript files -->
+    <script type="text/javascript" src="js/adddate.js"></script>
+    <script type="text/javascript" src="js/adddate2.js"></script>
+    <script type="text/javascript" src="js/autocomplete_customer1.js"></script>
+    <script type="text/javascript" src="js/autosuggest3.js"></script>
+</head>
+<body>
+    <!-- Hospital Header -->
+    <header class="hospital-header">
+        <h1 class="hospital-title">🏥 MedStar Hospital Management</h1>
+        <p class="hospital-subtitle">Advanced Healthcare Management Platform</p>
+    </header>
+
+    <!-- User Information Bar -->
+    <div class="user-info-bar">
+        <div class="user-welcome">
+            <span class="welcome-text">Welcome, <strong><?php echo htmlspecialchars($username); ?></strong></span>
+            <span class="location-info">📍 Company: <?php echo htmlspecialchars($companyname); ?></span>
+        </div>
+        <div class="user-actions">
+            <a href="mainmenu1.php" class="btn btn-outline">🏠 Main Menu</a>
+            <a href="logout.php" class="btn btn-outline">🚪 Logout</a>
+        </div>
+    </div>
+
+    <!-- Navigation Breadcrumb -->
+    <nav class="nav-breadcrumb">
+        <a href="mainmenu1.php">🏠 Home</a>
+        <span>→</span>
+        <span>Generate RFQ</span>
+    </nav>
+
+    <!-- Floating Menu Toggle -->
+    <div id="menuToggle" class="floating-menu-toggle">
+        <i class="fas fa-bars"></i>
+    </div>
+
+    <!-- Main Container with Sidebar -->
+    <div class="main-container-with-sidebar">
+        <!-- Left Sidebar -->
+        <aside id="leftSidebar" class="left-sidebar">
+            <div class="sidebar-header">
+                <h3>Quick Navigation</h3>
+                <button id="sidebarToggle" class="sidebar-toggle">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <ul class="nav-list">
+                    <li class="nav-item">
+                        <a href="mainmenu1.php" class="nav-link">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="purchase_rfqrequest.php" class="nav-link">
+                            <i class="fas fa-shopping-cart"></i>
+                            <span>Purchase RFQ Request</span>
+                        </a>
+                    </li>
+                    <li class="nav-item active">
+                        <a href="generaterfq.php" class="nav-link">
+                            <i class="fas fa-file-invoice"></i>
+                            <span>Generate RFQ</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="purchase_rfq.php" class="nav-link">
+                            <i class="fas fa-list"></i>
+                            <span>RFQ List</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Alert Container -->
+            <div id="alertContainer">
+                <?php if (!empty($errmsg)): ?>
+                    <div class="alert alert-<?php echo $bgcolorcode === 'success' ? 'success' : ($bgcolorcode === 'failed' ? 'error' : 'info'); ?>">
+                        <i class="fas fa-<?php echo $bgcolorcode === 'success' ? 'check-circle' : ($bgcolorcode === 'failed' ? 'exclamation-triangle' : 'info-circle'); ?> alert-icon"></i>
+                        <span><?php echo htmlspecialchars($errmsg); ?></span>
+                    </div>
+                <?php endif; ?>
+            </div>
+
+            <!-- Page Header -->
+            <div class="page-header">
+                <div class="page-header-content">
+                    <h2>Generate RFQ</h2>
+                    <p>Generate Request for Quotation (RFQ) from approved purchase requests.</p>
+                </div>
+                <div class="page-header-actions">
+                    <button type="button" class="btn btn-secondary" onclick="refreshPage()">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                    <button type="button" class="btn btn-outline" onclick="exportToExcel()">
+                        <i class="fas fa-download"></i> Export
+                    </button>
+                </div>
+            </div>
+
+            <!-- RFQ Generation Form -->
+            <div class="rfq-form-section">
+                <div class="rfq-form-header">
+                    <i class="fas fa-file-invoice rfq-form-icon"></i>
+                    <h3 class="rfq-form-title">Select Approved Requests</h3>
+                </div>
+                
+                <form method="post" name="form1" action="generaterfq.php" class="rfq-form">
+                    <?php 
+                    $query34 = "select * from purchase_rfqrequest where approvalstatus='approved' and grandapprovalstatus='approved' and rfqgeneration='' group by docno";
+                    $exec34 = mysqli_query($GLOBALS["___mysqli_ston"], $query34) or die(mysqli_error($GLOBALS["___mysqli_ston"]));
+                    $resnw1 = mysqli_num_rows($exec34);
+                    ?>
+
+                    <div class="form-info">
+                        <div class="info-item">
+                            <i class="fas fa-info-circle"></i>
+                            <span>Total Approved Requests: <strong><?php echo $resnw1; ?></strong></span>
+                        </div>
+                    </div>
+
+                    <?php if ($resnw1 > 0): ?>
+                        <div class="table-container">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>
+                                            <input type="checkbox" id="selectAll" onchange="toggleAllCheckboxes()">
+                                        </th>
+                                        <th>#</th>
+                                        <th>Date</th>
+                                        <th>From</th>
+                                        <th>DOC No</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php
+                                    $colorloopcount = 0;
+                                    $sno = 0;
+                                    $query34 = "select * from purchase_rfqrequest where approvalstatus='approved' and grandapprovalstatus='approved' and rfqgeneration='' group by docno";
+                                    $exec34 = mysqli_query($GLOBALS["___mysqli_ston"], $query34) or die(mysqli_error($GLOBALS["___mysqli_ston"]));
+                                    
+                                    while($res34 = mysqli_fetch_array($exec34)) {
+                                        $date = $res34['date'];
+                                        $user = $res34['username'];
+                                        $docno = $res34['docno'];
+                                        $colorloopcount++;
+                                        $sno++;
+                                        ?>
+                                        <tr>
+                                            <td>
+                                                <input type="checkbox" name="select[]" class="select-checkbox" 
+                                                       value="<?php echo htmlspecialchars($docno); ?>" checked>
+                                            </td>
+                                            <td><?php echo $sno; ?></td>
+                                            <td><?php echo htmlspecialchars($date); ?></td>
+                                            <td><?php echo htmlspecialchars($user); ?></td>
+                                            <td>
+                                                <span class="doc-number"><?php echo htmlspecialchars($docno); ?></span>
+                                                <input type="hidden" name="docno[]" value="<?php echo htmlspecialchars($docno); ?>">
+                                            </td>
+                                            <td>
+                                                <span class="status-badge status-approved">Approved</span>
+                                            </td>
+                                        </tr>
+                                        <?php
+                                    }
+                                    ?>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="form-actions">
+                            <input type="hidden" name="frm1submit1" value="frm1submit1" />
+                            <input type="hidden" name="doccno" value="<?php echo isset($billnumbercode) ? $billnumbercode : ''; ?>">
+                            <button type="submit" name="submit" class="btn btn-primary">
+                                <i class="fas fa-file-invoice"></i>
+                                Generate RFQ
+                            </button>
+                            <button type="button" class="btn btn-secondary" onclick="resetForm()">
+                                <i class="fas fa-undo"></i> Reset
+                            </button>
+                        </div>
+                    <?php else: ?>
+                        <div class="empty-state">
+                            <i class="fas fa-inbox"></i>
+                            <h3>No Approved Requests</h3>
+                            <p>There are no approved purchase requests available for RFQ generation.</p>
+                            <a href="purchase_rfqrequest.php" class="btn btn-primary">
+                                <i class="fas fa-plus"></i> Create New Request
+                            </a>
+                        </div>
+                    <?php endif; ?>
+                </form>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modern JavaScript -->
+    <script src="js/generaterfq-modern.js?v=<?php echo time(); ?>"></script>
+</body>
+</html>

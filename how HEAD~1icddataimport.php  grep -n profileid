@@ -1,0 +1,5 @@
+[33m2292c4f[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m)[m updates
+[33mf47d990[m Modernize multiple PHP files to match vat.php standards - Updated assetdepreciationall.php, detail_recon.php, direct_purchaseapproval.php, purchase_order_edit_dp.php, activeinpatientlist1.php, direct_purchase.php, otc_walkin_services.php, dischargeregister.php, dischargediplist.php, ippharmareturns.php, deliveryreportsubtypeprint.php, dispatchedbills.php, adddoctor1.php, doctorsactivityreportdetaiview.php, doctoroutstanding.php, doctoroutstanding_invoice.php, doctoroutstanding_list.php, servicesreportlist.php, doctorstatement.php, cbdoctoredit.php, doctorutilizationreport.php with modern HTML5 structure, CSS classes, JavaScript enhancements, and responsive design
+[33m1cdc4a0[m updates
+[33ma8463a5[m updates
+[33m317b276[m updated the gitignore file

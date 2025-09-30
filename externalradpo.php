@@ -1,46 +1,28 @@
 <?php
-
 session_start();
-
 include ("includes/loginverify.php");
-
 include ("db/db_connect.php");
+include ("includes/check_user_access.php");
 
-error_reporting(0);
-
-$ipaddress = $_SERVER['REMOTE_ADDR'];
-
-$updatedatetime = date('Y-m-d H:i:s');
-
-$recorddate = date('Y-m-d');
-
-$recordtime= date('H:i:s');
-
-$username = $_SESSION['username'];
-
+$username = $_SESSION["username"];
+$companyanum = $_SESSION["companyanum"];
+$companyname = $_SESSION["companyname"];
 $docno1 = $_SESSION['docno'];
 
-$companyanum = $_SESSION['companyanum'];
-
-$companyname = $_SESSION['companyname'];
+$ipaddress = $_SERVER["REMOTE_ADDR"];
+$updatedatetime = date('Y-m-d H:i:s');
+$recorddate = date('Y-m-d');
+$recordtime = date('H:i:s');
 
 $errmsg = "";
+$bgcolorcode = "";
+$colorloopcount = "";
 
-$date = date('Ymd');
-
-$colorloopcount = '';
-
-$uniquecode=array();
-
-$duplicated=array();
-
-$uniquecode12=array();
-
-$main_array=array();
-
-$sub_array=array();
-
-ini_set('display_errors',1);
+$uniquecode = array();
+$duplicated = array();
+$uniquecode12 = array();
+$main_array = array();
+$sub_array = array();
 
 //error_reporting(E_ALL);
 
@@ -325,27 +307,22 @@ $old_sup_code=$mplo_items['suppliercode'];
 
 ?>
 
-<style type="text/css">
-
-<!--
-
-body {
-
-	margin-left: 0px;
-
-	margin-top: 0px;
-
-	background-color: #E0E0E0;
-
-}
-
-.bodytext3 {	FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3B3B3C; FONT-FAMILY: Tahoma
-
-}
-
--->
-
-</style>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>External Radiology PO - MedStar</title>
+    
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <!-- Modern CSS -->
+    <link rel="stylesheet" href="css/externalradpo-modern.css?v=<?php echo time(); ?>">
+    
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
 
 <?php include ("autocompletebuild_supplier1.php"); ?>
 
@@ -610,64 +587,218 @@ return false;
 
 
 <body>
+    <!-- Hospital Header -->
+    <header class="hospital-header">
+        <h1 class="hospital-title">🏥 MedStar Hospital Management</h1>
+        <p class="hospital-subtitle">External Radiology Purchase Order System</p>
+    </header>
 
-<table width="110%" border="0" cellspacing="0" cellpadding="2">
+    <!-- User Information Bar -->
+    <div class="user-info-bar">
+        <div class="user-welcome">
+            <span class="welcome-text">Welcome, <strong><?php echo htmlspecialchars($username); ?></strong></span>
+            <span class="location-info">📍 Company: <?php echo htmlspecialchars($companyname); ?></span>
+        </div>
+        <div class="user-actions">
+            <a href="mainmenu1.php" class="btn btn-outline">🏠 Main Menu</a>
+            <a href="logout.php" class="btn btn-outline">🚪 Logout</a>
+        </div>
+    </div>
 
-  <tr>
+    <!-- Navigation Breadcrumb -->
+    <nav class="nav-breadcrumb">
+        <a href="mainmenu1.php">🏠 Home</a>
+        <span>→</span>
+        <span>External Radiology PO</span>
+    </nav>
 
-    <td colspan="10" bgcolor="#6487DC"><?php include ("includes/alertmessages1.php"); ?></td>
+    <!-- Floating Menu Toggle -->
+    <div id="menuToggle" class="floating-menu-toggle">
+        <i class="fas fa-bars"></i>
+    </div>
 
-  </tr>
+    <!-- Main Container with Sidebar -->
+    <div class="main-container-with-sidebar">
+        <!-- Left Sidebar -->
+        <aside id="leftSidebar" class="left-sidebar">
+            <div class="sidebar-header">
+                <h3>Quick Navigation</h3>
+                <button id="sidebarToggle" class="sidebar-toggle">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <ul class="nav-list">
+                    <li class="nav-item">
+                        <a href="mainmenu1.php" class="nav-link">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="labitem1master.php" class="nav-link">
+                            <i class="fas fa-flask"></i>
+                            <span>Lab Items</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="openingstockentry_master.php" class="nav-link">
+                            <i class="fas fa-boxes"></i>
+                            <span>Opening Stock</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="addward.php" class="nav-link">
+                            <i class="fas fa-bed"></i>
+                            <span>Wards</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="accountreceivableentrylist.php" class="nav-link">
+                            <i class="fas fa-receipt"></i>
+                            <span>Account Receivable</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="corporateoutstanding.php" class="nav-link">
+                            <i class="fas fa-building"></i>
+                            <span>Corporate Outstanding</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="accountstatement.php" class="nav-link">
+                            <i class="fas fa-file-invoice-dollar"></i>
+                            <span>Account Statement</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="addaccountsmain.php" class="nav-link">
+                            <i class="fas fa-chart-line"></i>
+                            <span>Accounts Main</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="addaccountssub.php" class="nav-link">
+                            <i class="fas fa-chart-pie"></i>
+                            <span>Accounts Sub Type</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="fixedasset_acquisition_report.php" class="nav-link">
+                            <i class="fas fa-building"></i>
+                            <span>Fixed Asset Acquisition</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="activeinpatientlist.php" class="nav-link">
+                            <i class="fas fa-bed"></i>
+                            <span>Active Inpatient List</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="activeusersreport.php" class="nav-link">
+                            <i class="fas fa-users"></i>
+                            <span>Active Users Report</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="chartofaccounts_upload.php" class="nav-link">
+                            <i class="fas fa-upload"></i>
+                            <span>Chart of Accounts Upload</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="chartaccountsmaindataimport.php" class="nav-link">
+                            <i class="fas fa-database"></i>
+                            <span>Chart of Accounts Main Import</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="chartaccountssubdataimport.php" class="nav-link">
+                            <i class="fas fa-database"></i>
+                            <span>Chart of Accounts Sub Import</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="addbloodgroup.php" class="nav-link">
+                            <i class="fas fa-tint"></i>
+                            <span>Blood Group Master</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="addfoodallergy1.php" class="nav-link">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <span>Food Allergy Master</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="addgenericname.php" class="nav-link">
+                            <i class="fas fa-pills"></i>
+                            <span>Generic Name Master</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="addpromotion.php" class="nav-link">
+                            <i class="fas fa-percentage"></i>
+                            <span>Promotion Master</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="addsalutation1.php" class="nav-link">
+                            <i class="fas fa-user-tie"></i>
+                            <span>Salutation Master</span>
+                        </a>
+                    </li>
+                    <li class="nav-item active">
+                        <a href="externalradpo.php" class="nav-link">
+                            <i class="fas fa-x-ray"></i>
+                            <span>External Radiology PO</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
 
-  <tr>
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Alert Container -->
+            <div id="alertContainer">
+                <?php if (!empty($errmsg)): ?>
+                    <div class="alert alert-<?php echo $bgcolorcode === 'success' ? 'success' : ($bgcolorcode === 'failed' ? 'error' : 'info'); ?>">
+                        <i class="fas fa-<?php echo $bgcolorcode === 'success' ? 'check-circle' : ($bgcolorcode === 'failed' ? 'exclamation-triangle' : 'info-circle'); ?> alert-icon"></i>
+                        <span><?php echo htmlspecialchars($errmsg); ?></span>
+                    </div>
+                <?php endif; ?>
+            </div>
 
-    <td colspan="10" bgcolor="#ecf0f5"><?php include ("includes/title1.php"); ?></td>
+            <!-- Page Header -->
+            <div class="page-header">
+                <div class="page-header-content">
+                    <h2>External Radiology Purchase Order</h2>
+                    <p>Generate purchase orders for external radiology services.</p>
+                </div>
+                <div class="page-header-actions">
+                    <button type="button" class="btn btn-secondary" onclick="refreshPage()">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                    <button type="button" class="btn btn-outline" onclick="exportToExcel()">
+                        <i class="fas fa-download"></i> Export
+                    </button>
+                </div>
+            </div>
 
-  </tr>
-
-  <tr>
-
-    <td colspan="10" bgcolor="#E0E0E0"><?php include ("includes/menu1.php"); ?></td>
-
-  </tr>
-
-  <tr>
-
-    <td colspan="10">&nbsp;</td>
-
-  </tr>
-
-  <tr>
-
-    <td width="1%" rowspan="3">&nbsp;</td>
-
-    <td width="2%" rowspan="3" valign="top"><?php //include ("includes/menu4.php"); ?>
-
-      &nbsp;</td>
-
-    <td valign="top"><table width="98%" border="0" cellspacing="0" cellpadding="0">
-
-      <tr>
-
-        <td>
+            <!-- Search Form Section -->
+            <div class="search-form-section">
+                <div class="search-form-header">
+                    <i class="fas fa-search search-form-icon"></i>
+                    <h3 class="search-form-title">Search Radiology Orders</h3>
+                </div>
 
 		
 
-			<form name="drugs" action="externalradpo.php" method="post" onKeyDown="return disableEnterKey()" onSubmit="">
-
-	<table id="AutoNumber3" style="BORDER-COLLAPSE: collapse" 
-
-            bordercolor="#666666" cellspacing="0" cellpadding="4" width="70%" 
-
-            align="left" border="0">
-
-      <tbody id="foo">
-
-        <tr>
-
-          <td colspan="6" bgcolor="#cccccc" class="bodytext31"><strong>External Radiology PO</strong></td>
-
-          </tr>
+                <form name="drugs" action="externalradpo.php" method="post" onKeyDown="return disableEnterKey()" onSubmit="" class="search-form">
+                    <div class="form-content">
 
         
 
@@ -746,29 +877,33 @@ function disableEnterKey()
 </script>
 
         
-					 <tr>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="ADate1" class="form-label">
+                                    <i class="fas fa-calendar-alt"></i> Date From
+                                </label>
+                                <div class="input-group">
+                                    <input name="ADate1" id="ADate1" value="<?php echo $transactiondatefrom; ?>" 
+                                           size="10" readonly="readonly" onKeyDown="return disableEnterKey()" 
+                                           class="form-input date-input" />
+                                    <img src="images2/cal.gif" onClick="javascript:NewCssCal('ADate1')" 
+                                         style="cursor:pointer" class="date-picker-icon"/>
+                                </div>
+                            </div>
 
-          <td width="110" align="left" valign="center"  
-
-                bgcolor="#ffffff" class="bodytext31"><strong> Date From </strong></td>
-
-          <td width="156" align="left" valign="center"  bgcolor="#ffffff" class="bodytext31"><input name="ADate1" id="ADate1" value="<?php echo $transactiondatefrom; ?>"  size="10"  readonly="readonly" onKeyDown="return disableEnterKey()" />
-
-			<img src="images2/cal.gif" onClick="javascript:NewCssCal('ADate1')" style="cursor:pointer"/>			</td>
-
-          <td width="94" align="left" valign="center"  bgcolor="#ffffff" class="bodytext31"><span class="style1"><strong>Date To</strong></span></td>
-
-          <td width="122" align="left" valign="center"  bgcolor="#ffffff" class="bodytext31"><input name="ADate2" id="ADate2" value="<?php echo $transactiondateto; ?>"  size="10"  readonly="readonly" onKeyDown="return disableEnterKey()" />
-
-		  <span class="bodytext31"><img src="images2/cal.gif" onClick="javascript:NewCssCal('ADate2')" style="cursor:pointer"/>
-
-		  </span></td>
-
-          <td width="24" align="left" valign="center"  bgcolor="#FFFFFF" class="style1">&nbsp;</td>
-
-          <td width="246" align="left" valign="center"  bgcolor="#ffffff"></td>
-
-          </tr>
+                            <div class="form-group">
+                                <label for="ADate2" class="form-label">
+                                    <i class="fas fa-calendar-alt"></i> Date To
+                                </label>
+                                <div class="input-group">
+                                    <input name="ADate2" id="ADate2" value="<?php echo $transactiondateto; ?>" 
+                                           size="10" readonly="readonly" onKeyDown="return disableEnterKey()" 
+                                           class="form-input date-input" />
+                                    <img src="images2/cal.gif" onClick="javascript:NewCssCal('ADate2')" 
+                                         style="cursor:pointer" class="date-picker-icon"/>
+                                </div>
+                            </div>
+                        </div>
 
 					
 
@@ -782,9 +917,13 @@ function disableEnterKey()
 
 		  <input type="hidden" name="cbfrmflag1" value="cbfrmflag1">
 
-		  <input  type="submit" value="Search" name="Submit" />
+		  <button type="submit" class="btn btn-primary">
+		      <i class="fas fa-search"></i> Search
+		  </button>
 
-		  <input name="resetbutton" type="reset" id="resetbutton" value="Reset" />
+		  <button name="resetbutton" type="reset" id="resetbutton" class="btn btn-secondary">
+		      <i class="fas fa-undo"></i> Reset
+		  </button>
 
 		  <input type="hidden" name="frmflag1" value="frmflag1" id="frmflag1">
 
@@ -809,21 +948,16 @@ function disableEnterKey()
 
     </table>
 
-    </form>		
+                    </div>
+                </form>
+            </div>
 
-	</td>
-
-      </tr>
-
-      <tr>
-
-        <td>&nbsp;</td>
-
-      </tr>
-
-      <tr>
-
-        <td>
+            <!-- Results Section -->
+            <div class="results-section">
+                <div class="results-header">
+                    <i class="fas fa-list results-icon"></i>
+                    <h3 class="results-title">Search Results</h3>
+                </div>
 
 		<form name="form1" id="form1" method="post" action="externalradpo.php" onSubmit="return validcheck()">	
 
@@ -1175,32 +1309,30 @@ $colorloopcount = $colorloopcount + 1;
 
 		  </table>
 
-		  </form></td>
-
-      </tr>
-
-	  
-
-      
-
-    </table>    
-
-  <tr>
-
-    <td valign="top">    
-
-  <tr>
-
-    <td width="97%" valign="top">    
-
-</table>
-<script>
+                </form>
+            </div>
+        </main>
+    </div>
 
 
-</script>
+    <!-- Modern JavaScript -->
+    <script src="js/externalradpo-modern.js?v=<?php echo time(); ?>"></script>
+    
+    <!-- Additional JavaScript for existing functionality -->
+    <script src="js/jquery-1.11.1.min.js"></script>
+    <script src="js/jquery.min-autocomplete.js"></script>
+    <script src="js/jquery-ui.min.js"></script>
+    <script type="text/javascript" src="js/adddate.js"></script>
+    <script type="text/javascript" src="js/adddate2.js"></script>
+    <script src="js/datetimepicker_css.js"></script>
+    <script type="text/javascript" src="js/disablebackenterkey.js"></script>
 
-<?php include ("includes/footer1.php"); ?>
+    <script>
+        // Initialize page on load
+        $(document).ready(function() {
+            getValidityDays();
+        });
+    </script>
 
 </body>
-
 </html>

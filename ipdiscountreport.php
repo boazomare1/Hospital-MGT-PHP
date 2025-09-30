@@ -1,954 +1,381 @@
 <?php
-
 session_start();
-
 include ("includes/loginverify.php");
-
 include ("db/db_connect.php");
 
-
-
 $ipaddress = $_SERVER['REMOTE_ADDR'];
-
 $updatedatetime = date('Y-m-d');
-
 $username = $_SESSION['username'];
-
 $docno = $_SESSION['docno'];
-
 $companyanum = $_SESSION['companyanum'];
-
 $companyname = $_SESSION['companyname'];
-
 $transactiondatefrom = date('Y-m-d', strtotime('-1 month'));
-
 $transactiondateto = date('Y-m-d');
-
- $location=isset($_REQUEST['location'])?$_REQUEST['location']:'';
-
-$locationcode1=isset($_REQUEST['location'])?$_REQUEST['location']:'';
-
+$location = isset($_REQUEST['location']) ? $_REQUEST['location'] : '';
+$locationcode1 = isset($_REQUEST['location']) ? $_REQUEST['location'] : '';
 ?>
 
-<style type="text/css">
-
-<!--
-
-body {
-
-	margin-left: 0px;
-
-	margin-top: 0px;
-
-	background-color: #ecf0f5;
-
-}
-
-.bodytext3 {	FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3B3B3C; FONT-FAMILY: Tahoma
-
-}
-
--->
-
-</style>
-
-<link href="css/datepickerstyle.css" rel="stylesheet" type="text/css" />
-
-<script type="text/javascript" src="js/adddate.js"></script>
-
-<script type="text/javascript" src="js/adddate2.js"></script>
-
-
-
-
-
-<script>
-
-
-
-function ajaxlocationfunction(val)
-
-{ 
-
-if (window.XMLHttpRequest)
-
-					  {// code for IE7+, Firefox, Chrome, Opera, Safari
-
-					  xmlhttp=new XMLHttpRequest();
-
-					  }
-
-					else
-
-					  {// code for IE6, IE5
-
-					  xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
-
-					  }
-
-					xmlhttp.onreadystatechange=function()
-
-					  {
-
-					  if (xmlhttp.readyState==4 && xmlhttp.status==200)
-
-						{
-
-						document.getElementById("ajaxlocation").innerHTML=xmlhttp.responseText;
-
-						}
-
-					  }
-
-					xmlhttp.open("GET","ajax/ajaxgetlocationname.php?loccode="+val,true);
-
-					xmlhttp.send();
-
-}
-
-					
-
-//ajax to get location which is selected ends here
-
-
-
-</script>
-
-<script type="text/javascript">
-
-
-
-
-
-
-
-function disableEnterKey(varPassed)
-
-{
-
-	//alert ("Back Key Press");
-
-	if (event.keyCode==8) 
-
-	{
-
-		event.keyCode=0; 
-
-		return event.keyCode 
-
-		return false;
-
-	}
-
-	
-
-	var key;
-
-	if(window.event)
-
-	{
-
-		key = window.event.keyCode;     //IE
-
-	}
-
-	else
-
-	{
-
-		key = e.which;     //firefox
-
-	}
-
-
-
-	if(key == 13) // if enter key press
-
-	{
-
-		//alert ("Enter Key Press2");
-
-		return false;
-
-	}
-
-	else
-
-	{
-
-		return true;
-
-	}
-
-}
-
-
-
-
-
-function process1backkeypress1()
-
-{
-
-	//alert ("Back Key Press");
-
-	if (event.keyCode==8) 
-
-	{
-
-		event.keyCode=0; 
-
-		return event.keyCode 
-
-		return false;
-
-	}
-
-}
-
-
-
-function disableEnterKey()
-
-{
-
-	//alert ("Back Key Press");
-
-	if (event.keyCode==8) 
-
-	{
-
-		event.keyCode=0; 
-
-		return event.keyCode 
-
-		return false;
-
-	}
-
-	
-
-	var key;
-
-	if(window.event)
-
-	{
-
-		key = window.event.keyCode;     //IE
-
-	}
-
-	else
-
-	{
-
-		key = e.which;     //firefox
-
-	}
-
-	
-
-	if(key == 13) // if enter key press
-
-	{
-
-		return false;
-
-	}
-
-	else
-
-	{
-
-		return true;
-
-	}
-
-
-
-}
-
-
-
-function paymententry1process2()
-
-{
-
-	if (document.getElementById("cbfrmflag1").value == "")
-
-	{
-
-		alert ("Search Bill Number Cannot Be Empty.");
-
-		document.getElementById("cbfrmflag1").focus();
-
-		document.getElementById("cbfrmflag1").value = "<?php echo $cbfrmflag1; ?>";
-
-		return false;
-
-	}
-
-}
-
-
-
-
-
-function funcPrintReceipt1()
-
-{
-
-	//window.open("print_bill1.php?printsource=billpage&&billautonumber="+varBillAutoNumber+"&&companyanum="+varBillCompanyAnum+"&&title1="+varTitleHeader+"&&copy1="+varPrintHeader+"&&billnumber="+varBillNumber+"","OriginalWindow<?php echo $banum; ?>",'width=722,height=950,toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=1,resizable=1,left=25,top=25');
-
-	window.open("print_payment_receipt1.php","OriginalWindow<?php echo $banum; ?>",'width=722,height=950,toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=1,resizable=1,left=25,top=25');
-
-}
-
-
-
-</script>
-
-
-
-<link rel="stylesheet" type="text/css" href="css/autosuggest.css" />        
-
-<style type="text/css">
-
-<!--
-
-.bodytext3 {FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3b3b3c; FONT-FAMILY: Tahoma; text-decoration:none
-
-}
-
-.bodytext31 {FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3b3b3c; FONT-FAMILY: Tahoma; text-decoration:none
-
-}
-
-.bodytext311 {FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3b3b3c; FONT-FAMILY: Tahoma; text-decoration:none
-
-}
-
--->
-
-.bal
-
-{
-
-border-style:none;
-
-background:none;
-
-text-align:right;
-
-}
-
-.number
-
-{
-
-padding-left:900px;
-
-text-align:right;
-
-font-weight:bold;
-
-}
-
-.bali
-
-{
-
-text-align:right;
-
-}
-
-.style1 {font-weight: bold}
-
-</style>
-
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IP Discount Report - MedStar</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="css/ipdiscountreport-modern.css?v=<?php echo time(); ?>">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="css/datepickerstyle.css" rel="stylesheet" type="text/css" />
+    <script type="text/javascript" src="js/adddate.js"></script>
+    <script type="text/javascript" src="js/adddate2.js"></script>
+    <link rel="stylesheet" type="text/css" href="css/autosuggest.css" />
+    <script src="js/datetimepicker_css.js"></script>
 </head>
-
-
-
-<script src="js/datetimepicker_css.js"></script>
-
-
-
 <body>
+    <!-- Hospital Header -->
+    <header class="hospital-header">
+        <h1 class="hospital-title">🏥 MedStar Hospital Management</h1>
+        <p class="hospital-subtitle">Advanced Healthcare Management Platform</p>
+    </header>
 
-<table width="101%" border="0" cellspacing="0" cellpadding="2">
+    <!-- User Information Bar -->
+    <div class="user-info-bar">
+        <div class="user-welcome">
+            <span class="welcome-text">Welcome, <strong><?php echo htmlspecialchars($username); ?></strong></span>
+            <span class="location-info">📍 Company: <?php echo htmlspecialchars($companyname); ?></span>
+        </div>
+        <div class="user-actions">
+            <a href="mainmenu1.php" class="btn btn-outline">🏠 Main Menu</a>
+            <a href="logout.php" class="btn btn-outline">🚪 Logout</a>
+        </div>
+    </div>
 
-  <tr>
+    <!-- Navigation Breadcrumb -->
+    <nav class="nav-breadcrumb">
+        <a href="mainmenu1.php">🏠 Home</a>
+        <span>→</span>
+        <span>IP Discount Report</span>
+    </nav>
 
-    <td colspan="10" bgcolor="#ecf0f5"><?php include ("includes/alertmessages1.php"); ?></td>
+    <!-- Floating Menu Toggle -->
+    <div id="menuToggle" class="floating-menu-toggle">
+        <i class="fas fa-bars"></i>
+    </div>
 
-  </tr>
-
-  <tr>
-
-    <td colspan="10" bgcolor="#ecf0f5"><?php include ("includes/title1.php"); ?></td>
-
-  </tr>
-
-  <tr>
-
-    <td colspan="10" bgcolor="#ecf0f5"><?php include ("includes/menu1.php"); ?></td>
-
-  </tr>
-
-  <tr>
-
-    <td colspan="10">&nbsp;</td>
-
-  </tr>
-
-  <tr>
-
-    <td width="1%">&nbsp;</td>
-
-    <td width="2%" valign="top"><?php //include ("includes/menu4.php"); ?>
-
-      &nbsp;</td>
-
-    <td width="97%" valign="top"><table width="116%" border="0" cellspacing="0" cellpadding="0">
-
-      <tr>
-
-        <td width="860"><form name="cbform1" method="post" action="ipdiscountreport.php">
-
-          <table width="800" border="0" align="left" cellpadding="4" cellspacing="0" bordercolor="#666666" id="AutoNumber3" style="border-collapse: collapse">
-
-          <tbody>
-
-            <tr bgcolor="#011E6A">
-
-              <td colspan="2" bgcolor="#ecf0f5" class="bodytext3"><strong>IP Discount Report </strong></td>
-
-              <td colspan="2" align="right" bgcolor="#ecf0f5" class="bodytext3" id="ajaxlocation"><strong> Location </strong>
-
-             
-
+    <!-- Main Container with Sidebar -->
+    <div class="main-container-with-sidebar">
+        <!-- Left Sidebar -->
+        <aside id="leftSidebar" class="left-sidebar">
+            <div class="sidebar-header">
+                <h3>Quick Navigation</h3>
+                <button id="sidebarToggle" class="sidebar-toggle">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+            </div>
             
-
-                  <?php
-
-						
-
-						if ($location!='')
-
-						{
-
-						$query12 = "select locationname from master_location where locationcode='$location' order by locationname";
-
-						$exec12 = mysqli_query($GLOBALS["___mysqli_ston"], $query12) or die ("Error in Query12".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-						$res12 = mysqli_fetch_array($exec12);
-
-						
-
-						echo $res1location = $res12["locationname"];
-
-						//echo $location;
-
-						}
-
-						else
-
-						{
-
-						$query1 = "select locationname from login_locationdetails where username='$username' and docno='$docno' group by locationname order by locationname";
-
-						$exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-						$res1 = mysqli_fetch_array($exec1);
-
-						
-
-						echo $res1location = $res1["locationname"];
-
-						//$res1locationanum = $res1["locationcode"];
-
-						}
-
-						?>
-
-						
-
-						
-
-                  
-
-                  </td> 
-
-              </tr>
-
-           <tr>
-
-              <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">Patient Name</td>
-
-              <td width="82%" colspan="3" align="left" valign="top"  bgcolor="#FFFFFF"><span class="bodytext3">
-
-                <input name="patient" type="text" id="patient" style="border: 1px solid #001E6A;" value="" size="50" autocomplete="off">
-
-              </span></td>
-
-              </tr>
-
-			    <tr>
-
-              <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">Patientcode</td>
-
-              <td width="82%" colspan="3" align="left" valign="top"  bgcolor="#FFFFFF"><span class="bodytext3">
-
-                <input name="patientcode" type="text" id="patient" style="border: 1px solid #001E6A;" value="" size="50" autocomplete="off">
-
-              </span></td>
-
-              </tr>
-
-			    <tr>
-
-              <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">Visitcode</td>
-
-              <td width="82%" colspan="3" align="left" valign="top"  bgcolor="#FFFFFF"><span class="bodytext3">
-
-                <input name="visitcode" type="text" id="patient" style="border: 1px solid #001E6A;" value="" size="50" autocomplete="off">
-
-              </span></td>
-
-              </tr><!--
-
-			      <tr>
-
-              <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">Doc Number</td>
-
-              <td width="82%" colspan="3" align="left" valign="top"  bgcolor="#FFFFFF"><span class="bodytext3">
-
-                <input name="docnumber" type="text" id="docnumber" style="border: 1px solid #001E6A;" value="" size="50" autocomplete="off">
-
-              </span></td>
-
-              </tr> -->
-
-             <tr>
-
-          <td width="76" align="left" valign="center"  
-
-                bgcolor="#ffffff" class="bodytext31"><strong> Date From </strong></td>
-
-          <td width="123" align="left" valign="center"  bgcolor="#ffffff" class="bodytext31"><input name="ADate1" id="ADate1" style="border: 1px solid #001E6A" value="<?php echo $transactiondatefrom; ?>"  size="10"  readonly="readonly" onKeyDown="return disableEnterKey()" />
-
-			<img src="images2/cal.gif" onClick="javascript:NewCssCal('ADate1')" style="cursor:pointer"/>			</td>
-
-          <td width="51" align="left" valign="center"  bgcolor="#FFFFFF" class="style1"><span class="bodytext31"><strong> Date To </strong></span></td>
-
-          <td width="129" align="left" valign="center"  bgcolor="#ffffff"><span class="bodytext31">
-
-            <input name="ADate2" id="ADate2" style="border: 1px solid #001E6A" value="<?php echo $transactiondateto; ?>"  size="10"  readonly="readonly" onKeyDown="return disableEnterKey()" />
-
-			<img src="images2/cal.gif" onClick="javascript:NewCssCal('ADate2')" style="cursor:pointer"/>
-
-		  </span></td>
-
-          </tr>
-
-           
-
-		   <tr>
-
-  			  <td width="10%" align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">Location</td>
-
-              <td width="30%" align="left" valign="top"  bgcolor="#FFFFFF"><span class="bodytext3">
-
-			 
-
-				 <select name="location" id="location"  onChange=" ajaxlocationfunction(this.value);" >
-
+            <nav class="sidebar-nav">
+                <ul class="nav-list">
+                    <li class="nav-item">
+                        <a href="ipdischargelist.php" class="nav-link">
+                            <i class="fas fa-list"></i>
+                            <span>Discharge List</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="ipdischargerequestlist.php" class="nav-link">
+                            <i class="fas fa-clipboard-list"></i>
+                            <span>Discharge Requests</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="ipdischargelist_tat.php" class="nav-link">
+                            <i class="fas fa-clock"></i>
+                            <span>Discharge TAT</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="ipdiscountlist.php" class="nav-link">
+                            <i class="fas fa-percentage"></i>
+                            <span>% Discount List</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="ipdiscountreport.php" class="nav-link active">
+                            <i class="fas fa-chart-bar"></i>
+                            <span>Discount Report</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="ipdocs.php" class="nav-link">
+                            <i class="fas fa-file-alt"></i>
+                            <span>IP Documents</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Alert Container -->
+            <div class="alert-container">
+                <?php include ("includes/alertmessages1.php"); ?>
+            </div>
+
+            <!-- Page Header -->
+            <div class="page-header">
+                <div class="page-title">
+                    <h2><i class="fas fa-chart-bar"></i> IP Discount Report</h2>
+                    <p>Generate and view comprehensive discount reports</p>
+                </div>
+                <div class="page-actions">
+                    <button class="btn btn-primary" onclick="exportToExcel()">
+                        <i class="fas fa-file-excel"></i> Export to Excel
+                    </button>
+                </div>
+            </div>
+
+            <!-- Search Form -->
+            <div class="search-form-container">
+                <form name="cbform1" method="post" action="ipdiscountreport.php" class="search-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="patient">Patient Name</label>
+                            <input name="patient" type="text" id="patient" value="" size="50" autocomplete="off" class="form-control" placeholder="Enter patient name">
+                        </div>
+                        <div class="form-group">
+                            <label for="patientcode">Patient Code</label>
+                            <input name="patientcode" type="text" id="patientcode" value="" size="50" autocomplete="off" class="form-control" placeholder="Enter patient code">
+                        </div>
+                        <div class="form-group">
+                            <label for="visitcode">Visit Code</label>
+                            <input name="visitcode" type="text" id="visitcode" value="" size="50" autocomplete="off" class="form-control" placeholder="Enter visit code">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="ADate1">Date From</label>
+                            <div class="date-input-wrapper">
+                                <input name="ADate1" id="ADate1" value="<?php echo $transactiondatefrom; ?>" size="10" readonly="readonly" onKeyDown="return disableEnterKey()" class="form-control date-input" />
+                                <img src="images2/cal.gif" onClick="javascript:NewCssCal('ADate1')" style="cursor:pointer" class="date-picker-icon"/>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="ADate2">Date To</label>
+                            <div class="date-input-wrapper">
+                                <input name="ADate2" id="ADate2" value="<?php echo $transactiondateto; ?>" size="10" readonly="readonly" onKeyDown="return disableEnterKey()" class="form-control date-input" />
+                                <img src="images2/cal.gif" onClick="javascript:NewCssCal('ADate2')" style="cursor:pointer" class="date-picker-icon"/>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="location">Location</label>
+                            <select name="location" id="location" onChange="ajaxlocationfunction(this.value);" class="form-control">
+                                <?php
+                                $query1 = "select * from login_locationdetails where username='$username' and docno='$docno' order by locationname";
+                                $exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
+                                $loccode = array();
+                                while ($res1 = mysqli_fetch_array($exec1)) {
+                                    $locationname = $res1["locationname"];
+                                    $locationcode = $res1["locationcode"];
+                                    ?>
+                                    <option value="<?php echo $locationcode; ?>" <?php if($location!='')if($location==$locationcode){echo "selected";}?>><?php echo $locationname; ?></option>
+                                    <?php
+                                }
+                                ?>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <input type="hidden" name="cbfrmflag1" value="cbfrmflag1">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-search"></i> Search
+                            </button>
+                            <button type="reset" class="btn btn-secondary">
+                                <i class="fas fa-undo"></i> Reset
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Data Table Section -->
+            <div class="data-table-container">
+                <?php
+                $colorloopcount = 0;
+                $sno = 0;
+                if (isset($_REQUEST["cbfrmflag1"])) { $cbfrmflag1 = $_REQUEST["cbfrmflag1"]; } else { $cbfrmflag1 = ""; }
+                
+                if ($cbfrmflag1 == 'cbfrmflag1') {
+                    $searchpatient = $_POST['patient'];
+                    $searchpatientcode = $_POST['patientcode'];
+                    $searchvisitcode = $_POST['visitcode'];
+                    $fromdate = $_POST['ADate1'];
+                    $todate = $_POST['ADate2'];
+                    
+                    $querynw1 = "select * from ip_discount where patientname like '%$searchpatient%' and patientcode like '%$searchpatientcode%' and patientvisitcode like '%$searchvisitcode%' and locationcode='$locationcode1' and consultationdate between '$fromdate' and '$todate'";
+                    $execnw1 = mysqli_query($GLOBALS["___mysqli_ston"], $querynw1) or die ("Error in Querynw1".mysqli_error($GLOBALS["___mysqli_ston"]));
+                    $resnw1 = mysqli_num_rows($execnw1);
+                    ?>
+                    <div class="table-header">
+                        <h3>IP Discount Report</h3>
+                        <div class="table-actions">
+                            <span class="result-count">Total Records: <?php echo $resnw1; ?></span>
+                            <a href="excel_ipdiscountreport.php?cbfrmflag1=cbfrmflag1&&fromdate=<?php echo $fromdate; ?>&&todate=<?php echo $todate; ?>&&locationcode1=<?php echo $locationcode1; ?>&&searchpatient=<?php echo $searchpatient; ?>&&searchpatientcode=<?php echo $searchpatientcode; ?>&&searchvisitcode=<?php echo $searchvisitcode; ?>" target="_blank" class="btn btn-success">
+                                <i class="fas fa-file-excel"></i> Export to Excel
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <div class="table-responsive">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>No.</th>
+                                    <th>Patient Name</th>
+                                    <th>Reg. No.</th>
+                                    <th>Visit Code</th>
+                                    <th>Remarks</th>
+                                    <th>IP Date</th>
+                                    <th>Amount</th>
+                                    <th>IP Address</th>
+                                    <th>Username</th>
+                                    <th>Time</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php
+                                $query1 = "select * from ip_discount where patientname like '%$searchpatient%' and patientcode like '%$searchpatientcode%' and patientvisitcode like '%$searchvisitcode%' and locationcode='$locationcode1' and consultationdate between '$fromdate' and '$todate' order by auto_number desc";
+                                $exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
+                                $num1 = mysqli_num_rows($exec1);
+                                
+                                while($res1 = mysqli_fetch_array($exec1)) {
+                                    $patientname = $res1['patientname'];
+                                    $patientcode = $res1['patientcode'];
+                                    $visitcode = $res1['patientvisitcode'];
+                                    $consultationdate = $res1['consultationdate'];
+                                    $amount = $res1['rate'];
+                                    $ipaddress = $res1['ipaddress'];
+                                    $username = $res1['username'];
+                                    $time = $res1['consultationtime'];
+                                    $discount = $res1['description'];
+                                    $authorizedby = $res1['authorizedby'];
+                                    
+                                    $colorloopcount = $colorloopcount + 1;
+                                    $showcolor = ($colorloopcount & 1); 
+                                    if ($showcolor == 0) {
+                                        $colorcode = 'class="even-row"';
+                                    } else {
+                                        $colorcode = 'class="odd-row"';
+                                    }
+                                    ?>
+                                    <tr <?php echo $colorcode; ?>>
+                                        <td><?php echo $sno = $sno + 1; ?></td>
+                                        <td><?php echo $patientname; ?></td>
+                                        <td><?php echo $patientcode; ?></td>
+                                        <td><?php echo $visitcode; ?></td>
+                                        <td>
+                                            <div class="discount-remarks">
+                                                <strong>Discount On:</strong> <?php echo $discount; ?><br>
+                                                <strong>Authorized By:</strong> <?php echo $authorizedby; ?>
+                                            </div>
+                                        </td>
+                                        <td><?php echo $consultationdate; ?></td>
+                                        <td><span class="amount"><?php echo number_format($amount,2,'.',','); ?></span></td>
+                                        <td><span class="ip-address"><?php echo $ipaddress; ?></span></td>
+                                        <td><?php echo $username; ?></td>
+                                        <td><?php echo $time; ?></td>
+                                    </tr>
+                                    <?php
+                                }
+                                ?>
+                            </tbody>
+                        </table>
+                    </div>
                     <?php
-
-						
-
-						$query1 = "select * from login_locationdetails where username='$username' and docno='$docno' order by locationname";
-
-						$exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-						$loccode=array();
-
-						while ($res1 = mysqli_fetch_array($exec1))
-
-						{
-
-						$locationname = $res1["locationname"];
-
-						$locationcode = $res1["locationcode"];
-
-						
-
-						?>
-
-						<option value="<?php echo $locationcode; ?>" <?php if($location!='')if($location==$locationcode){echo "selected";}?>><?php echo $locationname; ?></option>
-
-						<?php
-
-						} 
-
-						?>
-
-                      </select>
-
-					 
-
-              </span></td>
-
-			   <td width="10%" align="left" colspan="2" valign="middle"  bgcolor="#FFFFFF" class="bodytext3"></td>
-
-			  </tr>
-
-            <tr>
-
-              <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3"></td>
-
-              <td colspan="3" align="left" valign="top"  bgcolor="#FFFFFF">
-
-			  <input type="hidden" name="cbfrmflag1" value="cbfrmflag1">
-
-                  <input  style="border: 1px solid #001E6A" type="submit" value="Search" name="Submit" />
-
-                  <input name="resetbutton" type="reset" id="resetbutton"  style="border: 1px solid #001E6A" value="Reset" /></td>
-
-            </tr>
-
-          </tbody>
-
-        </table>
-
-		</form>		</td>
-
-      </tr>
-
-      
-
-      
-
-      <tr>
-
-        <td>&nbsp;</td>
-
-      </tr>
-
-	  <tr>
-
-        <td>
-
-	<form name="form1" id="form1" method="post" action="labresultsviewlist.php">	
-
-		
-
-<?php
-
-	$colorloopcount=0;
-
-	$sno=0;
-
-if (isset($_REQUEST["cbfrmflag1"])) { $cbfrmflag1 = $_REQUEST["cbfrmflag1"]; } else { $cbfrmflag1 = ""; }
-
-//$cbfrmflag1 = $_POST['cbfrmflag1'];
-
-if ($cbfrmflag1 == 'cbfrmflag1')
-
-{
-
-
-
-	$searchpatient = $_POST['patient'];
-
-	$searchpatientcode=$_POST['patientcode'];
-
-       $searchvisitcode=$_POST['visitcode'];
-
-	$fromdate=$_POST['ADate1'];
-
-	$todate=$_POST['ADate2'];
-
-	//$docnumber=$_POST['docnumber'];
-
-	//echo $searchpatient;
-
-		//$transactiondatefrom = $_REQUEST['ADate1'];
-
-	//$transactiondateto = $_REQUEST['ADate2'];
-
-
-
-$querynw1 = "select * from ip_discount where patientname like '%$searchpatient%' and patientcode like '%$searchpatientcode%' and patientvisitcode like '%$searchvisitcode%' and locationcode='$locationcode1' and consultationdate between '$fromdate' and '$todate'";// and (billingdatetime between '$triagedatefrom' and '$triagedateto')";//
-
-			$execnw1 = mysqli_query($GLOBALS["___mysqli_ston"], $querynw1) or die ("Error in Querynw1".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-			$resnw1=mysqli_num_rows($execnw1);
-
-	
-
-?>
-
-		<table id="AutoNumber3" style="BORDER-COLLAPSE: collapse" 
-
-            bordercolor="#666666" cellspacing="0" cellpadding="4" width="1128" 
-
-            align="left" border="0">
-			
-			<a href="excel_ipdiscountreport.php?cbfrmflag1=cbfrmflag1&&fromdate=<?php echo $fromdate; ?>&&todate=<?php echo $todate; ?>&&locationcode1=<?php echo $locationcode1; ?>&&searchpatient=<?php echo $searchpatient; ?>&&searchpatientcode=<?php echo $searchpatientcode; ?>&&searchvisitcode=<?php echo $searchvisitcode; ?>"><img  width="30" height="30" src="images/excel-xls-icon.png" style="cursor:pointer;"></a>
-			
-
-          <tbody>
-
-             <tr>
-
-			 <td colspan="10" bgcolor="#ecf0f5" class="bodytext31"><div align="left"><strong>IP Discount Report </strong><label class="number"><<<?php echo $resnw1;?>>></label></div></td>
-
-			 </tr>
-
-            <tr>
-
-              <td width="2%"  align="left" valign="center" 
-
-                bgcolor="#ffffff" class="bodytext31"><div align="center"><strong>No.</strong></div></td>
-
-				 <td width="16%"  align="left" valign="center" 
-
-                bgcolor="#ffffff" class="bodytext31"><div align="center"><strong> Patient Name</strong></div></td>
-
-				  <td width="16%"  align="left" valign="center" 
-
-                bgcolor="#ffffff" class="bodytext31"><div align="center"><strong> Reg. No. </strong></div></td>
-
-				  <td width="16%"  align="left" valign="center" 
-
-                bgcolor="#ffffff" class="bodytext31"><div align="center"><strong> Visit Code </strong></div></td>
-				
-				
-				 <td width="24%"  align="left" valign="center" 
-
-                bgcolor="#ffffff" class="bodytext31"><div align="center"><strong> Remarks </strong></div></td>
-
-             
-
-                  <td width="16%"  align="left" valign="center" 
-
-                bgcolor="#ffffff" class="bodytext31"><div align="center"><strong>IP Date </strong></div></td>
-
-                  <td width="9%"  align="left" valign="center" 
-
-                bgcolor="#ffffff" class="bodytext31"><div align="left"><strong>Amount</strong></div></td>
-
-                 <td width="9%"  align="left" valign="center" 
-
-                bgcolor="#ffffff" class="bodytext31"><div align="left"><strong>IP Address</strong></div></td>
-
-                 <td width="9%"  align="left" valign="center" 
-
-                bgcolor="#ffffff" class="bodytext31"><div align="left"><strong>Username</strong></div></td>
-
-                 <td width="9%"  align="left" valign="center" 
-
-                bgcolor="#ffffff" class="bodytext31"><div align="left"><strong>Time</strong></div></td>
-
-             </tr>
-
-           <?php
-
-		
-
-		$query1 = "select * from ip_discount where patientname like '%$searchpatient%' and patientcode like '%$searchpatientcode%' and patientvisitcode like '%$searchvisitcode%' and locationcode='$locationcode1' and consultationdate between '$fromdate' and '$todate' order by auto_number desc";
-
-		$exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-		$num1=mysqli_num_rows($exec1);
-
-		
-
-		while($res1 = mysqli_fetch_array($exec1))
-
-		{
-
-		$patientname=$res1['patientname'];
-
-		$patientcode=$res1['patientcode'];
-
-		$visitcode=$res1['patientvisitcode'];
-
-		$consultationdate=$res1['consultationdate'];
-
-	    $amount=$res1['rate'];
-
-		 $ipaddress=$res1['ipaddress'];
-
-		 $username=$res1['username'];
-
-		 $time=$res1['consultationtime'];
-		 
-		 $discount= $res1['description'];
-		$authorizedby = $res1['authorizedby'];
-
-		
-
-			$colorloopcount = $colorloopcount + 1;
-
-			$showcolor = ($colorloopcount & 1); 
-
-			if ($showcolor == 0)
-
-			{
-
-				//echo "if";
-
-				$colorcode = 'bgcolor="#CBDBFA"';
-
-			}
-
-			else
-
-			{
-
-				//echo "else";
-
-				$colorcode = 'bgcolor="#ecf0f5"';
-
-			}
-
-			?>
-
-          <tr <?php echo $colorcode; ?>>
-
-              <td class="bodytext31" valign="center"  align="left"><div align="center"><?php echo $sno = $sno + 1; ?></div></td>
-
-			  <td class="bodytext31" valign="center"  align="left">
-
-			  <div class="bodytext31" align="center"><?php echo $patientname; ?></div></td>
-
-			  <td class="bodytext31" valign="center"  align="left">
-
-			    <div align="center"><?php echo $patientcode; ?></div></td>
-
-			    <td class="bodytext31" valign="center"  align="left">
-
-			    <div align="center"><?php echo $visitcode; ?></div></td>	
-                 
-				 <td class="bodytext31" valign="center"  align="left">
-
-
-					<div class="bodytext31">Discount On <?php echo $discount; ?> by <?php echo $authorizedby; ?></div> </td>
-            
-
-                <td class="bodytext31" valign="center"  align="left"><div align="center"><?php echo $consultationdate; ?></div>                  </td>
-
-                <td class="bodytext31" valign="center"  align="left">
-
-			    <div align="left"><?php echo number_format($amount,2,'.',','); ?></div></td>
-
-                <td class="bodytext31" valign="center"  align="left">
-
-			    <div align="left"><?php echo $ipaddress; ?></div></td>
-
-                <td class="bodytext31" valign="center"  align="left">
-
-			    <div align="left"><?php echo $username; ?></div></td>
-
-                <td class="bodytext31" valign="center"  align="left">
-
-			    <div align="left"><?php echo $time; ?></div></td>
-
-              </tr>
-
-		   <?php 
-
-		   } 
-
-		  
-
-		   ?>
-
-           
-
-            <tr>
-			<td class="bodytext311" valign="center" bordercolor="#f3f3f3" align="left" 
-
-                bgcolor="#ecf0f5">&nbsp;</td>
-
-              <td class="bodytext311" valign="center" bordercolor="#f3f3f3" align="left" 
-
-                bgcolor="#ecf0f5">&nbsp;</td>
-
-				<td class="bodytext311" valign="center" bordercolor="#f3f3f3" align="left" 
-
-                bgcolor="#ecf0f5"><div align="right"><strong>
-
-                <?php //echo number_format($totalpurchaseamount, 2); ?>
-
-              </strong></div></td>
-
-              <td class="bodytext311" valign="center" bordercolor="#f3f3f3" align="left" 
-
-                bgcolor="#ecf0f5"><div align="right"><strong>
-
-                <?php //echo number_format($netpaymentamount, 2); ?>
-
-              </strong></div></td>
-
-              <td class="bodytext311" valign="center" bordercolor="#f3f3f3" align="left" 
-
-                bgcolor="#ecf0f5">&nbsp;</td>
-
-              <td class="bodytext311" valign="center" bordercolor="#f3f3f3" align="left" 
-
-                bgcolor="#ecf0f5">&nbsp;</td>
-
-				 <td colspan="4" class="bodytext311" valign="center" bordercolor="#f3f3f3" align="left" 
-
-                bgcolor="#ecf0f5">&nbsp;</td>
-
-      </tr>
-
-          </tbody>
-
-        </table>
-
-<?php
-
-}
-
-?>	
-
-	  <tr>
-
-        <td>&nbsp;</td>
-
-      </tr>
-
-      <tr>
-
-        <td>&nbsp;</td>
-
-      </tr>
-
-      <tr>
-
-        <td>&nbsp;</td>
-
-      </tr>
-
-	  
-
-	  </form>
-
-    </table>
-
-  </table>
-
-<?php include ("includes/footer1.php"); ?>
-
+                }
+                ?>
+            </div>
+        </main>
+    </div>
+
+    <script src="js/ipdiscountreport-modern.js?v=<?php echo time(); ?>"></script>
 </body>
-
 </html>
 
+<script language="javascript">
+function ajaxlocationfunction(val) { 
+    if (window.XMLHttpRequest) {
+        xmlhttp = new XMLHttpRequest();
+    } else {
+        xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
+    }
+    xmlhttp.onreadystatechange = function() {
+        if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+            document.getElementById("ajaxlocation").innerHTML = xmlhttp.responseText;
+        }
+    }
+    xmlhttp.open("GET","ajax/ajaxgetlocationname.php?loccode="+val,true);
+    xmlhttp.send();
+}
 
+function disableEnterKey(varPassed) {
+    if (event.keyCode == 8) {
+        event.keyCode = 0; 
+        return event.keyCode 
+        return false;
+    }
+    
+    var key;
+    if(window.event) {
+        key = window.event.keyCode;
+    } else {
+        key = e.which;
+    }
 
+    if(key == 13) {
+        return false;
+    } else {
+        return true;
+    }
+}
+
+function process1backkeypress1() {
+    if (event.keyCode == 8) {
+        event.keyCode = 0; 
+        return event.keyCode 
+        return false;
+    }
+}
+
+function disableEnterKey() {
+    if (event.keyCode == 8) {
+        event.keyCode = 0; 
+        return event.keyCode 
+        return false;
+    }
+    
+    var key;
+    if(window.event) {
+        key = window.event.keyCode;
+    } else {
+        key = e.which;
+    }
+    
+    if(key == 13) {
+        return false;
+    } else {
+        return true;
+    }
+}
+
+function paymententry1process2() {
+    if (document.getElementById("cbfrmflag1").value == "") {
+        alert ("Search Bill Number Cannot Be Empty.");
+        document.getElementById("cbfrmflag1").focus();
+        document.getElementById("cbfrmflag1").value = "<?php echo $cbfrmflag1; ?>";
+        return false;
+    }
+}
+
+function funcPrintReceipt1() {
+    window.open("print_payment_receipt1.php","OriginalWindow<?php echo $banum; ?>",'width=722,height=950,toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=1,resizable=1,left=25,top=25');
+}
+</script>

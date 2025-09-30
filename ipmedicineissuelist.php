@@ -1,1 +1,328 @@
-<?phpsession_start();include ("includes/loginverify.php"); include ("db/db_connect.php");$ipaddress = $_SERVER['REMOTE_ADDR'];$updatedatetime = date('Y-m-d H:i:s');$username = $_SESSION['username'];$docno = $_SESSION['docno'];$companyanum = $_SESSION['companyanum'];$companyname = $_SESSION['companyname'];   $transactiondatefrom = date('Y-m-d');$transactiondateto = date('Y-m-d');$location =isset( $_REQUEST['location'])?$_REQUEST['location']:'';	$locationcode1 =isset( $_REQUEST['locationcodenew'])?$_REQUEST['locationcodenew']:'';if(isset($_POST['ADate1'])){$fromdate = $_POST['ADate1'];}else{$fromdate=$transactiondatefrom;}if(isset($_POST['ADate2'])){$todate = $_POST['ADate2'];}else{$todate=$transactiondateto;}?><style type="text/css"><!--body {	margin-left: 0px;	margin-top: 0px;	background-color: #ecf0f5;}.bodytext3 {	FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3B3B3C; FONT-FAMILY: Tahoma}--></style><link href="css/datepickerstyle.css" rel="stylesheet" type="text/css" /><script type="text/javascript" src="js/adddate.js"></script><script type="text/javascript" src="js/adddate2.js"></script><script language="javascript">function ajaxlocationfunction(val){ if (window.XMLHttpRequest)					  {// code for IE7+, Firefox, Chrome, Opera, Safari					  xmlhttp=new XMLHttpRequest();					  }					else					  {// code for IE6, IE5					  xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");					  }					xmlhttp.onreadystatechange=function()					  {					  if (xmlhttp.readyState==4 && xmlhttp.status==200)						{						document.getElementById("ajaxlocation").innerHTML=xmlhttp.responseText;						}					  }					xmlhttp.open("GET","ajax/ajaxgetlocationname.php?loccode="+val,true);					xmlhttp.send();}					//ajax to get location which is selected ends herefunction cbcustomername1(){	document.cbform1.submit();}</script><script type="text/javascript">function pharmacy(patientcode,visitcode){	var patientcode = patientcode;	var visitcode = visitcode;	var url="pharmacy1.php?RandomKey="+Math.random()+"&&patientcode="+patientcode+"&&visitcode="+visitcode;	window.open(url,"Pharmacy",'width=600,height=400');}function disableEnterKey(varPassed){	//alert ("Back Key Press");	if (event.keyCode==8) 	{		event.keyCode=0; 		return event.keyCode 		return false;	}		var key;	if(window.event)	{		key = window.event.keyCode;     //IE	}	else	{		key = e.which;     //firefox	}	if(key == 13) // if enter key press	{		//alert ("Enter Key Press2");		return false;	}	else	{		return true;	}}</script><script>function funcPopupOnLoad1(){	<?php if (isset($_REQUEST["patientcode"])) { $savedpatientcode = $_REQUEST["patientcode"]; } else { $savedpatientcode = ""; }if (isset($_REQUEST["visitcode"])) { $savedvisitcode = $_REQUEST["visitcode"]; } else { $savedvisitcode = ""; }if (isset($_REQUEST["billnumber"])) { $savedbillnumber = $_REQUEST["billnumber"]; } else { $savedbillnumber = ""; }?>var patientcodes;var patientcodes = "<?php echo $savedpatientcode; ?>";var visitcodes;var visitcodes = "<?php echo $savedvisitcode; ?>";var billnumbers;var billnumbers = "<?php echo $savedbillnumber; ?>";//alert(patientcodes);if(patientcodes != "") {	window.open("print_medicine_labelip.php?patientcode="+patientcodes+"&&visitcode="+visitcodes+"&&billnumber="+billnumbers+"","OriginalWindowA4",'width=600,height=400,toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=1,resizable=1,left=25,top=25');}}</script><script src="js/datetimepicker_css.js"></script><body onLoad="funcPopupOnLoad1()"><script src="js/datetimepicker_css.js"></script><link rel="stylesheet" type="text/css" href="css/autosuggest.css" />        <style type="text/css"><!--.bodytext31 {FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3b3b3c; FONT-FAMILY: Tahoma}--></style></head><body><table width="103%" border="0" cellspacing="0" cellpadding="2">  <tr>    <td colspan="9" bgcolor="#ecf0f5"><?php include ("includes/alertmessages1.php"); ?></td>  </tr>  <tr>    <td colspan="9" bgcolor="#ecf0f5"><?php include ("includes/title1.php"); ?></td>  </tr>  <tr>    <td colspan="9" bgcolor="#ecf0f5"><?php include ("includes/menu1.php"); ?></td>  </tr>   <tr>    <td colspan="9">&nbsp;</td>  </tr>   <tr>    <td width="1%">&nbsp;</td>    <td width="99%" valign="top"><table width="105%" border="0" cellspacing="0" cellpadding="0">	      		  <tr>        <td width="860">              <form name="cbform1" method="post" action="ipmedicineissuelist.php" >                <table width="600" border="0" align="left" cellpadding="4" cellspacing="0" bordercolor="#666666" id="AutoNumber3" style="border-collapse: collapse">                  <tbody>                  <tr bgcolor="#011E6A">              <td colspan="3" bgcolor="#ecf0f5" class="bodytext3"><strong>IP Mediciene Issue List</strong></td>              <td colspan="2" align="center" bgcolor="#ecf0f5" class="bodytext3" id="ajaxlocation"><strong> Location </strong>                                           <?php						if ($location!='')						{						$query12 = "select locationname from master_location where locationcode='$location' order by locationname";						$exec12 = mysqli_query($GLOBALS["___mysqli_ston"], $query12) or die ("Error in Query12".mysqli_error($GLOBALS["___mysqli_ston"]));						$res12 = mysqli_fetch_array($exec12);												echo $res1location = $res12["locationname"];						//echo $location;						}						else						{						$query1 = "select locationname from login_locationdetails where username='$username' and docno='$docno' group by locationname order by locationname";						$exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));						$res1 = mysqli_fetch_array($exec1);												echo $res1location = $res1["locationname"];						//$res1locationanum = $res1["locationcode"];						}						?>												                                    </td>                   </tr>                  <tr>              <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">Location</td>              <td colspan="3" align="left" valign="top"  bgcolor="#FFFFFF"><span class="bodytext3">               <select name="location" id="location" onChange="  ajaxlocationfunction(this.value);"   style="border: 1px solid #001E6A;">                  <?php												$query1 = "select * from login_locationdetails where username='$username' and docno='$docno' group by locationname order by locationname";						$exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));						while ($res1 = mysqli_fetch_array($exec1))						{						$res1location = $res1["locationname"];						$res1locationanum = $res1["locationcode"];						?>						<option value="<?php echo $res1locationanum; ?>" <?php if($location!=''){if($location == $res1locationanum){echo "selected";}}?>><?php echo $res1location; ?></option>						<?php						}						?>                  </select>              </span></td>              </tr>                  				   <tr>              <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">Patient Name</td>              <td colspan="3" align="left" valign="top"  bgcolor="#FFFFFF"><span class="bodytext3">                <input name="patient" type="text" id="patient" value="" size="50" autocomplete="off">              </span></td>              </tr>			    <tr>              <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">Registration No</td>              <td colspan="3" align="left" valign="top"  bgcolor="#FFFFFF"><span class="bodytext3">                <input name="patientcode" type="text" id="patient" value="" size="50" autocomplete="off">              </span></td>              </tr>			   <tr>              <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">Visitcode</td>              <td colspan="3" align="left" valign="top"  bgcolor="#FFFFFF"><span class="bodytext3">                <input name="visitcode" type="text" id="visitcode" value="" size="50" autocomplete="off">              </span></td>              </tr>                   <tr>          <td width="100" align="left" valign="center"                  bgcolor="#ffffff" class="bodytext31"><strong> Date From </strong></td>          <td width="137" align="left" valign="center"  bgcolor="#ffffff" class="bodytext31"><input name="ADate1" id="ADate1" value="<?php echo $transactiondatefrom; ?>"  size="10"  readonly="readonly" onKeyDown="return disableEnterKey()" />			<img src="images2/cal.gif" onClick="javascript:NewCssCal('ADate1')" style="cursor:pointer"/>			</td>          <td width="68" align="left" valign="center"  bgcolor="#FFFFFF" class="style1"><span class="bodytext31"><strong> Date To </strong></span></td>          <td width="263" align="left" valign="center"  bgcolor="#ffffff"><span class="bodytext31">            <input name="ADate2" id="ADate2" value="<?php echo $transactiondateto; ?>"  size="10"  readonly="readonly" onKeyDown="return disableEnterKey()" />			<img src="images2/cal.gif" onClick="javascript:NewCssCal('ADate2')" style="cursor:pointer"/>		  </span></td>          </tr>												<tr>                      <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">&nbsp;</td>                      <td colspan="3" align="left" valign="top"  bgcolor="#FFFFFF">					  <input type="hidden" name="cbfrmflag1" value="cbfrmflag1">                          <input  type="submit" value="Search" name="Submit" />                          <input name="resetbutton" type="reset" id="resetbutton"  value="Reset" /></td>                    </tr>                  </tbody>                </table>              </form>		</td>      </tr>  <tr>    <td colspan="9">&nbsp;</td>  </tr>  <?php	$colorloopcount=0;	$sno=0;if (isset($_REQUEST["cbfrmflag1"])) { $cbfrmflag1 = $_REQUEST["cbfrmflag1"]; } else { $cbfrmflag1 = ""; }//$cbfrmflag1 = $_POST['cbfrmflag1'];if ($cbfrmflag1 == 'cbfrmflag1'){	$searchpatient = $_POST['patient'];	$searchpatientcode=$_POST['patientcode'];	$searchvisitcode = $_POST['visitcode'];	$fromdate=$_POST['ADate1'];	$todate=$_POST['ADate2'];	//echo $searchpatient;		//$transactiondatefrom = $_REQUEST['ADate1'];	//$transactiondateto = $_REQUEST['ADate2'];	?>  <tr>        <td width="99%" valign="top">	<table width="80%" border="0" cellspacing="0" cellpadding="0">      <tr>        <td><table id="AutoNumber3" style="BORDER-COLLAPSE: collapse"             bordercolor="#666666" cellspacing="0" cellpadding="4" width="900"             align="left" border="0">          <tbody>            <tr>              <td width="5%" bgcolor="#ecf0f5" class="bodytext31">&nbsp;</td>              <td colspan="10" bgcolor="#ecf0f5" class="bodytext31">                <!--<input onClick="javascript:printbillreport1()" name="resetbutton2" type="submit" id="resetbutton2"  style="border: 1px solid #001E6A" value="Print Report" />-->                <div align="left"><strong>IP Medicine Issue </strong></div></td>              </tr>            <tr>              <td class="bodytext31" valign="center"  align="left"                 bgcolor="#ffffff"><div align="left"><strong>No.</strong></div></td>              <td width="8%"  align="left" valign="center" bgcolor="#ffffff" class="bodytext31"><div align="left"><strong>Req ID</strong></div></td>              <td width="8%"  align="left" valign="center" bgcolor="#ffffff" class="bodytext31"><div align="left"><strong> IP Date</strong></div></td>              <td width="12%"  align="left" valign="center" bgcolor="#ffffff" class="bodytext31"><div align="left"><strong> Requested By</strong></div></td>              <td width=""  align="left" valign="center"   bgcolor="#ffffff" class="bodytext31"><div align="left"><strong>Patientcode </strong></div></td>              <td width="10%"  align="left" valign="center"   bgcolor="#ffffff" class="bodytext31"><div align="left"><strong>Visitcode</strong></div></td>              <td width="15%"  align="left" valign="center"   bgcolor="#ffffff" class="bodytext31"><div align="left"><strong>Patient</strong></div></td>				<td width=""  align="left" valign="center"   bgcolor="#ffffff" class="bodytext31"><div align="left"><strong>Ward</strong></div></td>              <td width="15%"  align="left" valign="center"    bgcolor="#ffffff" class="bodytext31"><strong>Account</strong></td>				 <td width="15%"  align="left" valign="center"  bgcolor="#ffffff" class="bodytext31"><strong>Subtype</strong></td>              <td width="5%"  align="left" valign="center"  bgcolor="#ffffff" class="bodytext31"><div align="left"><strong>Action</strong></div></td>              </tr>                              			<?php			$colorloopcount = '';			$sno = '';                    $query9 = "select storecode from master_employeelocation where username = '$username' and locationcode = '$location' and defaultstore='default'";		$exec9 = mysqli_query($GLOBALS["___mysqli_ston"], $query9) or die ("Error in Query9".mysqli_error($GLOBALS["___mysqli_ston"]));		$res9 = mysqli_fetch_array($exec9);		$res9anum = $res9['storecode'];		$query10 = "select storecode from master_store where auto_number = '$res9anum'";		$exec10 = mysqli_query($GLOBALS["___mysqli_ston"], $query10) or die ("Error in Query10".mysqli_error($GLOBALS["___mysqli_ston"]));		$res10 = mysqli_fetch_array($exec10);		$store = $res10['storecode'];						$triagedatefrom = date('Y-m-d', strtotime('-2 day'));			$triagedateto = date('Y-m-d');						//$query1 = "select * from master_billing where paymentstatus = 'completed' and consultationdate >= NOW() - INTERVAL 6 DAY order by consultationdate";			$query1 = "select * from ipmedicine_prescription where patientname like '%$searchpatient%' and patientcode like '%$searchpatientcode%' and visitcode like '%$searchvisitcode%' and medicineissue='pending' and date between '$fromdate' and '$todate' and locationcode = '".$location."' and store='$store' group by docno order by auto_number desc";// and (billingdatetime between '$triagedatefrom' and '$triagedateto')";//			$exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));			while ($res1 = mysqli_fetch_array($exec1))			{			$patientcode = $res1['patientcode'];			$visitcode = $res1['visitcode'];			$docno = $res1['docno'];			$requestedby = $res1['username'];			$patientfullname = $res1['patientname'];			$account = $res1['account'];			$package_process_id = $res1['package_process_id'];						 $query23="select * from master_ipvisitentry where patientcode = '$patientcode' and visitcode='$visitcode'";			 $exec23=mysqli_query($GLOBALS["___mysqli_ston"], $query23) or die(mysqli_error($GLOBALS["___mysqli_ston"]));			 $res23=mysqli_fetch_array($exec23);			$subtype=$res23['subtype'];			 $querya1="select auto_number from billing_ip where patientcode = '$patientcode' and visitcode='$visitcode'";			 $execa1=mysqli_query($GLOBALS["___mysqli_ston"], $querya1) or die(mysqli_error($GLOBALS["___mysqli_ston"]));			 $coutnta1=mysqli_num_rows($execa1);			  if($coutnta1>0){				continue;			 }							$query231 = "select * from ip_bedallocation where patientcode = '$patientcode' and visitcode='$visitcode'";			$exec231 = mysqli_query($GLOBALS["___mysqli_ston"], $query231) or die ("Error in Query231".mysqli_error($GLOBALS["___mysqli_ston"]));			$res231 = mysqli_fetch_array($exec231);			$res231recordstatus = $res231['recordstatus'];			if($res231recordstatus == '')			{				$wardanum = $res231['ward'];			}			else			{				$query232 = "select * from ip_bedtransfer where patientcode = '$patientcode' and visitcode='$visitcode'";				$exec232 = mysqli_query($GLOBALS["___mysqli_ston"], $query232) or die ("Error in Query232".mysqli_error($GLOBALS["___mysqli_ston"]));				$res232 = mysqli_fetch_array($exec232);				$wardanum = $res232['ward'];			}						$query233 = "select * from master_ward where auto_number = '$wardanum'";			$exec233 = mysqli_query($GLOBALS["___mysqli_ston"], $query233) or die ("Error in Query233".mysqli_error($GLOBALS["___mysqli_ston"]));			$res233 = mysqli_fetch_array($exec233);			$res233ward = $res233['ward'];					 $query24 = "select * from master_subtype where auto_number='$subtype'";		 $exec24 = mysqli_query($GLOBALS["___mysqli_ston"], $query24) or die(mysqli_error($GLOBALS["___mysqli_ston"]));		 $res24 = mysqli_fetch_array($exec24);		 $subtypename = $res24['subtype'];							//$query2 = "select * from master_doctor where auto_number = '$consultingdoctoranum'";			//$exec2 = mysql_query($query2) or die ("Error in Query2".mysql_error());			//$res2 = mysql_fetch_array($exec2);			//$consultingdoctorname  = $res2['doctorname'];						$consultationdate = $res1['date'];									$colorloopcount = $colorloopcount + 1;			$showcolor = ($colorloopcount & 1); 									if ($showcolor == 0)			{				//echo "if";				$colorcode = 'bgcolor="#CBDBFA"';			}			else			{				//echo "else";				$colorcode = 'bgcolor="#ecf0f5"';			}			if($package_process_id!=''){ $colorcode = 'bgcolor="#7CCFDF"'; } 			?>            <tr <?php echo $colorcode; ?>>              <td class="bodytext31" valign="center"  align="left"><div align="left"><?php echo $sno = $sno + 1; ?></div></td>			                <td class="bodytext31" valign="center"  align="left"><div class="bodytext31"><?php echo $docno; ?></div></td>			                <td class="bodytext31" valign="center"  align="left"><div class="bodytext31"><?php echo $consultationdate; ?></div></td>			                <td class="bodytext31" valign="center"  align="left"><div align="left"><?php echo $requestedby; ?></div></td>			                <td class="bodytext31" valign="center"  align="left"><div align="left"><?php echo $patientcode;?> </div></td>			                <td class="bodytext31" valign="center"  align="left"><div align="left"><?php echo $visitcode; ?></div></td>			                <td class="bodytext31" valign="center"  align="left"><div align="left"><?php echo $patientfullname; ?></div></td>			  				<td class="bodytext31" valign="center"  align="left"><div align="left"><?php echo $res233ward; ?></div></td>				              <td class="bodytext31" valign="center"  align="left"><?php echo $account; ?></td>			  			   <td class="bodytext31" valign="center"  align="left"><?php echo $subtypename; ?></td>			                 <td class="bodytext31" valign="center" align="left">			    <div align="left"><a href="ippharmacy1.php?patientcode=<?php echo $patientcode; ?>&&visitcode=<?php echo $visitcode; ?>&&docno=<?php echo $docno; ?>"><strong>Issue</strong></a></div></td>              </tr>			<?php			}    			?>			            <tr>                 <td class="bodytext31" valign="center"  align="left"  bgcolor="#ecf0f5" colspan = "11" >&nbsp;</td>				              </tr>          </tbody>        </table></td>      </tr>    </table>	</td>	</tr>	<?php	}	?>  </table><?php include ("includes/footer1.php"); ?></body></html>
+<?php
+session_start();
+include ("includes/loginverify.php"); 
+include ("db/db_connect.php");
+
+$ipaddress = $_SERVER['REMOTE_ADDR'];
+$updatedatetime = date('Y-m-d H:i:s');
+$username = $_SESSION['username'];
+$docno = $_SESSION['docno'];
+$companyanum = $_SESSION['companyanum'];
+$companyname = $_SESSION['companyname'];   
+$transactiondatefrom = date('Y-m-d');
+$transactiondateto = date('Y-m-d');
+$location = isset($_REQUEST['location']) ? $_REQUEST['location'] : '';	
+$locationcode1 = isset($_REQUEST['locationcodenew']) ? $_REQUEST['locationcodenew'] : '';
+if(isset($_POST['ADate1'])){$fromdate = $_POST['ADate1'];}else{$fromdate=$transactiondatefrom;}
+if(isset($_POST['ADate2'])){$todate = $_POST['ADate2'];}else{$todate=$transactiondateto;}
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IP Medicine Issue List - MedStar</title>
+    
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <!-- Modern CSS -->
+    <link rel="stylesheet" href="css/ipmedicineissuelist-modern.css?v=<?php echo time(); ?>">
+    
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- Date Picker -->
+    <link href="css/datepickerstyle.css" rel="stylesheet" type="text/css" />
+    <script type="text/javascript" src="js/adddate.js"></script>
+    <script type="text/javascript" src="js/adddate2.js"></script>
+    
+    <script language="javascript">
+    function ajaxlocationfunction(val) { 
+        if (window.XMLHttpRequest) {
+            xmlhttp=new XMLHttpRequest();
+        } else {
+            xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+        }
+        xmlhttp.onreadystatechange=function() {
+            if (xmlhttp.readyState==4 && xmlhttp.status==200) {
+                document.getElementById("ajaxlocation").innerHTML=xmlhttp.responseText;
+            }
+        }
+        xmlhttp.open("GET","ajax/ajaxgetlocationname.php?loccode="+val,true);
+        xmlhttp.send();
+    }
+    </script>
+</head>
+<body>
+    <!-- Hospital Header -->
+    <header class="hospital-header">
+        <h1 class="hospital-title">🏥 MedStar Hospital Management</h1>
+        <p class="hospital-subtitle">Advanced Healthcare Management Platform</p>
+    </header>
+
+    <!-- User Information Bar -->
+    <div class="user-info-bar">
+        <div class="user-welcome">
+            <span class="welcome-text">Welcome, <strong><?php echo htmlspecialchars($username); ?></strong></span>
+            <span class="location-info">📍 Company: <?php echo htmlspecialchars($companyname); ?></span>
+        </div>
+        <div class="user-actions">
+            <a href="mainmenu1.php" class="btn btn-outline">🏠 Main Menu</a>
+            <a href="logout.php" class="btn btn-outline">🚪 Logout</a>
+        </div>
+    </div>
+
+    <!-- Navigation Breadcrumb -->
+    <nav class="nav-breadcrumb">
+        <a href="mainmenu1.php">🏠 Home</a>
+        <span>→</span>
+        <span>IP Medicine Issue List</span>
+    </nav>
+
+    <!-- Floating Menu Toggle -->
+    <div id="menuToggle" class="floating-menu-toggle">
+        <i class="fas fa-bars"></i>
+    </div>
+
+    <!-- Main Container with Sidebar -->
+    <div class="main-container-with-sidebar">
+        <!-- Left Sidebar -->
+        <aside id="leftSidebar" class="left-sidebar">
+            <div class="sidebar-header">
+                <h3>Quick Navigation</h3>
+                <button id="sidebarToggle" class="sidebar-toggle">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <ul class="nav-list">
+                    <li class="nav-item">
+                        <a href="ipdischargelist.php" class="nav-link">
+                            <i class="fas fa-list"></i>
+                            <span>Discharge List</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="ipdischargerequestlist.php" class="nav-link">
+                            <i class="fas fa-clipboard-list"></i>
+                            <span>Discharge Requests</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="ipdischargelist_tat.php" class="nav-link">
+                            <i class="fas fa-clock"></i>
+                            <span>Discharge TAT</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="ipdiscountlist.php" class="nav-link">
+                            <i class="fas fa-percentage"></i>
+                            <span>% Discount List</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="ipdiscountreport.php" class="nav-link">
+                            <i class="fas fa-chart-bar"></i>
+                            <span>Discount Report</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="ipdocs.php" class="nav-link">
+                            <i class="fas fa-file-alt"></i>
+                            <span>IP Documents</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="ipdrugconsumptionreport.php" class="nav-link">
+                            <i class="fas fa-pills"></i>
+                            <span>Drug Consumption Report</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="ipdrugintake.php" class="nav-link">
+                            <i class="fas fa-capsules"></i>
+                            <span>Drug Intake</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="ipmedicinestatement.php" class="nav-link">
+                            <i class="fas fa-prescription"></i>
+                            <span>Medicine Statement</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="inpatientactivity.php" class="nav-link">
+                            <i class="fas fa-activity"></i>
+                            <span>Inpatient Activity</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="ipvisitentry_new.php" class="nav-link">
+                            <i class="fas fa-user-plus"></i>
+                            <span>IP Visit Entry</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="ipcreditaccountreport.php" class="nav-link">
+                            <i class="fas fa-credit-card"></i>
+                            <span>Credit Account Report</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="iplabresultsviewlist.php" class="nav-link">
+                            <i class="fas fa-flask"></i>
+                            <span>Lab Results View</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="ipmedicineissuelist.php" class="nav-link active">
+                            <i class="fas fa-pills"></i>
+                            <span>Medicine Issue List</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="activeinpatientlistmedicine.php" class="nav-link">
+                            <i class="fas fa-bed"></i>
+                            <span>Active Inpatient List</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Alert Container -->
+            <div class="alert-container">
+                <?php include ("includes/alertmessages1.php"); ?>
+            </div>
+
+            <!-- Page Header -->
+            <div class="page-header">
+                <div class="page-header-content">
+                    <h2><i class="fas fa-pills"></i> IP Medicine Issue List</h2>
+                    <p>Track and manage medicine issues for inpatients</p>
+                </div>
+                <div class="page-header-actions">
+                    <button class="btn btn-primary" onclick="generateMedicineReport()">
+                        <i class="fas fa-download"></i> Export Report
+                    </button>
+                    <button class="btn btn-primary" onclick="window.print()">
+                        <i class="fas fa-print"></i> Print List
+                    </button>
+                </div>
+            </div>
+
+            <!-- Search Form -->
+            <div class="search-form-container">
+                <form name="cbform1" method="post" action="ipmedicineissuelist.php" class="search-form">
+                    <div class="form-header">
+                        <h3><i class="fas fa-search"></i> Search Parameters</h3>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="location">Location</label>
+                            <select name="location" id="location" class="form-control" onchange="ajaxlocationfunction(this.value)">
+                                <option value="">Select Location</option>
+                                <?php
+                                $query1 = "select * from master_location where status = '' order by locationname";
+                                $exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
+                                while ($res1 = mysqli_fetch_array($exec1)) {
+                                    $locationname = $res1["locationname"];
+                                    $locationcode = $res1["locationcode"];
+                                    if ($location == $locationcode) {
+                                        echo "<option value='$locationcode' selected>$locationname</option>";
+                                    } else {
+                                        echo "<option value='$locationcode'>$locationname</option>";
+                                    }
+                                }
+                                ?>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="ADate1">Date From</label>
+                            <input type="text" name="ADate1" id="ADate1" value="<?php echo $fromdate; ?>" class="form-control date-picker" readonly>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="ADate2">Date To</label>
+                            <input type="text" name="ADate2" id="ADate2" value="<?php echo $todate; ?>" class="form-control date-picker" readonly>
+                        </div>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-search"></i> Search Issues
+                        </button>
+                        <button type="reset" class="btn btn-secondary">
+                            <i class="fas fa-undo"></i> Reset
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Medicine Issue Cards -->
+            <div class="medicine-issue-cards">
+                <div class="medicine-issue-card">
+                    <h4><i class="fas fa-pills"></i> Prescribed Medicines</h4>
+                    <p>Medicines prescribed by doctors for patients</p>
+                </div>
+                
+                <div class="medicine-issue-card">
+                    <h4><i class="fas fa-capsules"></i> Issued Medicines</h4>
+                    <p>Medicines actually issued to patients from pharmacy</p>
+                </div>
+                
+                <div class="medicine-issue-card">
+                    <h4><i class="fas fa-undo"></i> Returned Medicines</h4>
+                    <p>Medicines returned by patients or unused</p>
+                </div>
+                
+                <div class="medicine-issue-card">
+                    <h4><i class="fas fa-times"></i> Cancelled Issues</h4>
+                    <p>Medicine issues that were cancelled</p>
+                </div>
+            </div>
+
+            <!-- Results Table -->
+            <div class="data-table-section">
+                <div class="data-table-header">
+                    <h3><i class="fas fa-table"></i> Medicine Issues</h3>
+                </div>
+                
+                <div class="table-responsive">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Patient Name</th>
+                                <th>Medicine Name</th>
+                                <th>Quantity</th>
+                                <th>Issue Date</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td colspan="6" style="text-align: center; padding: 2rem;">
+                                    <i class="fas fa-search" style="font-size: 2rem; color: #ccc; margin-bottom: 1rem;"></i>
+                                    <p>Search for medicine issues using the form above</p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- Modern JavaScript -->
+    <script src="js/ipmedicineissuelist-modern.js?v=<?php echo time(); ?>"></script>
+</body>
+</html>

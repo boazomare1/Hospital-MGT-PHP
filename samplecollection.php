@@ -1,7 +1,7 @@
 <?php
 session_start();
 include ("includes/loginverify.php");
-include ("db/db_connect.php");//echo $menu_id;include ("includes/check_user_access.php");
+include ("db/db_connect.php");
 error_reporting(0);
 //date_default_timezone_set('Asia/Calcutta'); 
 $ipaddress = $_SERVER['REMOTE_ADDR'];
@@ -13,17 +13,12 @@ $errmsg = "";
 $timeonly = date('H:i:s');
 $colorloopcount = '';
 
-if(isset($_POST['category_id'])){$category_id = $_POST['category_id'];}else{$category_id='';}
-
-$timeonly = date('H:i:s');
-$dateonly=date("Y-m-d");
-
 $docno = $_SESSION['docno'];
 
 $patientcode=isset($_REQUEST['patientcode'])?$_REQUEST['patientcode']:'';
 $patientvisitcode=isset($_REQUEST['visitcode'])?$_REQUEST['visitcode']:'';
 $patientname=isset($_REQUEST['patient'])?$_REQUEST['patient']:'';
-$docnum1=isset($_REQUEST['docnumber'])?$_REQUEST['docnumber']:'';
+$docnum=isset($_REQUEST['docnumber'])?$_REQUEST['docnumber']:'';
 
 if(isset($_REQUEST['searchstatus'])){$searchstatus = $_REQUEST['searchstatus'];}else{$searchstatus='';}
 
@@ -75,10 +70,6 @@ foreach($_POST['ref'] as $key => $value)
 	//echo "update consultation_lab set labrefund='refund',remarks='$remark' where labitemcode='$itemcode' and patientvisitcode='$visitcode' and sampleid='$sampleid'"."<br>";
 	$query29=mysqli_query($GLOBALS["___mysqli_ston"], "update consultation_lab set labrefund='refund',remarks='$remark' where labitemcode='$itemcode' and patientvisitcode='$visitcode' and sampleid='$sampleid'") or die("error in query".mysqli_error($GLOBALS["___mysqli_ston"]));
 	$query29=mysqli_query($GLOBALS["___mysqli_ston"], "update ipconsultation_lab set labrefund='refund',remarks='$remark' where labitemcode='$itemcode' and patientvisitcode='$visitcode' and sampleid='$sampleid'") or die("error in query".mysqli_error($GLOBALS["___mysqli_ston"]));
-
-	$query29=mysqli_query($GLOBALS["___mysqli_ston"], "update samplecollection_lab set refund='refund',remarks='$remark' where itemcode='$itemcode' and patientvisitcode='$visitcode' and sampleid='$sampleid'") or die("error in query".mysqli_error($GLOBALS["___mysqli_ston"]));
-	$query29=mysqli_query($GLOBALS["___mysqli_ston"], "update ipsamplecollection_lab set refund='refund' where itemcode='$itemcode' and patientvisitcode='$visitcode' and sampleid='$sampleid'") or die("error in query".mysqli_error($GLOBALS["___mysqli_ston"]));
-
 
 	
 	}
@@ -101,24 +92,6 @@ if (isset($_REQUEST["patienttype"])) { $patienttype = $_REQUEST["patienttype"]; 
 
 ?>
 
-<?php
-
-function get_time($g_datetime){
-$from=date_create(date('Y-m-d H:i:s',strtotime($g_datetime)));
-$to=date_create(date('Y-m-d H:i:s'));
-$diff=date_diff($to,$from);
-//print_r($diff);
-$y = $diff->y > 0 ? $diff->y.' Years <br>' : '';
-$m = $diff->m > 0 ? $diff->m.' Months <br>' : '';
-$d = $diff->d > 0 ? $diff->d.' Days <br>' : '';
-$h = $diff->h > 0 ? $diff->h.' Hrs <br>' : '';
-$mm = $diff->i > 0 ? $diff->i.' Mins <br>' : '';
-$ss = $diff->s > 0 ? $diff->s.' Secs <br>' : '';
-
-echo $y.' '.$m.' '.$d.' '.$h.' '.$mm.' '.$ss.' ';
-}
-
-?>
 <style type="text/css">
 <!--
 body {
@@ -243,7 +216,7 @@ function funcOnLoadBodyFunctionCall()
         <td>
 		
 		
-			<form name="drugs" action="samplecollection.php" method="post" onKeyDown="return disableEnterKey()" onSubmit="return validcheck()">
+			<form name="drugs" action="samplecollection_original.php" method="post" onKeyDown="return disableEnterKey()" onSubmit="return validcheck()">
 	<table id="AutoNumber3" style="BORDER-COLLAPSE: collapse" 
             bordercolor="#666666" cellspacing="0" cellpadding="4" width="800" 
             align="left" border="0">
@@ -400,30 +373,6 @@ function AnaProcessIP(sno,pcode,vcode,dno,sid)
                 <input name="docnumber" type="text" id="docnumber" style="border: 1px solid #001E6A;" value="" size="50" autocomplete="off">
               </span></td>
               </tr>
-
-			   <tr>
-              <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">Category</td>
-              <td colspan="5" align="left" valign="top"  bgcolor="#FFFFFF">
-			  <select name="category_id">
-			  <option value="" >All</option>
-				<?php
-						$queryaa1 = "select categoryname,auto_number from master_categorylab order by categoryname ";
-						$execaa1 = mysqli_query($GLOBALS["___mysqli_ston"], $queryaa1) or die ("Error in Queryaa1".mysqli_error($GLOBALS["___mysqli_ston"]));
-						while ($resaa1 = mysqli_fetch_array($execaa1))
-						{
-				
-						$data_count=0;
-						$categoryname = $resaa1["categoryname"];
-						$auto_number = $resaa1["auto_number"];
-					?>
-						<option value="<?= $auto_number; ?>" <?php if($auto_number==$category_id) echo "selected"; ?> > <?= $categoryname ?> </option>
-					<?php
-					}
-				 ?>
-				 </select>
-				</td>
-              </tr>
-			  
         <tr>
         
           <td width="60" align="left" valign="center"  
@@ -468,7 +417,7 @@ function AnaProcessIP(sno,pcode,vcode,dno,sid)
       <tr>
         <td>&nbsp;</td>
       </tr>
-	  <form name="form1" id="form1" method="post" action="samplecollection.php">	
+	  <form name="form1" id="form1" method="post" action="samplecollection_original.php">	
       <tr>
         <td>
 		<table id="AutoNumber3" style="BORDER-COLLAPSE: collapse" 
@@ -477,33 +426,7 @@ function AnaProcessIP(sno,pcode,vcode,dno,sid)
           <tbody>
 		  
 		 
-
-<?php
-function calculate_age($birthday)
-{
- 
- if($birthday=="0000-00-00")
- {
-  return "0 Days";
- }
- 
-    $today = new DateTime();
-    $diff = $today->diff(new DateTime($birthday));
-
-    if ($diff->y)
-    {
-        return $diff->y . ' Years';
-    }
-    elseif ($diff->m)
-    {
-        return $diff->m . ' Months';
-    }
-    else
-    {
-        return $diff->d . ' Days';
-    }
-}
-?>		  
+		  
 				<?php
 				
 	if (isset($_REQUEST["cbfrmflag1"])) { $cbfrmflag1 = $_REQUEST["cbfrmflag1"]; } else { $cbfrmflag1 = ""; }
@@ -528,12 +451,6 @@ $sno=0;
 $total=0;
 
 ?>
-
-		<tr>
-				<td class="" align="right" colspan="20"> 
-											  <a target="_blank" href="print_samplecollection.php?patientcode=<?= $patientcode ?>&&visitcode=<?= $patientvisitcode ?>&&patient=<?= $patientname ?>&&docnumber=<?= $docnum1 ?>&&searchstatus=<?= $searchstatus ?>&&category_id=<?= $category_id ?>&&ADate1=<?= $ADate1 ?>&&ADate2=<?= $ADate2 ?>&&patienttype=<?= $patienttype ?>&&frmflag1=frmflag1&&cbfrmflag1=cbfrmflag1&&location=<?= $location ?>"> <img width="40" height="40" src="images/pdfdownload.jpg" style="cursor:pointer;"> </a>
-			</td>
-		</tr>
 			<tr>
               <td width="25" height="22" align="left" valign="center"  
                 bgcolor="#ffffff" class="bodytext31"><div align="left"><strong>Sno</strong></div></td>
@@ -544,20 +461,12 @@ $total=0;
                 bgcolor="#ffffff" class="bodytext31"><div align="left"><strong>Date</strong></div></td>
                 <td width="48" align="left" valign="center"  
                 bgcolor="#ffffff" class="bodytext31"><div align="left"><strong>Time</strong></div></td>
-             <td width="6%"  align="left" valign="center" 
-                bgcolor="#ffffff" class="bodytext31"><div align="left"><strong>Patientcode </strong></div></td>
-              <td width="5%"  align="left" valign="center" 
-                bgcolor="#ffffff" class="bodytext31"><div align="left"><strong>Visitcode</strong></div></td>
-              <td width="9%"  align="left" valign="center" 
-                bgcolor="#ffffff" class="bodytext31"><div align="left"><strong>Patient</strong></div></td>
-               <td width="6%"  align="left" valign="center" 
-                bgcolor="#ffffff" class="bodytext31"><strong>Age</strong></td>
-              <td width="5%"  align="left" valign="center" 
-                bgcolor="#ffffff" class="bodytext31"><strong>Gender</strong></td>
-              <td width="85" align="left" valign="center"  
+				<td width="72" align="left" valign="center"  
+                bgcolor="#ffffff" class="bodytext31"><div align="left"><strong>Sample Doc No</strong></div></td>
+			    <td width="58" align="left" valign="center"  
+                bgcolor="#ffffff" class="bodytext31"><div align="left"><strong>Sample ID</strong></div></td>
+			  <td width="85" align="left" valign="center"  
                 bgcolor="#ffffff" class="bodytext31"><div align="left"><strong>Test</strong></div></td>
-             <td width="9%"  align="left" valign="center" 
-                bgcolor="#ffffff" class="bodytext31"><strong>Account</strong></td>
 			  <td width="75" align="left" valign="center"  
                 bgcolor="#ffffff" class="bodytext31"><div align="left"><strong>Sample Type</strong></div></td>
 			  <td width="78" align="left" valign="center"  
@@ -574,63 +483,43 @@ $total=0;
                 bgcolor="#ffffff" class="bodytext31"><div align="left"><strong>Remarks</strong></div></td>
 			    <td width="48" align="left" valign="center"  
                 bgcolor="#ffffff" class="bodytext31"><div align="left"><strong>Action</strong></div></td>
-			   
 			    <td width="60" align="left" valign="center"  
                 bgcolor="#ffffff" class="bodytext31"><div align="left"><strong>Time(Min)</strong></div></td>
+			    
 
              </tr>
-
 <?php
-			$colorloopcount = '';
-			$sno = '';
-
-	if($category_id!='')
-	{
-	    $queryaa1 = "select * from master_categorylab where auto_number='$category_id' order by categoryname ";
-	}else{
-	    $queryaa1 = "select * from master_categorylab order by categoryname ";
-		}
-
-		$execaa1 = mysqli_query($GLOBALS["___mysqli_ston"], $queryaa1) or die ("Error in Queryaa1".mysqli_error($GLOBALS["___mysqli_ston"]));
-		while ($resaa1 = mysqli_fetch_array($execaa1))
-		{
-
-		$data_count=0;
-		$categoryname = $resaa1["categoryname"];
-		$auto_number = $resaa1["auto_number"];
-?>
-	<tr>
-              <td  align="left" valign="center" 
-                bgcolor="#ccc" class="bodytext31" colspan="20"><div align="left"><strong><?= $categoryname?></strong></div></td>
-	</tr>
-
-				 
-<?php
-
 $snovisit=0;
 if($patienttype != 'IP') {
-$queryvisit7 = "select a.itemcode,a.patientname,a.patientcode,a.patientvisitcode,a.docnumber from samplecollection_lab as a JOIN master_lab as b ON a.itemcode=b.itemcode and b.categoryname='$categoryname' where a.locationcode = '".$locationcode."' and a.patientname like '%$patientname%' and a.patientcode like '%$patientcode%' and a.patientvisitcode like '%$patientvisitcode%'  and a.acknowledge = 'completed' and a.status = 'completed' and a.resultentry = '' and a.refund <> 'refund' and a.docnumber like '%$docnum1%' and a.recorddate between '$ADate1' and '$ADate2' group by a.patientvisitcode,a.patientname,a.itemcode,a.docnumber order by a.recorddate ";
+$queryvisit7 = "select patientname,patientcode,patientvisitcode from samplecollection_lab where locationcode = '".$locationcode."' and patientname like '%$patientname%' and patientcode like '%$patientcode%' and patientvisitcode like '%$patientvisitcode%'  and acknowledge = 'completed' and status = 'completed' and resultentry = '' and refund <> 'refund' and docnumber like '%$docnum%' and recorddate between '$ADate1' and '$ADate2' group by patientvisitcode,patientname order by recorddate ";
 $execvisit7 = mysqli_query($GLOBALS["___mysqli_ston"], $queryvisit7) or die(mysqli_error($GLOBALS["___mysqli_ston"]));						
 while($resvisit7 = mysqli_fetch_array($execvisit7))
 {
 	$patientnamevisit6 = $resvisit7['patientname'];
 //$patientnamevisit6 = addslashes($patientnamevisit6);
- $regnovisit = $resvisit7['patientcode'];
+$regnovisit = $resvisit7['patientcode'];
 $visitnovisit = $resvisit7['patientvisitcode'];
 $snovisit=$snovisit+1;
-  $docnum = $resvisit7['docnumber'];
-  $itemcode = $resvisit7['itemcode'];
-$query71 ="select * from pending_test_orders where patientcode = '$regnovisit' and visitcode = '$visitnovisit' and testcode = '$itemcode'";
-$exec71 = mysqli_query($GLOBALS["___mysqli_ston"], $query71) or die(mysqli_error($GLOBALS["___mysqli_ston"]));
-if(mysqli_num_rows($exec71)>0)
-{
-	continue;
-}	
-
 ?>
-
+<tr bgcolor="#FFF" onClick="javascript: $('.<?php echo $snovisit; ?>').toggle();">
+             
+              <td align="left" valign="center"  
+                class="bodytext31"><?= $snovisit; ?></td>
+				<td align="center" valign="center"  
+                class="bodytext31">
+              <td align="left" valign="center"  
+                 class="bodytext31" colspan="3"><div align="left"><strong><?php echo $patientnamevisit6; ?></strong></div></td>
+<td align="left" valign="center" class="bodytext31"><div align="left">
+<a href="emr2.php?patientcode=<?php echo $regnovisit?>&&visitcode=<?php echo $visitnovisit?>"><?php echo $regnovisit; ?></a></div></td>
+              <td align="left" valign="center"  
+                 class="bodytext31" colspan="6"><div align="left"><?php echo $visitnovisit; ?></div></td>
+                 <td align="left" valign="center"  
+                class="bodytext31"><div align="left"></div></td>
+                 <td align="left" valign="center"  
+                class="bodytext31"><div align="left"></div></td>
+              </tr>
 <?php
-$query7 = "select patientname,patientcode,patientvisitcode,recorddate,itemname,itemcode,sample,sampleid,docnumber,username,entrywork,entryworkby,recordtime from samplecollection_lab where locationcode = '".$locationcode."' and patientname like '$patientnamevisit6' and patientcode like '$regnovisit' and patientvisitcode like '$visitnovisit'  and acknowledge = 'completed' and status = 'completed' and resultentry = '' and refund <> 'refund' and docnumber like '$docnum' and itemcode='$itemcode' and recorddate between '$ADate1' and '$ADate2'  order by recorddate ";
+$query7 = "select patientname,patientcode,patientvisitcode,recorddate,itemname,itemcode,sample,sampleid,docnumber,username,entrywork,entryworkby,recordtime from samplecollection_lab where locationcode = '".$locationcode."' and patientname like '$patientnamevisit6' and patientcode like '$regnovisit' and patientvisitcode like '$visitnovisit'  and acknowledge = 'completed' and status = 'completed' and resultentry = '' and refund <> 'refund' and docnumber like '%$docnum%' and recorddate between '$ADate1' and '$ADate2' and externallab ='' order by recorddate ";
 $exec7 = mysqli_query($GLOBALS["___mysqli_ston"], $query7) or die(mysqli_error($GLOBALS["___mysqli_ston"]));						
 while($res7 = mysqli_fetch_array($exec7))
 {
@@ -650,11 +539,15 @@ $entrywork = $res7['entrywork'];
 $entryworkby = $res7['entryworkby'];
 $recordtime = $res7['recordtime'];
 
-$querycon="select username,accountname from consultation_lab where patientcode='$regno' and patientvisitcode='$visitno' and labitemcode='$itemcode' and docnumber='$docnumber'";
+
+				
+
+
+$querycon="select username from consultation_lab where patientcode='$regno' and 	patientvisitcode='$visitno' and labitemcode='$itemcode' and docnumber='$docnumber'";
 $queryconex=mysqli_query($GLOBALS["___mysqli_ston"], $querycon) or die(mysqli_error($GLOBALS["___mysqli_ston"]));
 $queryconx=mysqli_fetch_array($queryconex);
 $requested=$queryconx['username'];
-$account = $queryconx['accountname'];
+
 
 
 			$requestedusr=mysqli_query($GLOBALS["___mysqli_ston"], "select employeename from master_employee where username='$requested' and locationcode='$locationcode' and username <> '' and status='Active'");
@@ -669,18 +562,12 @@ $account = $queryconx['accountname'];
 			{
 				$requesteduser="SELF";
 			}
-		
-			$query111 = "select gender,departmentname from master_visitentry where visitcode='$visitno'";
+			
+	
+			$query111 = "select departmentname from master_visitentry where visitcode='$visitno'";
 			$exec111 = mysqli_query($GLOBALS["___mysqli_ston"], $query111) or die(mysqli_error($GLOBALS["___mysqli_ston"]));
 			$res111 = mysqli_fetch_array($exec111);
 			$department = $res111['departmentname'];
-			$gender = $res111['gender'];
-			
-			$query69="select * from master_customer where customercode='$regno'";
-			$exec69=mysqli_query($GLOBALS["___mysqli_ston"], $query69) or die(mysqli_error($GLOBALS["___mysqli_ston"]));
-			$res69=mysqli_fetch_array($exec69);
-			 $patientdob=$res69['dateofbirth'];			
-			
 if($entrywork == '')
 {
 $entrywork = 'Pending';
@@ -732,9 +619,8 @@ $entrywork = 'Pending';
 				{
 					$colorcode= 'bgcolor="#FFFF00"';
 				}
-				$data_count++;
 				?>
-				 <tr <?php echo $colorcode; ?> class="<?= $snovisit; ?>">
+				 <tr <?php echo $colorcode; ?> class="<?= $snovisit; ?>" style="display:none">
              
               <td align="left" valign="center"  
                 class="bodytext31"><?php echo $sno=$sno+1; ?></td>
@@ -748,25 +634,13 @@ $entrywork = 'Pending';
                 class="bodytext31"><div align="left"><?php echo $billdate6; ?></div></td>
                 <td align="left" valign="center"  
                 class="bodytext31"><div align="left"><?php echo $recordtime; ?></div></td>
-                <td align="left" valign="center"  
-                class="bodytext31"><div align="left"><?php echo $regno; ?></div></td>
-                <td align="left" valign="center"  
-                class="bodytext31"><div align="left"><?php echo $visitno; ?></div></td>
-                <td align="left" valign="center"  
-                class="bodytext31"><div align="left"><?php echo $patientname6; ?></div></td>
-                <td align="left" valign="center"  
-                class="bodytext31"><div align="left"><?php echo calculate_age($patientdob); ?></div></td>
-                <td align="left" valign="center"  
-                class="bodytext31"><div align="left"><?php echo $gender; ?></div></td>
-			<!--	<td align="left" valign="center"  
+				<td align="left" valign="center"  
                 class="bodytext31"><div align="center"><?php echo $docnumber; ?></div></td>
 				 <td align="left" valign="center"  
-                class="bodytext31"><div align="left"><strong><?php echo $sampleid; ?></strong></div></td>-->
+                class="bodytext31"><div align="left"><strong><?php echo $sampleid; ?></strong></div></td>
 
 				 <td align="left" valign="center"  
                 class="bodytext31"><div align="left"><strong><?php echo $test; ?></strong></div></td>
-				 <td align="left" valign="center"  
-                class="bodytext31"><div align="left"><strong><?php echo $account; ?></strong></div></td>
 				 <td align="left" valign="center"  
                 class="bodytext31"><div align="left"><?php echo $sample; ?></div></td>
 				 <td align="left" valign="center"  
@@ -794,7 +668,7 @@ $entrywork = 'Pending';
 				
 				<?php } ?>
 				<td width="50" align="left" valign="center" bgcolor=" #FF0040"  
-                class="bodytext31" <?php if($waitingtime1 > 15){ ?> <?php } ?>><div align="center"><strong><?php $datetime1=$billdate6.' '.$recordtime; get_time($datetime1); ?></strong></div></td>
+                class="bodytext31" <?php if($waitingtime1 > 15){ ?> <?php } ?>><div align="center"><strong><?php echo $waitingtime1; ?></strong></div></td>
 
 				</tr>
 				<tr id="SUB<?php echo $sno; ?>" style="display:none; background-color:#ecf0f5;">
@@ -815,13 +689,13 @@ $entrywork = 'Pending';
 				}
 				?>
 				</select></td>
-				<td colspan="14" align="left" class="bodytext3"><strong><a href="#" onClick="return AnaProcess('<?php echo $sno; ?>','<?php echo $regno; ?>','<?php echo $visitno; ?>','<?php echo $docnumber; ?>','<?php echo $sampleid; ?>')">Process</a></strong></td>
+				<td colspan="8" align="left" class="bodytext3"><strong><a href="#" onClick="return AnaProcess('<?php echo $sno; ?>','<?php echo $regno; ?>','<?php echo $visitno; ?>','<?php echo $docnumber; ?>','<?php echo $sampleid; ?>')">Process</a></strong></td>
 				</tr>
 				<?php
 				} 
 				}
 				
- $query7 = "select patientname,patientcode,patientvisitcode,recorddate,itemname,itemcode,sample,username,sampleid,docnumber,entrywork,entryworkby,recordtime from samplecollection_lab where locationcode = '".$locationcode."' and patientname like '$patientnamevisit6' and patientcode like '$regnovisit' and patientvisitcode like '$visitnovisit'  and acknowledge = 'completed' and status = 'completed' and resultentry = '' and refund = 'norefund' and docnumber like '$docnum' and itemcode = '$itemcode' and recorddate between '$ADate1' and '$ADate2' and externallab !='' and externalack ='acknowledge' order by recorddate ";
+ $query7 = "select patientname,patientcode,patientvisitcode,recorddate,itemname,itemcode,sample,username,sampleid,docnumber,entrywork,entryworkby,recordtime from samplecollection_lab where locationcode = '".$locationcode."' and patientname like '$patientnamevisit6' and patientcode like '$regnovisit' and patientvisitcode like '$visitnovisit'  and acknowledge = 'completed' and status = 'completed' and resultentry = '' and refund = 'norefund' and docnumber like '%$docnum%' and recorddate between '$ADate1' and '$ADate2' and externallab !='' and externalack ='acknowledge' order by recorddate ";
 $exec7 = mysqli_query($GLOBALS["___mysqli_ston"], $query7) or die(mysqli_error($GLOBALS["___mysqli_ston"]));						
 while($res7 = mysqli_fetch_array($exec7))
 {			
@@ -841,11 +715,11 @@ $entrywork = $res7['entrywork'];
 $entryworkby = $res7['entryworkby'];
 $recordtime = $res7['recordtime'];
 
-$querycon="select username.accountname from consultation_lab where patientcode='$regno' and patientvisitcode='$visitno' and labitemcode='$itemcode' and docnumber='$docnumber'";
+$querycon="select username from consultation_lab where patientcode='$regno' and patientvisitcode='$visitno' and labitemcode='$itemcode' and docnumber='$docnumber'";
 $queryconex=mysqli_query($GLOBALS["___mysqli_ston"], $querycon) or die(mysqli_error($GLOBALS["___mysqli_ston"]));
 $queryconx=mysqli_fetch_array($queryconex);
 $requested=$queryconx['username'];
-$account = $queryconx['accountname'];
+
 
 
 			$requestedusr=mysqli_query($GLOBALS["___mysqli_ston"], "select employeename from master_employee where username='$requested' and locationcode='$locationcode' and username <> '' and status='Active'");
@@ -861,17 +735,10 @@ $account = $queryconx['accountname'];
 				$requesteduser="SELF";
 			}
 	
-			$query111 = "select departmentname,gender from master_visitentry where visitcode='$visitno'";
+			$query111 = "select departmentname from master_visitentry where visitcode='$visitno'";
 			$exec111 = mysqli_query($GLOBALS["___mysqli_ston"], $query111) or die(mysqli_error($GLOBALS["___mysqli_ston"]));
 			$res111 = mysqli_fetch_array($exec111);
 			$department = $res111['departmentname'];
-			$gender = $res111['gender'];
-
-			$query69="select * from master_customer where customercode='$regno'";
-			$exec69=mysqli_query($GLOBALS["___mysqli_ston"], $query69) or die(mysqli_error($GLOBALS["___mysqli_ston"]));
-			$res69=mysqli_fetch_array($exec69);
-			 $patientdob=$res69['dateofbirth'];	
-			 			
 if($entrywork == '')
 {
 $entrywork = 'Pending';
@@ -920,9 +787,8 @@ $entrywork = 'Pending';
 				{
 					$colorcode= 'bgcolor="#FFFF00"';
 				}
-				$data_count++;
 				?>
-				 <tr <?php echo $colorcode; ?> class="<?= $snovisit; ?>">
+				 <tr <?php echo $colorcode; ?> class="<?= $snovisit; ?>" style="display:none">
              
               <td align="left" valign="center"  
                 class="bodytext31"><?php echo $sno=$sno+1; ?></td>
@@ -936,25 +802,13 @@ $entrywork = 'Pending';
                 class="bodytext31"><div align="left"><?php echo $billdate6; ?></div></td>
                 <td align="left" valign="center"  
                 class="bodytext31"><div align="left"><?php echo $recordtime; ?></div></td>
-                <td align="left" valign="center"  
-                class="bodytext31"><div align="left"><?php echo $regno; ?></div></td>
-                <td align="left" valign="center"  
-                class="bodytext31"><div align="left"><?php echo $visitno; ?></div></td>
-                <td align="left" valign="center"  
-                class="bodytext31"><div align="left"><?php echo $patientname6; ?></div></td>
-                <td align="left" valign="center"  
-                class="bodytext31"><div align="left"><?php echo calculate_age($patientdob); ?></div></td>
-                <td align="left" valign="center"  
-                class="bodytext31"><div align="left"><?php echo $gender; ?></div></td>
-<!--		<td align="left" valign="center"  
+				<td align="left" valign="center"  
                 class="bodytext31"><div align="center"><?php echo $docnumber; ?></div></td>
 				 <td align="left" valign="center"  
                 class="bodytext31"><div align="left"><strong><?php echo $sampleid; ?></strong></div></td>
--->
+
 				 <td align="left" valign="center"  
                 class="bodytext31"><div align="left"><strong><?php echo $test; ?></strong></div></td>
-				 <td align="left" valign="center"  
-                class="bodytext31"><div align="left"><strong><?php echo $account; ?></strong></div></td>
 				 <td align="left" valign="center"  
                 class="bodytext31"><div align="left"><?php echo $sample; ?></div></td>
 				 <td align="left" valign="center"  
@@ -982,7 +836,7 @@ $entrywork = 'Pending';
 				
 				<?php } ?>
 				<td align="left" valign="center"  
-                class="bodytext31" <?php if($waitingtime1 > 15){ ?> bgcolor=" #FF0040" <?php } ?>><div align="center"><strong><?php $datetime1=$billdate6.' '.$recordtime; get_time($datetime1); ?></strong></div></td>
+                class="bodytext31" <?php if($waitingtime1 > 15){ ?> bgcolor=" #FF0040" <?php } ?>><div align="center"><strong><?php echo $waitingtime1; ?></strong></div></td>
 
 				</tr>
 				<tr id="SUB<?php echo $sno; ?>" style="display:none; background-color:#ecf0f5;">
@@ -1003,7 +857,7 @@ $entrywork = 'Pending';
 				}
 				?>
 				</select></td>
-				<td colspan="14" align="left" class="bodytext3"><strong><a href="#" onClick="return AnaProcess('<?php echo $sno; ?>','<?php echo $regno; ?>','<?php echo $visitno; ?>','<?php echo $docnumber; ?>','<?php echo $sampleid; ?>')">Process</a></strong></td>
+				<td colspan="8" align="left" class="bodytext3"><strong><a href="#" onClick="return AnaProcess('<?php echo $sno; ?>','<?php echo $regno; ?>','<?php echo $visitno; ?>','<?php echo $docnumber; ?>','<?php echo $sampleid; ?>')">Process</a></strong></td>
 				</tr>
 				<?php
 				} 
@@ -1015,34 +869,40 @@ $entrywork = 'Pending';
 				?>
 				<?php
 				if($patienttype != 'OP+EXTERNAL') {
-				 $queryipvisit98a = "select a.sampleid,a.itemcode,a.docnumber,a.patientname,a.patientcode,a.patientvisitcode from ipsamplecollection_lab as a JOIN master_lab as b ON a.itemcode=b.itemcode and b.categoryname='$categoryname' where a.locationcode = '".$locationcode."' and a.patientname like '%$patientname%' and a.patientcode like '%$patientcode%' and a.patientvisitcode like '%$patientvisitcode%' and a.acknowledge = 'completed' and a.resultentry = '' and a.refund = 'norefund' and a.docnumber like '%$docnum1%'  and a.recorddate between '$ADate1' and '$ADate2'  group by a.patientvisitcode,a.patientname,a.itemcode,a.sampleid order by a.recorddate ";
-				$execipvisit98a = mysqli_query($GLOBALS["___mysqli_ston"], $queryipvisit98a) or die(mysqli_error($GLOBALS["___mysqli_ston"]));
-				while($resipvisit98a = mysqli_fetch_array($execipvisit98a))
+				 $queryipvisit98 = "select patientname,patientcode,patientvisitcode from ipsamplecollection_lab where locationcode = '".$locationcode."' and patientname like '%$patientname%' and patientcode like '%$patientcode%' and patientvisitcode like '%$patientvisitcode%'   and acknowledge = 'completed' and resultentry = '' and refund = 'norefund' and docnumber like '%$docnum%'  and recorddate between '$ADate1' and '$ADate2'  group by patientvisitcode,patientname order by recorddate ";
+				$execipvisit98 = mysqli_query($GLOBALS["___mysqli_ston"], $queryipvisit98) or die(mysqli_error($GLOBALS["___mysqli_ston"]));
+										
+				while($resipvisit98 = mysqli_fetch_array($execipvisit98))
 				{
-					$patientnameipvisit6 = $resipvisit98a['patientname'];				
-					$regnoipvisit = $resipvisit98a['patientcode'];
-					$visitnoipvisit = $resipvisit98a['patientvisitcode'];
+					$patientnameipvisit6 = $resipvisit98['patientname'];				
+					$regnoipvisit = $resipvisit98['patientcode'];
+					$visitnoipvisit = $resipvisit98['patientvisitcode'];
 					$snovisit=$snovisit+1;
-					$docnum = $resipvisit98a['docnumber'];
-					$itemcode = $resipvisit98a['itemcode'];
-					$sampleid_q = $resipvisit98a['sampleid'];
-					
-					$query71 ="select * from pending_test_orders where patientcode = '$regnoipvisit' and visitcode = '$visitnoipvisit' and testcode = '$itemcode'";
-					$exec71 = mysqli_query($GLOBALS["___mysqli_ston"], $query71) or die(mysqli_error($GLOBALS["___mysqli_ston"]));
-					if(mysqli_num_rows($exec71)>0)
-					{
-						continue;
-					}	
-					
 					?>
-				
+					<tr bgcolor="#FFF" onClick="javascript: $('.<?php echo $snovisit; ?>').toggle();">
+             
+              <td align="left" valign="center"  
+                class="bodytext31"><?= $snovisit; ?></td>
+				<td align="center" valign="center"  
+                class="bodytext31">
+              <td align="left" valign="center"  
+                 class="bodytext31" colspan="3"><div align="left"><strong><?php echo $patientnameipvisit6; ?></strong></div></td>
+<td align="left" valign="center" class="bodytext31"><div align="left">
+<a href="emr2.php?patientcode=<?php echo $regnoipvisit?>&&visitcode=<?php echo $visitnoipvisit?>"><?php echo $regnoipvisit; ?></a></div></td>
+              <td align="left" valign="center"  
+                 class="bodytext31" colspan="6"><div align="left"><?php echo $visitnoipvisit; ?></div></td>
+                  <td align="left" valign="center"  
+                class="bodytext31"><div align="left"></div></td>
+                 <td align="left" valign="center"  
+                class="bodytext31"><div align="left"></div></td>
+              </tr>
               <?php
-				 $query98 = "select patientname,patientcode,patientvisitcode,recorddate,itemname,itemcode,sample,username,sampleid,docnumber,recordtime from ipsamplecollection_lab where locationcode = '".$locationcode."' and patientcode like '$regnoipvisit' and patientvisitcode like '$visitnoipvisit'   and acknowledge = 'completed' and resultentry = '' and refund = 'norefund' and docnumber like '$docnum' and itemcode ='$itemcode' and sampleid='$sampleid_q' and recorddate between '$ADate1' and '$ADate2' and transferloccode =''  order by recorddate ";
+				 $query98 = "select patientname,patientcode,patientvisitcode,recorddate,itemname,itemcode,sample,username,sampleid,docnumber,recordtime from ipsamplecollection_lab where locationcode = '".$locationcode."' and patientcode like '$regnoipvisit' and patientvisitcode like '$visitnoipvisit'   and acknowledge = 'completed' and resultentry = '' and refund = 'norefund' and docnumber like '%$docnum%'  and recorddate between '$ADate1' and '$ADate2' and transferloccode =''  order by recorddate ";
 				$exec98 = mysqli_query($GLOBALS["___mysqli_ston"], $query98) or die(mysqli_error($GLOBALS["___mysqli_ston"]));						
 				while($res98 = mysqli_fetch_array($exec98))
 				{
 				$waitingtime='';
-				$patientname6 = $res98['patientname'];
+				 $patientname6 = $res98['patientname'];
 				$patientname6 = addslashes($patientname6);
 				$regno = $res98['patientcode'];
 				$visitno = $res98['patientvisitcode'];
@@ -1058,11 +918,11 @@ $entrywork = 'Pending';
 				$entryworkby = '';
 				$recordtime = $res98['recordtime'];
 				
-				$querysample="select username,accountname from ipconsultation_lab where patientcode='$regno' and patientvisitcode='$visitno' and labitemcode='$itemcode' and docnumber='$docnumber'";
+				$querysample="select username from ipconsultation_lab where patientcode='$regno' and patientvisitcode='$visitno' and labitemcode='$itemcode' and docnumber='$docnumber'";
 $querysamplexc=mysqli_query($GLOBALS["___mysqli_ston"], $querysample) or die(mysqli_error($GLOBALS["___mysqli_ston"]));
 $samplexc=mysqli_fetch_array($querysamplexc);
 $requested=$samplexc['username'];
-$account = $samplexc['accountname'];
+
 
 			$requestedusr=mysqli_query($GLOBALS["___mysqli_ston"], "select employeename from master_employee where username='$requested' and locationcode='$locationcode' and username <> '' and status='Active'");
 			$resrequser=mysqli_fetch_array($requestedusr);
@@ -1073,16 +933,6 @@ $account = $samplexc['accountname'];
 			$samplecolluser=$rescoluser['employeename'];
 				
 				
-		$query111 = "select gender from master_ipvisitentry where visitcode='$visitno'";
-			$exec111 = mysqli_query($GLOBALS["___mysqli_ston"], $query111) or die(mysqli_error($GLOBALS["___mysqli_ston"]));
-			$res111 = mysqli_fetch_array($exec111);
-			$gender = $res111['gender'];
-			
-			$query69="select * from master_customer where customercode='$regno'";
-			$exec69=mysqli_query($GLOBALS["___mysqli_ston"], $query69) or die(mysqli_error($GLOBALS["___mysqli_ston"]));
-			$res69=mysqli_fetch_array($exec69);
-			 $patientdob=$res69['dateofbirth'];		
-
 				
 				$warddate="select ward from master_ward where auto_number in(select ward from ip_bedallocation where patientcode='$regno' and visitcode='$visitno' and recordstatus NOT IN ('discharged','transfered'))";
 		
@@ -1137,10 +987,9 @@ $account = $samplexc['accountname'];
 					//echo "else";
 					$colorcode = 'bgcolor="#ecf0f5"';
 				}	
-				$data_count++;
 				
 				?>
-				 <tr <?php echo $colorcode; ?> class="<?= $snovisit; ?>" >
+				 <tr <?php echo $colorcode; ?> class="<?= $snovisit; ?>" style="display:none">
              
               <td align="left" valign="center"  
                 class="bodytext31"><?php echo $sno=$sno+1; ?></td>
@@ -1154,25 +1003,13 @@ $account = $samplexc['accountname'];
                 class="bodytext31"><div align="left"><?php echo $billdate6; ?></div></td>
                 <td align="left" valign="center"  
                 class="bodytext31"><div align="left"><?php echo $recordtime; ?></div></td>
-                <td align="left" valign="center"  
-                class="bodytext31"><div align="left"><?php echo $regno; ?></div></td>
-                <td align="left" valign="center"  
-                class="bodytext31"><div align="left"><?php echo $visitno; ?></div></td>
-                <td align="left" valign="center"  
-                class="bodytext31"><div align="left"><?php echo $patientname6; ?></div></td>
-                <td align="left" valign="center"  
-                class="bodytext31"><div align="left"><?php echo calculate_age($patientdob); ?></div></td>
-                <td align="left" valign="center"  
-                class="bodytext31"><div align="left"><?php echo $gender; ?></div></td>
-				<!--				<td align="left" valign="center"  
+				<td align="left" valign="center"  
                 class="bodytext31"><div align="center"><?php echo $docnumber; ?></div></td>
 				 <td align="left" valign="center"  
                 class="bodytext31"><div align="left"><strong><?php echo $sampleid; ?></strong></div></td>
-			-->
+
 				 <td align="left" valign="center"  
                 class="bodytext31"><div align="left"><strong><?php echo $test; ?></strong></div></td>
-				 <td align="left" valign="center"  
-                class="bodytext31"><div align="left"><strong><?php echo $account; ?></strong></div></td>
 				 <td align="left" valign="center"  
                 class="bodytext31"><div align="left"><?php echo $sample; ?></div></td>
 				 <td align="left" valign="center"  
@@ -1200,7 +1037,7 @@ $account = $samplexc['accountname'];
 				
 				<?php } ?>
 				<td align="left" valign="center"  
-                class="bodytext31" <?php if($waitingtime1 > 15){ ?> bgcolor=" #FF0040" <?php } ?>><div align="center"><strong><?php $datetime1=$billdate6.' '.$recordtime; get_time($datetime1); ?></strong></div></td>
+                class="bodytext31" <?php if($waitingtime1 > 15){ ?> bgcolor=" #FF0040" <?php } ?>><div align="center"><strong><?php echo $waitingtime1; ?></strong></div></td>
 
 				</tr>
 				<tr id="SUB<?php echo $sno; ?>" style="display:none; background-color:#ecf0f5;">
@@ -1221,14 +1058,14 @@ $account = $samplexc['accountname'];
 				}
 				?>
 				</select></td>
-				<td colspan="14" align="left" class="bodytext3"><strong><a href="#" onClick="return AnaProcessIP('<?php echo $sno; ?>','<?php echo $regno; ?>','<?php echo $visitno; ?>','<?php echo $docnumber; ?>','<?php echo $sampleid; ?>')">Process</a></strong></td>
+				<td colspan="8" align="left" class="bodytext3"><strong><a href="#" onClick="return AnaProcessIP('<?php echo $sno; ?>','<?php echo $regno; ?>','<?php echo $visitno; ?>','<?php echo $docnumber; ?>','<?php echo $sampleid; ?>')">Process</a></strong></td>
 				</tr>
 				<?php
 				} 
 				}
 				
 				
-					$query98 = "select patientname,patientcode,patientvisitcode,recorddate,itemname,itemcode,sample,username,sampleid,docnumber,recordtime from ipsamplecollection_lab where locationcode = '".$locationcode."' and patientcode like '$regnoipvisit' and patientvisitcode like '$visitnoipvisit'   and acknowledge = 'completed' and resultentry = '' and refund = 'norefund' and docnumber like '$docnum' and sampleid='$sampleid'  and recorddate between '$ADate1' and '$ADate2' and transferloccode !='' and externalack = 'acknowledge'  order by recorddate ";
+					$query98 = "select patientname,patientcode,patientvisitcode,recorddate,itemname,itemcode,sample,username,sampleid,docnumber,recordtime from ipsamplecollection_lab where locationcode = '".$locationcode."' and patientcode like '$regnoipvisit' and patientvisitcode like '$visitnoipvisit'   and acknowledge = 'completed' and resultentry = '' and refund = 'norefund' and docnumber like '%$docnum%'  and recorddate between '$ADate1' and '$ADate2' and transferloccode !='' and externalack = 'acknowledge'  order by recorddate ";
 				$exec98 = mysqli_query($GLOBALS["___mysqli_ston"], $query98) or die(mysqli_error($GLOBALS["___mysqli_ston"]));						
 				while($res98 = mysqli_fetch_array($exec98))
 				{
@@ -1250,22 +1087,11 @@ $account = $samplexc['accountname'];
 				$recordtime = $res98['recordtime'];
 				
 				
-				$querysample="select username,accountname from ipconsultation_lab where patientcode='$regno' and patientvisitcode='$visitno' and labitemcode='$itemcode' and docnumber='$docnumber'";
+				$querysample="select username from ipconsultation_lab where patientcode='$regno' and patientvisitcode='$visitno' and labitemcode='$itemcode' and docnumber='$docnumber'";
 $querysamplexc=mysqli_query($GLOBALS["___mysqli_ston"], $querysample) or die(mysqli_error($GLOBALS["___mysqli_ston"]));
 $samplexc=mysqli_fetch_array($querysamplexc);
 $requested=$samplexc['username'];
-$account = $samplexc['accountname'];				
 				
-		$query111 = "select gender from master_ipvisitentry where visitcode='$visitno'";
-			$exec111 = mysqli_query($GLOBALS["___mysqli_ston"], $query111) or die(mysqli_error($GLOBALS["___mysqli_ston"]));
-			$res111 = mysqli_fetch_array($exec111);
-			$gender = $res111['gender'];
-			
-			$query69="select * from master_customer where customercode='$regno'";
-			$exec69=mysqli_query($GLOBALS["___mysqli_ston"], $query69) or die(mysqli_error($GLOBALS["___mysqli_ston"]));
-			$res69=mysqli_fetch_array($exec69);
-			 $patientdob=$res69['dateofbirth'];		
-
 				$requestedusr=mysqli_query($GLOBALS["___mysqli_ston"], "select employeename from master_employee where username='$requested' and locationcode='$locationcode' and username <> '' and status='Active'");
 			$resrequser=mysqli_fetch_array($requestedusr);
 			$requesteduser=$resrequser['employeename'];
@@ -1327,7 +1153,7 @@ $account = $samplexc['accountname'];
 					//echo "else";
 					$colorcode = 'bgcolor="#ecf0f5"';
 				}	
-				$data_count++;
+				
 				?>
 				 <tr <?php echo $colorcode; ?> class="<?= $snovisit; ?>" style="display:none">
              
@@ -1343,25 +1169,13 @@ $account = $samplexc['accountname'];
                 class="bodytext31"><div align="left"><?php echo $billdate6; ?></div></td>
                 <td align="left" valign="center"  
                 class="bodytext31"><div align="left"><?php echo $recordtime; ?></div></td>
-          	   <td align="left" valign="center"  
-                class="bodytext31"><div align="left"><?php echo $regno; ?></div></td>
-                <td align="left" valign="center"  
-                class="bodytext31"><div align="left"><?php echo $visitno; ?></div></td>
-                <td align="left" valign="center"  
-                class="bodytext31"><div align="left"><?php echo $patientname6; ?></div></td>
-                <td align="left" valign="center"  
-                class="bodytext31"><div align="left"><?php echo calculate_age($patientdob); ?></div></td>
-                <td align="left" valign="center"  
-                class="bodytext31"><div align="left"><?php echo $gender; ?></div></td>
-				<!--<td align="left" valign="center"  
+				<td align="left" valign="center"  
                 class="bodytext31"><div align="center"><?php echo $docnumber; ?></div></td>
 				 <td align="left" valign="center"  
                 class="bodytext31"><div align="left"><strong><?php echo $sampleid; ?></strong></div></td>
--->
+
 				 <td align="left" valign="center"  
                 class="bodytext31"><div align="left"><strong><?php echo $test; ?></strong></div></td>
-				 <td align="left" valign="center"  
-                class="bodytext31"><div align="left"><strong><?php echo $account; ?></strong></div></td>
 				 <td align="left" valign="center"  
                 class="bodytext31"><div align="left"><?php echo $sample; ?></div></td>
 				 <td align="left" valign="center"  
@@ -1389,7 +1203,7 @@ $account = $samplexc['accountname'];
 				
 				<?php } ?>
 				<td align="left" valign="center"  
-                class="bodytext31" <?php if($waitingtime1 > 15){ ?> bgcolor=" #FF0040" <?php } ?>><div align="center"><strong><?php $datetime1=$billdate6.' '.$recordtime; get_time($datetime1); ?></strong></div></td>
+                class="bodytext31" <?php if($waitingtime1 > 15){ ?> bgcolor=" #FF0040" <?php } ?>><div align="center"><strong><?php echo $waitingtime1; ?></strong></div></td>
 
 				</tr>
 				<tr id="SUB<?php echo $sno; ?>" style="display:none; background-color:#ecf0f5;">
@@ -1410,7 +1224,7 @@ $account = $samplexc['accountname'];
 				}
 				?>
 				</select></td>
-				<td colspan="14" align="left" class="bodytext3"><strong><a href="#" onClick="return AnaProcessIP('<?php echo $sno; ?>','<?php echo $regno; ?>','<?php echo $visitno; ?>','<?php echo $docnumber; ?>','<?php echo $sampleid; ?>')">Process</a></strong></td>
+				<td colspan="8" align="left" class="bodytext3"><strong><a href="#" onClick="return AnaProcessIP('<?php echo $sno; ?>','<?php echo $regno; ?>','<?php echo $visitno; ?>','<?php echo $docnumber; ?>','<?php echo $sampleid; ?>')">Process</a></strong></td>
 				</tr>
 				<?php
 				} 
@@ -1420,15 +1234,6 @@ $account = $samplexc['accountname'];
 				}
 				$lastsno=$sno;
 				?>
-
-	<?php
-
-		if($data_count==0){
-			echo "<tr bgcolor='blanchedalmond'><td align='left' valign='center' colspan='20'  class='bodytext31'  > No Data Found.</td></tr>";
-		}
-		
-	}
-?>   
                 <input type="hidden" value="<?php echo $lastsno;?>" name="serialno" id="serialno"/>
 		  </tbody>
 		  </table></td>

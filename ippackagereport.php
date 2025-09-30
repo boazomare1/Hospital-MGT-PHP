@@ -1,1 +1,399 @@
-<?phpsession_start();include ("includes/loginverify.php");include ("db/db_connect.php");$ipaddress = $_SERVER['REMOTE_ADDR'];$updatedatetime = date('Y-m-d');$username = $_SESSION['username'];$docno = $_SESSION['docno'];$companyanum = $_SESSION['companyanum'];$companyname = $_SESSION['companyname'];$fromdate =  date('Y-m-d');$todate = date('Y-m-d');$errmsg = "";$banum = "1";$supplieranum = "";$custid = "";$custname = "";$balanceamount = "0.00";$openingbalance = "0.00";$searchsuppliername = "";$cbsuppliername = ""; $location=isset($_REQUEST['location'])?$_REQUEST['location']:'';//This include updatation takes too long to load for hunge items database.//$getcanum = $_GET['canum'];if (isset($_REQUEST["package"])) { $packagecode = $_REQUEST["package"]; $package=$packagecode; } else { $packagecode = ""; $package = ''; }if (isset($_REQUEST["cbfrmflag1"])) { $cbfrmflag1 = $_REQUEST["cbfrmflag1"]; } else { $cbfrmflag1 = ""; }if (isset($_REQUEST["ADate1"])) { $fromdate = $_REQUEST["ADate1"]; } else { $fromdate = date("Y-m-d"); }if (isset($_REQUEST["ADate2"])) { $todate = $_REQUEST["ADate2"]; } else { $todate = date("Y-m-d"); }$locationcode1=isset($_REQUEST['location'])?$_REQUEST['location']:'';$packagename=isset($_REQUEST['packagename'])?$_REQUEST['packagename']:'';$type=isset($_REQUEST['type'])?$_REQUEST['type']:'';?><style type="text/css"><!--body {	margin-left: 0px;	margin-top: 0px;	background-color: #ecf0f5;}.bodytext3 {	FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3B3B3C; FONT-FAMILY: Tahoma}-->.bodytext3 {	FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3B3B3C; FONT-FAMILY: Tahoma}</style><script type="text/javascript" src="js/adddate.js"></script><script type="text/javascript" src="js/adddate2.js"></script><script type="text/javascript" src="js/jquery-1.11.1.min.js"></script><script type="text/javascript" src="js/jquery.min-autocomplete.js"></script><script type="text/javascript" src="js/jquery-ui.min.js"></script><link rel="stylesheet" type="text/css" href="css/autosuggest.css" /> <link rel="stylesheet" type="text/css" href="css/autocomplete.css" />      <script>function ajaxlocationfunction(val){ if (window.XMLHttpRequest)					  {// code for IE7+, Firefox, Chrome, Opera, Safari					  xmlhttp=new XMLHttpRequest();					  }					else					  {// code for IE6, IE5					  xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");					  }					xmlhttp.onreadystatechange=function()					  {					  if (xmlhttp.readyState==4 && xmlhttp.status==200)						{						document.getElementById("ajaxlocation").innerHTML=xmlhttp.responseText;						}					  }					xmlhttp.open("GET","ajax/ajaxgetlocationname.php?loccode="+val,true);					xmlhttp.send();}					//ajax to get location which is selected ends here</script><script type="text/javascript">function process1backkeypress1(){	//alert ("Back Key Press");	if (event.keyCode==8) 	{		event.keyCode=0; 		return event.keyCode 		return false;	}}function disableEnterKey(){	//alert ("Back Key Press");	if (event.keyCode==8) 	{		event.keyCode=0; 		return event.keyCode 		return false;	}		var key;	if(window.event)	{		key = window.event.keyCode;     //IE	}	else	{		key = e.which;     //firefox	}		if(key == 13) // if enter key press	{		return false;	}	else	{		return true;	}}function paymententry1process2(){	if (document.getElementById("cbfrmflag1").value == "")	{		alert ("Search Bill Number Cannot Be Empty.");		document.getElementById("cbfrmflag1").focus();		document.getElementById("cbfrmflag1").value = "<?php echo $cbfrmflag1; ?>";		return false;	}}function get_department(){	$('#package').val('');	$('#packagename').autocomplete({		source:'ajaxippackagesearch.php', 	//alert(source);	minLength:3,	delay: 0,	html: true, 		select: function(event,ui){			var anum = ui.item.anum;			var value = ui.item.value;			$('#package').val(anum);					},	    });}</script><link rel="stylesheet" type="text/css" href="css/autosuggest.css" />        <style type="text/css"><!--.bodytext3 {FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3b3b3c; FONT-FAMILY: Tahoma; text-decoration:none}.bodytext31 {FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3b3b3c; FONT-FAMILY: Tahoma; text-decoration:none}.bodytext311 {FONT-WEIGHT: normal; FONT-SIZE: 11px; COLOR: #3b3b3c; FONT-FAMILY: Tahoma; text-decoration:none}-->.bal{border-style:none;background:none;text-align:right;}.bali{text-align:right;}</style></head><script src="js/datetimepicker_css.js"></script><body><table width="101%" border="0" cellspacing="0" cellpadding="2">  <tr>    <td colspan="10" bgcolor="#ecf0f5"><?php include ("includes/alertmessages1.php"); ?></td>  </tr>  <tr>    <td colspan="10" bgcolor="#ecf0f5"><?php include ("includes/title1.php"); ?></td>  </tr>  <tr>    <td colspan="10" bgcolor="#ecf0f5"><?php include ("includes/menu1.php"); ?></td>  </tr>  <tr>    <td colspan="10">&nbsp;</td>  </tr>  <tr>    <td width="1%">&nbsp;</td>    <td width="2%" valign="top"><?php //include ("includes/menu4.php"); ?>      &nbsp;</td>    <td width="97%" valign="top"><table width="116%" border="0" cellspacing="0" cellpadding="0">      <tr>        <td width="860">				        <form name="cbform1" method="post" action="ippackagereport.php">		<table width="800" border="0" align="left" cellpadding="4" cellspacing="0" bordercolor="#666666" id="AutoNumber3" style="border-collapse: collapse">          <tbody>            <tr bgcolor="#011E6A">              <td colspan="2" bgcolor="#ecf0f5" class="bodytext3"><strong>IP Package Report </strong></td>              <td colspan="2" align="right" bgcolor="#ecf0f5" class="bodytext3" id="ajaxlocation"><strong> Location </strong>                                           <?php												if ($location!='')						{						$query12 = "select locationname from master_location where locationcode='$location' order by locationname";						$exec12 = mysqli_query($GLOBALS["___mysqli_ston"], $query12) or die ("Error in Query12".mysqli_error($GLOBALS["___mysqli_ston"]));						$res12 = mysqli_fetch_array($exec12);												echo $res1location = $res12["locationname"];						//echo $location;						}						else						{						$query1 = "select locationname from login_locationdetails where username='$username' and docno='$docno' group by locationname order by locationname";						$exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));						$res1 = mysqli_fetch_array($exec1);												echo $res1location = $res1["locationname"];						//$res1locationanum = $res1["locationcode"];						}						?>												                                    </td>               </tr>                      			    <tr>              <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3"><strong>Package Name</strong></td>              <td width="82%" colspan="4" align="left" valign="top"  bgcolor="#FFFFFF"><span class="bodytext3">				<input type="text" name="packagename" id="packagename" value="<?php echo $packagename;?>" onKeyUp="get_department()" size="50" autocomplete="off">                 <input type="hidden" name="package" id="package" value="<?php echo $package;?>">              </span></td>              </tr>            <tr>          <td width="76" align="left" valign="center"                  bgcolor="#ffffff" class="bodytext31"><strong> Date From </strong></td>          <td width="123" align="left" valign="center"  bgcolor="#ffffff" class="bodytext31"><input name="ADate1" id="ADate1" value="<?php echo $fromdate; ?>"  size="10"  readonly="readonly" onKeyDown="return disableEnterKey()" />			<img src="images2/cal.gif" onClick="javascript:NewCssCal('ADate1')" style="cursor:pointer"/>			</td>          <td width="51" align="left" valign="center"  bgcolor="#FFFFFF" class="style1"><span class="bodytext31"><strong> Date To </strong></span></td>          <td width="129" align="left" valign="center"  bgcolor="#ffffff"><span class="bodytext31">            <input name="ADate2" id="ADate2" value="<?php echo $todate; ?>"  size="10"  readonly="readonly" onKeyDown="return disableEnterKey()" />			<img src="images2/cal.gif" onClick="javascript:NewCssCal('ADate2')" style="cursor:pointer"/>		  </span></td>          </tr>          <tr>  			  <td width="10%" align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">Location</td>              <td width="10%" align="left" valign="top"  bgcolor="#FFFFFF"><span class="bodytext3">			 				 <select name="location" id="location"  onChange=" ajaxlocationfunction(this.value);" >				  <option value="All">All</option>                                     					  					  <?php						$query1="select locationcode,locationname from master_employeelocation where username ='$username' group by locationcode order by locationcode ";						$exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));						$loccode=array();						while ($res1 = mysqli_fetch_array($exec1))						{							$locationname = $res1["locationname"];							$locationcode = $res1["locationcode"];						?>						 <option value="<?php echo $locationcode; ?>" <?php if($location!='')if($location==$locationcode){echo "selected";}?>><?php echo $locationname; ?></option>						<?php						} 						?>					  </select>              </span></td>			   <td width="10%" align="left" colspan="" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">Type</td>			   <td width="10%" align="left" colspan="" valign="middle"  bgcolor="#FFFFFF" class="bodytext3">			   <select name="type" id="type">			   <option value="summary" <?php if($type=='summary'){ echo 'selected';} ?>>Summary</option>			   <option value="detailed" <?php if($type=='detailed'){ echo 'selected';} ?>>Deatiled</option>			   </select>			   			   </td>			  </tr>						                       <tr>              <td align="left" valign="middle"  bgcolor="#FFFFFF" class="bodytext3"></td>              <td colspan="3" align="left" valign="top"  bgcolor="#FFFFFF">			  <input type="hidden" name="cbfrmflag1" value="cbfrmflag1">                  <input  type="submit" onClick="return funcvalid();" value="Search" name="submit"/>                  <input name="resetbutton" type="reset" id="resetbutton"  value="Reset" /></td>            </tr>          </tbody>        </table>		</form>		</td>      </tr>      <tr>        <td>&nbsp;</td>      </tr>      	  	  <tr>        <td>			<?php	$colorloopcount=0;	$sno=0;if (isset($_REQUEST["cbfrmflag1"])) { $cbfrmflag1 = $_REQUEST["cbfrmflag1"]; } else { $cbfrmflag1 = ""; }//$cbfrmflag1 = $_POST['cbfrmflag1'];if ($cbfrmflag1 == 'cbfrmflag1'){	$fromdate=$_POST['ADate1'];	$todate=$_POST['ADate2'];	$num6='';	?>	<table id="AutoNumber3" style="BORDER-COLLAPSE: collapse" 	bordercolor="#666666" cellspacing="0" cellpadding="4" width="700" 	align="left" border="0">	<tbody>			<tr bgcolor="#fff">			<td colspan="3"  align="left" valign="center" class="bodytext31"><strong>Package Name</strong></td>			<td colspan="2"  align="left" valign="center" class="bodytext31"><strong>Count</strong></td>			<td colspan="3"  align="left" valign="center" class="bodytext31"><strong>Amount</strong></td>			<td  align="right" valign="center" bgcolor="#ecf0f5" class="bodytext31"><div align="right"><a target="_blank" href="print_ippackagereport.php?ADate1=<?php echo $fromdate; ?>&&ADate2=<?php echo $todate; ?>&&packagecode=<?php echo $packagecode; ?>&&locationcode1=<?php echo $locationcode1; ?>&&type=<?php echo $type; ?>"><img src="images/excel-xls-icon.png" width="30" height="30"></a></div></td>			</tr>		<?php	$snocount = '';	$colorloopcount = '';		if($locationcode1=='All'){	$query1="select locationcode,locationname from master_employeelocation where username ='$username'  group by locationcode order by locationcode asc";	}else{	$query1="select locationcode,locationname from master_employeelocation where username ='$username' and locationcode='$locationcode1' group by locationcode order by locationcode asc";		}	$exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));	while ($res1 = mysqli_fetch_array($exec1))	{	$locationcodenew = $res1['locationcode'];	$locationnamenew = $res1['locationname'];	?>	<tr >			<td  colspan="5" align="left" valign="center" class="bodytext31" ><strong><?php echo $locationnamenew;?></strong></td>	</tr>	<?php	if($type == 'detailed') {	?>					<tr bgcolor="#fff">					<td width=""  align="left" valign="center" class="bodytext31"><strong>Sno</strong></td>					<td width=""  align="left" valign="center" class="bodytext31"><strong>Date</strong></td>					<td width=""  align="left" valign="center" class="bodytext31"><strong>Patitent Name</strong></td> 					<td class="bodytext31" valign="center"  align="left"><strong>Patitent Code</strong></td>					<td class="bodytext31" valign="center"  align="left"><strong>Visit Code</strong></td> 					<td width=""  align="left" valign="center" class="bodytext31"><strong>Age</strong></td> 					<td width=""  align="left" valign="center" class="bodytext31"><strong>Gender</strong></td> 					<td width=""  align="left" valign="center" class="bodytext31"><strong>Pkg Amt</strong></td> 					</tr>	<?php } ?>					<?php	$sno=0;	$locatpkgamt=0;		if($packagecode==''){	$query40 = "select * from master_ippackage where  auto_number like '%$packagecode%'";	}else{	$query40 = "select * from master_ippackage where  auto_number = '$packagecode'";		}	$exec40 = mysqli_query($GLOBALS["___mysqli_ston"], $query40) or die(mysqli_error($GLOBALS["___mysqli_ston"]));	while($res40 = mysqli_fetch_array($exec40))			{			$packagename = $res40['packagename'];		$packagecode1 = $res40['auto_number'];		$num5 = '';		$totpkg=0;				 $query3 = "select * from master_ipvisitentry where locationcode='$locationcodenew' and consultationdate between '$fromdate' and '$todate' and  package='$packagecode1' and visitcode IN (select visitcode from billing_ip UNION ALL select visitcode from billing_ipcreditapproved)";		$exec3 = mysqli_query($GLOBALS["___mysqli_ston"], $query3) or die ("Error in Query3".mysqli_error($GLOBALS["___mysqli_ston"]));		$num3=mysqli_num_rows($exec3);		while($res3 = mysqli_fetch_array($exec3))		{					$visitcode=$res3['visitcode'];				$patientcode=$res3['patientcode'];			$packagecharge=$res3['packagecharge'];			$totpkg+=$packagecharge;			$locatpkgamt+=$packagecharge;			$query4 = "select * from ip_bedallocation where recorddate between '$fromdate' and '$todate' and  visitcode='$visitcode'";			$exec4 = mysqli_query($GLOBALS["___mysqli_ston"], $query4) or die ("Error in Query4".mysqli_error($GLOBALS["___mysqli_ston"]));			$num4=mysqli_num_rows($exec4);			$num5=$num5+$num4;			$num6=$num6+$num4;		}		if($num5 != '')		{			$sno=$sno+1;				$colorloopcount = $colorloopcount + 1;				$showcolor = ($colorloopcount & 1); 				$colorcode = '';				/* if ($showcolor == 0)				{				//echo "if";				$colorcode = 'bgcolor="#CBDBFA"';				}				else				{				//echo "else";				$colorcode = 'bgcolor="#5fe5de"';				} */				$colorcode = 'bgcolor="#5fe5de"';			?>						<tr <?php echo $colorcode; ?>>			<td  colspan="3"align="left" valign="center" class="bodytext31" ><strong><?php echo $packagename;?></strong></td>			<td colspan="2"  align="left" valign="center" class="bodytext31"><strong><?php echo $num5;?></strong></td>  			<td colspan="3"  align="right" valign="center" class="bodytext31"><strong><?php echo number_format($totpkg,2,'.',',');?></strong></td>  			</tr>				<?php					if($type == 'detailed')				{									$snocount=0;					$query11 = "select * from master_ipvisitentry where locationcode='$locationcodenew' and consultationdate between '$fromdate' and '$todate' and  package='$packagecode1' and  visitcode IN (select visitcode from billing_ip UNION ALL select visitcode from billing_ipcreditapproved)";					$exec11 = mysqli_query($GLOBALS["___mysqli_ston"], $query11) or die ("Error in Query11".mysqli_error($GLOBALS["___mysqli_ston"]));					$num11=mysqli_num_rows($exec11);					while($res11 = mysqli_fetch_array($exec11))					{											$visitcode=$res11['visitcode'];						$patientcode=$res11['patientcode'];							$patientfullname=$res11['patientfullname'];					$age=$res11['age'];					$gender=$res11['gender'];					$packagecharge=$res11['packagecharge'];					$query2 = "select * from ip_bedallocation where recorddate between '$fromdate' and '$todate' and  visitcode='$visitcode'";					$exec2 = mysqli_query($GLOBALS["___mysqli_ston"], $query2) or die ("Error in Query2".mysqli_error($GLOBALS["___mysqli_ston"]));					$num2=mysqli_num_rows($exec2);					if($num2 !='')					{					$res2 = mysqli_fetch_array($exec2);					$recorddate = $res2['recorddate'];					$snocount = $snocount + 1;					$colorloopcount = $colorloopcount + 1;					$showcolor = ($colorloopcount & 1); 					if ($showcolor == 0)					{										$colorcode = 'bgcolor="#CBDBFA"';					}					else					{					$colorcode = 'bgcolor="#ecf0f5"';					}										?>					<tr <?php echo $colorcode; ?> >					<td class="bodytext31" valign="center"  align="left"><?php echo $snocount; ?></td>					<td class="bodytext31" valign="center"  align="left"><?php echo $recorddate; ?></td>					<td class="bodytext31" valign="center"  align="left"><?php echo $patientfullname; ?></td> 					<td class="bodytext31" valign="center"  align="left"><?php echo $patientcode; ?></td>					<td class="bodytext31" valign="center"  align="left"><?php echo $visitcode; ?></td> 					<td class="bodytext31" valign="center"  align="left"><?php echo $age; ?></td> 					<td class="bodytext31" valign="center"  align="left"><?php echo $gender; ?></td> 					<td class="bodytext31" valign="center"  align="right"><?php echo number_format($packagecharge,2,'.',','); ?></td> 					</tr>					<?php 					} 					}					?>												<?php } ?>		<?php 					}	} 	if($type == 'summary') {	?>	<tr >			<td  colspan="3"align="left" valign="center" class="bodytext31" ><strong></strong></td>			<td colspan="2"  align="left" valign="center" class="bodytext31"><strong>Total</strong></td>  			<td colspan="3"  align="right" valign="center" class="bodytext31"><strong><?php echo number_format($locatpkgamt,2,'.',',');?></strong></td>  			</tr>	<?php	}	}	?>		</tbody>	</table><?php}?>			</td>      </tr>  </table><?php include ("includes/footer1.php"); ?></body></html>
+<?php
+session_start();
+include ("includes/loginverify.php");
+include ("db/db_connect.php");
+
+$ipaddress = $_SERVER['REMOTE_ADDR'];
+$updatedatetime = date('Y-m-d');
+$username = $_SESSION['username'];
+$docno = $_SESSION['docno'];
+$companyanum = $_SESSION['companyanum'];
+$companyname = $_SESSION['companyname'];
+$fromdate = date('Y-m-d');
+$todate = date('Y-m-d');
+$errmsg = "";
+$banum = "1";
+$supplieranum = "";
+$custid = "";
+$custname = "";
+$balanceamount = "0.00";
+$openingbalance = "0.00";
+$searchsuppliername = "";
+$cbsuppliername = "";
+$location = isset($_REQUEST['location']) ? $_REQUEST['location'] : '';
+
+if (isset($_REQUEST["package"])) { $packagecode = $_REQUEST["package"]; $package = $packagecode; } else { $packagecode = ""; $package = ''; }
+if (isset($_REQUEST["cbfrmflag1"])) { $cbfrmflag1 = $_REQUEST["cbfrmflag1"]; } else { $cbfrmflag1 = ""; }
+if (isset($_REQUEST["ADate1"])) { $fromdate = $_REQUEST["ADate1"]; } else { $fromdate = date("Y-m-d"); }
+if (isset($_REQUEST["ADate2"])) { $todate = $_REQUEST["ADate2"]; } else { $todate = date("Y-m-d"); }
+$locationcode1 = isset($_REQUEST['location']) ? $_REQUEST['location'] : '';
+$packagename = isset($_REQUEST['packagename']) ? $_REQUEST['packagename'] : '';
+$type = isset($_REQUEST['type']) ? $_REQUEST['type'] : '';
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IP Package Report - MedStar</title>
+    
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <!-- Modern CSS -->
+    <link rel="stylesheet" href="css/ippackagereport-modern.css?v=<?php echo time(); ?>">
+    
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- Date Picker -->
+    <link href="css/datepickerstyle.css" rel="stylesheet" type="text/css" />
+    <script type="text/javascript" src="js/adddate.js"></script>
+    <script type="text/javascript" src="js/adddate2.js"></script>
+    <script src="js/datetimepicker_css.js"></script>
+    
+    <!-- Autocomplete -->
+    <script type="text/javascript" src="js/jquery-1.11.1.min.js"></script>
+    <script type="text/javascript" src="js/jquery.min-autocomplete.js"></script>
+    <script type="text/javascript" src="js/jquery-ui.min.js"></script>
+    <link href="js/jquery-ui.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Hospital Header -->
+    <header class="hospital-header">
+        <h1 class="hospital-title">🏥 MedStar Hospital Management</h1>
+        <p class="hospital-subtitle">Advanced Healthcare Management Platform</p>
+    </header>
+
+    <!-- User Information Bar -->
+    <div class="user-info-bar">
+        <div class="user-welcome">
+            <span class="welcome-text">Welcome, <strong><?php echo htmlspecialchars($username); ?></strong></span>
+            <span class="location-info">📍 Company: <?php echo htmlspecialchars($companyname); ?></span>
+        </div>
+        <div class="user-actions">
+            <a href="mainmenu1.php" class="btn btn-outline">🏠 Main Menu</a>
+            <a href="logout.php" class="btn btn-outline">🚪 Logout</a>
+        </div>
+    </div>
+
+    <!-- Navigation Breadcrumb -->
+    <nav class="nav-breadcrumb">
+        <a href="mainmenu1.php">🏠 Home</a>
+        <span>→</span>
+        <span>IP Package Report</span>
+    </nav>
+
+    <!-- Floating Menu Toggle -->
+    <div id="menuToggle" class="floating-menu-toggle">
+        <i class="fas fa-bars"></i>
+    </div>
+
+    <!-- Main Container with Sidebar -->
+    <div class="main-container-with-sidebar">
+        <!-- Left Sidebar -->
+        <aside id="leftSidebar" class="left-sidebar">
+            <div class="sidebar-header">
+                <h3>Quick Navigation</h3>
+                <button id="sidebarToggle" class="sidebar-toggle">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <ul class="nav-list">
+                    <li class="nav-item">
+                        <a href="ipdischargelist.php" class="nav-link">
+                            <i class="fas fa-list"></i>
+                            <span>Discharge List</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="ipdischargerequestlist.php" class="nav-link">
+                            <i class="fas fa-clipboard-list"></i>
+                            <span>Discharge Requests</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="ipdischargelist_tat.php" class="nav-link">
+                            <i class="fas fa-clock"></i>
+                            <span>Discharge TAT</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="ipdiscountlist.php" class="nav-link">
+                            <i class="fas fa-percentage"></i>
+                            <span>% Discount List</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="ipdiscountreport.php" class="nav-link">
+                            <i class="fas fa-chart-bar"></i>
+                            <span>Discount Report</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="ipdocs.php" class="nav-link">
+                            <i class="fas fa-file-alt"></i>
+                            <span>IP Documents</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="ipdrugconsumptionreport.php" class="nav-link">
+                            <i class="fas fa-pills"></i>
+                            <span>Drug Consumption Report</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="ipdrugintake.php" class="nav-link">
+                            <i class="fas fa-capsules"></i>
+                            <span>Drug Intake</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="ipmedicinestatement.php" class="nav-link">
+                            <i class="fas fa-prescription"></i>
+                            <span>Medicine Statement</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="inpatientactivity.php" class="nav-link">
+                            <i class="fas fa-activity"></i>
+                            <span>Inpatient Activity</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="ipvisitentry_new.php" class="nav-link">
+                            <i class="fas fa-user-plus"></i>
+                            <span>IP Visit Entry</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="ipcreditaccountreport.php" class="nav-link">
+                            <i class="fas fa-credit-card"></i>
+                            <span>Credit Account Report</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="iplabresultsviewlist.php" class="nav-link">
+                            <i class="fas fa-flask"></i>
+                            <span>Lab Results View</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="ipmedicineissuelist.php" class="nav-link">
+                            <i class="fas fa-pills"></i>
+                            <span>Medicine Issue List</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="activeinpatientlistmedicine.php" class="nav-link">
+                            <i class="fas fa-bed"></i>
+                            <span>Active Inpatient List</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="ippackageanalysis.php" class="nav-link">
+                            <i class="fas fa-chart-line"></i>
+                            <span>Package Analysis</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="addippackage.php" class="nav-link">
+                            <i class="fas fa-plus"></i>
+                            <span>Add IP Package</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="ippackagereport.php" class="nav-link active">
+                            <i class="fas fa-file-alt"></i>
+                            <span>Package Report</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Alert Container -->
+            <div class="alert-container">
+                <?php include ("includes/alertmessages1.php"); ?>
+            </div>
+
+            <!-- Page Header -->
+            <div class="page-header">
+                <div class="page-header-content">
+                    <h2><i class="fas fa-file-alt"></i> IP Package Report</h2>
+                    <p>Generate comprehensive reports for inpatient packages</p>
+                </div>
+                <div class="page-header-actions">
+                    <button class="btn btn-primary" onclick="generatePackageReport()">
+                        <i class="fas fa-download"></i> Export Report
+                    </button>
+                    <button class="btn btn-primary" onclick="printPackageReport()">
+                        <i class="fas fa-print"></i> Print Report
+                    </button>
+                </div>
+            </div>
+
+            <!-- Search Form -->
+            <div class="search-form-container">
+                <form name="cbform1" method="post" action="ippackagereport.php" class="search-form">
+                    <div class="form-header">
+                        <h3><i class="fas fa-search"></i> Report Parameters</h3>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="package">Package</label>
+                            <select name="package" id="package" class="form-control">
+                                <option value="">Select Package</option>
+                                <?php
+                                $query1 = "select * from master_package where status <> 'deleted' order by packagename";
+                                $exec1 = mysqli_query($GLOBALS["___mysqli_ston"], $query1) or die ("Error in Query1".mysqli_error($GLOBALS["___mysqli_ston"]));
+                                while ($res1 = mysqli_fetch_array($exec1)) {
+                                    $packagename = $res1["packagename"];
+                                    $packagecode = $res1["auto_number"];
+                                    if ($package == $packagecode) {
+                                        echo "<option value='$packagecode' selected>$packagename</option>";
+                                    } else {
+                                        echo "<option value='$packagecode'>$packagename</option>";
+                                    }
+                                }
+                                ?>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="location">Location</label>
+                            <select name="location" id="location" class="form-control">
+                                <option value="">Select Location</option>
+                                <?php
+                                $query2 = "select * from master_location where status = '' order by locationname";
+                                $exec2 = mysqli_query($GLOBALS["___mysqli_ston"], $query2) or die ("Error in Query2".mysqli_error($GLOBALS["___mysqli_ston"]));
+                                while ($res2 = mysqli_fetch_array($exec2)) {
+                                    $locationname = $res2["locationname"];
+                                    $locationcode = $res2["locationcode"];
+                                    if ($location == $locationcode) {
+                                        echo "<option value='$locationcode' selected>$locationname</option>";
+                                    } else {
+                                        echo "<option value='$locationcode'>$locationname</option>";
+                                    }
+                                }
+                                ?>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="ADate1">Date From</label>
+                            <input type="text" name="ADate1" id="ADate1" value="<?php echo $fromdate; ?>" class="form-control date-picker" readonly>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="ADate2">Date To</label>
+                            <input type="text" name="ADate2" id="ADate2" value="<?php echo $todate; ?>" class="form-control date-picker" readonly>
+                        </div>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <input type="hidden" name="cbfrmflag1" value="cbfrmflag1">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-search"></i> Generate Report
+                        </button>
+                        <button type="reset" class="btn btn-secondary">
+                            <i class="fas fa-undo"></i> Reset
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Package Report Cards -->
+            <div class="package-report-cards">
+                <div class="package-report-card">
+                    <h4><i class="fas fa-chart-bar"></i> Revenue Report</h4>
+                    <p>Package revenue and financial performance</p>
+                </div>
+                
+                <div class="package-report-card">
+                    <h4><i class="fas fa-users"></i> Patient Report</h4>
+                    <p>Patient utilization and demographics</p>
+                </div>
+                
+                <div class="package-report-card">
+                    <h4><i class="fas fa-clock"></i> Performance Report</h4>
+                    <p>Package performance and efficiency metrics</p>
+                </div>
+                
+                <div class="package-report-card">
+                    <h4><i class="fas fa-cogs"></i> Service Report</h4>
+                    <p>Service utilization and breakdown</p>
+                </div>
+            </div>
+
+            <!-- Package Summary -->
+            <div class="package-summary">
+                <h3><i class="fas fa-chart-pie"></i> Package Summary</h3>
+                <div class="summary-grid">
+                    <div class="summary-item">
+                        <h4>Total Packages</h4>
+                        <div class="value">0</div>
+                    </div>
+                    <div class="summary-item">
+                        <h4>Active Packages</h4>
+                        <div class="value">0</div>
+                    </div>
+                    <div class="summary-item">
+                        <h4>Total Revenue</h4>
+                        <div class="value">$0.00</div>
+                    </div>
+                    <div class="summary-item">
+                        <h4>Avg. Package Value</h4>
+                        <div class="value">$0.00</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Report Results -->
+            <?php if ($cbfrmflag1 == 'cbfrmflag1') { ?>
+            <div class="data-table-section">
+                <div class="data-table-header">
+                    <h3><i class="fas fa-table"></i> Package Report Results</h3>
+                </div>
+                
+                <div class="table-responsive">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Package Name</th>
+                                <th>Location</th>
+                                <th>Patients</th>
+                                <th>Revenue</th>
+                                <th>Avg. Stay</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td colspan="7" style="text-align: center; padding: 2rem;">
+                                    <i class="fas fa-search" style="font-size: 2rem; color: #ccc; margin-bottom: 1rem;"></i>
+                                    <p>Search for package report data using the form above</p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <?php } ?>
+
+        </main>
+    </div>
+
+    <!-- Modern JavaScript -->
+    <script src="js/ippackagereport-modern.js?v=<?php echo time(); ?>"></script>
+</body>
+</html>
